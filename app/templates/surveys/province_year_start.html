@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khởi tạo năm học mới toàn tỉnh</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+
+    <style>
+        .province-page {
+            background: #eef4fa;
+            min-height: 100vh;
+        }
+
+        .province-header {
+            background: linear-gradient(120deg, #0d47a1, #1976d2);
+            color: white;
+            padding: 28px 0;
+        }
+
+        .province-header-inner {
+            width: min(1320px, calc(100% - 36px));
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .province-header h1 {
+            margin: 5px 0 8px;
+            font-size: clamp(27px, 3.2vw, 40px);
+        }
+
+        .eyebrow {
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            font-size: 13px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .page-container {
+            width: min(1320px, calc(100% - 36px));
+            margin: 24px auto 50px;
+        }
+
+        .panel-card {
+            background: white;
+            border: 1px solid #dce6f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 26px rgba(31, 78, 121, 0.06);
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .intro-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+            gap: 18px;
+        }
+
+        .principle-box {
+            background: #eaf4ff;
+            border: 1px solid #bcdcff;
+            border-radius: 12px;
+            padding: 16px;
+            line-height: 1.65;
+            color: #174b7a;
+        }
+
+        .warning-box {
+            background: #fff8e8;
+            border: 1px solid #f1d38d;
+            border-radius: 12px;
+            padding: 16px;
+            line-height: 1.65;
+            color: #7b5200;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 750;
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c9d6e3;
+            border-radius: 9px;
+            background: white;
+            font: inherit;
+            box-sizing: border-box;
+        }
+
+        textarea.form-control {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .form-span-2 {
+            grid-column: 1 / -1;
+        }
+
+        .confirm-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 16px;
+            border: 1px solid #c9d6e3;
+            border-radius: 12px;
+            background: #f7fafc;
+        }
+
+        .confirm-box input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 13px;
+            margin-top: 18px;
+        }
+
+        .summary-card {
+            border: 1px solid #dce6f0;
+            background: #f8fbfe;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .summary-card .label {
+            color: #60778c;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .summary-card .value {
+            display: block;
+            margin-top: 7px;
+            font-size: 28px;
+            font-weight: 850;
+            color: #0d47a1;
+        }
+
+        .summary-card.warning .value {
+            color: #aa6500;
+        }
+
+        .summary-card.danger .value {
+            color: #c62828;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.72);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .result-item strong {
+            display: block;
+            font-size: 22px;
+            color: #146c2e;
+            margin-top: 5px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #dce6f0;
+            border-radius: 12px;
+        }
+
+        .province-table {
+            width: 100%;
+            min-width: 1180px;
+            border-collapse: collapse;
+        }
+
+        .province-table th,
+        .province-table td {
+            padding: 12px 11px;
+            border-bottom: 1px solid #e5edf5;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .province-table th {
+            background: #eef5fc;
+            color: #24445f;
+            font-size: 13px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .province-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .code {
+            font-weight: 800;
+            color: #0d47a1;
+        }
+
+        .muted {
+            color: #687e91;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .pill-ready {
+            background: #e4f6e9;
+            color: #166b2f;
+        }
+
+        .pill-warning {
+            background: #fff0d8;
+            color: #985800;
+        }
+
+        .pill-danger {
+            background: #ffe7e7;
+            color: #a72121;
+        }
+
+        .pill-neutral {
+            background: #edf2f7;
+            color: #52677a;
+        }
+
+        .action-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 180px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .section-heading h2 {
+            margin: 4px 0 0;
+        }
+
+        .section-label {
+            margin: 0;
+            color: #1976d2;
+            font-size: 13px;
+            font-weight: 850;
+            letter-spacing: 0.08em;
+        }
+
+        @media (max-width: 1000px) {
+            .intro-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-span-2 {
+                grid-column: auto;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 620px) {
+            .summary-grid,
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="province-page">
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="province-header">
+        <div class="province-header-inner">
+            <div>
+                <p class="eyebrow">BÀI 12D-11</p>
+                <h1>Khởi tạo năm học mới toàn tỉnh</h1>
+                <p style="margin: 0; line-height: 1.6;">
+                    Tạo một đợt cho mọi xã/phường, tự động chuyển hộ và
+                    đối tượng từ dữ liệu đã chốt sang năm học mới.
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <div style="text-align: right; line-height: 1.4; margin-right: 5px;">
+                    <strong>{{ nguoi_dung.full_name }}</strong>
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                    </div>
+                </div>
+
+                <a class="button button-light" href="/dieu-tra">
+                    ← Danh sách đợt
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-container">
+        {% if message %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+
+        {% if error_message %}
+            <div class="alert alert-error">{{ error_message }}</div>
+        {% endif %}
+
+        {% if result_summary %}
+            <section class="alert alert-success" style="display: block;">
+                <strong>Kết quả khởi tạo toàn tỉnh</strong>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        Đợt mới đã tạo
+                        <strong>{{ result_summary.created_batches }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Đợt đã có và dùng lại
+                        <strong>{{ result_summary.reused_batches }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Xã đã kế thừa dữ liệu
+                        <strong>{{ result_summary.inherited_communes }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Phiếu mới
+                        <strong>{{ result_summary.created_forms }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Phiếu đã có, không tạo trùng
+                        <strong>{{ result_summary.existing_forms }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Hồ sơ năm học mới
+                        <strong>{{ result_summary.created_year_records }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Xã chưa có nguồn
+                        <strong>{{ result_summary.missing_source_communes }}</strong>
+                    </div>
+                    <div class="result-item">
+                        Nguồn chưa khóa / đích đã khóa
+                        <strong>
+                            {{ result_summary.unlocked_source_communes
+                               + result_summary.locked_target_communes }}
+                        </strong>
+                    </div>
+                </div>
+
+                {% if result_summary.backup %}
+                    <p style="margin: 14px 0 0;">
+                        <strong>Bản sao an toàn:</strong>
+                        <code>C:\PhoCap\data\backups\{{ result_summary.backup }}</code>
+                    </p>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <section class="panel-card intro-grid">
+            <div>
+                <p class="section-label">QUY TRÌNH ĐẦU NĂM HỌC</p>
+                <h2 style="margin-top: 5px;">Một thao tác thay cho 130 lần tạo đợt</h2>
+
+                <div class="principle-box">
+                    Hệ thống tạo hoặc dùng lại <strong>một đợt của năm học mới
+                    cho mỗi xã/phường đang hoạt động</strong>. Với xã có đợt nguồn
+                    đã khóa, phần mềm tự tạo phiếu <em>Chưa điều tra</em> và hồ sơ
+                    năm học mới cho các đối tượng đang theo dõi. Mã hộ, mã đối
+                    tượng và thông tin cá nhân được giữ nguyên.
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>Nguyên tắc an toàn</strong><br>
+                Chỉ kế thừa dữ liệu từ đợt nguồn đã chốt và khóa. Xã chưa có
+                dữ liệu nguồn hoặc nguồn chưa khóa vẫn được tạo đợt trống để
+                tiếp tục tổ chức điều tra. Hệ thống tự sao lưu cơ sở dữ liệu
+                trước khi thực hiện và có thể chạy lại mà không tạo trùng.
+            </div>
+        </section>
+
+        {% if source_school_year %}
+        <section class="panel-card">
+            <div class="section-heading">
+                <div>
+                    <p class="section-label">THÔNG TIN KHỞI TẠO</p>
+                    <h2>Tạo đợt và chuyển dữ liệu lên năm học mới</h2>
+                </div>
+
+                <span class="pill pill-neutral">
+                    Phạm vi: TOÀN TỈNH
+                </span>
+            </div>
+
+            <form
+                method="post"
+                action="/dieu-tra/khoi-tao-nam-hoc-toan-tinh"
+                onsubmit="return confirm('Bạn chắc chắn muốn tạo đợt năm học mới đồng loạt cho toàn tỉnh và tự động kế thừa dữ liệu đã khóa?');"
+            >
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="source_school_year_id">Năm học nguồn</label>
+                        <select
+                            id="source_school_year_id"
+                            name="source_school_year_id"
+                            class="form-control"
+                            required
+                        >
+                            {% for school_year in school_years %}
+                                <option
+                                    value="{{ school_year.id }}"
+                                    data-school-year-code="{{ school_year.code }}"
+                                    {% if school_year.id == source_school_year.id %}selected{% endif %}
+                                >
+                                    {{ school_year.code }} – {{ school_year.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target_school_year_code">Mã năm học mới</label>
+                        <input
+                            id="target_school_year_code"
+                            name="target_school_year_code"
+                            class="form-control"
+                            maxlength="20"
+                            value="{{ form_data.target_school_year_code }}"
+                            placeholder="Ví dụ: 2026-2027"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target_school_year_name">Tên năm học mới</label>
+                        <input
+                            id="target_school_year_name"
+                            name="target_school_year_name"
+                            class="form-control"
+                            maxlength="100"
+                            value="{{ form_data.target_school_year_name }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="batch_name">Tên đợt dùng chung cho toàn tỉnh</label>
+                        <input
+                            id="batch_name"
+                            name="batch_name"
+                            class="form-control"
+                            maxlength="300"
+                            value="{{ form_data.batch_name }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="start_date">Ngày bắt đầu điều tra</label>
+                        <input
+                            id="start_date"
+                            name="start_date"
+                            type="date"
+                            class="form-control"
+                            value="{{ form_data.start_date }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date">Ngày kết thúc dự kiến</label>
+                        <input
+                            id="end_date"
+                            name="end_date"
+                            type="date"
+                            class="form-control"
+                            value="{{ form_data.end_date }}"
+                        >
+                    </div>
+
+                    <div class="form-group form-span-2">
+                        <label for="notes">Ghi chú chung</label>
+                        <textarea
+                            id="notes"
+                            name="notes"
+                            class="form-control"
+                        >{{ form_data.notes }}</textarea>
+                    </div>
+
+                    <label class="confirm-box form-span-2">
+                        <input
+                            type="checkbox"
+                            name="confirm_province_start"
+                            value="yes"
+                            required
+                        >
+                        <span>
+                            <strong>
+                                Tôi xác nhận khởi tạo năm học mới cho toàn bộ
+                                xã/phường trong tỉnh.
+                            </strong>
+                            <span class="muted" style="display: block; margin-top: 4px;">
+                                Tôi hiểu rằng đợt đã có sẽ được dùng lại, phiếu
+                                đã có không bị ghi đè và chỉ dữ liệu nguồn đã khóa
+                                mới được tự động kế thừa.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-secondary"
+                        type="submit"
+                        formmethod="get"
+                        formaction="/dieu-tra/khoi-tao-nam-hoc-toan-tinh"
+                        formnovalidate
+                    >
+                        🔎 Cập nhật xem trước
+                    </button>
+
+                    <button class="button button-primary" type="submit">
+                        🚀 Khởi tạo toàn tỉnh và chuyển dữ liệu
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel-card">
+            <div class="section-heading">
+                <div>
+                    <p class="section-label">XEM TRƯỚC PHẠM VI</p>
+                    <h2>
+                        {{ source_school_year.code }}
+                        → {{ form_data.target_school_year_code }}
+                    </h2>
+                </div>
+
+                {% if target_school_year %}
+                    <span class="pill pill-warning">
+                        Năm học đích đã tồn tại – hệ thống sẽ dùng lại
+                    </span>
+                {% else %}
+                    <span class="pill pill-ready">
+                        Năm học đích sẽ được tạo mới
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <span class="label">Xã/phường đang hoạt động</span>
+                    <span class="value">{{ preview_summary.commune_total }}</span>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Nguồn đã khóa, sẵn sàng kế thừa</span>
+                    <span class="value">{{ preview_summary.locked_source_total }}</span>
+                </div>
+                <div class="summary-card warning">
+                    <span class="label">Nguồn chưa khóa</span>
+                    <span class="value">{{ preview_summary.unlocked_source_total }}</span>
+                </div>
+                <div class="summary-card danger">
+                    <span class="label">Chưa có đợt nguồn</span>
+                    <span class="value">{{ preview_summary.missing_source_total }}</span>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Số phiếu nguồn dự kiến chuyển</span>
+                    <span class="value">{{ preview_summary.estimated_forms }}</span>
+                </div>
+            </div>
+
+            <p class="muted" style="margin: 15px 0 0;">
+                Đợt đích đã có trước khi chạy: {{ preview_summary.existing_target_total }}.
+                Sau khi khởi tạo, từng xã/phường có thể mở danh sách hộ và dùng
+                nút <strong>Xuất Excel</strong> để phát phiếu đi điều tra thực tế.
+            </p>
+        </section>
+
+        <section class="panel-card">
+            <div class="section-heading">
+                <div>
+                    <p class="section-label">CHI TIẾT 130 XÃ/PHƯỜNG</p>
+                    <h2>Đợt nguồn, đợt đích và phiếu điều tra</h2>
+                </div>
+
+                {% if target_school_year %}
+                    <a
+                        class="button button-primary"
+                        href="/dieu-tra?school_year_id={{ target_school_year.id }}"
+                    >
+                        Mở danh sách đợt năm {{ target_school_year.code }}
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="table-wrapper">
+                <table class="province-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Xã/phường</th>
+                            <th>Đợt nguồn {{ source_school_year.code }}</th>
+                            <th>Phiếu nguồn</th>
+                            <th>Đánh giá nguồn</th>
+                            <th>Đợt đích {{ form_data.target_school_year_code }}</th>
+                            <th>Phiếu đích</th>
+                            <th>Thao tác sau khởi tạo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in preview_rows %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <strong>{{ row.commune.name }}</strong>
+                                    <div class="muted">Mã {{ row.commune.code }}</div>
+                                </td>
+                                <td>
+                                    {% if row.source_batch %}
+                                        <span class="code">{{ row.source_batch.code }}</span>
+                                        <div class="muted">
+                                            {{ status_labels.get(row.source_batch.status, row.source_batch.status) }}
+                                            {% if row.source_batch.is_locked %} · Đã khóa{% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="muted">Chưa có đợt</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ row.source_form_total }}</strong></td>
+                                <td>
+                                    {% if row.source_state == 'ready' %}
+                                        <span class="pill pill-ready">Sẵn sàng kế thừa</span>
+                                    {% elif row.source_state == 'unlocked' %}
+                                        <span class="pill pill-warning">Nguồn chưa khóa</span>
+                                    {% else %}
+                                        <span class="pill pill-danger">Chưa có nguồn</span>
+                                    {% endif %}
+                                    <div class="muted" style="margin-top: 6px;">
+                                        {{ row.source_note }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if row.target_batch %}
+                                        <span class="code">{{ row.target_batch.code }}</span>
+                                        <div class="muted">
+                                            {{ status_labels.get(row.target_batch.status, row.target_batch.status) }}
+                                            {% if row.target_batch.is_locked %} · Đã khóa{% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="muted">Sẽ tạo khi xác nhận</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ row.target_form_total }}</strong></td>
+                                <td>
+                                    {% if row.target_batch %}
+                                        <div class="action-stack">
+                                            <a
+                                                class="button button-small button-primary"
+                                                href="/dieu-tra/{{ row.target_batch.id }}/ho-dan"
+                                            >
+                                                Mở danh sách hộ
+                                            </a>
+                                            <a
+                                                class="button button-small button-secondary"
+                                                href="/dieu-tra/{{ row.target_batch.id }}/ho-dan/xuat-excel"
+                                            >
+                                                📥 Xuất Excel đi điều tra
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <span class="muted">Có sau khi khởi tạo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <script>
+        (function () {
+            const sourceSelect = document.getElementById('source_school_year_id');
+            const targetCodeInput = document.getElementById('target_school_year_code');
+            const targetNameInput = document.getElementById('target_school_year_name');
+            const batchNameInput = document.getElementById('batch_name');
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            const notesInput = document.getElementById('notes');
+            const confirmInput = document.querySelector(
+                'input[name="confirm_province_start"]'
+            );
+
+            if (!sourceSelect) {
+                return;
+            }
+
+            function nextSchoolYear(code) {
+                const match = String(code || '').trim().match(/^(\d{4})-(\d{4})$/);
+                if (!match) {
+                    return null;
+                }
+
+                const firstYear = Number(match[1]);
+                const secondYear = Number(match[2]);
+                if (secondYear !== firstYear + 1) {
+                    return null;
+                }
+
+                return {
+                    sourceCode: `${firstYear}-${secondYear}`,
+                    targetCode: `${secondYear}-${secondYear + 1}`,
+                    targetFirstYear: secondYear,
+                };
+            }
+
+            sourceSelect.addEventListener('change', function () {
+                const selectedOption = sourceSelect.options[sourceSelect.selectedIndex];
+                const sourceCode = selectedOption
+                    ? selectedOption.dataset.schoolYearCode
+                    : '';
+                const years = nextSchoolYear(sourceCode);
+
+                if (!years) {
+                    return;
+                }
+
+                targetCodeInput.value = years.targetCode;
+                targetNameInput.value = `Năm học ${years.targetCode}`;
+                batchNameInput.value =
+                    `Điều tra phổ cập giáo dục đầu năm học ${years.targetCode}`;
+                startDateInput.value = `${years.targetFirstYear}-07-01`;
+                endDateInput.value = `${years.targetFirstYear}-08-31`;
+                notesInput.value =
+                    `Khởi tạo đồng loạt toàn tỉnh và kế thừa dữ liệu từ năm học ${years.sourceCode}.`;
+
+                if (confirmInput) {
+                    confirmInput.checked = false;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

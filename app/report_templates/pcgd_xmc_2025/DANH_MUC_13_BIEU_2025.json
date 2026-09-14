@@ -1,0 +1,122 @@
+{
+  "version": "PCGD-XMC-V1.5-MENU-BAO-CAO-4-NHOM",
+  "templates": [
+    {
+      "code": "PCGD_TH_M1_2025",
+      "level": "TIEU_HOC",
+      "title": "TH-M1 – Phổ cập giáo dục Tiểu học",
+      "source_name": "1. PCGD_2025_TH_M1_phường Thành Vinh.xls",
+      "target_name": "PCGD_2025_TH_M1.xls",
+      "sha256": "e5d1df46cb23f84fb8bc8dc7e7300a9e5f75b1a65ec1dfba6e7bbe5ba75a3252",
+      "size": 46080
+    },
+    {
+      "code": "PCGD_TH_02_2025",
+      "level": "TIEU_HOC",
+      "title": "TH-02 – Thống kê kết quả PCGD Tiểu học",
+      "source_name": "2. PCGD_2025_TH-02_phường Thành Vinh.xls",
+      "target_name": "PCGD_2025_TH_02.xls",
+      "sha256": "37a528264bf837cf0d7f2460b0e678c8b9c07510a43f1c2c9bc81ee932b26a48",
+      "size": 32768
+    },
+    {
+      "code": "PCGD_TH_01_GV_2025",
+      "level": "TIEU_HOC",
+      "title": "TH-01-GV – Thống kê đội ngũ giáo viên",
+      "source_name": "3. PCGD_2025_TH-01_GV_phường Thành Vinh.xls",
+      "target_name": "PCGD_2025_TH_01_GV.xls",
+      "sha256": "2d674aa0c43b21f2e7f9bfa051088f22dee1696be80ccc7d9906980926c06810",
+      "size": 38912
+    },
+    {
+      "code": "PCGD_TH_01_CSVC_2025",
+      "level": "TIEU_HOC",
+      "title": "TH-01-CSVC – Thống kê cơ sở vật chất",
+      "source_name": "4. PCGD_2025_TH-01-CSVC_phường Thành Vinh.xls",
+      "target_name": "PCGD_2025_TH_01_CSVC.xls",
+      "sha256": "ef1cfd30847872bb8add78fed65f7e0e043bcef9fbc5f399297b0fc38e38c2e2",
+      "size": 37888
+    },
+    {
+      "code": "PCGD_THCS_M1_2025",
+      "level": "THCS",
+      "title": "THCS-M1 – Phổ cập giáo dục THCS",
+      "source_name": "1. PCGD_M1_THCS_2025_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_THCS_M1.xls",
+      "sha256": "b1f5d6d4e684ba63b4dfc59813b151c9051acff7675f11d89ee5b83dba400203",
+      "size": 51200
+    },
+    {
+      "code": "PCGD_THCS_M2_2025",
+      "level": "THCS",
+      "title": "THCS-M2 – Tiêu chuẩn PCGD THCS",
+      "source_name": "2. PCGD_M2_THCS_2025_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_THCS_M2.xls",
+      "sha256": "1fca61adb85230d08cbeb2a2bc1b3c9d1a795a7ab9a2731e2168e145c6a37d88",
+      "size": 49664
+    },
+    {
+      "code": "PCGD_THCS_TK_2025",
+      "level": "THCS",
+      "title": "THCS-TK – Thống kê kết quả PCGD THCS",
+      "source_name": "3. PCGD_THCS_2025_TK_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_THCS_TK.xls",
+      "sha256": "958569a4e428c58d42665926af1b1730fd5516b09a56003c42948da4f8647da0",
+      "size": 33280
+    },
+    {
+      "code": "PCGD_THCS_M5_2025",
+      "level": "THCS",
+      "title": "THCS-M5 – Thống kê đội ngũ giáo viên",
+      "source_name": "4. PCGD_THCS_M5_2025_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_THCS_M5.xls",
+      "sha256": "026a412dbdd94d8ec07f73322e64df2273f9a8af4f8292868b0f9d5bbb75a11f",
+      "size": 41472
+    },
+    {
+      "code": "PCGD_THCS_CSVC_2025",
+      "level": "THCS",
+      "title": "THCS-CSVC – Thống kê cơ sở vật chất",
+      "source_name": "5. PCGD_THCS_2025_CSVC_phuong_Thành Vinh.xls",
+      "target_name": "PCGD_2025_THCS_CSVC.xls",
+      "sha256": "03f7e5c43717542de2461913eee5b54d5b87bd97d49da823065acda2c6809f77",
+      "size": 37888
+    },
+    {
+      "code": "PCGD_XMC_3_2025",
+      "level": "XOA_MU_CHU",
+      "title": "XMC-3 – Tổng hợp kết quả xóa mù chữ",
+      "source_name": "1. PCGD_XMC_3_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_XMC_3.xls",
+      "sha256": "d04437ee3e8666c1a508e95fb42adb3b453984f2b74c03343576ca57189c4ba9",
+      "size": 43008
+    },
+    {
+      "code": "PCGD_CMC_2_2025",
+      "level": "XOA_MU_CHU",
+      "title": "CMC-2 – Thống kê số người mù chữ",
+      "source_name": "2. PCGD_CMC_2_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_CMC_2.xls",
+      "sha256": "d83e06ebdc96c24d18295713b17645df586c486f4d245d1c55b807a55c8540b7",
+      "size": 51712
+    },
+    {
+      "code": "PCGD_CMC_1_2025",
+      "level": "XOA_MU_CHU",
+      "title": "CMC-1 – Tổng hợp chống mù chữ",
+      "source_name": "3. PCGD_CMC_1_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_CMC_1.xls",
+      "sha256": "108339cb12f38b6a37cd80f647731be690a8a19bf1e61f1b043bee1754317694",
+      "size": 35328
+    },
+    {
+      "code": "PCGD_XMC_4_2025",
+      "level": "XOA_MU_CHU",
+      "title": "XMC-4 – Thống kê đạt chuẩn xóa mù chữ",
+      "source_name": "4. TK_DATCHUAN_XMC_4_phường_Thành Vinh.xls",
+      "target_name": "PCGD_2025_XMC_4.xls",
+      "sha256": "498ff35e84810a789f93a7d1f05214aaebe2b4f602858ffdd93f0c01b9c65a51",
+      "size": 34304
+    }
+  ]
+}

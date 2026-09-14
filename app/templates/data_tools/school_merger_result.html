@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả sáp nhập trường</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .rs-wrap{max-width:1300px;margin:0 auto;padding:24px 18px 60px}.card{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:20px;margin-bottom:18px}.card h1,.card h2{margin-top:0}.note{padding:12px 14px;border-radius:9px;margin:10px 0;line-height:1.55}.ok{background:#edf9f2;border:1px solid #a8dfbd;color:#155f3a}.error{background:#fff0ef;border:1px solid #f0b4ae;color:#842029}.info{background:#eef6ff;border:1px solid #b9d8fa;color:#164e7a}.muted{color:#667788;font-size:13px}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:10px 15px;font-weight:700;text-decoration:none;background:#e8eef4;color:#213547}.grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px}.kpi{border:1px solid #dce5ee;border-radius:12px;padding:14px;background:#fbfcfe}.kpi .n{font-size:26px;font-weight:800;color:#173f62}.kpi .t{font-size:13px;color:#5c6c7c;margin-top:5px}.route{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;align-items:center}.school{padding:14px;border:1px solid #dbe3ec;border-radius:10px;background:#f9fbfd}.arrow{text-align:center;font-size:28px;font-weight:800}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:9px;border-bottom:1px solid #e7ecf1;text-align:left}.table th{background:#f7f9fb}.mono{font-family:Consolas,monospace;word-break:break-all}.actions{display:flex;gap:10px;flex-wrap:wrap}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.route{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="rs-wrap">
+    <section class="card">
+        <h1>Kết quả thực hiện sáp nhập</h1>
+        <div class="actions"><a class="btn" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an?school_year_id={{ selected_school_year_id or (result.school_year_id if result else '') }}&commune_id={{ selected_commune_id or '' }}&level_code={{ selected_level_code or '' }}">← Quay lại danh sách phương án</a></div>
+    </section>
+    {% if error_message %}<div class="note error"><strong>Lỗi:</strong> {{ error_message }}</div>{% endif %}
+    {% if result %}
+    <section class="card">
+        <div class="note ok"><strong>SÁP NHẬP THÀNH CÔNG.</strong> Nhật ký sáp nhập an toàn đã được ghi. Cùng phương án này không thể thực hiện lần thứ hai.</div>
+        <div class="route">
+            <div class="school"><div class="muted">TRƯỜNG NGUỒN – ĐÃ CHUYỂN INACTIVE</div>{% for s in result.source_schools %}<strong>{{ s.name }}</strong><div class="muted">school_id={{ s.id }} · mã={{ s.code }}</div>{% if not loop.last %}<hr>{% endif %}{% endfor %}</div>
+            <div class="arrow">→</div>
+            <div class="school"><div class="muted">TRƯỜNG ĐÍCH – GIỮ NGUYÊN ID</div><strong>{{ result.target_school.name if result.target_school else result.summary.target_school_name }}</strong><div class="muted">school_id={{ result.target_school_id }}{% if result.target_school %} · mã={{ result.target_school.code }}{% endif %}</div></div>
+        </div>
+        <div class="note info"><strong>Năm hiệu lực:</strong> {{ result.school_year.code if result.school_year else result.school_year_id }} · <strong>Thời điểm:</strong> {{ result.created_at }} · <strong>Người thực hiện:</strong> {{ result.actor_full_name or result.actor_username or ('user_id=' ~ result.actor_user_id) }}</div>
+    </section>
+
+    <section class="card">
+        <h2>1. Tổng quan kết quả</h2>
+        <div class="grid">
+            <div class="kpi"><div class="n">{{ result.summary.direct_moves|sum(attribute='rows') if result.summary.direct_moves else 0 }}</div><div class="t">Dòng CURRENT/FUTURE chuyển trực tiếp</div></div>
+            <div class="kpi"><div class="n">{{ result.summary.staff_rollover_created or 0 }}</div><div class="t">Hồ sơ đội ngũ rollover tạo mới</div></div>
+            <div class="kpi"><div class="n">{{ result.summary.users_moved or 0 }}</div><div class="t">Tài khoản CBQL/GV/khác chuyển về đích</div></div>
+            <div class="kpi"><div class="n">{{ result.summary.source_school_logins_disabled or 0 }}</div><div class="t">Tài khoản trường nguồn đã khóa</div></div>
+            <div class="kpi"><div class="n">{{ result.summary.sources_deactivated or 0 }}</div><div class="t">Trường nguồn chuyển inactive</div></div>
+            <div class="kpi"><div class="n">{{ result.operation_id }}</div><div class="t">Mã nhật ký school_merger_operations</div></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>2. Chi tiết dòng chuyển</h2>
+        {% if result.summary.direct_moves %}<table class="table"><thead><tr><th>Bảng</th><th>school_id nguồn</th><th>school_id đích</th><th>Số dòng</th></tr></thead><tbody>{% for x in result.summary.direct_moves %}<tr><td><code>{{ x.table }}</code></td><td>{{ x.source_school_id }}</td><td>{{ x.target_school_id }}</td><td><strong>{{ x.rows }}</strong></td></tr>{% endfor %}</tbody></table>{% else %}<div class="note info">Không có dòng chuyển trực tiếp ở các bảng theo năm.</div>{% endif %}
+        {% if result.summary.no_year_moves %}<h3>Dữ liệu không có school_year_id nhưng truy được năm</h3><table class="table"><thead><tr><th>Bảng</th><th>Nguồn</th><th>Đích</th><th>Số dòng</th></tr></thead><tbody>{% for x in result.summary.no_year_moves %}<tr><td><code>{{ x.table }}</code></td><td>{{ x.source_school_id }}</td><td>{{ x.target_school_id }}</td><td><strong>{{ x.rows }}</strong></td></tr>{% endfor %}</tbody></table>{% endif %}
+    </section>
+
+    <section class="card">
+        <h2>3. An toàn và phục hồi</h2>
+        <ul>
+            <li>Backup tự động trước khi chạm dữ liệu: <strong>{{ result.backup_name }}</strong>.</li>
+            <li>Toàn bộ thay đổi dữ liệu + nhật ký chạy trong <strong>một transaction</strong>.</li>
+            <li><strong>foreign_key_check</strong> và <strong>integrity_check</strong> đã chạy bên trong transaction trước COMMIT; nếu không đạt thì hệ thống rollback toàn bộ.</li>
+            <li>Dữ liệu các năm trước năm hiệu lực không đổi school_id, tiếp tục bảo toàn lịch sử.</li>
+            <li>Trường nguồn không bị xóa; chỉ chuyển inactive và được nhận diện là “Đã sáp nhập” từ nhật ký.</li>
+        </ul>
+        <div class="muted">Dấu vân tay dữ liệu tác động đã khớp trước khi ghi: <span class="mono">{{ result.summary.impact_state_fingerprint }}</span></div>
+        <div class="muted" style="margin-top:6px">Dấu vân tay bản xem trước lưu nhật ký: <span class="mono">{{ result.preview_fingerprint }}</span></div>
+    </section>
+    {% endif %}
+</main>
+</body>
+</html>

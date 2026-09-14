@@ -1,0 +1,21 @@
+V10.8 - CHUẨN BỊ NẠP BASELINE HỌC SINH 2025-2026 QĐ3805
+===========================================================
+
+1. Tải 2 file:
+   - Nguon_HS_2025_2026_Nghi_Loc_QD3805.zip
+   - dry_run_chuan_bi_nap_baseline_HS_2025_2026_QD3805_v10_8.py
+
+2. Chép ZIP nguồn vào:
+   C:\PhoCap\uploads\Nguon_HS_2025_2026_Nghi_Loc_QD3805.zip
+
+3. Chép script vào:
+   C:\PhoCap\dry_run_chuan_bi_nap_baseline_HS_2025_2026_QD3805_v10_8.py
+
+4. Chạy:
+   cd C:\PhoCap
+   .\.venv\Scripts\python.exe .\dry_run_chuan_bi_nap_baseline_HS_2025_2026_QD3805_v10_8.py
+
+5. Gửi lại ZIP ở dòng:
+   ZIP: C:\PhoCap\dry_run_baseline_HS_QD3805_v10_8_....zip
+
+V10.8 CHỈ ĐỌC. Không sửa database.

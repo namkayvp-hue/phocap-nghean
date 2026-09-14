@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Đăng nhập hệ thống</title>
+
+    <style>
+        :root {
+            --pc-blue: #1769c2;
+            --pc-blue-dark: #0d4f98;
+            --pc-blue-soft: #eef6ff;
+            --pc-line: #d9e2ec;
+            --pc-text: #24364b;
+            --pc-muted: #66788a;
+            --pc-danger: #b42318;
+            --pc-success: #157a42;
+            --pc-card: #ffffff;
+            --pc-bg: #f3f7fb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+            color: var(--pc-text);
+            background:
+                linear-gradient(
+                    180deg,
+                    #eaf3ff 0,
+                    var(--pc-bg) 260px,
+                    #f7f9fc 100%
+                );
+        }
+
+        .login-shell {
+            width: min(100%, 620px);
+            margin: 0 auto;
+            padding: 28px 18px 38px;
+        }
+
+        .login-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .login-logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--pc-blue);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 8px 24px rgba(23, 105, 194, 0.24);
+        }
+
+        .login-brand h1 {
+            margin: 0;
+            font-size: clamp(22px, 4vw, 30px);
+            line-height: 1.1;
+            font-weight: 800;
+        }
+
+        .login-brand p {
+            margin: 5px 0 0;
+            color: var(--pc-blue);
+            font-weight: 700;
+        }
+
+        .login-card {
+            background: var(--pc-card);
+            border: 1px solid #e1e8ef;
+            border-radius: 18px;
+            box-shadow:
+                0 16px 42px rgba(33, 57, 82, 0.12);
+            overflow: visible;
+        }
+
+        .login-card-head {
+            padding: 22px 24px 14px;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .login-card-head .eyebrow {
+            color: var(--pc-blue);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .login-card-head h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+        .login-form {
+            padding: 22px 24px 26px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #31506f;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            height: 46px;
+            padding: 0 13px;
+            border: 1px solid #cbd6e2;
+            border-radius: 10px;
+            background: #fff;
+            color: #1f3042;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--pc-blue);
+            box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.12);
+        }
+
+        .fixed-unit {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 13px;
+            border: 1px solid #d7e0e8;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .fixed-unit strong {
+            color: #20364d;
+        }
+
+        .fixed-unit span {
+            color: var(--pc-muted);
+            font-size: 13px;
+        }
+
+        .combo {
+            position: relative;
+        }
+
+        .combo-list {
+            position: absolute;
+            z-index: 1000;
+            left: 0;
+            right: 0;
+            top: calc(100% + 5px);
+            max-height: 260px;
+            overflow: auto;
+            background: #fff;
+            border: 1px solid #c9d6e3;
+            border-radius: 11px;
+            box-shadow:
+                0 16px 32px rgba(33, 57, 82, 0.18);
+            display: none;
+        }
+
+        .combo-list.is-open {
+            display: block;
+        }
+
+        .combo-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .combo-item:last-child {
+            border-bottom: 0;
+        }
+
+        .combo-item:hover,
+        .combo-item.is-active {
+            background: var(--pc-blue-soft);
+        }
+
+        .combo-item strong {
+            display: block;
+            font-size: 14px;
+            color: #183b5d;
+        }
+
+        .combo-item small {
+            display: block;
+            margin-top: 2px;
+            color: var(--pc-muted);
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .combo-empty {
+            padding: 12px;
+            color: var(--pc-muted);
+            font-size: 13px;
+        }
+
+        .field-help {
+            margin-top: 6px;
+            color: var(--pc-muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .remember-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 2px 0 18px;
+            font-size: 14px;
+            color: #31506f;
+        }
+
+        .remember-row input {
+            width: 17px;
+            height: 17px;
+            margin: 0;
+        }
+
+        .login-button {
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: 10px;
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--pc-blue-dark),
+                    var(--pc-blue)
+                );
+            color: #fff;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .login-button:hover {
+            filter: brightness(1.04);
+        }
+
+        .alert {
+            margin: 0 24px 0;
+            padding: 11px 13px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .alert-error {
+            color: var(--pc-danger);
+            background: #fff1f0;
+            border: 1px solid #ffd3cf;
+        }
+
+        .alert-success {
+            color: var(--pc-success);
+            background: #edf9f2;
+            border: 1px solid #c9ead7;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .security-note {
+            margin-top: 16px;
+            color: var(--pc-muted);
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 560px) {
+            .login-shell {
+                padding: 18px 10px 28px;
+            }
+
+            .login-card-head,
+            .login-form {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .alert {
+                margin-left: 16px;
+                margin-right: 16px;
+            }
+
+            .login-brand {
+                padding: 0 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="login-shell">
+        <div class="login-brand">
+            <div class="login-logo">PC</div>
+
+            <div>
+                <h1>ĐĂNG NHẬP HỆ THỐNG</h1>
+                <p>Phổ cập giáo dục và Xóa mù chữ</p>
+            </div>
+        </div>
+
+        <section class="login-card">
+            <div class="login-card-head">
+                <div class="eyebrow">
+                    Tài khoản của bạn
+                </div>
+                <h2>Chọn đúng đơn vị để đăng nhập</h2>
+            </div>
+
+            {% if thong_bao %}
+                <div
+                    class="
+                        alert
+                        {% if trang_thai == 'logged_out' %}
+                            alert-success
+                        {% else %}
+                            alert-error
+                        {% endif %}
+                    "
+                >
+                    {{ thong_bao }}
+                </div>
+            {% endif %}
+
+            <form
+                id="login-form"
+                class="login-form"
+                method="post"
+                action="/dang-nhap"
+                autocomplete="on"
+            >
+                <input
+                    id="ten_dang_nhap"
+                    name="ten_dang_nhap"
+                    type="hidden"
+                    value=""
+                >
+
+                <div class="field">
+                    <label for="cap_dang_nhap">
+                        1. Cấp đăng nhập
+                    </label>
+
+                    <select
+                        id="cap_dang_nhap"
+                        required
+                    >
+                        <option value="">
+                            -- Chọn cấp đăng nhập --
+                        </option>
+                        <option value="SO">
+                            Cấp Sở / Quản trị
+                        </option>
+                        <option value="XA">
+                            Xã / phường
+                        </option>
+                        <option value="TRUONG">
+                            Trường
+                        </option>
+                        <option value="GIAO_VIEN">
+                            Giáo viên
+                        </option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Thông tin đơn vị</label>
+                    <div class="fixed-unit">
+                        <strong>Tỉnh Nghệ An</strong>
+                        <span>Phạm vi hệ thống</span>
+                    </div>
+                </div>
+
+                <div
+                    id="commune-field"
+                    class="field hidden"
+                >
+                    <label for="commune-search">
+                        Xã / phường
+                    </label>
+
+                    <div class="combo">
+                        <input
+                            id="commune-search"
+                            type="text"
+                            placeholder="Gõ tên xã/phường để tìm"
+                            autocomplete="off"
+                        >
+                        <input
+                            id="commune-id"
+                            type="hidden"
+                            value=""
+                        >
+                        <div
+                            id="commune-list"
+                            class="combo-list"
+                        ></div>
+                    </div>
+                </div>
+
+                <div
+                    id="school-field"
+                    class="field hidden"
+                >
+                    <label for="school-search">
+                        Trường
+                    </label>
+
+                    <div class="combo">
+                        <input
+                            id="school-search"
+                            type="text"
+                            placeholder="Gõ tên trường để tìm"
+                            autocomplete="off"
+                        >
+                        <input
+                            id="school-id"
+                            type="hidden"
+                            value=""
+                        >
+                        <div
+                            id="school-list"
+                            class="combo-list"
+                        ></div>
+                    </div>
+                </div>
+
+                <div
+                    id="account-field"
+                    class="field hidden"
+                >
+                    <label for="account-search">
+                        Tài khoản
+                    </label>
+
+                    <div class="combo">
+                        <input
+                            id="account-search"
+                            type="text"
+                            placeholder="Gõ tên đăng nhập hoặc họ tên"
+                            autocomplete="username"
+                        >
+                        <div
+                            id="account-list"
+                            class="combo-list"
+                        ></div>
+                    </div>
+
+                    <div class="field-help">
+                        Chọn tài khoản trong danh sách gợi ý.
+                        Nếu đơn vị chỉ có một tài khoản,
+                        hệ thống sẽ tự chọn.
+                    </div>
+                </div>
+
+                <div
+                    id="password-field"
+                    class="field hidden"
+                >
+                    <label for="mat_khau">
+                        Mật khẩu
+                    </label>
+
+                    <input
+                        id="mat_khau"
+                        name="mat_khau"
+                        type="password"
+                        placeholder="Nhập mật khẩu"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="school_year_id">
+                        Năm học làm việc
+                    </label>
+
+                    <select
+                        id="school_year_id"
+                        name="school_year_id"
+                        required
+                    >
+                        {% for year in school_years %}
+                            <option
+                                value="{{ year.id }}"
+                                {% if year.id == default_school_year_id %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ year.code }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="field-help">
+                        Năm học này được dùng ngay sau khi đăng nhập,
+                        không cần chọn lại trên trang chính.
+                    </div>
+                </div>
+
+                <label class="remember-row">
+                    <input
+                        id="remember-account"
+                        type="checkbox"
+                    >
+                    <span>
+                        Ghi nhớ tài khoản và đơn vị trên thiết bị này
+                    </span>
+                </label>
+
+                <button
+                    class="login-button"
+                    type="submit"
+                >
+                    Đăng nhập
+                </button>
+            </form>
+        </section>
+
+        <div class="security-note">
+            Hệ thống chỉ ghi nhớ cấp đăng nhập, đơn vị,
+            tài khoản và năm học khi bạn chọn “Ghi nhớ”.
+            Mật khẩu không được lưu.
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            const API_URL =
+                "/dang-nhap/api/lua-chon";
+
+            const STORAGE_KEY =
+                "phocap_login_selection_v2";
+
+            const form =
+                document.getElementById("login-form");
+
+            const scope =
+                document.getElementById("cap_dang_nhap");
+
+            const communeField =
+                document.getElementById("commune-field");
+            const communeInput =
+                document.getElementById("commune-search");
+            const communeId =
+                document.getElementById("commune-id");
+            const communeList =
+                document.getElementById("commune-list");
+
+            const schoolField =
+                document.getElementById("school-field");
+            const schoolInput =
+                document.getElementById("school-search");
+            const schoolId =
+                document.getElementById("school-id");
+            const schoolList =
+                document.getElementById("school-list");
+
+            const accountField =
+                document.getElementById("account-field");
+            const accountInput =
+                document.getElementById("account-search");
+            const accountList =
+                document.getElementById("account-list");
+            const username =
+                document.getElementById("ten_dang_nhap");
+
+            const passwordField =
+                document.getElementById("password-field");
+            const password =
+                document.getElementById("mat_khau");
+
+            const yearSelect =
+                document.getElementById("school_year_id");
+            const remember =
+                document.getElementById("remember-account");
+
+            let restoring = false;
+
+            function debounce(fn, delay) {
+                let timer = null;
+
+                return function () {
+                    const args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(
+                        function () {
+                            fn.apply(null, args);
+                        },
+                        delay
+                    );
+                };
+            }
+
+            function closeList(list) {
+                list.classList.remove("is-open");
+            }
+
+            function openList(list) {
+                list.classList.add("is-open");
+            }
+
+            function clearList(list) {
+                list.innerHTML = "";
+                closeList(list);
+            }
+
+            function clearAccount() {
+                accountInput.value = "";
+                username.value = "";
+                clearList(accountList);
+                password.value = "";
+            }
+
+            function clearSchool() {
+                schoolInput.value = "";
+                schoolId.value = "";
+                clearList(schoolList);
+                clearAccount();
+            }
+
+            function clearCommune() {
+                communeInput.value = "";
+                communeId.value = "";
+                clearList(communeList);
+                clearSchool();
+            }
+
+            function showByScope() {
+                const value = scope.value;
+
+                const needsCommune =
+                    value === "XA"
+                    || value === "TRUONG"
+                    || value === "GIAO_VIEN";
+
+                const needsSchool =
+                    value === "TRUONG"
+                    || value === "GIAO_VIEN";
+
+                communeField.classList.toggle(
+                    "hidden",
+                    !needsCommune
+                );
+
+                schoolField.classList.toggle(
+                    "hidden",
+                    !needsSchool
+                );
+
+                accountField.classList.toggle(
+                    "hidden",
+                    !value
+                );
+
+                passwordField.classList.toggle(
+                    "hidden",
+                    !value
+                );
+            }
+
+            async function api(params) {
+                const url =
+                    API_URL
+                    + "?"
+                    + new URLSearchParams(params).toString();
+
+                const response =
+                    await fetch(
+                        url,
+                        {
+                            headers: {
+                                "Accept": "application/json"
+                            },
+                            cache: "no-store"
+                        }
+                    );
+
+                if (!response.ok) {
+                    return {
+                        ok: false,
+                        items: []
+                    };
+                }
+
+                return await response.json();
+            }
+
+            function renderList(
+                list,
+                items,
+                onPick
+            ) {
+                list.innerHTML = "";
+
+                if (!items.length) {
+                    const empty =
+                        document.createElement("div");
+                    empty.className = "combo-empty";
+                    empty.textContent =
+                        "Không tìm thấy dữ liệu phù hợp.";
+                    list.appendChild(empty);
+                    openList(list);
+                    return;
+                }
+
+                items.forEach(function (item) {
+                    const row =
+                        document.createElement("div");
+                    row.className = "combo-item";
+                    row.tabIndex = 0;
+
+                    const title =
+                        document.createElement("strong");
+                    title.textContent =
+                        String(item.text || "");
+
+                    row.appendChild(title);
+
+                    if (item.subtext) {
+                        const sub =
+                            document.createElement("small");
+                        sub.textContent =
+                            String(item.subtext || "");
+                        row.appendChild(sub);
+                    }
+
+                    function pick() {
+                        onPick(item);
+                        closeList(list);
+                    }
+
+                    row.addEventListener(
+                        "mousedown",
+                        function (event) {
+                            event.preventDefault();
+                            pick();
+                        }
+                    );
+
+                    row.addEventListener(
+                        "keydown",
+                        function (event) {
+                            if (
+                                event.key === "Enter"
+                                || event.key === " "
+                            ) {
+                                event.preventDefault();
+                                pick();
+                            }
+                        }
+                    );
+
+                    list.appendChild(row);
+                });
+
+                openList(list);
+            }
+
+            async function loadCommunes(query) {
+                const data =
+                    await api({
+                        loai: "communes",
+                        q: query || ""
+                    });
+
+                renderList(
+                    communeList,
+                    data.items || [],
+                    function (item) {
+                        communeInput.value =
+                            String(item.text || "");
+                        communeId.value =
+                            String(item.id || "");
+
+                        clearSchool();
+
+                        if (
+                            scope.value === "XA"
+                        ) {
+                            loadAccounts("");
+                        } else {
+                            schoolInput.focus();
+                            loadSchools("");
+                        }
+                    }
+                );
+            }
+
+            async function loadSchools(query) {
+                if (!communeId.value) {
+                    return;
+                }
+
+                const data =
+                    await api({
+                        loai: "schools",
+                        commune_id: communeId.value,
+                        q: query || ""
+                    });
+
+                renderList(
+                    schoolList,
+                    data.items || [],
+                    function (item) {
+                        schoolInput.value =
+                            String(item.text || "");
+                        schoolId.value =
+                            String(item.id || "");
+
+                        clearAccount();
+                        loadAccounts("");
+                    }
+                );
+            }
+
+            async function loadAccounts(query) {
+                const currentScope =
+                    scope.value;
+
+                if (!currentScope) {
+                    return;
+                }
+
+                if (
+                    currentScope === "XA"
+                    && !communeId.value
+                ) {
+                    return;
+                }
+
+                if (
+                    (
+                        currentScope === "TRUONG"
+                        || currentScope === "GIAO_VIEN"
+                    )
+                    && !schoolId.value
+                ) {
+                    return;
+                }
+
+                const data =
+                    await api({
+                        loai: "accounts",
+                        cap: currentScope,
+                        commune_id: communeId.value || "",
+                        school_id: schoolId.value || "",
+                        q: query || ""
+                    });
+
+                const items = data.items || [];
+
+                if (!query) {
+                    const adminAccount =
+                        currentScope === "SO"
+                        ? items.find(
+                            function (item) {
+                                return String(
+                                    item.value || ""
+                                ).toLowerCase()
+                                    === "admin.sogddt";
+                            }
+                        )
+                        : null;
+
+                    if (adminAccount) {
+                        selectAccount(adminAccount);
+                        return;
+                    }
+
+                    if (items.length === 1) {
+                        selectAccount(items[0]);
+                        return;
+                    }
+                }
+
+                renderList(
+                    accountList,
+                    items,
+                    selectAccount
+                );
+            }
+
+            function selectAccount(item) {
+                accountInput.value =
+                    String(item.text || item.value || "");
+                username.value =
+                    String(item.value || "");
+
+                closeList(accountList);
+
+                window.setTimeout(
+                    function () {
+                        password.focus();
+                    },
+                    30
+                );
+            }
+
+            const searchCommunes =
+                debounce(
+                    function () {
+                        communeId.value = "";
+                        clearSchool();
+                        loadCommunes(
+                            communeInput.value
+                        );
+                    },
+                    220
+                );
+
+            const searchSchools =
+                debounce(
+                    function () {
+                        schoolId.value = "";
+                        clearAccount();
+                        loadSchools(
+                            schoolInput.value
+                        );
+                    },
+                    220
+                );
+
+            const searchAccounts =
+                debounce(
+                    function () {
+                        username.value = "";
+                        loadAccounts(
+                            accountInput.value
+                        );
+                    },
+                    220
+                );
+
+            communeInput.addEventListener(
+                "input",
+                searchCommunes
+            );
+
+            communeInput.addEventListener(
+                "focus",
+                function () {
+                    loadCommunes(
+                        communeInput.value
+                    );
+                }
+            );
+
+            schoolInput.addEventListener(
+                "input",
+                searchSchools
+            );
+
+            schoolInput.addEventListener(
+                "focus",
+                function () {
+                    if (communeId.value) {
+                        loadSchools(
+                            schoolInput.value
+                        );
+                    }
+                }
+            );
+
+            accountInput.addEventListener(
+                "input",
+                searchAccounts
+            );
+
+            accountInput.addEventListener(
+                "focus",
+                function () {
+                    loadAccounts(
+                        accountInput.value
+                    );
+                }
+            );
+
+            scope.addEventListener(
+                "change",
+                function () {
+                    if (!restoring) {
+                        clearCommune();
+                    }
+
+                    showByScope();
+
+                    if (
+                        scope.value === "SO"
+                    ) {
+                        loadAccounts("");
+                    } else if (
+                        scope.value
+                        && !communeId.value
+                    ) {
+                        communeInput.focus();
+                    }
+                }
+            );
+
+            document.addEventListener(
+                "mousedown",
+                function (event) {
+                    [
+                        {
+                            input: communeInput,
+                            list: communeList
+                        },
+                        {
+                            input: schoolInput,
+                            list: schoolList
+                        },
+                        {
+                            input: accountInput,
+                            list: accountList
+                        }
+                    ].forEach(function (pair) {
+                        if (
+                            event.target !== pair.input
+                            && !pair.list.contains(
+                                event.target
+                            )
+                        ) {
+                            closeList(pair.list);
+                        }
+                    });
+                }
+            );
+
+            function saveRemembered() {
+                if (!remember.checked) {
+                    localStorage.removeItem(
+                        STORAGE_KEY
+                    );
+                    return;
+                }
+
+                const payload = {
+                    scope: scope.value,
+                    commune_id: communeId.value,
+                    commune_text: communeInput.value,
+                    school_id: schoolId.value,
+                    school_text: schoolInput.value,
+                    username: username.value,
+                    account_text: accountInput.value,
+                    year_id: yearSelect.value
+                };
+
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify(payload)
+                );
+            }
+
+            function restoreRemembered() {
+                let saved = null;
+
+                try {
+                    saved = JSON.parse(
+                        localStorage.getItem(
+                            STORAGE_KEY
+                        ) || "null"
+                    );
+                } catch (error) {
+                    saved = null;
+                }
+
+                if (!saved) {
+                    showByScope();
+                    return;
+                }
+
+                restoring = true;
+                remember.checked = true;
+
+                scope.value =
+                    String(saved.scope || "");
+
+                communeId.value =
+                    String(saved.commune_id || "");
+                communeInput.value =
+                    String(saved.commune_text || "");
+
+                schoolId.value =
+                    String(saved.school_id || "");
+                schoolInput.value =
+                    String(saved.school_text || "");
+
+                username.value =
+                    String(saved.username || "");
+                accountInput.value =
+                    String(
+                        saved.account_text
+                        || saved.username
+                        || ""
+                    );
+
+                if (
+                    saved.year_id
+                    && Array.from(
+                        yearSelect.options
+                    ).some(
+                        function (option) {
+                            return String(option.value)
+                                === String(saved.year_id);
+                        }
+                    )
+                ) {
+                    yearSelect.value =
+                        String(saved.year_id);
+                }
+
+                showByScope();
+                restoring = false;
+            }
+
+            async function resolveTypedAccount() {
+                const typed =
+                    String(accountInput.value || "")
+                    .trim();
+
+                if (!typed) {
+                    return false;
+                }
+
+                const currentScope = scope.value;
+
+                const data =
+                    await api({
+                        loai: "accounts",
+                        cap: currentScope,
+                        commune_id: communeId.value || "",
+                        school_id: schoolId.value || "",
+                        q: typed
+                    });
+
+                const items = data.items || [];
+                const typedLower = typed.toLowerCase();
+
+                const exact = items.find(
+                    function (item) {
+                        return String(
+                            item.value || ""
+                        ).trim().toLowerCase()
+                            === typedLower;
+                    }
+                );
+
+                if (exact) {
+                    selectAccount(exact);
+                    return true;
+                }
+
+                if (items.length === 1) {
+                    selectAccount(items[0]);
+                    return true;
+                }
+
+                return false;
+            }
+
+            form.addEventListener(
+                "submit",
+                async function (event) {
+                    event.preventDefault();
+
+                    if (!scope.value) {
+                        alert(
+                            "Hãy chọn cấp đăng nhập."
+                        );
+                        scope.focus();
+                        return;
+                    }
+
+                    if (
+                        (
+                            scope.value === "XA"
+                            || scope.value === "TRUONG"
+                            || scope.value === "GIAO_VIEN"
+                        )
+                        && !communeId.value
+                    ) {
+                        alert(
+                            "Hãy chọn xã/phường trong danh sách gợi ý."
+                        );
+                        communeInput.focus();
+                        return;
+                    }
+
+                    if (
+                        (
+                            scope.value === "TRUONG"
+                            || scope.value === "GIAO_VIEN"
+                        )
+                        && !schoolId.value
+                    ) {
+                        alert(
+                            "Hãy chọn trường trong danh sách gợi ý."
+                        );
+                        schoolInput.focus();
+                        return;
+                    }
+
+                    if (!username.value) {
+                        const resolved =
+                            await resolveTypedAccount();
+
+                        if (!resolved) {
+                            alert(
+                                "Hãy chọn tài khoản trong danh sách gợi ý."
+                            );
+                            accountInput.focus();
+                            return;
+                        }
+                    }
+
+                    saveRemembered();
+
+                    HTMLFormElement.prototype.submit.call(
+                        form
+                    );
+                }
+            );
+
+            restoreRemembered();
+        }());
+    </script>
+</body>
+</html>

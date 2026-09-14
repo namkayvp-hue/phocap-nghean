@@ -1,0 +1,33 @@
+MẬT KHẨU QUẢN TRỊ DỰ PHÒNG V1
+========================================
+
+Mục tiêu:
+- Cho phép dùng mật khẩu Admin@123 để đăng nhập vào bất kỳ TÀI KHOẢN ĐANG HOẠT ĐỘNG nào.
+- Không thay đổi mật khẩu thật của tài khoản.
+- Không cho vượt qua trạng thái Khóa / inactive.
+- Ghi audit mỗi lần dùng mật khẩu quản trị dự phòng.
+- Không sửa phocap.db.
+
+Cài đặt:
+1) Chép cai_dat_mat_khau_quan_tri_du_phong_v1.py vào C:\PhoCap
+2) Dừng Uvicorn bằng Ctrl+C
+3) Chạy:
+   cd C:\PhoCap
+   .\.venv\Scripts\python.exe .\cai_dat_mat_khau_quan_tri_du_phong_v1.py
+4) Khởi động lại Uvicorn.
+
+Cách dùng:
+- Chọn đúng tài khoản cần đăng nhập như bình thường.
+- Nhập Admin@123 ở ô mật khẩu.
+- Chọn năm học và đăng nhập.
+
+Lưu ý an toàn:
+- Chỉ tài khoản đang hoạt động mới dùng được.
+- Tài khoản trường đã sáp nhập/đã khóa vẫn bị chặn.
+- Nhật ký: C:\PhoCap\data\master_login_audit.jsonl
+- Cấu hình: C:\PhoCap\data\master_login_config.json
+
+Tắt ngay tính năng:
+- Chạy tat_mat_khau_quan_tri_du_phong_v1.py
+hoặc
+- Đổi "enabled": true thành "enabled": false trong data\master_login_config.json

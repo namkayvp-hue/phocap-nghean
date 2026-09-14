@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhập nhanh hộ dân</title>
+    <style>
+        :root {
+            --blue: #1268c4;
+            --blue-dark: #0d4f9a;
+            --blue-soft: #eaf4ff;
+            --ink: #152238;
+            --muted: #5d6b7f;
+            --line: #d9e4f0;
+            --page: #eef4fb;
+            --card: #ffffff;
+            --green: #1f8a3b;
+            --green-soft: #eaf7ed;
+            --amber: #a96600;
+            --amber-soft: #fff5dc;
+            --red: #c42e2e;
+            --red-soft: #fff0f0;
+            --shadow: 0 10px 28px rgba(22, 49, 82, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--page);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.45;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .page-header {
+            color: #fff;
+            background: linear-gradient(120deg, var(--blue-dark), #2081dc);
+        }
+
+        .header-inner,
+        .page-main {
+            width: min(1440px, calc(100% - 40px));
+            margin: 0 auto;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 28px 0;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: #cfe6ff;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1.15;
+        }
+
+        .header-subtitle {
+            margin-bottom: 0;
+            font-size: 17px;
+        }
+
+        .header-user {
+            min-width: 260px;
+            text-align: right;
+        }
+
+        .header-user strong,
+        .header-user span {
+            display: block;
+        }
+
+        .header-user span {
+            margin-top: 3px;
+            color: #d8eaff;
+        }
+
+        .header-links {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 750;
+            text-decoration: none;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            color: #fff;
+            background: var(--blue);
+        }
+
+        .button-secondary {
+            color: var(--blue-dark);
+            background: #fff;
+            border-color: #c8daf0;
+        }
+
+        .button-muted {
+            color: #32445a;
+            background: #edf2f7;
+            border-color: #dbe4ee;
+        }
+
+        .button-success {
+            color: #fff;
+            background: var(--green);
+        }
+
+        .button-small {
+            min-height: 36px;
+            padding: 7px 11px;
+            font-size: 14px;
+        }
+
+        .button[disabled] {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+        }
+
+        .page-main {
+            padding: 26px 0 60px;
+        }
+
+        .flash,
+        .error-box,
+        .scope-box {
+            margin-bottom: 18px;
+            padding: 15px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        .flash {
+            color: #17682c;
+            background: var(--green-soft);
+            border: 1px solid #b9e0c2;
+        }
+
+        .error-box {
+            color: var(--red);
+            background: var(--red-soft);
+            border: 1px solid #f0b8b8;
+        }
+
+        .scope-box {
+            color: #205c2e;
+            background: #e8f6e9;
+            border: 1px solid #b9dcbc;
+        }
+
+        .toolbar-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid #e2eaf3;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-card,
+        .progress-card,
+        .section-card {
+            padding: 22px;
+        }
+
+        .card-label {
+            margin-bottom: 7px;
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+        }
+
+        .search-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            gap: 10px;
+        }
+
+        .field-input,
+        .field-select,
+        .field-textarea {
+            width: 100%;
+            border: 1px solid #cfdbea;
+            border-radius: 9px;
+            color: var(--ink);
+            background: #fff;
+            outline: none;
+        }
+
+        .field-input,
+        .field-select {
+            min-height: 45px;
+            padding: 10px 12px;
+        }
+
+        .field-textarea {
+            min-height: 92px;
+            padding: 11px 12px;
+            resize: vertical;
+        }
+
+        .field-input:focus,
+        .field-select:focus,
+        .field-textarea:focus {
+            border-color: #4c9be5;
+            box-shadow: 0 0 0 3px rgba(32, 129, 220, 0.12);
+        }
+
+        .search-results {
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .search-result {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: center;
+            padding: 11px 12px;
+            border: 1px solid #dbe6f2;
+            border-radius: 10px;
+            text-decoration: none;
+        }
+
+        .search-result:hover {
+            background: var(--blue-soft);
+            border-color: #9fc9ee;
+        }
+
+        .search-result strong,
+        .search-result span {
+            display: block;
+        }
+
+        .search-result span {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .status-pill,
+        .metric-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .status-pill {
+            min-height: 30px;
+            padding: 5px 10px;
+            color: #195f29;
+            background: var(--green-soft);
+        }
+
+        .status-pill.status-warning {
+            color: var(--amber);
+            background: var(--amber-soft);
+        }
+
+        .status-pill.status-neutral {
+            color: #495a6f;
+            background: #eef2f6;
+        }
+
+        .progress-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .progress-number {
+            color: var(--blue-dark);
+            font-size: 28px;
+            font-weight: 850;
+        }
+
+        .progress-track {
+            height: 12px;
+            margin: 16px 0 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #dfe9f4;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #27a14a, #59c874);
+        }
+
+        .progress-meta,
+        .small-muted {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .navigation-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .navigation-row .next-button {
+            justify-self: end;
+        }
+
+        .position-chip {
+            padding: 8px 14px;
+            border-radius: 999px;
+            color: var(--blue-dark);
+            background: var(--blue-soft);
+            font-weight: 800;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            padding: 16px;
+        }
+
+        .summary-card span,
+        .summary-card strong {
+            display: block;
+        }
+
+        .summary-card span {
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .summary-card strong {
+            color: var(--blue-dark);
+            font-size: 23px;
+        }
+
+        .warning-list {
+            display: grid;
+            gap: 9px;
+            margin-bottom: 18px;
+        }
+
+        .warning-item {
+            padding: 12px 15px;
+            border: 1px solid #efd49a;
+            border-radius: 10px;
+            color: #7d4d00;
+            background: var(--amber-soft);
+            font-weight: 700;
+        }
+
+        .completion-box {
+            margin-bottom: 18px;
+            padding: 16px 18px;
+            border-radius: 12px;
+            border: 1px solid #acd8b6;
+            color: #17682c;
+            background: var(--green-soft);
+        }
+
+        .completion-box.blocked {
+            border-color: #efc46f;
+            color: #754700;
+            background: var(--amber-soft);
+        }
+
+        .completion-box h3 {
+            margin-bottom: 7px;
+            font-size: 18px;
+        }
+
+        .completion-box p {
+            margin-bottom: 0;
+        }
+
+        .completion-box ul {
+            margin: 8px 0 0;
+            padding-left: 22px;
+        }
+
+        .completion-box li + li {
+            margin-top: 4px;
+        }
+
+        .completion-current-warning {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(117, 71, 0, 0.35);
+            font-weight: 800;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(360px, 0.82fr) minmax(500px, 1.18fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .section-title {
+            margin-bottom: 6px;
+            font-size: 25px;
+        }
+
+        .section-description {
+            margin-bottom: 20px;
+            color: var(--muted);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .field-group {
+            min-width: 0;
+        }
+
+        .field-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 800;
+        }
+
+        .required {
+            color: var(--red);
+        }
+
+        .check-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #dbe6f2;
+            border-radius: 10px;
+            background: #f7faff;
+        }
+
+        .check-row input {
+            width: 19px;
+            height: 19px;
+            margin-top: 1px;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .assignment-box {
+            margin-top: 16px;
+            padding: 13px 14px;
+            border-radius: 10px;
+            color: #34475c;
+            background: #f3f7fb;
+        }
+
+        .assignment-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .members-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: flex-start;
+            margin-bottom: 17px;
+        }
+
+        .metric-pill {
+            min-height: 34px;
+            padding: 7px 12px;
+            color: var(--blue-dark);
+            background: var(--blue-soft);
+        }
+
+        .member-list {
+            display: grid;
+            gap: 11px;
+        }
+
+        .member-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 14px;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #dbe6f2;
+            border-radius: 12px;
+        }
+
+        .member-name {
+            margin-bottom: 5px;
+            font-size: 18px;
+            font-weight: 850;
+        }
+
+        .member-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .member-alert {
+            margin-top: 8px;
+            color: var(--amber);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .member-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 7px;
+        }
+
+        .empty-state {
+            padding: 34px 20px;
+            border: 2px dashed #d5e1ed;
+            border-radius: 12px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .add-person {
+            margin-top: 18px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+        }
+
+        .add-person summary {
+            cursor: pointer;
+            color: var(--blue-dark);
+            font-size: 19px;
+            font-weight: 850;
+        }
+
+        .add-person[open] summary {
+            margin-bottom: 18px;
+        }
+
+        .read-only-note {
+            padding: 14px;
+            border-radius: 10px;
+            color: #455a70;
+            background: #edf2f7;
+            font-weight: 700;
+        }
+
+        .sticky-mobile-nav {
+            display: none;
+        }
+
+        @media (max-width: 1080px) {
+            .toolbar-grid,
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 720px) {
+            .header-inner,
+            .page-main {
+                width: min(100% - 24px, 1440px);
+            }
+
+            .header-inner {
+                display: block;
+                padding: 22px 0;
+            }
+
+            .header-user {
+                min-width: 0;
+                margin-top: 20px;
+                text-align: left;
+            }
+
+            .header-links {
+                justify-content: flex-start;
+            }
+
+            .search-row,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .navigation-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .position-chip {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                justify-self: center;
+            }
+
+            .navigation-row .next-button {
+                justify-self: stretch;
+            }
+
+            .navigation-row .button {
+                width: 100%;
+            }
+
+            .member-card {
+                grid-template-columns: 1fr;
+            }
+
+            .member-actions {
+                justify-content: flex-start;
+            }
+
+            .form-actions .button {
+                flex: 1 1 100%;
+            }
+
+            .sticky-mobile-nav {
+                position: sticky;
+                bottom: 10px;
+                z-index: 5;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-top: 18px;
+                padding: 8px;
+                border: 1px solid #c9d9ea;
+                border-radius: 13px;
+                background: rgba(255, 255, 255, 0.96);
+                box-shadow: 0 12px 30px rgba(20, 46, 77, 0.18);
+            }
+        }
+    
+        /* === GV_MOBILE_V191_QUICK_CSS_START === */
+        .pc-gv-v191-birth {
+            display: block;
+            margin-top: 4px;
+            color: #60758a;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.25;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 760px) {
+            .pc-gv-v191-birth {
+                margin-top: 5px;
+                color: #526b82;
+                font-size: 13px;
+                font-weight: 750;
+            }
+        }
+        /* === GV_MOBILE_V191_QUICK_CSS_END === */
+
+    </style>
+</head>
+<body>
+{# === GV_MOBILE_V18_QUICK_START === #}
+{% if nguoi_dung.role_code == 'GIAO_VIEN' %}
+<style>
+.pc-gv-v18-quick-page { display: none; }
+@media (max-width: 760px) {
+    html, body { margin: 0 !important; min-height: 100dvh; background: #f3f6fa !important; }
+    body > *:not(.pc-gv-v18-quick-page) { display: none !important; }
+    .pc-gv-v18-quick-page {
+        display: block !important;
+        min-height: 100dvh;
+        padding: 12px 10px 26px;
+        box-sizing: border-box;
+    }
+    .pc-gv-v18-quick-inner { width: min(100%, 650px); margin: 0 auto; }
+    .pc-gv-v18-q-head {
+        margin-bottom: 12px;
+        padding: 13px 14px;
+        border-radius: 12px;
+        background: #174f86;
+        color: #fff;
+    }
+    .pc-gv-v18-q-number { font-size: 12px; font-weight: 800; opacity: .88; }
+    .pc-gv-v18-q-house { margin-top: 4px; font-size: 19px; font-weight: 900; line-height: 1.2; }
+    .pc-gv-v18-q-position { margin-top: 5px; font-size: 12px; opacity: .86; }
+    .pc-gv-v18-alert {
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff0f0;
+        color: #a51f1f;
+        border: 1px solid #efbcbc;
+        font-size: 13px;
+        font-weight: 750;
+    }
+    .pc-gv-v18-ok {
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #eaf7ed;
+        color: #1b662f;
+        border: 1px solid #b9dfc2;
+        font-size: 13px;
+        font-weight: 750;
+    }
+    .pc-gv-v18-members-head,
+    .pc-gv-v18-member {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, .75fr);
+        gap: 8px;
+        align-items: start;
+    }
+    .pc-gv-v18-members-head {
+        padding: 9px 10px;
+        border-radius: 10px 10px 0 0;
+        background: #e3edf7;
+        color: #24435f;
+        font-size: 12px;
+        font-weight: 850;
+    }
+    .pc-gv-v18-member {
+        padding: 11px 10px;
+        border: 1px solid #d8e2ec;
+        border-top: 0;
+        background: #fff;
+        font-size: 13px;
+    }
+    .pc-gv-v18-member:last-child { border-radius: 0 0 10px 10px; }
+    .pc-gv-v18-member-name { font-weight: 850; line-height: 1.25; }
+    .pc-gv-v18-member-stt { display: inline-block; min-width: 22px; color: #174f86; }
+    .pc-gv-v18-school, .pc-gv-v18-class { line-height: 1.3; word-break: break-word; }
+    .pc-gv-v18-actions {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 3px;
+    }
+    .pc-gv-v18-btn,
+    .pc-gv-v18-actions button,
+    .pc-gv-v18-actions a {
+        display: flex;
+        min-height: 40px;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 9px;
+        border: 0;
+        border-radius: 9px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 850;
+        text-decoration: none !important;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+    .pc-gv-v18-edit { background: #edf3f8; color: #174f86 !important; border: 1px solid #cbd9e6 !important; }
+    .pc-gv-v18-accept { background: #1f8a3b; color: #fff !important; }
+    .pc-gv-v18-accepted { background: #eaf7ed; color: #1b662f !important; border: 1px solid #b9dfc2 !important; cursor: default !important; }
+    .pc-gv-v18-section {
+        margin-top: 14px;
+        padding: 13px;
+        border: 1px solid #d9e4ee;
+        border-radius: 12px;
+        background: #fff;
+    }
+    .pc-gv-v18-section summary {
+        cursor: pointer;
+        color: #174f86;
+        font-size: 15px;
+        font-weight: 900;
+    }
+    .pc-gv-v18-form-grid { display: grid; gap: 9px; margin-top: 12px; }
+    .pc-gv-v18-input, .pc-gv-v18-select {
+        width: 100%;
+        min-height: 44px;
+        padding: 8px 10px;
+        border: 1px solid #c9d7e4;
+        border-radius: 9px;
+        background: #fff;
+        font: inherit;
+        box-sizing: border-box;
+    }
+    .pc-gv-v18-label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 800; color: #3d5368; }
+    .pc-gv-v18-add-button {
+        width: 100%;
+        min-height: 46px;
+        margin-top: 10px;
+        border: 0;
+        border-radius: 10px;
+        background: #1769aa;
+        color: #fff;
+        font: inherit;
+        font-weight: 900;
+    }
+    .pc-gv-v18-finish-box {
+        display: grid;
+        gap: 9px;
+        margin-top: 14px;
+    }
+    .pc-gv-v18-finish {
+        width: 100%;
+        min-height: 54px;
+        border: 0;
+        border-radius: 11px;
+        background: #1f8a3b;
+        color: #fff;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+    .pc-gv-v18-finish-next { background: #1769aa; }
+    .pc-gv-v18-back {
+        display: flex;
+        min-height: 44px;
+        margin-top: 12px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #cbd9e6;
+        color: #174f86 !important;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 850;
+    }
+}
+</style>
+<main class="pc-gv-v18-quick-page">
+    <div class="pc-gv-v18-quick-inner">
+        <section class="pc-gv-v18-q-head">
+            <div class="pc-gv-v18-q-number">Số phiếu: {{ survey_form.form_number }}</div>
+            <div class="pc-gv-v18-q-house">{{ household.head_name }}</div>
+            <div class="pc-gv-v18-q-position">Phiếu {{ current_position }}/{{ total_forms }}</div>
+        </section>
+
+        {% if thong_bao_loi %}<div class="pc-gv-v18-alert">{{ thong_bao_loi }}</div>{% endif %}
+        {% if thong_bao %}<div class="pc-gv-v18-ok">{{ thong_bao }}</div>{% endif %}
+
+        {% if person_summaries %}
+            <div class="pc-gv-v18-members-head">
+                <div>Thành viên</div>
+                <div>Trường</div>
+                <div>Lớp</div>
+            </div>
+            {% for item in person_summaries %}
+                <section class="pc-gv-v18-member">
+                    <div class="pc-gv-v18-member-name"><span class="pc-gv-v18-member-stt">{{ loop.index }}.</span>{{ item.person.full_name }}</div>
+
+                    <!-- === GV_MOBILE_V191_BIRTH_YEAR_START === -->
+                    <span class="pc-gv-v191-birth">
+                        Năm sinh:
+                        {% if item.person.date_of_birth %}
+                            {{ item.person.date_of_birth.year }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </span>
+                    <!-- === GV_MOBILE_V191_BIRTH_YEAR_END === -->
+                    <div class="pc-gv-v18-school">{{ item.school_name or '—' }}</div>
+                    <div class="pc-gv-v18-class">{{ item.class_name or '—' }}</div>
+                    <div class="pc-gv-v18-actions">
+                        <a class="pc-gv-v18-edit" href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ item.person.id }}/nam-hoc?school_year_id={{ batch.school_year_id }}#year_record_form">
+                            Sửa
+                        </a>
+                        {% if item.is_reviewed %}
+                            <span class="pc-gv-v18-btn pc-gv-v18-accepted">✓ Đã chấp nhận</span>
+                        {% elif item.can_accept %}
+                            <form method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/nhap-nhanh/{{ item.person.id }}/chap-nhan">
+                                <button class="pc-gv-v18-accept" type="submit">Chấp nhận</button>
+                            </form>
+                        {% else %}
+                            <span class="pc-gv-v18-btn pc-gv-v18-accepted" style="opacity:.55;">Cần sửa</span>
+                        {% endif %}
+                    </div>
+                </section>
+            {% endfor %}
+        {% else %}
+            <div class="pc-gv-v18-alert">Hộ chưa có thành viên. Hãy thêm thành viên mới.</div>
+        {% endif %}
+
+        {% if can_edit_data %}
+            {# === FIX28B_HEAD_PERSON_PROMPT_UI_START === #}
+            {% if household_head_needs_person %}
+            <div class="pc-gv-v18-alert" style="margin-bottom:12px;">
+                <strong>👤 Chủ hộ chưa có trong danh sách đối tượng điều tra.</strong><br>
+                Hệ thống đã điền sẵn tên <strong>{{ household.head_name }}</strong>
+                và quan hệ <strong>Chủ hộ</strong> ở biểu mẫu bên dưới.
+                Hãy bổ sung Ngày sinh, Giới tính, Dân tộc và Số định danh nếu có.
+                Nếu chủ hộ thuộc phạm vi 0–60 tuổi thì cần bổ sung để điều tra;
+                nếu trên 60 tuổi có thể bỏ qua khi không thuộc phạm vi nghiệp vụ cần theo dõi.
+            </div>
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var el = document.getElementById("fix28b-head-person-details");
+                if (el) el.open = true;
+            });
+            </script>
+            {% endif %}
+            {# === FIX28B_HEAD_PERSON_PROMPT_UI_END === #}
+
+<details id="fix28b-head-person-details" class="pc-gv-v18-section" {% if thong_bao_loi and person_form_data.full_name %}open{% endif %}>
+                <summary>
+                    {% if household_head_needs_person %}
+                        👤 Bổ sung chủ hộ vào đối tượng điều tra
+                    {% else %}
+                        ＋ Thêm thành viên mới
+                    {% endif %}
+                </summary>
+                <form method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/nhap-nhanh/them-doi-tuong">
+                    <div class="pc-gv-v18-form-grid">
+                        <div><label class="pc-gv-v18-label">Họ và tên *</label><input class="pc-gv-v18-input" name="full_name" value="{{ person_form_data.full_name }}" required></div>
+                        <div><label class="pc-gv-v18-label">Ngày sinh *</label><input class="pc-gv-v18-input" type="date" name="date_of_birth" value="{{ person_form_data.date_of_birth }}" max="{{ today }}" required></div>
+                        <div><label class="pc-gv-v18-label">Giới tính *</label><select class="pc-gv-v18-select" name="gender" required><option value="">-- Chọn --</option>{% for value in ['Nam','Nữ','Khác'] %}<option value="{{ value }}" {% if person_form_data.gender == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></div>
+                        <div><label class="pc-gv-v18-label">Dân tộc *</label><input class="pc-gv-v18-input" name="ethnic_group" value="{{ person_form_data.ethnic_group }}" required></div>
+                        <div><label class="pc-gv-v18-label">Quan hệ với chủ hộ *</label><input class="pc-gv-v18-input" name="relationship_to_head" value="{{ person_form_data.relationship_to_head }}" required></div>
+                        <div><label class="pc-gv-v18-label">Số định danh cá nhân</label><input class="pc-gv-v18-input" name="personal_id" value="{{ person_form_data.personal_id }}" inputmode="numeric"></div>
+<div>
+    <!-- === GV_MOBILE_V19_CCCD_FIELD === -->
+    <label for="citizen_id">Căn cước công dân</label>
+    <input
+        id="citizen_id"
+        type="text"
+        name="citizen_id"
+        value="{{ person_form_data.citizen_id or '' }}"
+        maxlength="50"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="Nhập CCCD nếu có"
+    >
+    <small>Không bắt buộc. Nếu chưa có, hệ thống vẫn dùng mã định danh nội bộ.</small>
+</div>
+
+                        <div><label class="pc-gv-v18-label">Diện cư trú *</label><select class="pc-gv-v18-select" name="residency_status" required>{% for code, label in residency_status_labels.items() %}<option value="{{ code }}" {% if person_form_data.residency_status == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+                    </div>
+                    <button class="pc-gv-v18-add-button" type="submit">Thêm thành viên</button>
+                </form>
+            </details>
+
+            <form class="pc-gv-v18-finish-box" method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/nhap-nhanh/luu">
+                <input type="hidden" name="head_name" value="{{ household_form_data.head_name }}">
+                <input type="hidden" name="address" value="{{ household_form_data.address }}">
+                <input type="hidden" name="hamlet_name" value="{{ household_form_data.hamlet_name }}">
+                <input type="hidden" name="phone" value="{{ household_form_data.phone }}">
+                <input type="hidden" name="household_notes" value="{{ household_form_data.household_notes }}">
+                <input type="hidden" name="form_status" value="DA_HOAN_THANH">
+                <input type="hidden" name="survey_date" value="{{ household_form_data.survey_date or today }}">
+                <input type="hidden" name="village_head_name" value="{{ household_form_data.village_head_name }}">
+                <input type="hidden" name="household_representative_name" value="{{ household_form_data.household_representative_name or household_form_data.head_name }}">
+                <input type="hidden" name="household_confirmed" value="1">
+                <input type="hidden" name="form_notes" value="{{ household_form_data.form_notes }}">
+                <button class="pc-gv-v18-finish" type="submit" name="submit_action" value="save">✓ Hoàn thành</button>
+                {% if next_url %}
+                    <button class="pc-gv-v18-finish pc-gv-v18-finish-next" type="submit" name="submit_action" value="save_next">✓ Hoàn thành & hộ tiếp theo →</button>
+                {% endif %}
+            </form>
+        {% endif %}
+
+        <a class="pc-gv-v18-back" href="/dieu-tra/{{ batch.id }}/ho-dan?page_size=100&sort=hamlet">← Phiếu phân công</a>
+    </div>
+</main>
+{% endif %}
+{# === GV_MOBILE_V18_QUICK_END === #}
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="page-header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">Điều tra phổ cập giáo dục mầm non</p>
+            <h1>Nhập nhanh hộ dân</h1>
+            <p class="header-subtitle">
+                {{ survey_form.form_number }} · {{ household.code }} ·
+                Năm học {{ batch.school_year.code }}
+            </p>
+        </div>
+
+        <div class="header-user">
+            <strong>{{ nguoi_dung.full_name }}</strong>
+            <span>{{ nguoi_dung.role_name }} — {{ nguoi_dung.unit_name }}</span>
+            <div class="header-links">
+                <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan">
+                    ← Danh sách hộ
+                </a>
+                <a class="button button-secondary" href="/">
+                    Trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="page-main">
+    {% if thong_bao %}
+        <div class="flash">{{ thong_bao }}</div>
+    {% endif %}
+
+    {% if thong_bao_loi %}
+        <div class="error-box">{{ thong_bao_loi }}</div>
+    {% endif %}
+
+    <div class="scope-box">
+        <strong>Phạm vi an toàn:</strong>
+        chỉ mở và cập nhật các phiếu nằm trong quyền của tài khoản đang đăng nhập.
+    </div>
+
+    <section class="toolbar-grid">
+        <article class="card search-card">
+            <div class="card-label">Tìm nhanh phiếu được phân công</div>
+            <h2 class="section-title">Chuyển thẳng đến đúng hộ</h2>
+            <form method="get" class="search-row">
+                <input
+                    class="field-input"
+                    type="search"
+                    name="q"
+                    value="{{ q }}"
+                    placeholder="Số phiếu, mã hộ, chủ hộ, địa chỉ hoặc điện thoại"
+                    autocomplete="off"
+                >
+                <button class="button button-primary" type="submit">🔎 Tìm hộ</button>
+                <a
+                    class="button button-muted"
+                    href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/nhap-nhanh"
+                >
+                    Xóa
+                </a>
+            </form>
+
+            {% if q %}
+                <div class="search-results">
+                    {% if search_results %}
+                        {% for item in search_results %}
+                            <a
+                                class="search-result"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ item.household_id }}/nhap-nhanh"
+                            >
+                                <div>
+                                    <strong>{{ item.head_name }}</strong>
+                                    <span>
+                                        {{ item.form_number }} · {{ item.household_code }}
+                                        {% if item.hamlet_name %} · {{ item.hamlet_name }}{% endif %}
+                                    </span>
+                                    <span>{{ item.address }}</span>
+                                </div>
+                                <span class="status-pill
+                                    {% if item.form_status == 'CAN_BO_SUNG' %}status-warning
+                                    {% elif item.form_status == 'CHUA_DIEU_TRA' %}status-neutral{% endif %}
+                                ">
+                                    {{ form_status_labels.get(item.form_status, item.form_status) }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            Không tìm thấy hộ phù hợp trong phạm vi được phép.
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </article>
+
+        <article class="card progress-card">
+            <div class="progress-head">
+                <div>
+                    <div class="card-label">Tiến độ phạm vi đang thấy</div>
+                    <h2 class="section-title">Đã hoàn thành {{ completed_forms }}/{{ total_forms }} hộ</h2>
+                </div>
+                <div class="progress-number">{{ progress_percent }}%</div>
+            </div>
+            <div class="progress-track" aria-label="Tiến độ điều tra">
+                <div class="progress-fill" style="width: {{ progress_percent }}%;"></div>
+            </div>
+            <div class="progress-meta">
+                Chưa điều tra: {{ status_counts.get('CHUA_DIEU_TRA', 0) }} ·
+                Đang điều tra: {{ status_counts.get('DANG_DIEU_TRA', 0) }} ·
+                Cần bổ sung: {{ status_counts.get('CAN_BO_SUNG', 0) }}
+            </div>
+        </article>
+    </section>
+
+    <nav class="navigation-row" aria-label="Chuyển hộ">
+        {% if previous_url %}
+            <a class="button button-secondary" href="{{ previous_url }}">← Hộ trước</a>
+        {% else %}
+            <button class="button button-muted" type="button" disabled>← Hộ trước</button>
+        {% endif %}
+
+        <span class="position-chip">
+            Hộ {{ current_position }}/{{ total_forms }}
+        </span>
+
+        {% if next_url %}
+            <a class="button button-secondary next-button" href="{{ next_url }}">Hộ tiếp theo →</a>
+        {% else %}
+            <button class="button button-muted next-button" type="button" disabled>
+                Hộ tiếp theo →
+            </button>
+        {% endif %}
+    </nav>
+
+    <section class="summary-grid">
+        <article class="card summary-card">
+            <span>Chủ hộ</span>
+            <strong>{{ household.head_name }}</strong>
+        </article>
+        <article class="card summary-card">
+            <span>Thành viên</span>
+            <strong>{{ active_people_count }}</strong>
+        </article>
+        <article class="card summary-card">
+            <span>Thiếu định danh</span>
+            <strong>{{ missing_personal_id_count }}</strong>
+        </article>
+        <article class="card summary-card">
+            <span>Chưa có dữ liệu năm</span>
+            <strong>{{ missing_year_record_count }}</strong>
+        </article>
+        <article class="card summary-card">
+            <span>Chưa đủ chỉ báo</span>
+            <strong>{{ incomplete_year_record_count }}</strong>
+        </article>
+    </section>
+
+    {% if warnings %}
+        <section class="warning-list" aria-label="Cảnh báo thiếu dữ liệu">
+            {% for warning in warnings %}
+                <div class="warning-item">⚠ {{ warning }}</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if completion_ready %}
+        <section class="completion-box" aria-label="Điều kiện hoàn thành phiếu">
+            <h3>✓ Phiếu đủ điều kiện đánh dấu “Đã hoàn thành”</h3>
+            <p>Hộ đã có thành viên, đủ số định danh, đủ dữ liệu năm học, đủ chỉ báo và đã được hộ gia đình xác nhận.</p>
+        </section>
+    {% else %}
+        <section class="completion-box blocked" aria-label="Điều kiện chưa hoàn thành">
+            <h3>⚠ Chưa đủ điều kiện đánh dấu “Đã hoàn thành”</h3>
+            <ul>
+                {% for item in completion_blockers %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% if household_form_data.form_status == 'DA_HOAN_THANH' %}
+                <div class="completion-current-warning">
+                    Phiếu hiện đang mang trạng thái “Đã hoàn thành” nhưng dữ liệu chưa đạt điều kiện.
+                    Khi lưu lại, cần bổ sung dữ liệu hoặc chuyển trạng thái sang “Cần bổ sung”.
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <section class="content-grid">
+        <article class="card section-card">
+            <div class="card-label">Thông tin hộ và phiếu</div>
+            <h2 class="section-title">Cập nhật trong một lần lưu</h2>
+            <p class="section-description">
+                Sửa thông tin hộ, trạng thái phiếu và xác nhận ngay trên cùng một màn hình.
+            </p>
+
+            {% if can_edit_data %}
+                <form
+                    method="post"
+                    action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/nhap-nhanh/luu"
+                >
+                    <div class="form-grid">
+                        <div class="field-group full">
+                            <label class="field-label" for="head_name">
+                                Họ và tên chủ hộ <span class="required">*</span>
+                            </label>
+                            <input
+                                class="field-input"
+                                id="head_name"
+                                name="head_name"
+                                value="{{ household_form_data.head_name }}"
+                                maxlength="200"
+                                required
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="hamlet_name">Thôn/xóm/khối/bản</label>
+                            <input
+                                class="field-input"
+                                id="hamlet_name"
+                                name="hamlet_name"
+                                value="{{ household_form_data.hamlet_name }}"
+                                maxlength="200"
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="phone">Điện thoại</label>
+                            <input
+                                class="field-input"
+                                id="phone"
+                                name="phone"
+                                value="{{ household_form_data.phone }}"
+                                maxlength="30"
+                                inputmode="tel"
+                            >
+                        </div>
+
+                        <div class="field-group full">
+                            <label class="field-label" for="address">
+                                Địa chỉ hộ <span class="required">*</span>
+                            </label>
+                            <textarea
+                                class="field-textarea"
+                                id="address"
+                                name="address"
+                                required
+                            >{{ household_form_data.address }}</textarea>
+                        </div>
+
+                        <div class="field-group full">
+                            <label class="field-label" for="household_notes">Ghi chú riêng của hộ</label>
+                            <textarea
+                                class="field-textarea"
+                                id="household_notes"
+                                name="household_notes"
+                            >{{ household_form_data.household_notes }}</textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="form_status">
+                                Trạng thái phiếu <span class="required">*</span>
+                            </label>
+                            <select class="field-select" id="form_status" name="form_status" required>
+                                {% for code, label in form_status_labels.items() %}
+                                    <option
+                                        value="{{ code }}"
+                                        {% if household_form_data.form_status == code %}selected{% endif %}
+                                    >
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="survey_date">Ngày điều tra</label>
+                            <input
+                                class="field-input"
+                                type="date"
+                                id="survey_date"
+                                name="survey_date"
+                                value="{{ household_form_data.survey_date }}"
+                                max="{{ today }}"
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="village_head_name">Trưởng thôn/xóm</label>
+                            <input
+                                class="field-input"
+                                id="village_head_name"
+                                name="village_head_name"
+                                value="{{ household_form_data.village_head_name }}"
+                                maxlength="200"
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="household_representative_name">
+                                Người đại diện hộ
+                            </label>
+                            <input
+                                class="field-input"
+                                id="household_representative_name"
+                                name="household_representative_name"
+                                value="{{ household_form_data.household_representative_name }}"
+                                maxlength="200"
+                            >
+                        </div>
+
+                        <div class="field-group full">
+                            <label class="field-label" for="form_notes">
+                                Nội dung cần bổ sung hoặc ghi chú phiếu
+                            </label>
+                            <textarea
+                                class="field-textarea"
+                                id="form_notes"
+                                name="form_notes"
+                            >{{ household_form_data.form_notes }}</textarea>
+                        </div>
+
+                        <label class="check-row">
+                            <input
+                                type="checkbox"
+                                name="household_confirmed"
+                                value="1"
+                                {% if household_form_data.household_confirmed %}checked{% endif %}
+                            >
+                            <span>
+                                <strong>Hộ gia đình đã xác nhận</strong><br>
+                                <span class="small-muted">Đánh dấu khi đã đối chiếu với đại diện hộ.</span>
+                            </span>
+                        </label>
+
+                        {% if can_confirm_commune %}
+                            <label class="check-row">
+                                <input
+                                    type="checkbox"
+                                    name="commune_confirmed"
+                                    value="1"
+                                    {% if household_form_data.commune_confirmed %}checked{% endif %}
+                                >
+                                <span>
+                                    <strong>UBND xã/phường đã xác nhận</strong><br>
+                                    <span class="small-muted">Tài khoản Xã và ADMIN được thay đổi xác nhận cấp xã/phường.</span>
+                                </span>
+                            </label>
+                        {% endif %}
+                    </div>
+
+                    {% if assignments %}
+                        <div class="assignment-box">
+                            <strong>Người được phân công</strong>
+                            {% for item in assignments %}
+                                {{ item.full_name }}{% if item.school_name %} — {{ item.school_name }}{% endif %}
+                                {% if not loop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                            name="submit_action"
+                            value="save"
+                        >
+                            Lưu hộ hiện tại
+                        </button>
+                        <button
+                            class="button button-success"
+                            type="submit"
+                            name="submit_action"
+                            value="save_next"
+                        >
+                            Lưu và chuyển hộ tiếp theo →
+                        </button>
+                        <a
+                            class="button button-muted"
+                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/phieu"
+                        >
+                            Mở phiếu đầy đủ
+                        </a>
+                    </div>
+                </form>
+            {% else %}
+                <div class="read-only-note">
+                    Tài khoản hiện tại chỉ được xem dữ liệu. Chức năng nhập nhanh chỉ mở quyền sửa
+                    cho Quản trị hệ thống và Giáo viên được phân công trực tiếp.
+                </div>
+            {% endif %}
+        </article>
+
+        <article class="card section-card" id="members">
+            <div class="members-head">
+                <div>
+                    <div class="card-label">Thành viên trong hộ</div>
+                    <h2 class="section-title">Kiểm tra và nhập năm học</h2>
+                    <!-- === FIX28C_HEAD_PROMPT_UI_START === -->
+                    {% if fix28c_head_missing %}
+                    <div style="margin:14px 0 16px;padding:14px 16px;border:1px solid #f2b84b;border-radius:14px;background:#fff8e6;color:#6b4a00;line-height:1.55;">
+                        <strong>👤 Chủ hộ chưa có trong danh sách đối tượng điều tra.</strong><br>
+                        Chủ hộ hiện tại: <strong>{{ household.head_name }}</strong>.
+                        Hệ thống đã điền sẵn tên và quan hệ <strong>Chủ hộ</strong> ở mục bổ sung bên dưới.
+                        Hãy nhập Ngày sinh, Giới tính, Dân tộc và Số định danh nếu có.
+                    </div>
+                    {% endif %}
+                    <!-- === FIX28C_HEAD_PROMPT_UI_END === -->
+                    <p class="section-description">
+                        Ưu tiên xử lý các dòng thiếu định danh hoặc chưa hoàn thành thông tin năm học theo nhóm đối tượng.
+                    </p>
+                </div>
+                <span class="metric-pill">{{ active_people_count }} thành viên</span>
+            </div>
+
+            {% if person_summaries %}
+                <div class="member-list">
+                    {% for item in person_summaries %}
+                        <article class="member-card">
+                            <div>
+                                <div class="member-name">{{ item.person.full_name }}</div>
+                                <div class="member-meta">
+                                    <span>{{ item.person.code }}</span>
+                                    <span>
+                                        {% if item.person.date_of_birth %}
+                                            {{ item.person.date_of_birth.strftime('%d/%m/%Y') }}
+                                        {% else %}
+                                            Chưa có ngày sinh
+                                        {% endif %}
+                                    </span>
+                                    <span>{{ item.person.relationship_to_head or 'Chưa rõ quan hệ' }}</span>
+                                    <span>
+                                        {{ residency_status_labels.get(
+                                            item.person.residency_status,
+                                            item.person.residency_status
+                                        ) }}
+                                    </span>
+                                </div>
+                                <div class="member-meta" style="margin-top: 6px;">
+                                    <span>
+                                        Năm {{ batch.school_year.code }}:
+                                        <strong>{{ item.learning_status }}</strong>
+                                    </span>
+                                    <span>
+                                        Thông tin năm học:
+                                        <strong>{{ item.answered }}/{{ item.total }}</strong>
+                                    </span>
+                                    <span>
+                                        Định danh:
+                                        <strong>{{ item.person.personal_id or 'Chưa có' }}</strong>
+                                    </span>
+                                </div>
+
+                                {% if not item.person.personal_id or not item.year_record or item.answered < item.total %}
+                                    <div class="member-alert">
+                                        {% if not item.person.personal_id %}Thiếu số định danh. {% endif %}
+                                        {% if not item.year_record %}
+                                            Chưa nhập dữ liệu năm học.
+                                        {% elif item.answered < item.total %}
+                                            Chưa hoàn thành thông tin năm học theo nhóm đối tượng.
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="member-actions">
+                                <a
+                                    class="button button-small button-primary"
+                                    href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ item.person.id }}/nam-hoc?school_year_id={{ batch.school_year_id }}"
+                                >
+                                    Năm học
+                                </a>
+                                <a
+                                    class="button button-small button-secondary"
+                                    href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ item.person.id }}/sua"
+                                >
+                                    Sửa
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Hộ chưa có thành viên</h3>
+                    <p>Thêm người đầu tiên bằng biểu mẫu nhanh phía dưới.</p>
+                </div>
+            {% endif %}
+
+            {% if can_edit_data %}
+                <details class="add-person" {% if fix28c_head_missing or (thong_bao_loi and person_form_data.full_name) %}open{% endif %}>
+                    <summary>
+                        {% if fix28c_head_missing %}
+                            👤 Bổ sung chủ hộ vào đối tượng điều tra
+                        {% else %}
+                            ＋ Thêm nhanh một thành viên
+                        {% endif %}
+                    </summary>
+
+                    <form
+                        method="post"
+                        action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/nhap-nhanh/them-doi-tuong"
+                    >
+                        <div class="form-grid">
+                            <div class="field-group full">
+                                <label class="field-label" for="person_full_name">
+                                    Họ và tên <span class="required">*</span>
+                                </label>
+                                <input
+                                    class="field-input"
+                                    id="person_full_name"
+                                    name="full_name"
+                                    value="{{ person_form_data.full_name }}"
+                                    maxlength="200"
+                                    required
+                                >
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label" for="person_date_of_birth">
+                                    Ngày sinh <span class="required">*</span>
+                                </label>
+                                <input
+                                    class="field-input"
+                                    type="date"
+                                    id="person_date_of_birth"
+                                    name="date_of_birth"
+                                    value="{{ person_form_data.date_of_birth }}"
+                                    max="{{ today }}"
+                                    required
+                                >
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label" for="person_gender">
+                                    Giới tính <span class="required">*</span>
+                                </label>
+                                <select class="field-select" id="person_gender" name="gender" required>
+                                    <option value="">-- Chọn giới tính --</option>
+                                    {% for value in ['Nam', 'Nữ', 'Khác'] %}
+                                        <option
+                                            value="{{ value }}"
+                                            {% if person_form_data.gender == value %}selected{% endif %}
+                                        >
+                                            {{ value }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label" for="person_ethnic_group">
+                                    Dân tộc <span class="required">*</span>
+                                </label>
+                                <input
+                                    class="field-input"
+                                    id="person_ethnic_group"
+                                    name="ethnic_group"
+                                    value="{{ person_form_data.ethnic_group }}"
+                                    maxlength="100"
+                                    required
+                                >
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label" for="person_relationship_to_head">
+                                    Quan hệ chủ hộ <span class="required">*</span>
+                                </label>
+                                <input
+                                    class="field-input"
+                                    id="person_relationship_to_head"
+                                    name="relationship_to_head"
+                                    value="{{ person_form_data.relationship_to_head }}"
+                                    maxlength="100"
+                                    required
+                                >
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label" for="person_personal_id">
+                                    Số định danh cá nhân
+                                </label>
+                                <input
+                                    class="field-input"
+                                    id="person_personal_id"
+                                    name="personal_id"
+                                    value="{{ person_form_data.personal_id }}"
+                                    maxlength="50"
+                                    inputmode="numeric"
+                                >
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label" for="person_residency_status">
+                                    Diện cư trú <span class="required">*</span>
+                                </label>
+                                <select
+                                    class="field-select"
+                                    id="person_residency_status"
+                                    name="residency_status"
+                                    required
+                                >
+                                    {% for code, label in residency_status_labels.items() %}
+                                        <option
+                                            value="{{ code }}"
+                                            {% if person_form_data.residency_status == code %}selected{% endif %}
+                                        >
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="button button-primary" type="submit">
+                                Thêm thành viên
+                            </button>
+                            <a
+                                class="button button-muted"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong"
+                            >
+                                Mở biểu mẫu đầy đủ / liên kết học sinh
+                            </a>
+                        </div>
+                    </form>
+                </details>
+            {% endif %}
+        </article>
+    </section>
+
+    <div class="sticky-mobile-nav">
+        {% if previous_url %}
+            <a class="button button-secondary button-small" href="{{ previous_url }}">← Hộ trước</a>
+        {% else %}
+            <button class="button button-muted button-small" type="button" disabled>← Hộ trước</button>
+        {% endif %}
+
+        {% if next_url %}
+            <a class="button button-primary button-small" href="{{ next_url }}">Hộ tiếp →</a>
+        {% else %}
+            <button class="button button-muted button-small" type="button" disabled>Hộ tiếp →</button>
+        {% endif %}
+    </div>
+</main>
+</body>
+</html>

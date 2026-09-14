@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung tâm phiếu điều tra</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .exchange-toolbar,
+        .exchange-filter-grid,
+        .exchange-summary {
+            display: grid;
+            gap: 14px;
+        }
+        .exchange-toolbar {
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+        }
+        .exchange-filter-grid {
+            grid-template-columns: 1fr 1fr 1.4fr auto;
+            align-items: end;
+        }
+        .exchange-summary {
+            grid-template-columns: repeat(6, minmax(145px, 1fr));
+            margin-bottom: 22px;
+        }
+        .summary-card {
+            background: #fff;
+            border: 1px solid #dfe8f1;
+            border-radius: 14px;
+            padding: 18px;
+            min-height: 112px;
+        }
+        .summary-card span {
+            display: block;
+            color: #63778c;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+        .summary-card strong {
+            display: block;
+            margin-top: 10px;
+            color: #0b4e9b;
+            font-size: 29px;
+        }
+        .exchange-control {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #c9d5e2;
+            border-radius: 9px;
+            background: #fff;
+            font: inherit;
+        }
+        .exchange-table {
+            min-width: 1450px;
+        }
+        .exchange-table th,
+        .exchange-table td {
+            vertical-align: top;
+        }
+        .exchange-state {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .state-missing,
+        .state-not-issued {
+            background: #fff3e0;
+            color: #9a5700;
+        }
+        .state-waiting {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .state-received {
+            background: #e8f5e9;
+            color: #176b32;
+        }
+        .exchange-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 175px;
+        }
+        .exchange-meta {
+            color: #62758a;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        .exchange-meta strong {
+            color: #173b63;
+        }
+        .bulk-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding: 13px 15px;
+            border-radius: 12px;
+            background: #eef6ff;
+        }
+        .empty-box {
+            padding: 35px;
+            text-align: center;
+            color: #617489;
+        }
+        @media (max-width: 1200px) {
+            .exchange-summary {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .exchange-filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 720px) {
+            .exchange-toolbar,
+            .exchange-filter-grid,
+            .exchange-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">BÀI 12D-12 · 12D-13</p>
+            <h1>Trung tâm phát hành và tiếp nhận phiếu điều tra</h1>
+            <p>
+                Phát hành file Excel theo từng xã/phường, tiếp nhận file cập nhật
+                và theo dõi đầy đủ lịch sử thao tác.
+            </p>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            <div style="text-align:right; line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px; opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+            <a class="button button-light" href="/dieu-tra">← Danh sách đợt</a>
+        </div>
+    </div>
+</header>
+
+<main class="admin-container">
+    {% if message %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="exchange-toolbar">
+            <div>
+                <p class="panel-label">ĐIỀU HÀNH PHÁT HÀNH</p>
+                <h2 style="margin-bottom:6px;">
+                    {% if selected_year %}Năm học {{ selected_year.code }}{% else %}Chưa có năm học{% endif %}
+                </h2>
+                <p style="margin:0; color:#66798d;">
+                    File xuất từ trang này được ghi nhật ký. Sau khi nhập Excel thành công,
+                    trạng thái xã/phường tự chuyển sang đã tiếp nhận.
+                </p>
+            </div>
+            {% if selected_year %}
+                <a
+                    class="button button-primary"
+                    href="/dieu-tra/trung-tam-phieu/xuat-bao-cao?school_year_id={{ selected_year.id }}"
+                >
+                    📊 Xuất báo cáo theo dõi
+                </a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="panel" style="margin-bottom:22px;">
+        <form method="get" action="/dieu-tra/trung-tam-phieu">
+            <div class="exchange-filter-grid">
+                <div class="form-group" style="margin:0;">
+                    <label for="school_year_id">Năm học</label>
+                    <select id="school_year_id" name="school_year_id" class="exchange-control">
+                        {% for year in school_years %}
+                            <option value="{{ year.id }}" {% if selected_year and year.id == selected_year.id %}selected{% endif %}>
+                                {{ year.code }} – {{ year.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label for="exchange_status">Trạng thái phát hành</label>
+                    <select id="exchange_status" name="exchange_status" class="exchange-control">
+                        {% for code, label in exchange_status_labels.items() %}
+                            <option value="{{ code }}" {% if code == exchange_status %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label for="q">Tìm xã/phường, mã xã hoặc mã đợt</label>
+                    <input
+                        id="q"
+                        name="q"
+                        class="exchange-control"
+                        value="{{ q }}"
+                        placeholder="Ví dụ: Cửa Lò, 16732, DT-..."
+                    >
+                </div>
+                <button class="button button-primary" type="submit">🔎 Lọc danh sách</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="exchange-summary">
+        <div class="summary-card">
+            <span>Xã/phường trong phạm vi</span>
+            <strong>{{ summary.commune_total }}</strong>
+        </div>
+        <div class="summary-card">
+            <span>Đã có đợt điều tra</span>
+            <strong>{{ summary.batch_total }}</strong>
+        </div>
+        <div class="summary-card">
+            <span>Chưa phát hành</span>
+            <strong style="color:#b56800;">{{ summary.not_issued_total }}</strong>
+        </div>
+        <div class="summary-card">
+            <span>Đã phát hành, chờ nhận</span>
+            <strong>{{ summary.waiting_total }}</strong>
+        </div>
+        <div class="summary-card">
+            <span>Đã tiếp nhận file</span>
+            <strong style="color:#1b7b3b;">{{ summary.received_total }}</strong>
+        </div>
+        <div class="summary-card">
+            <span>Tổng số phiếu</span>
+            <strong>{{ summary.form_total }}</strong>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">DANH SÁCH ĐỊA PHƯƠNG</p>
+                <h2>Phát hành và tiếp nhận phiếu</h2>
+            </div>
+            <span class="status-pill status-running">{{ rows|length }} kết quả</span>
+        </div>
+
+        {% if rows %}
+            <form
+                method="post"
+                action="/dieu-tra/trung-tam-phieu/xuat-hang-loat"
+                onsubmit="return confirmBulkExport();"
+            >
+                {% if selected_year %}
+                    <input type="hidden" name="school_year_id" value="{{ selected_year.id }}">
+                {% endif %}
+
+                {% if co_quyen_xuat_hang_loat %}
+                    <div class="bulk-bar">
+                        <label style="display:flex; align-items:center; gap:9px; font-weight:700;">
+                            <input id="select-all-batches" type="checkbox">
+                            Chọn tất cả các đợt đang hiển thị
+                        </label>
+                        <button class="button button-primary" type="submit">
+                            📦 Xuất ZIP các xã đã chọn
+                        </button>
+                    </div>
+                {% endif %}
+
+                <div class="table-wrapper">
+                    <table class="data-table exchange-table">
+                        <thead>
+                            <tr>
+                                {% if co_quyen_xuat_hang_loat %}<th>Chọn</th>{% endif %}
+                                <th>STT</th>
+                                <th>Xã/phường</th>
+                                <th>Đợt điều tra</th>
+                                <th>Phiếu / hoàn thành</th>
+                                <th>Đối tượng</th>
+                                <th>Trạng thái phát hành</th>
+                                <th>Lần xuất gần nhất</th>
+                                <th>Lần nhập gần nhất</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                                <tr>
+                                    {% if co_quyen_xuat_hang_loat %}
+                                        <td>
+                                            {% if row.batch %}
+                                                <input
+                                                    class="batch-checkbox"
+                                                    type="checkbox"
+                                                    name="batch_ids"
+                                                    value="{{ row.batch.id }}"
+                                                    aria-label="Chọn {{ row.commune.name }}"
+                                                >
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <strong>{{ row.commune.name }}</strong>
+                                        <div class="exchange-meta">Mã {{ row.commune.code }}</div>
+                                    </td>
+                                    <td>
+                                        {% if row.batch %}
+                                            <strong>{{ row.batch.code }}</strong>
+                                            <div class="exchange-meta">
+                                                {{ row.batch.name }}<br>
+                                                {% if row.batch.is_locked %}Đã khóa dữ liệu{% else %}Đang mở cập nhật{% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="exchange-meta">Chưa tạo đợt</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ row.form_total }} / {{ row.completed_total }}</strong>
+                                    </td>
+                                    <td><strong>{{ row.person_total }}</strong></td>
+                                    <td>
+                                        {% set state_class = 'state-not-issued' %}
+                                        {% if row.state == 'CHUA_CO_DOT' %}{% set state_class = 'state-missing' %}{% endif %}
+                                        {% if row.state == 'CHO_TIEP_NHAN' %}{% set state_class = 'state-waiting' %}{% endif %}
+                                        {% if row.state == 'DA_TIEP_NHAN' %}{% set state_class = 'state-received' %}{% endif %}
+                                        <span class="exchange-state {{ state_class }}">
+                                            {{ row.state_label }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if row.latest_export %}
+                                            <div class="exchange-meta">
+                                                <strong>{{ row.latest_export.created_at.strftime('%d/%m/%Y %H:%M') }}</strong><br>
+                                                {{ row.latest_export.actor_name_snapshot or 'Không xác định' }}<br>
+                                                {{ row.latest_export.file_name or '' }}
+                                            </div>
+                                        {% else %}
+                                            <span class="exchange-meta">Chưa xuất</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if row.latest_import %}
+                                            <div class="exchange-meta">
+                                                <strong>{{ row.latest_import.created_at.strftime('%d/%m/%Y %H:%M') }}</strong><br>
+                                                {{ row.latest_import.actor_name_snapshot or 'Không xác định' }}<br>
+                                                {{ row.latest_import.file_name or '' }}
+                                            </div>
+                                        {% else %}
+                                            <span class="exchange-meta">Chưa tiếp nhận</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="exchange-actions">
+                                            {% if row.batch %}
+                                                <a class="button button-primary" href="/dieu-tra/{{ row.batch.id }}/trung-tam-phieu/xuat">
+                                                    📥 Xuất Excel điều tra
+                                                </a>
+                                                <a class="button button-secondary" href="/dieu-tra/{{ row.batch.id }}/phieu-in-thuc-dia">
+                                                    🖨️ In phiếu thực địa
+                                                </a>
+                                                {% if co_quyen_nhap and not row.batch.is_locked %}
+                                                    <a class="button button-secondary" href="/dieu-tra/{{ row.batch.id }}/ho-dan/nhap-excel">
+                                                        📤 Tiếp nhận Excel
+                                                    </a>
+                                                {% elif row.batch.is_locked %}
+                                                    <span class="button button-secondary" style="opacity:.65; cursor:not-allowed;">
+                                                        🔒 Đợt đã khóa
+                                                    </span>
+                                                {% endif %}
+                                                <a class="button button-secondary" href="/dieu-tra/{{ row.batch.id }}/ho-dan">
+                                                    Mở danh sách hộ
+                                                </a>
+                                            {% else %}
+                                                <span class="exchange-meta">Cần tạo đợt điều tra trước.</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        {% else %}
+            <div class="empty-box">
+                Không có xã/phường phù hợp với bộ lọc hiện tại.
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+<script>
+    const selectAll = document.getElementById('select-all-batches');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.batch-checkbox').forEach(function (item) {
+                item.checked = selectAll.checked;
+            });
+        });
+    }
+
+    function confirmBulkExport() {
+        const selected = document.querySelectorAll('.batch-checkbox:checked').length;
+        if (!selected) {
+            alert('Hãy chọn ít nhất một xã/phường đã có đợt điều tra.');
+            return false;
+        }
+        return confirm(
+            'Hệ thống sẽ tạo ' + selected +
+            ' file Excel và đóng gói thành một tệp ZIP. Tiếp tục?'
+        );
+    }
+</script>
+</body>
+</html>

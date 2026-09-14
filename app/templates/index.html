@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ten_phan_mem }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">HỆ THỐNG QUẢN LÝ DỮ LIỆU</p>
+            <h1>{{ ten_phan_mem }}</h1>
+            <p>Quản lý tập trung – Chính xác – Minh bạch – Kịp thời</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+            <form method="post" action="/dang-xuat" style="margin:0;">
+                <button class="button button-light" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+<main class="container">
+    {% if thong_bao %}<div class="alert alert-error">{{ thong_bao }}</div>{% endif %}
+    <section class="welcome">
+        <p class="section-label">XIN CHÀO</p>
+        <h2>{{ nguoi_dung.full_name }}</h2>
+        <p>
+            Tên đăng nhập: <strong>{{ nguoi_dung.username }}</strong> |
+            Vai trò: <strong>{{ nguoi_dung.role_name }}</strong> |
+            Đơn vị: <strong>{{ nguoi_dung.unit_name }}</strong>
+        </p>
+    </section>
+
+    <section class="roles">
+        {% if nguoi_dung.role_code in ['ADMIN', 'SO'] %}
+            <article class="role-card">
+                <div class="role-icon">👤</div>
+                <h3>QUẢN LÝ TÀI KHOẢN</h3>
+                <p>Tạo và quản lý tài khoản Phòng ban, Xã và Trường.</p>
+                <a class="button button-primary" href="/tai-khoan">Mở quản lý tài khoản</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">🏘️</div>
+                <h3>DANH MỤC XÃ</h3>
+                <p>Quản lý danh mục xã/phường trong toàn tỉnh.</p>
+                <a class="button button-primary" href="/xa">Quản lý xã</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">🏫</div>
+                <h3>DANH MỤC TRƯỜNG</h3>
+                <p>Quản lý trường và đơn vị trực thuộc từng xã/phường.</p>
+                <a class="button button-primary" href="/truong">Quản lý trường</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">📝</div>
+                <h3>ĐIỀU TRA HỘ DÂN</h3>
+                <p>Tạo đợt toàn tỉnh, theo dõi 130 xã/phường và khóa đợt cấp tỉnh.</p>
+                <a class="button button-primary" href="/dieu-tra">Quản lý điều tra</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">👧</div>
+                <h3>HỌC SINH</h3>
+                <p>Tra cứu và quản lý hồ sơ học sinh toàn tỉnh.</p>
+                <a class="button button-primary" href="/hoc-sinh">Danh sách học sinh</a>
+            </article>
+        {% elif nguoi_dung.role_code == 'PHONG_BAN' %}
+            <article class="role-card">
+                <div class="role-icon">📊</div>
+                <h3>DỮ LIỆU TOÀN TỈNH</h3>
+                <p>Chỉ xem tiến độ, dữ liệu và xuất các tệp báo cáo cấp tỉnh.</p>
+                <a class="button button-primary" href="/dieu-tra">Xem dữ liệu toàn tỉnh</a>
+            </article>
+        {% elif nguoi_dung.role_code == 'XA' %}
+            <article class="role-card">
+                <div class="role-icon">🏫</div>
+                <h3>TRƯỜNG THUỘC XÃ</h3>
+                <p>Xem danh sách các trường thuộc xã/phường quản lý.</p>
+                <a class="button button-primary" href="/truong">Xem trường thuộc xã</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">📊</div>
+                <h3>ĐIỀU TRA HỘ DÂN</h3>
+                <p>Tiếp nhận đợt của Sở, phân công và khóa/mở các trường thuộc xã.</p>
+                <a class="button button-primary" href="/dieu-tra">Mở điều tra cấp xã</a>
+            </article>
+        {% elif nguoi_dung.role_code == 'TRUONG' %}
+            <article class="role-card">
+                <div class="role-icon">👩‍🏫</div>
+                <h3>QUẢN LÝ GIÁO VIÊN</h3>
+                <p>Tạo, cập nhật, khóa và đặt lại mật khẩu giáo viên của trường.</p>
+                <a class="button button-primary" href="/tai-khoan">Quản lý giáo viên</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">🏫</div>
+                <h3>ĐIỀU TRA HỘ DÂN</h3>
+                <p>Tiếp nhận nhiệm vụ của xã, phân công giáo viên và gửi kết quả lên xã.</p>
+                <a class="button button-primary" href="/dieu-tra">Mở nhiệm vụ điều tra</a>
+            </article>
+        {% else %}
+            <article class="role-card">
+                <div class="role-icon">📝</div>
+                <h3>PHIẾU CỦA TÔI</h3>
+                <p>Nhập các phiếu được phân công; xem và xuất báo cáo của trường.</p>
+                <a class="button button-primary" href="/dieu-tra">Mở phiếu của tôi</a>
+            </article>
+        {% endif %}
+            <article class="role-card">
+                <div class="role-icon">👩‍🏫</div>
+                <h3>ĐỘI NGŨ NHÀ TRƯỜNG</h3>
+                <p>Quản lý cán bộ quản lý, giáo viên, nhân viên và dữ liệu biểu MN-01 GV.</p>
+                <a class="button button-primary" href="/doi-ngu">Mở quản lý đội ngũ</a>
+            </article>
+            <article class="role-card">
+                <div class="role-icon">📑</div>
+                <h3>TRUNG TÂM BÁO CÁO</h3>
+                <p>Chọn năm học, phạm vi, loại báo cáo; xem mức sẵn sàng và xuất danh mục báo cáo.</p>
+                <a class="button button-primary" href="/bao-cao">Mở trung tâm báo cáo</a>
+            </article>
+    </section>
+
+    <section class="status">
+        <div class="status-icon">✓</div>
+        <div>
+            <strong>Phiên đăng nhập đang hoạt động</strong>
+            <p>Phiên bản thử nghiệm: {{ phien_ban }}</p>
+        </div>
+    </section>
+</main>
+<footer class="footer">
+    <p>Phần mềm Quản lý Phổ cập Giáo dục Mầm non</p>
+    <p>Phân quyền: ADMIN – Phòng ban – Xã – Trường – Giáo viên</p>
+</footer>
+
+<!-- === BAI_13B_11_15_2_4_8_1_WORKING_YEAR_SELECTOR_START === -->
+<script>
+(function () {
+    "use strict";
+
+    if (window.__pcWorkingSchoolYearInstalled) {
+        return;
+    }
+
+    window.__pcWorkingSchoolYearInstalled = true;
+
+    function findLogoutButton() {
+        const direct = document.querySelector(
+            ".pc-global-nav__logout"
+        );
+
+        if (direct) {
+            return direct;
+        }
+
+        const buttons = Array.from(
+            document.querySelectorAll(
+                "button, input[type='submit']"
+            )
+        );
+
+        return buttons.find(function (button) {
+            const text = String(
+                button.textContent
+                || button.value
+                || ""
+            ).trim().toLowerCase();
+
+            return text.indexOf(
+                "đăng xuất"
+            ) >= 0;
+        }) || null;
+    }
+
+    function createControl() {
+        if (
+            document.getElementById(
+                "pc-working-school-year"
+            )
+        ) {
+            return null;
+        }
+
+        const wrap = document.createElement(
+            "div"
+        );
+
+        wrap.id =
+            "pc-working-school-year";
+
+        wrap.style.display = "flex";
+        wrap.style.alignItems = "center";
+        wrap.style.gap = "6px";
+        wrap.style.margin = "4px 8px";
+        wrap.style.padding = "4px 8px";
+        wrap.style.borderRadius = "8px";
+        wrap.style.background =
+            "rgba(255,255,255,.14)";
+        wrap.style.whiteSpace = "nowrap";
+
+        const label = document.createElement(
+            "label"
+        );
+
+        label.htmlFor =
+            "pc-working-school-year-select";
+        label.textContent = "Năm học:";
+        label.style.fontSize = "12px";
+        label.style.fontWeight = "700";
+        label.style.color = "inherit";
+
+        const select = document.createElement(
+            "select"
+        );
+
+        select.id =
+            "pc-working-school-year-select";
+        select.setAttribute(
+            "aria-label",
+            "Năm học làm việc"
+        );
+        select.style.minWidth = "112px";
+        select.style.height = "30px";
+        select.style.border = "1px solid rgba(255,255,255,.45)";
+        select.style.borderRadius = "6px";
+        select.style.padding = "2px 6px";
+        select.style.background = "#ffffff";
+        select.style.color = "#17324d";
+        select.style.fontWeight = "700";
+        select.style.fontSize = "12px";
+
+        const loading =
+            document.createElement(
+                "option"
+            );
+
+        loading.value = "";
+        loading.textContent = "Đang tải...";
+        select.appendChild(
+            loading
+        );
+
+        wrap.appendChild(
+            label
+        );
+
+        wrap.appendChild(
+            select
+        );
+
+        return {
+            wrap: wrap,
+            select: select,
+        };
+    }
+
+    function currentNextUrl() {
+        return (
+            window.location.pathname
+            + window.location.search
+            + window.location.hash
+        );
+    }
+
+    function installControl() {
+        const logout =
+            findLogoutButton();
+
+        if (!logout) {
+            return;
+        }
+
+        const created =
+            createControl();
+
+        if (!created) {
+            return;
+        }
+
+        const logoutForm =
+            logout.closest(
+                "form"
+            );
+
+        const host = (
+            logoutForm
+            && logoutForm.parentElement
+        )
+            ? logoutForm.parentElement
+            : logout.parentElement;
+
+        if (!host) {
+            return;
+        }
+
+        if (
+            logoutForm
+            && logoutForm.parentElement
+                === host
+        ) {
+            host.insertBefore(
+                created.wrap,
+                logoutForm
+            );
+        } else {
+            host.insertBefore(
+                created.wrap,
+                logout
+            );
+        }
+
+        fetch(
+            "/nam-hoc-lam-viec/options",
+            {
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        )
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error(
+                    "Không tải được năm học."
+                );
+            }
+
+            return response.json();
+        })
+        .then(function (data) {
+            const select =
+                created.select;
+
+            select.innerHTML = "";
+
+            const years =
+                Array.isArray(
+                    data.years
+                )
+                    ? data.years
+                    : [];
+
+            if (!years.length) {
+                const empty =
+                    document.createElement(
+                        "option"
+                    );
+
+                empty.value = "";
+                empty.textContent =
+                    "Chưa có năm học";
+                select.appendChild(
+                    empty
+                );
+                select.disabled = true;
+                return;
+            }
+
+            years.forEach(
+                function (year) {
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        String(
+                            year.id
+                        );
+
+                    option.textContent =
+                        String(
+                            year.code
+                            || year.name
+                            || year.id
+                        );
+
+                    if (
+                        Number(
+                            year.id
+                        )
+                        === Number(
+                            data.selected_id
+                        )
+                    ) {
+                        option.selected = true;
+                    }
+
+                    select.appendChild(
+                        option
+                    );
+                }
+            );
+
+            select.addEventListener(
+                "change",
+                function () {
+                    const yearId =
+                        String(
+                            select.value
+                            || ""
+                        );
+
+                    if (!yearId) {
+                        return;
+                    }
+
+                    const target =
+                        "/nam-hoc-lam-viec/chon"
+                        + "?school_year_id="
+                        + encodeURIComponent(
+                            yearId
+                        )
+                        + "&next="
+                        + encodeURIComponent(
+                            currentNextUrl()
+                        );
+
+                    window.location.assign(
+                        target
+                    );
+                }
+            );
+        })
+        .catch(function () {
+            created.select.innerHTML =
+                "<option value=''>Năm học</option>";
+        });
+    }
+
+    if (
+        document.readyState
+        === "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            installControl,
+            {
+                once: true
+            }
+        );
+    } else {
+        installControl();
+    }
+})();
+</script>
+<!-- === BAI_13B_11_15_2_4_8_1_WORKING_YEAR_SELECTOR_END === -->
+</body>
+</html>

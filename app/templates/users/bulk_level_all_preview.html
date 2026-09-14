@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấp tài khoản toàn cấp {{ cap_hoc_label }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        body{background:#eef4fa}.wrap{width:min(1180px,calc(100% - 28px));margin:28px auto 50px}.card{background:#fff;border:1px solid #d7e3ef;border-radius:18px;padding:24px;box-shadow:0 10px 30px rgba(31,78,121,.08);margin-bottom:18px}.title{margin:4px 0 8px;color:#17365d}.muted{color:#607086;line-height:1.6}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}.stat{padding:16px;border-radius:14px;background:#f3f8fe}.stat strong{display:block;font-size:26px;color:#0e5fae}.warn{padding:14px 16px;border:1px solid #f1d28a;border-radius:12px;background:#fff6d8;color:#785800}.table-wrap{overflow:auto;border:1px solid #e0e8f0;border-radius:12px;margin-top:16px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:11px 10px;border-bottom:1px solid #e6edf4;text-align:left}th{background:#f1f6fb}.confirm{display:grid;gap:12px;margin-top:18px}.confirm input[type=text]{padding:12px;border:1px solid #c8d5e2;border-radius:9px;font:inherit}.actions{display:flex;gap:10px;flex-wrap:wrap}.danger{background:#c97a00;color:#fff;border:0;border-radius:9px;padding:12px 18px;font-weight:800;cursor:pointer}.back{display:inline-flex;align-items:center;text-decoration:none;padding:12px 18px;border-radius:9px;background:#eaf1f7;color:#17365d;font-weight:800}.checkrow{display:flex;gap:9px;align-items:flex-start;font-weight:700;color:#253b51}@media(max-width:700px){.stats{grid-template-columns:1fr}.wrap{width:min(100% - 18px,1180px)}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="wrap">
+    <section class="card">
+        <p class="panel-label">XEM TRƯỚC CẤP TÀI KHOẢN HÀNG LOẠT</p>
+        <h1 class="title">Tạo tài khoản cho tất cả trường {{ cap_hoc_label }}</h1>
+        <p class="muted">Hệ thống chỉ tạo tài khoản cho các trường thuộc đúng cấp {{ cap_hoc_label }} đang chưa có tài khoản. Tài khoản hiện có được giữ nguyên.</p>
+        {% if thong_bao %}<div class="warn">{{ thong_bao }}</div>{% endif %}
+        <div class="stats">
+            <div class="stat"><span>Tổng trường {{ cap_hoc_label }}</span><strong>{{ tong_truong }}</strong></div>
+            <div class="stat"><span>Đã có tài khoản</span><strong>{{ da_co_tai_khoan }}</strong></div>
+            <div class="stat"><span>Sẽ tạo mới</span><strong>{{ chua_co_tai_khoan }}</strong></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="title">Danh sách sẽ cấp</h2>
+        {% if danh_sach_xem_truoc %}
+        <div class="table-wrap"><table><thead><tr><th>STT</th><th>Mã trường</th><th>Tên trường</th><th>Xã/phường</th></tr></thead><tbody>
+        {% for row in danh_sach_xem_truoc %}
+        <tr><td>{{ loop.index }}</td><td>{{ row.truong.code if row.truong else '' }}</td><td><strong>{{ row.don_vi.name }}</strong></td><td>{{ row.xa.name if row.xa else '' }}</td></tr>
+        {% endfor %}
+        </tbody></table></div>
+        {% if so_dong_an > 0 %}<p class="muted">Còn {{ so_dong_an }} trường khác không hiển thị trong bảng xem trước.</p>{% endif %}
+        {% else %}
+        <div class="warn">Không còn trường {{ cap_hoc_label }} nào cần cấp tài khoản.</div>
+        {% endif %}
+    </section>
+
+    {% if chua_co_tai_khoan > 0 %}
+    <section class="card">
+        <h2 class="title">Xác nhận tạo tài khoản</h2>
+        <p class="muted">Sau khi xác nhận, hệ thống chạy tiến trình hàng loạt, tự sinh tên đăng nhập và mật khẩu tạm. Khi hoàn thành có thể tải Excel bàn giao tài khoản.</p>
+        <form method="post" action="/tai-khoan/cap-tat-ca-theo-cap" class="confirm">
+            <input type="hidden" name="cap" value="{{ cap_hoc }}">
+            <label class="checkrow"><input type="checkbox" name="xac_nhan" value="yes" required> Tôi xác nhận tạo tài khoản cho toàn bộ trường {{ cap_hoc_label }} chưa được cấp.</label>
+            <label for="cum_xac_nhan">Nhập đúng cụm <strong>{{ cum_xac_nhan }}</strong> để xác nhận:</label>
+            <input id="cum_xac_nhan" name="cum_xac_nhan" type="text" autocomplete="off" required>
+            <div class="actions">
+                <button class="danger" type="submit">⚡ Tạo tài khoản cho tất cả {{ chua_co_tai_khoan }} trường</button>
+                <a class="back" href="{{ url_quay_lai }}">← Quay lại</a>
+            </div>
+        </form>
+    </section>
+    {% else %}
+    <a class="back" href="{{ url_quay_lai }}">← Quay lại danh sách tài khoản</a>
+    {% endif %}
+</main>
+</body>
+</html>

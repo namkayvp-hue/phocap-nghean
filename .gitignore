@@ -1,0 +1,21 @@
+# Dữ liệu thật và tệp tải lên - không đưa vào lịch sử git
+data/
+uploads/
+
+# Môi trường Python cục bộ trên Windows
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Bản sao toàn bộ dự án dùng để chuyển máy
+PhoCap_Chuyen_May_*/
+
+# Bí mật / cấu hình máy chủ
+.env
+
+# Tệp tạm
+*.log
+.idea/
+.vscode/

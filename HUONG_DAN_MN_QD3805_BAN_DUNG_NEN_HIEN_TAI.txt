@@ -1,0 +1,41 @@
+MẦM NON QĐ3805 - BẢN ĐÚNG NỀN HIỆN TẠI 17:38:50
+
+Nền đã khóa chính xác:
+- school_merger_level_batch_service.py:
+  ea5b86cf02395d960f53011352bc7dd4450c556710383c912b473dd21c7d5cf2
+- school_merger_official_registry.py:
+  12cb62d3cd9cc7e2834b5658506c8825943a9c8820f0e7b89a7b647e47db4264
+- school_merger_level_batch.html:
+  72ac5b4cc27001fbbca6ec783772cc7e9c41e3ad32bbcbc28cc211114b178708
+- qd3805_level_lock.json:
+  8e581eaddd0e2b8f482f3ab272d804d06155268fc3a755fd5a20aedf9067738a
+
+Bộ cài:
+1. Giữ nguyên nguyên tắc Mầm non KHÔNG CÓ LIÊN CẤP.
+2. Tách 3 trường hợp đặc thù cùng cấp khỏi động tác sáp nhập toàn bộ trường:
+   - QD3805-OP-0141: tiếp nhận điểm lẻ MN Diễn Yên.
+   - QD3805-OP-0244: tiếp nhận điểm lẻ Long Xá.
+   - QD3805-OP-0704: tiếp nhận 6 lớp MN Hermann Gmeiner.
+3. Khóa 5 mã trường còn thiếu bằng chính dữ liệu MN 2025-2026 đang có trong DB.
+   Không hard-code mã; nếu DB không cho đúng 1 kết quả khớp an toàn, bộ cài DỪNG và rollback.
+4. Không sửa Excel nguồn.
+5. Không ghi phocap.db.
+6. Không thực hiện sáp nhập.
+7. Giữ nguyên Tiểu học 160 DONE / 0 READY / 0 BLOCK.
+8. Mầm non Lượng Minh vẫn CHƯA XÁC ĐỊNH và vẫn CHẶN.
+
+Cách chạy:
+1. Dừng Uvicorn bằng Ctrl+C.
+2. Giải nén ZIP vào C:\PhoCap.
+3. Chạy:
+
+cd C:\PhoCap
+.\.venv\Scripts\python.exe .\cai_dat_MN_QD3805_tach_3_dac_thu_va_khoa_ma_an_toan.py
+
+Sau khi thành công, gửi:
+- KPI MN sau cài
+- Candidate MN
+- BLOCK hiệu lực MN
+- 5 dòng mã trường đã khóa
+
+CHƯA bấm SÁP NHẬP TOÀN CẤP.

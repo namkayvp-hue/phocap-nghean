@@ -1,0 +1,40 @@
+BỘ BÁO CÁO PCGD & XMC V1.4 - CẤP XÃ / TRƯỜNG / GIÁO VIÊN
+================================================================
+
+MỤC TIÊU
+- Giữ nguyên báo cáo cấp tỉnh đã chạy thành công.
+- Mở rộng cùng 13 biểu cho cấp Xã, Trường và Giáo viên theo phạm vi tài khoản.
+- Không đổi route, không sửa CSDL, không đổi luồng nghiệp vụ, không mất chức năng cũ.
+
+PHẠM VI
+1) Cấp Xã/phường
+   - Chỉ xuất dữ liệu thuộc xã/phường của tài khoản.
+   - Nếu giao diện chọn một trường, chỉ chấp nhận trường thuộc đúng xã.
+   - Chữ ký: XÁC NHẬN CỦA UBND XÃ/PHƯỜNG - PHÓ CHỦ TỊCH.
+
+2) Cấp Trường
+   - Luôn khóa về đúng trường của tài khoản.
+   - Chữ ký: XÁC NHẬN CỦA NHÀ TRƯỜNG - HIỆU TRƯỞNG.
+
+3) Cấp Giáo viên
+   - Dữ liệu điều tra cá nhân tiếp tục theo đúng phiếu được phân công bởi luồng hiện có.
+   - Các biểu đội ngũ/CSVC sử dụng phạm vi trường của tài khoản như dữ liệu hiện có.
+   - Không mở rộng quyền và không thay đổi phân công.
+
+CÀI ĐẶT
+1. Giải nén và chép CẢ 3 file .py vào C:\PhoCap
+2. Dừng Uvicorn: Ctrl + C
+3. Chạy:
+   & C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\nang_cap_bao_cao_cac_cap_v1_4.py
+4. Khởi động lại:
+   cd C:\PhoCap
+   & C:\PhoCap\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+5. Chrome: Ctrl + F5
+
+KIỂM TRA ĐỀ NGHỊ
+- Đăng nhập tài khoản Xã: xuất TH-M1, THCS-M1, XMC-3.
+- Đăng nhập tài khoản Trường: xuất TH-M1, TH-01-GV, THCS-M5.
+- Đăng nhập tài khoản Giáo viên: xuất TH-M1 hoặc XMC-3 để kiểm tra đúng phạm vi phân công.
+
+KHÔI PHỤC
+& C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\khoi_phuc_bao_cao_cac_cap_v1_4.py

@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Thêm học sinh mới</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+
+    <style>
+        .student-form-container {
+            width: min(1180px, 94%);
+            margin: 30px auto;
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .form-section-title {
+            margin: 0 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e3eaf1;
+            color: #0d47a1;
+            font-size: 20px;
+        }
+
+        .student-form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 18px 22px;
+        }
+
+        .student-form-grid-three {
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+        }
+
+        .student-form-grid-four {
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: white;
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #1976d2;
+            box-shadow:
+                0 0 0 3px
+                rgba(25, 118, 210, 0.12);
+        }
+
+        .form-control:disabled {
+            background: #f1f4f7;
+            color: #8a98a6;
+            cursor: not-allowed;
+        }
+
+        textarea.form-control {
+            min-height: 95px;
+            resize: vertical;
+        }
+
+        .required-mark {
+            color: #c62828;
+        }
+
+        .form-note {
+            margin-top: 6px;
+            color: #657789;
+            font-size: 13px;
+        }
+
+        .loading-note {
+            margin-top: 8px;
+            color: #0d47a1;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .form-footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 1050px) {
+            .student-form-grid-four {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 850px) {
+            .student-form-grid,
+            .student-form-grid-three,
+            .student-form-grid-four {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group-full {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-footer-actions {
+                flex-direction: column-reverse;
+            }
+
+            .form-footer-actions .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    QUẢN LÝ HỌC SINH
+                </p>
+
+                <h1>Thêm học sinh mới</h1>
+
+                <p>
+                    Chọn đúng xã, trường, lớp và năm học
+                    trước khi nhập hồ sơ học sinh.
+                </p>
+            </div>
+
+            <div
+                style="
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    flex-wrap: wrap;
+                "
+            >
+                <div
+                    style="
+                        text-align: right;
+                        line-height: 1.4;
+                    "
+                >
+                    <strong>
+                        {{ nguoi_dung.full_name }}
+                    </strong>
+
+                    <div
+                        style="
+                            font-size: 13px;
+                            opacity: 0.9;
+                        "
+                    >
+                        {{ nguoi_dung.role_name }}
+                        – {{ nguoi_dung.unit_name }}
+                    </div>
+                </div>
+
+                <a
+                    class="button button-light"
+                    href="/hoc-sinh"
+                >
+                    ← Danh sách học sinh
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="student-form-container">
+        {% if thong_bao %}
+            <div class="alert alert-error">
+                {{ thong_bao }}
+            </div>
+        {% endif %}
+
+        <form
+            method="post"
+            action="/hoc-sinh/them"
+        >
+            <section class="panel form-section">
+                <h2 class="form-section-title">
+                    1. Năm học, xã, trường và lớp
+                </h2>
+
+                <div
+                    class="
+                        student-form-grid
+                        student-form-grid-four
+                    "
+                >
+                    <div class="form-group">
+                        <label for="school_year_id">
+                            Năm học
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <select
+                            id="school_year_id"
+                            name="school_year_id"
+                            class="form-control"
+                            required
+                        >
+                            <option value="">
+                                -- Chọn năm học --
+                            </option>
+
+                            {% for nam_hoc in school_years %}
+                                <option
+                                    value="{{ nam_hoc.id }}"
+                                    {% if
+                                        nam_hoc.id
+                                        == form_data.school_year_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ nam_hoc.code }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commune_id">
+                            Xã
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <select
+                            id="commune_id"
+                            name="commune_id"
+                            class="form-control"
+                            required
+                        >
+                            <option value="">
+                                -- Chọn xã --
+                            </option>
+
+                            {% for xa in communes %}
+                                <option
+                                    value="{{ xa.id }}"
+                                    {% if
+                                        xa.id
+                                        == form_data.commune_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ xa.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="school_id">
+                            Trường
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <select
+                            id="school_id"
+                            name="school_id"
+                            class="form-control"
+                            required
+                            {% if not form_data.commune_id %}
+                                disabled
+                            {% endif %}
+                        >
+                            <option value="">
+                                {% if form_data.commune_id %}
+                                    -- Chọn trường --
+                                {% else %}
+                                    -- Chọn xã trước --
+                                {% endif %}
+                            </option>
+
+                            {% for truong in schools %}
+                                <option
+                                    value="{{ truong.id }}"
+                                    {% if
+                                        truong.id
+                                        == form_data.school_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ truong.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div
+                            id="school-loading"
+                            class="loading-note"
+                            hidden
+                        >
+                            Đang tải danh sách trường...
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="class_id">
+                            Lớp hiện có
+                        </label>
+
+                        <select
+                            id="class_id"
+                            name="class_id"
+                            class="form-control"
+                            {% if
+                                not form_data.school_id
+                                or not form_data.school_year_id
+                            %}
+                                disabled
+                            {% endif %}
+                        >
+                            <option value="">
+                                {% if form_data.school_id %}
+                                    -- Chọn lớp --
+                                {% else %}
+                                    -- Chọn trường trước --
+                                {% endif %}
+                            </option>
+
+                            {% for lop in classrooms %}
+                                <option
+                                    value="{{ lop.id }}"
+                                    {% if
+                                        lop.id
+                                        == form_data.class_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ lop.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div
+                            id="class-loading"
+                            class="loading-note"
+                            hidden
+                        >
+                            Đang tải danh sách lớp...
+                        </div>
+                    </div>
+
+                    <div
+                        class="
+                            form-group
+                            form-group-full
+                        "
+                    >
+                        <label for="ten_lop_moi">
+                            Hoặc nhập tên lớp mới
+                        </label>
+
+                        <input
+                            id="ten_lop_moi"
+                            name="ten_lop_moi"
+                            type="text"
+                            maxlength="200"
+                            class="form-control"
+                            value="{{ form_data.ten_lop_moi }}"
+                            placeholder="Ví dụ: Bé A, Nhỡ B, Lớn C"
+                            autocomplete="off"
+                            {% if not form_data.school_id %}
+                                disabled
+                            {% endif %}
+                        >
+
+                        <div class="form-note">
+                            Chỉ nhập tên lớp mới khi lớp đó
+                            chưa có trong trường và năm học đã chọn.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel form-section">
+                <h2 class="form-section-title">
+                    2. Thông tin cơ bản của học sinh
+                </h2>
+
+                <div class="student-form-grid">
+                    <div class="form-group">
+                        <label for="ma_hoc_sinh">
+                            Mã học sinh
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <input
+                            id="ma_hoc_sinh"
+                            name="ma_hoc_sinh"
+                            type="text"
+                            maxlength="50"
+                            class="form-control"
+                            value="{{ form_data.ma_hoc_sinh }}"
+                            placeholder="Nhập mã định danh Bộ GD&ĐT"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ho_ten">
+                            Họ và tên
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <input
+                            id="ho_ten"
+                            name="ho_ten"
+                            type="text"
+                            maxlength="200"
+                            class="form-control"
+                            value="{{ form_data.ho_ten }}"
+                            placeholder="Nhập họ và tên học sinh"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ngay_sinh">
+                            Ngày sinh
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <input
+                            id="ngay_sinh"
+                            name="ngay_sinh"
+                            type="date"
+                            class="form-control"
+                            value="{{ form_data.ngay_sinh }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gioi_tinh">
+                            Giới tính
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <select
+                            id="gioi_tinh"
+                            name="gioi_tinh"
+                            class="form-control"
+                            required
+                        >
+                            <option value="">
+                                -- Chọn giới tính --
+                            </option>
+
+                            <option
+                                value="Nam"
+                                {% if form_data.gioi_tinh == "Nam" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Nam
+                            </option>
+
+                            <option
+                                value="Nữ"
+                                {% if form_data.gioi_tinh == "Nữ" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Nữ
+                            </option>
+
+                            <option
+                                value="Khác"
+                                {% if form_data.gioi_tinh == "Khác" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Khác
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dan_toc">
+                            Dân tộc
+                        </label>
+
+                        <input
+                            id="dan_toc"
+                            name="dan_toc"
+                            type="text"
+                            maxlength="100"
+                            class="form-control"
+                            value="{{ form_data.dan_toc }}"
+                            placeholder="Ví dụ: Kinh"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="noi_sinh">
+                            Nơi sinh
+                        </label>
+
+                        <input
+                            id="noi_sinh"
+                            name="noi_sinh"
+                            type="text"
+                            maxlength="500"
+                            class="form-control"
+                            value="{{ form_data.noi_sinh }}"
+                            placeholder="Nhập nơi sinh"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="so_dinh_danh">
+                            Số định danh cá nhân
+                        </label>
+
+                        <input
+                            id="so_dinh_danh"
+                            name="so_dinh_danh"
+                            type="text"
+                            maxlength="50"
+                            class="form-control"
+                            value="{{ form_data.so_dinh_danh }}"
+                            placeholder="Nhập số định danh cá nhân"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trang_thai">
+                            Trạng thái học tập
+                        </label>
+
+                        <select
+                            id="trang_thai"
+                            name="trang_thai"
+                            class="form-control"
+                        >
+                            {% for code, label in status_labels.items() %}
+                                <option
+                                    value="{{ code }}"
+                                    {% if
+                                        code
+                                        == form_data.trang_thai
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel form-section">
+                <h2 class="form-section-title">
+                    3. Địa chỉ và thông tin liên hệ
+                </h2>
+
+                <div class="student-form-grid">
+                    <div class="form-group">
+                        <label for="dia_chi_thuong_tru">
+                            Địa chỉ thường trú
+                        </label>
+
+                        <textarea
+                            id="dia_chi_thuong_tru"
+                            name="dia_chi_thuong_tru"
+                            class="form-control"
+                            placeholder="Nhập địa chỉ thường trú"
+                        >{{ form_data.dia_chi_thuong_tru }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cho_o_hien_nay">
+                            Chỗ ở hiện nay
+                        </label>
+
+                        <textarea
+                            id="cho_o_hien_nay"
+                            name="cho_o_hien_nay"
+                            class="form-control"
+                            placeholder="Nhập chỗ ở hiện nay"
+                        >{{ form_data.cho_o_hien_nay }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="so_dien_thoai">
+                            Số điện thoại liên hệ
+                        </label>
+
+                        <input
+                            id="so_dien_thoai"
+                            name="so_dien_thoai"
+                            type="text"
+                            maxlength="30"
+                            class="form-control"
+                            value="{{ form_data.so_dien_thoai }}"
+                            placeholder="Ví dụ: 0912345678"
+                        >
+
+                        <div class="form-note">
+                            Số điện thoại được lưu dưới dạng
+                            văn bản để giữ số 0 ở đầu.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loai_khuyet_tat">
+                            Loại khuyết tật
+                        </label>
+
+                        <input
+                            id="loai_khuyet_tat"
+                            name="loai_khuyet_tat"
+                            type="text"
+                            maxlength="300"
+                            class="form-control"
+                            value="{{ form_data.loai_khuyet_tat }}"
+                            placeholder="Để trống nếu không có"
+                        >
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel form-section">
+                <h2 class="form-section-title">
+                    4. Thông tin cha
+                </h2>
+
+                <div
+                    class="
+                        student-form-grid
+                        student-form-grid-three
+                    "
+                >
+                    <div class="form-group">
+                        <label for="ten_cha">
+                            Họ và tên cha
+                        </label>
+
+                        <input
+                            id="ten_cha"
+                            name="ten_cha"
+                            type="text"
+                            maxlength="200"
+                            class="form-control"
+                            value="{{ form_data.ten_cha }}"
+                            placeholder="Nhập họ tên cha"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nam_sinh_cha">
+                            Năm sinh cha
+                        </label>
+
+                        <input
+                            id="nam_sinh_cha"
+                            name="nam_sinh_cha"
+                            type="number"
+                            min="1900"
+                            max="2100"
+                            class="form-control"
+                            value="{{ form_data.nam_sinh_cha }}"
+                            placeholder="Ví dụ: 1988"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nghe_nghiep_cha">
+                            Nghề nghiệp cha
+                        </label>
+
+                        <input
+                            id="nghe_nghiep_cha"
+                            name="nghe_nghiep_cha"
+                            type="text"
+                            maxlength="300"
+                            class="form-control"
+                            value="{{ form_data.nghe_nghiep_cha }}"
+                            placeholder="Nhập nghề nghiệp"
+                        >
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel form-section">
+                <h2 class="form-section-title">
+                    5. Thông tin mẹ
+                </h2>
+
+                <div
+                    class="
+                        student-form-grid
+                        student-form-grid-three
+                    "
+                >
+                    <div class="form-group">
+                        <label for="ten_me">
+                            Họ và tên mẹ
+                        </label>
+
+                        <input
+                            id="ten_me"
+                            name="ten_me"
+                            type="text"
+                            maxlength="200"
+                            class="form-control"
+                            value="{{ form_data.ten_me }}"
+                            placeholder="Nhập họ tên mẹ"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nam_sinh_me">
+                            Năm sinh mẹ
+                        </label>
+
+                        <input
+                            id="nam_sinh_me"
+                            name="nam_sinh_me"
+                            type="number"
+                            min="1900"
+                            max="2100"
+                            class="form-control"
+                            value="{{ form_data.nam_sinh_me }}"
+                            placeholder="Ví dụ: 1990"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nghe_nghiep_me">
+                            Nghề nghiệp mẹ
+                        </label>
+
+                        <input
+                            id="nghe_nghiep_me"
+                            name="nghe_nghiep_me"
+                            type="text"
+                            maxlength="300"
+                            class="form-control"
+                            value="{{ form_data.nghe_nghiep_me }}"
+                            placeholder="Nhập nghề nghiệp"
+                        >
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel form-section">
+                <h2 class="form-section-title">
+                    6. Ghi chú
+                </h2>
+
+                <div class="form-group">
+                    <label for="ghi_chu">
+                        Nội dung ghi chú
+                    </label>
+
+                    <textarea
+                        id="ghi_chu"
+                        name="ghi_chu"
+                        class="form-control"
+                        placeholder="Nhập thông tin cần lưu ý"
+                    >{{ form_data.ghi_chu }}</textarea>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="form-footer-actions">
+                    <a
+                        class="button button-secondary"
+                        href="/hoc-sinh"
+                    >
+                        Hủy
+                    </a>
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Lưu học sinh
+                    </button>
+                </div>
+            </section>
+        </form>
+    </main>
+
+    <script>
+        const schoolYearSelect =
+            document.getElementById("school_year_id");
+
+        const communeSelect =
+            document.getElementById("commune_id");
+
+        const schoolSelect =
+            document.getElementById("school_id");
+
+        const classSelect =
+            document.getElementById("class_id");
+
+        const newClassInput =
+            document.getElementById("ten_lop_moi");
+
+        const schoolLoading =
+            document.getElementById("school-loading");
+
+        const classLoading =
+            document.getElementById("class-loading");
+
+        function datLuaChonMacDinh(
+            selectElement,
+            label
+        ) {
+            selectElement.innerHTML = "";
+
+            const option =
+                document.createElement("option");
+
+            option.value = "";
+            option.textContent = label;
+
+            selectElement.appendChild(option);
+        }
+
+        function datTrangThaiLop() {
+            const canChooseClass = Boolean(
+                schoolYearSelect.value
+                && schoolSelect.value
+            );
+
+            classSelect.disabled = !canChooseClass;
+            newClassInput.disabled = !canChooseClass;
+        }
+
+        async function taiDanhSachTruong() {
+            const communeId = communeSelect.value;
+
+            datLuaChonMacDinh(
+                schoolSelect,
+                communeId
+                    ? "-- Chọn trường --"
+                    : "-- Chọn xã trước --"
+            );
+
+            datLuaChonMacDinh(
+                classSelect,
+                "-- Chọn trường trước --"
+            );
+
+            schoolSelect.disabled = true;
+            classSelect.disabled = true;
+            newClassInput.disabled = true;
+            newClassInput.value = "";
+
+            if (!communeId) {
+                return;
+            }
+
+            schoolLoading.hidden = false;
+
+            try {
+                const response = await fetch(
+                    `/hoc-sinh/api/truong?commune_id=${encodeURIComponent(communeId)}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Không tải được danh sách trường."
+                    );
+                }
+
+                const schools = await response.json();
+
+                for (const school of schools) {
+                    const option =
+                        document.createElement("option");
+
+                    option.value = school.id;
+                    option.textContent = school.name;
+
+                    schoolSelect.appendChild(option);
+                }
+
+                schoolSelect.disabled = false;
+            } catch (error) {
+                datLuaChonMacDinh(
+                    schoolSelect,
+                    "Không tải được danh sách trường"
+                );
+            } finally {
+                schoolLoading.hidden = true;
+            }
+        }
+
+        async function taiDanhSachLop() {
+            const yearId = schoolYearSelect.value;
+            const schoolId = schoolSelect.value;
+
+            datLuaChonMacDinh(
+                classSelect,
+                schoolId
+                    ? "-- Chọn lớp --"
+                    : "-- Chọn trường trước --"
+            );
+
+            classSelect.disabled = true;
+            newClassInput.disabled = true;
+            newClassInput.value = "";
+
+            if (!yearId || !schoolId) {
+                return;
+            }
+
+            classLoading.hidden = false;
+
+            try {
+                const query = new URLSearchParams({
+                    school_year_id: yearId,
+                    school_id: schoolId,
+                });
+
+                const response = await fetch(
+                    `/hoc-sinh/api/lop?${query.toString()}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Không tải được danh sách lớp."
+                    );
+                }
+
+                const classrooms = await response.json();
+
+                for (const classroom of classrooms) {
+                    const option =
+                        document.createElement("option");
+
+                    option.value = classroom.id;
+                    option.textContent = classroom.name;
+
+                    classSelect.appendChild(option);
+                }
+
+                classSelect.disabled = false;
+                newClassInput.disabled = false;
+            } catch (error) {
+                datLuaChonMacDinh(
+                    classSelect,
+                    "Không tải được danh sách lớp"
+                );
+            } finally {
+                classLoading.hidden = true;
+            }
+        }
+
+        communeSelect.addEventListener(
+            "change",
+            taiDanhSachTruong
+        );
+
+        schoolSelect.addEventListener(
+            "change",
+            taiDanhSachLop
+        );
+
+        schoolYearSelect.addEventListener(
+            "change",
+            taiDanhSachLop
+        );
+
+        classSelect.addEventListener(
+            "change",
+            function () {
+                if (classSelect.value) {
+                    newClassInput.value = "";
+                }
+            }
+        );
+
+        newClassInput.addEventListener(
+            "input",
+            function () {
+                if (newClassInput.value.trim()) {
+                    classSelect.value = "";
+                }
+            }
+        );
+
+        schoolSelect.disabled = !communeSelect.value;
+        datTrangThaiLop();
+    </script>
+</body>
+</html>

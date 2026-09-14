@@ -1,0 +1,44 @@
+V13.13 - TÌM KIẾM NHANH TOÀN HỆ THỐNG
+================================================================================
+
+STATUS=SUCCESS
+
+Đã cài vào:
+C:\PhoCap\app\templates\partials\dropdown_menu_v1.html
+
+Chức năng:
+1. Danh sách dài >= 12 dòng:
+   - ô Tìm nhanh
+   - nút Tìm
+   - nút Xóa
+   - Enter để tìm
+   - Esc để xóa
+   - Ctrl+K focus tìm nhanh
+   - bỏ dấu tiếng Việt khi so khớp
+   - hiện số dòng phù hợp
+
+2. Select dài >= 15 lựa chọn:
+   - ô gõ để lọc
+   - nút xóa
+   - không đổi id/name/value
+   - không xóa option thật
+   - theo dõi select động
+
+Bỏ qua:
+- bảng nhập liệu có nhiều input/select
+- select Năm học / trạng thái / vai trò / cấp học / loại báo cáo
+- bảng ngắn
+- select ngắn
+
+Backup:
+C:\PhoCap\exports\backup_source_v13_13_tim_kiem_nhanh_20260904_202803
+
+Đã xóa __pycache__: 3
+
+Database=KHÔNG THAY ĐỔI
+Plan JSON=KHÔNG THAY ĐỔI
+Dữ liệu sáp nhập=KHÔNG THAY ĐỔI
+
+Sau cài:
+- khởi động lại Uvicorn
+- Ctrl+F5 trình duyệt

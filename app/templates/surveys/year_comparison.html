@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đối chiếu biến động giữa hai năm học</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .page-wrap {
+            width: min(1480px, 96%);
+            margin: 28px auto 48px;
+        }
+
+        .compare-header {
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            color: #fff;
+            padding: 28px 0;
+        }
+
+        .compare-header-inner {
+            width: min(1480px, 96%);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .compare-eyebrow {
+            margin: 0 0 7px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+
+        .compare-header h1 {
+            margin: 0 0 7px;
+            font-size: clamp(28px, 4vw, 38px);
+        }
+
+        .compare-header p {
+            margin: 0;
+            opacity: 0.92;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-box {
+            margin-right: 8px;
+            text-align: right;
+            line-height: 1.45;
+        }
+
+        .source-target-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .batch-card {
+            padding: 18px;
+            border: 1px solid #dce7f1;
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .batch-card-source {
+            border-left: 6px solid #607d8b;
+        }
+
+        .batch-card-target {
+            border-left: 6px solid #1976d2;
+        }
+
+        .batch-card-label {
+            margin: 0 0 8px;
+            color: #5f7386;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+        }
+
+        .batch-card h2 {
+            margin: 0 0 8px;
+            color: #17324d;
+            font-size: 22px;
+        }
+
+        .batch-meta {
+            margin: 4px 0;
+            color: #5f7386;
+            line-height: 1.5;
+        }
+
+        .selection-panel {
+            margin-bottom: 22px;
+        }
+
+        .selection-form {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: #fff;
+            font: inherit;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            padding: 15px;
+            border: 1px solid #dce7f1;
+            border-radius: 13px;
+            background: #fff;
+        }
+
+        .summary-label {
+            margin: 0 0 6px;
+            color: #65798b;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .summary-value {
+            margin: 0;
+            color: #0d47a1;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .summary-card-warning .summary-value {
+            color: #b26a00;
+        }
+
+        .summary-card-danger .summary-value {
+            color: #c62828;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .scope-note {
+            color: #5f7386;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .section-panel {
+            margin-bottom: 22px;
+        }
+
+        .section-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .section-kicker {
+            margin: 0 0 5px;
+            color: #1976d2;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+        }
+
+        .section-title-row h2 {
+            margin: 0;
+            color: #17324d;
+        }
+
+        .count-pill,
+        .status-pill,
+        .review-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .count-pill {
+            background: #eaf4ff;
+            color: #0d47a1;
+        }
+
+        .status-pill {
+            background: #eef3f7;
+            color: #3f566b;
+        }
+
+        .status-new {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .status-missing {
+            background: #ffebee;
+            color: #9b1c1c;
+        }
+
+        .status-changed {
+            background: #fff3e0;
+            color: #9b5200;
+        }
+
+        .review-pill {
+            background: #fff3e0;
+            color: #9b5200;
+        }
+
+        .review-ok {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .table-wide {
+            min-width: 1320px;
+        }
+
+        .table-household {
+            min-width: 1050px;
+        }
+
+        .muted {
+            color: #687b8d;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .empty-state-local {
+            padding: 42px 18px;
+            text-align: center;
+            color: #627689;
+        }
+
+        .empty-icon {
+            margin-bottom: 10px;
+            font-size: 42px;
+        }
+
+        @media (max-width: 1180px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 800px) {
+            .source-target-grid,
+            .selection-form {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .user-box {
+                width: 100%;
+                margin-right: 0;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="compare-header">
+    <div class="compare-header-inner">
+        <div>
+            <p class="compare-eyebrow">BÀI 12D-8</p>
+            <h1>Đối chiếu biến động giữa hai năm học</h1>
+            <p>So sánh hộ, đối tượng, trạng thái học tập, trường, lớp và mức độ hoàn thiện hồ sơ năm mới.</p>
+        </div>
+
+        <div class="header-actions">
+            <div class="user-box">
+                <strong>{{ nguoi_dung.full_name }}</strong><br>
+                <span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span>
+            </div>
+            <a class="button button-light" href="/dieu-tra/{{ target_batch.id }}/ho-dan">← Danh sách hộ</a>
+            <a class="button button-light" href="/dieu-tra">Danh sách đợt</a>
+        </div>
+    </div>
+</header>
+
+<main class="page-wrap">
+    {% if not target_batch.is_locked %}
+        <div class="alert alert-success">
+            <strong>Đợt đích đang mở cập nhật.</strong>
+            Số liệu đối chiếu thay đổi ngay khi hồ sơ năm học mới được cập nhật.
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <strong>Đợt đích đã khóa dữ liệu.</strong>
+            Báo cáo đối chiếu tại thời điểm này là kết quả đã chốt của năm học đích.
+        </div>
+    {% endif %}
+
+    <section class="panel selection-panel">
+        <div class="section-title-row">
+            <div>
+                <p class="section-kicker">CHỌN CẶP NĂM HỌC</p>
+                <h2>Đợt nguồn để đối chiếu</h2>
+            </div>
+            <span class="count-pill">{{ source_candidates | length }} đợt nguồn phù hợp</span>
+        </div>
+
+        {% if source_candidates %}
+            <form method="get" action="/dieu-tra/{{ target_batch.id }}/doi-chieu-nam-hoc" class="selection-form">
+                <div class="form-group" style="margin: 0;">
+                    <label for="source_batch_id">Đợt điều tra cũ cùng xã/phường</label>
+                    <select id="source_batch_id" name="source_batch_id" class="form-control">
+                        {% for item in source_candidates %}
+                            <option value="{{ item.id }}" {% if selected_source and selected_source.id == item.id %}selected{% endif %}>
+                                {{ item.school_year.code }} – {{ item.code }} – {{ item.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="button button-primary" type="submit">🔎 Thực hiện đối chiếu</button>
+            </form>
+        {% else %}
+            <div class="empty-state-local">
+                <div class="empty-icon">🗓️</div>
+                <h3>Chưa có năm học cũ cùng xã/phường</h3>
+                <p>Đợt {{ target_batch.school_year.code }} chưa có đợt nguồn cũ hơn trong phạm vi tài khoản để so sánh.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {% if comparison and selected_source %}
+        <section class="source-target-grid">
+            <article class="batch-card batch-card-source">
+                <p class="batch-card-label">ĐỢT NGUỒN</p>
+                <h2>{{ selected_source.school_year.code }} · {{ selected_source.code }}</h2>
+                <p class="batch-meta">{{ selected_source.name }}</p>
+                <p class="batch-meta">{{ selected_source.commune.name }} · {% if selected_source.is_locked %}Đã khóa dữ liệu{% else %}Đang mở cập nhật{% endif %}</p>
+            </article>
+
+            <article class="batch-card batch-card-target">
+                <p class="batch-card-label">ĐỢT ĐÍCH</p>
+                <h2>{{ target_batch.school_year.code }} · {{ target_batch.code }}</h2>
+                <p class="batch-meta">{{ target_batch.name }}</p>
+                <p class="batch-meta">{{ target_batch.commune.name }} · {% if target_batch.is_locked %}Đã khóa dữ liệu{% else %}Đang mở cập nhật{% endif %}</p>
+            </article>
+        </section>
+
+        <div class="toolbar">
+            <span class="scope-note">Phạm vi báo cáo: {{ scope_label }}</span>
+            <a
+                class="button button-primary"
+                href="/dieu-tra/{{ target_batch.id }}/doi-chieu-nam-hoc/xuat-excel?source_batch_id={{ selected_source.id }}"
+            >
+                📊 Xuất Excel đối chiếu
+            </a>
+        </div>
+
+        <section class="summary-grid">
+            <article class="summary-card">
+                <p class="summary-label">Hộ nguồn</p>
+                <p class="summary-value">{{ comparison.summary.source_households }}</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-label">Hộ đích</p>
+                <p class="summary-value">{{ comparison.summary.target_households }}</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-label">Hộ tiếp tục</p>
+                <p class="summary-value">{{ comparison.summary.continuing_households }}</p>
+            </article>
+            <article class="summary-card summary-card-warning">
+                <p class="summary-label">Hộ mới</p>
+                <p class="summary-value">{{ comparison.summary.new_households }}</p>
+            </article>
+            <article class="summary-card summary-card-danger">
+                <p class="summary-label">Hộ không còn</p>
+                <p class="summary-value">{{ comparison.summary.missing_households }}</p>
+            </article>
+            <article class="summary-card summary-card-warning">
+                <p class="summary-label">Hộ thay đổi ảnh chụp</p>
+                <p class="summary-value">{{ comparison.summary.changed_households }}</p>
+            </article>
+
+            <article class="summary-card">
+                <p class="summary-label">Đối tượng nguồn</p>
+                <p class="summary-value">{{ comparison.summary.source_people }}</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-label">Đối tượng đích</p>
+                <p class="summary-value">{{ comparison.summary.target_people }}</p>
+            </article>
+            <article class="summary-card summary-card-warning">
+                <p class="summary-label">Đối tượng mới</p>
+                <p class="summary-value">{{ comparison.summary.new_people }}</p>
+            </article>
+            <article class="summary-card summary-card-danger">
+                <p class="summary-label">Đối tượng không còn</p>
+                <p class="summary-value">{{ comparison.summary.missing_people }}</p>
+            </article>
+            <article class="summary-card summary-card-warning">
+                <p class="summary-label">Có thay đổi học tập</p>
+                <p class="summary-value">{{ comparison.summary.changed_people }}</p>
+            </article>
+            <article class="summary-card summary-card-danger">
+                <p class="summary-label">Cần rà soát năm mới</p>
+                <p class="summary-value">{{ comparison.summary.review_people }}</p>
+            </article>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-title-row">
+                <div>
+                    <p class="section-kicker">BIẾN ĐỘNG HỘ GIA ĐÌNH</p>
+                    <h2>Đối chiếu hộ giữa hai đợt</h2>
+                </div>
+                <span class="count-pill">{{ comparison.household_rows | length }} hộ</span>
+            </div>
+
+            {% if comparison.household_rows %}
+                <div class="table-wrapper">
+                    <table class="data-table table-household">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã hộ</th>
+                                <th>Chủ hộ / địa bàn</th>
+                                <th>Phiếu nguồn</th>
+                                <th>Phiếu đích</th>
+                                <th>Nhóm biến động</th>
+                                <th>Nội dung thay đổi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in comparison.household_rows %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><strong>{{ row.household_code }}</strong></td>
+                                <td>
+                                    <strong>{{ row.head_name }}</strong>
+                                    <div class="muted">{{ row.hamlet_name }}</div>
+                                </td>
+                                <td>{{ row.source_form_number }}</td>
+                                <td>{{ row.target_form_number }}</td>
+                                <td>
+                                    <span class="status-pill {% if row.category_code == 'HO_MOI' %}status-new{% elif row.category_code == 'KHONG_CON' %}status-missing{% endif %}">
+                                        {{ row.category_label }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if row.changes %}
+                                        <span class="status-pill status-changed">{{ row.change_text }}</span>
+                                    {% else %}
+                                        <span class="muted">{{ row.change_text }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state-local">Không có hộ trong phạm vi đối chiếu.</div>
+            {% endif %}
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-title-row">
+                <div>
+                    <p class="section-kicker">BIẾN ĐỘNG ĐỐI TƯỢNG</p>
+                    <h2>Trạng thái học tập, trường, lớp và chỉ báo</h2>
+                </div>
+                <span class="count-pill">{{ comparison.person_rows | length }} đối tượng</span>
+            </div>
+
+            {% if comparison.person_rows %}
+                <div class="table-wrapper">
+                    <table class="data-table table-wide">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Đối tượng / hộ</th>
+                                <th>Nhóm biến động</th>
+                                <th>Năm nguồn</th>
+                                <th>Năm đích</th>
+                                <th>Nội dung thay đổi</th>
+                                <th>Chỉ báo năm mới</th>
+                                <th>Kết quả rà soát</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in comparison.person_rows %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <strong>{{ row.full_name }}</strong>
+                                    <div class="muted">{{ row.person_code }} · {{ row.date_of_birth.strftime('%d/%m/%Y') if row.date_of_birth else 'Chưa có ngày sinh' }}</div>
+                                    <div class="muted">{{ row.household_code }} · {{ row.head_name }}</div>
+                                </td>
+                                <td>
+                                    <span class="status-pill {% if row.category_code == 'DOI_TUONG_MOI' %}status-new{% elif row.category_code == 'KHONG_CON' %}status-missing{% endif %}">
+                                        {{ row.category_label }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>{{ row.source_learning }}</strong>
+                                    <div class="muted">{{ row.source_school }}</div>
+                                    <div class="muted">Lớp: {{ row.source_class }}</div>
+                                </td>
+                                <td>
+                                    <strong>{{ row.target_learning }}</strong>
+                                    <div class="muted">{{ row.target_school }}</div>
+                                    <div class="muted">Lớp: {{ row.target_class }}</div>
+                                </td>
+                                <td>
+                                    {% if row.changes %}
+                                        <span class="status-pill status-changed">{{ row.change_text }}</span>
+                                    {% else %}
+                                        <span class="muted">{{ row.change_text }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ row.target_answered }}/{{ row.target_indicator_total }}</strong>
+                                </td>
+                                <td>
+                                    {% if row.needs_review %}
+                                        <span class="review-pill">{{ row.review_text }}</span>
+                                    {% else %}
+                                        <span class="review-pill review-ok">{{ row.review_text }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.target_household_id %}
+                                        <a
+                                            class="button button-small button-secondary"
+                                            href="/dieu-tra/{{ target_batch.id }}/ho-dan/{{ row.target_household_id }}/doi-tuong"
+                                        >
+                                            Xem hộ năm mới
+                                        </a>
+                                    {% else %}
+                                        <span class="muted">Không có trong đợt đích</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state-local">Không có đối tượng trong phạm vi đối chiếu.</div>
+            {% endif %}
+        </section>
+    {% endif %}
+</main>
+</body>
+</html>

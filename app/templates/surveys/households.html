@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Danh sách hộ dân</title>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+    <style>
+        :root {
+            --survey-blue: #0b69c7;
+            --survey-blue-dark: #084f99;
+            --survey-border: #d9e4ee;
+            --survey-muted: #627487;
+            --survey-bg: #eef4f9;
+            --survey-green: #198754;
+            --survey-orange: #a85d00;
+            --survey-red: #b42318;
+        }
+
+        body {
+            background: var(--survey-bg);
+        }
+
+        .survey-header {
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--survey-blue-dark),
+                    #237ed5
+                );
+            color: white;
+        }
+
+        .survey-header-inner {
+            width: min(1500px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .survey-header h1 {
+            margin: 5px 0 7px;
+            font-size: clamp(26px, 3vw, 40px);
+        }
+
+        .survey-header p {
+            margin: 0;
+            line-height: 1.55;
+        }
+
+        .survey-eyebrow {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            opacity: 0.88;
+        }
+
+        .header-user {
+            text-align: right;
+            line-height: 1.45;
+        }
+
+        .header-user strong {
+            display: block;
+            font-size: 16px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .survey-container {
+            width: min(1500px, calc(100% - 32px));
+            margin: 24px auto 56px;
+        }
+
+        .scope-banner {
+            margin-bottom: 18px;
+            padding: 15px 18px;
+            border: 1px solid #b8dfc3;
+            border-radius: 12px;
+            background: #eaf7ed;
+            color: #155724;
+            line-height: 1.55;
+        }
+
+        .batch-strip {
+            margin-bottom: 18px;
+            padding: 16px 18px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1.3fr 1fr;
+            gap: 12px;
+            border: 1px solid var(--survey-border);
+            border-radius: 14px;
+            background: white;
+            box-shadow: 0 5px 18px rgba(31, 62, 91, 0.06);
+        }
+
+        .batch-item {
+            min-width: 0;
+        }
+
+        .batch-label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--survey-muted);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .batch-value {
+            display: block;
+            color: #17324d;
+            font-size: 16px;
+            font-weight: 800;
+            word-break: break-word;
+        }
+
+        .quick-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            margin-bottom: 18px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            border: 1px solid var(--survey-border);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 7px 22px rgba(31, 62, 91, 0.10);
+            backdrop-filter: blur(8px);
+        }
+
+        .quick-toolbar-left,
+        .quick-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .summary-grid {
+            margin-bottom: 18px;
+            display: grid;
+            grid-template-columns: repeat(7, minmax(125px, 1fr));
+            gap: 10px;
+        }
+
+        .summary-card {
+            min-height: 98px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid var(--survey-border);
+            border-radius: 12px;
+            background: white;
+            color: inherit;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(31, 62, 91, 0.05);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        a.summary-card:hover {
+            transform: translateY(-2px);
+            border-color: #79b6ec;
+        }
+
+        .summary-card span {
+            color: var(--survey-muted);
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.35;
+            text-transform: uppercase;
+        }
+
+        .summary-card strong {
+            color: var(--survey-blue-dark);
+            font-size: 25px;
+            line-height: 1;
+        }
+
+        .filter-panel,
+        .list-panel {
+            margin-bottom: 18px;
+            padding: 20px;
+            border: 1px solid var(--survey-border);
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 5px 18px rgba(31, 62, 91, 0.06);
+        }
+
+        .panel-topline {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .panel-kicker {
+            margin: 0 0 4px;
+            color: var(--survey-blue);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .panel-topline h2 {
+            margin: 0;
+            color: #17324d;
+            font-size: 24px;
+        }
+
+        .panel-subtext {
+            margin: 6px 0 0;
+            color: var(--survey-muted);
+            line-height: 1.5;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(260px, 2fr)
+                repeat(3, minmax(170px, 1fr));
+            gap: 13px;
+            align-items: end;
+        }
+
+        .filter-grid-secondary {
+            margin-top: 13px;
+            grid-template-columns:
+                repeat(4, minmax(170px, 1fr));
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 13px;
+            border: 1px solid #c8d5e1;
+            border-radius: 9px;
+            background: white;
+            color: #17324d;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--survey-blue);
+            box-shadow: 0 0 0 3px rgba(11, 105, 199, 0.12);
+        }
+
+        textarea.form-control {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #263f57;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .filter-actions {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .result-count {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #eaf4ff;
+            color: var(--survey-blue-dark);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .table-wrapper {
+            overflow: auto;
+            border: 1px solid var(--survey-border);
+            border-radius: 12px;
+        }
+
+        .household-table {
+            min-width: 1540px;
+            margin: 0;
+        }
+
+        .household-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #edf5fc;
+            color: #26445f;
+            white-space: nowrap;
+        }
+
+        .household-table tbody tr:hover {
+            background: #f8fbfe;
+        }
+
+        .code-cell {
+            white-space: nowrap;
+            font-weight: 800;
+        }
+
+        .head-cell {
+            min-width: 175px;
+            font-weight: 800;
+        }
+
+        .address-cell {
+            min-width: 250px;
+            max-width: 340px;
+        }
+
+        .small-muted {
+            display: block;
+            margin-top: 3px;
+            color: var(--survey-muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .investigator-cell {
+            min-width: 235px;
+            max-width: 315px;
+        }
+
+        .investigator-name {
+            display: block;
+            margin-bottom: 2px;
+            color: #263f57;
+            font-weight: 800;
+        }
+
+        .investigator-empty {
+            color: var(--survey-orange);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .status-not-started {
+            background: #fff5d6;
+            color: #805800;
+        }
+
+        .status-running {
+            background: #e5f2ff;
+            color: #075cae;
+        }
+
+        .status-finished {
+            background: #e6f6ea;
+            color: #176b35;
+        }
+
+        .status-needs-update {
+            background: #ffe9e7;
+            color: #9d2018;
+        }
+
+        .action-stack {
+            min-width: 280px;
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .assignment-count {
+            display: inline-flex;
+            min-width: 20px;
+            height: 20px;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: rgba(11, 105, 199, 0.13);
+            font-size: 11px;
+        }
+
+        .mobile-list {
+            display: none;
+        }
+
+        .household-card {
+            padding: 15px;
+            border: 1px solid var(--survey-border);
+            border-radius: 13px;
+            background: white;
+        }
+
+        .household-card + .household-card {
+            margin-top: 12px;
+        }
+
+        .card-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .card-title-row h3 {
+            margin: 0;
+            color: #17324d;
+            font-size: 18px;
+        }
+
+        .card-code {
+            margin: 5px 0 0;
+            color: var(--survey-muted);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .card-details {
+            margin: 13px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px 12px;
+        }
+
+        .card-detail {
+            color: #344d64;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .card-detail strong {
+            display: block;
+            color: var(--survey-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            min-width: 39px;
+            height: 39px;
+            padding: 0 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #c8d5e1;
+            border-radius: 8px;
+            background: white;
+            color: var(--survey-blue-dark);
+            font-size: 14px;
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .page-link-active {
+            border-color: var(--survey-blue);
+            background: var(--survey-blue);
+            color: white;
+        }
+
+        .page-link-disabled {
+            background: #f1f4f7;
+            color: #9aa7b4;
+            pointer-events: none;
+        }
+
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 48px;
+        }
+
+        .empty-state h3 {
+            margin: 12px 0 6px;
+            color: #17324d;
+        }
+
+        .empty-state p {
+            margin: 0 auto;
+            max-width: 520px;
+            color: var(--survey-muted);
+            line-height: 1.55;
+        }
+
+        dialog.household-dialog {
+            width: min(680px, calc(100% - 28px));
+            max-height: calc(100vh - 30px);
+            padding: 0;
+            overflow: auto;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 24px 80px rgba(13, 35, 56, 0.35);
+        }
+
+        dialog.household-dialog::backdrop {
+            background: rgba(19, 42, 64, 0.62);
+        }
+
+        .dialog-header {
+            padding: 20px 22px 14px;
+            border-bottom: 1px solid var(--survey-border);
+        }
+
+        .dialog-header h2 {
+            margin: 4px 0 0;
+            color: #17324d;
+        }
+
+        .dialog-body {
+            padding: 20px 22px 22px;
+        }
+
+        .dialog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px;
+        }
+
+        .dialog-grid .span-2 {
+            grid-column: 1 / -1;
+        }
+
+        .required-mark {
+            color: var(--survey-red);
+        }
+
+        .dialog-actions {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .keyboard-hint {
+            margin-left: auto;
+            color: var(--survey-muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 1250px) {
+            .summary-grid {
+                grid-template-columns: repeat(4, minmax(125px, 1fr));
+            }
+
+            .filter-grid,
+            .filter-grid-secondary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 820px) {
+            .survey-header-inner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .header-user {
+                text-align: left;
+            }
+
+            .header-actions {
+                justify-content: flex-start;
+            }
+
+            .batch-strip {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .desktop-table {
+                display: none;
+            }
+
+            .mobile-list {
+                display: block;
+            }
+
+            .keyboard-hint {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .survey-header-inner,
+            .survey-container {
+                width: min(100% - 20px, 1500px);
+            }
+
+            .survey-header-inner {
+                padding: 22px 0;
+            }
+
+            .batch-strip,
+            .filter-grid,
+            .filter-grid-secondary,
+            .dialog-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dialog-grid .span-2 {
+                grid-column: auto;
+            }
+
+            .quick-toolbar-left,
+            .quick-toolbar-right,
+            .filter-actions,
+            .dialog-actions {
+                width: 100%;
+            }
+
+            .quick-toolbar .button,
+            .filter-actions .button,
+            .dialog-actions .button {
+                flex: 1 1 auto;
+                text-align: center;
+            }
+
+            .filter-panel,
+            .list-panel {
+                padding: 15px;
+            }
+
+            .card-details,
+            .card-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+{# === GV_MOBILE_V18_ASSIGNMENTS_START === #}
+{% if nguoi_dung.role_code == 'GIAO_VIEN' %}
+<style>
+.pc-gv-v18-assignments { display: none; }
+@media (max-width: 760px) {
+    html, body { margin: 0 !important; min-height: 100dvh; background: #f3f6fa !important; }
+    body > *:not(.pc-gv-v18-assignments) { display: none !important; }
+    .pc-gv-v18-assignments {
+        display: block !important;
+        min-height: 100dvh;
+        padding: 14px 10px 28px;
+        box-sizing: border-box;
+    }
+    .pc-gv-v18-assignments-inner { width: min(100%, 650px); margin: 0 auto; }
+    .pc-gv-v18-assignments-title {
+        margin: 0 0 12px;
+        color: #123f73;
+        font-size: 20px;
+        font-weight: 850;
+    }
+    .pc-gv-v18-grid-head,
+    .pc-gv-v18-grid-row {
+        display: grid;
+        grid-template-columns: 1.05fr 1.55fr .9fr;
+        gap: 8px;
+        align-items: center;
+    }
+    .pc-gv-v18-grid-head {
+        padding: 10px 9px;
+        border-radius: 10px 10px 0 0;
+        background: #174f86;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 850;
+    }
+    .pc-gv-v18-grid-row {
+        padding: 11px 9px;
+        border: 1px solid #d8e2ec;
+        border-top: 0;
+        background: #fff;
+        color: #1d2c3c;
+        font-size: 14px;
+    }
+    .pc-gv-v18-grid-row:last-child { border-radius: 0 0 10px 10px; }
+    .pc-gv-v18-form-number { font-weight: 800; word-break: break-word; }
+    .pc-gv-v18-head-name { font-weight: 700; line-height: 1.25; }
+    .pc-gv-v18-quick {
+        display: flex;
+        min-height: 38px;
+        padding: 7px 8px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: #1769aa;
+        color: #fff !important;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 850;
+        text-align: center;
+    }
+    .pc-gv-v18-empty {
+        padding: 20px 14px;
+        border: 1px dashed #bdcad8;
+        border-radius: 10px;
+        background: #fff;
+        color: #637486;
+        text-align: center;
+    }
+    .pc-gv-v18-pages {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 14px;
+    }
+    .pc-gv-v18-page-link {
+        display: flex;
+        min-height: 42px;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #c6d4e1;
+        border-radius: 10px;
+        background: #fff;
+        color: #174f86 !important;
+        text-decoration: none !important;
+        font-weight: 800;
+    }
+    .pc-gv-v18-page-link.disabled { opacity: .45; pointer-events: none; }
+}
+</style>
+<section class="pc-gv-v18-assignments">
+    <div class="pc-gv-v18-assignments-inner">
+        <!-- === BAI_13B_12_V2_2_NEW_HOUSE_BUTTON_MOBILE_START === -->
+        <a
+            class="button button-primary b1322-new-household-link"
+            href="/dieu-tra/phan-cong-to-dieu-tra/nhap-ho-moi/{{ batch.id }}"
+            hidden
+            style="display:none;margin:0 0 12px;width:100%;justify-content:center;"
+        >
+            ➕ Điều tra mới – Nhập hộ dân mới
+        </a>
+        <!-- === BAI_13B_12_V2_2_NEW_HOUSE_BUTTON_MOBILE_END === -->
+
+        <h1 class="pc-gv-v18-assignments-title">Phiếu phân công</h1>
+        {% if survey_forms %}
+            <div class="pc-gv-v18-grid-head">
+                <div>Số phiếu</div>
+                <div>Tên hộ</div>
+                <div>Nhập nhanh</div>
+            </div>
+            {% for phieu in survey_forms %}
+                <div class="pc-gv-v18-grid-row">
+                    <div class="pc-gv-v18-form-number">{{ phieu.form_number }}</div>
+                    <div class="pc-gv-v18-head-name">{{ phieu.household.head_name }}</div>
+                    <div>
+                        <a class="pc-gv-v18-quick" href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/nhap-nhanh">
+                            Nhập nhanh
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="pc-gv-v18-empty">Chưa có phiếu nào được phân công.</div>
+        {% endif %}
+
+        {% if total_pages | default(1) > 1 %}
+            <div class="pc-gv-v18-pages">
+                {% if previous_url %}
+                    <a class="pc-gv-v18-page-link" href="{{ previous_url }}">← Trước</a>
+                {% else %}
+                    <span class="pc-gv-v18-page-link disabled">← Trước</span>
+                {% endif %}
+                {% if next_url %}
+                    <a class="pc-gv-v18-page-link" href="{{ next_url }}">Tiếp →</a>
+                {% else %}
+                    <span class="pc-gv-v18-page-link disabled">Tiếp →</span>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+{# === GV_MOBILE_V18_ASSIGNMENTS_END === #}
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="survey-header">
+    <div class="survey-header-inner">
+        <div>
+            <p class="survey-eyebrow">
+                ĐIỀU TRA PHỔ CẬP GIÁO DỤC
+            </p>
+            <h1>Danh sách hộ dân</h1>
+            <p>
+                Lọc nhanh → mở hộ → cập nhật thành viên →
+                hoàn thiện phiếu điều tra.
+            </p>
+        </div>
+
+        <div>
+            <div class="header-user">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <span>
+                    {{ nguoi_dung.role_name }}
+                    – {{ nguoi_dung.unit_name }}
+                </span>
+            </div>
+            <div class="header-actions" style="margin-top: 12px;">
+                <a class="button button-light" href="/dieu-tra">
+                    ← Danh sách đợt
+                </a>
+                <a class="button button-light" href="/">
+                    Trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="survey-container">
+    {% if thong_bao %}
+        <div class="alert alert-success">{{ thong_bao }}</div>
+    {% endif %}
+
+    {% if thong_bao_loi %}
+        <div class="alert alert-error">{{ thong_bao_loi }}</div>
+    {% endif %}
+
+    {% if batch.is_locked %}
+        <div class="alert alert-error">
+            <strong>🔒 Đợt điều tra đã khóa dữ liệu.</strong>
+            Mọi thao tác thêm, sửa, nhập Excel và phân công đã bị chặn.
+            Bạn vẫn có thể xem dữ liệu và xuất báo cáo.
+        </div>
+    {% endif %}
+
+    {% if pham_vi_han_che %}
+        <div class="scope-banner">
+            <strong>Phạm vi dữ liệu:</strong>
+            {{ pham_vi_mo_ta }}
+        </div>
+    {% endif %}
+
+    <section class="batch-strip">
+        <div class="batch-item">
+            <span class="batch-label">Đợt điều tra</span>
+            <span class="batch-value">{{ batch.name }}</span>
+        </div>
+        <div class="batch-item">
+            <span class="batch-label">Năm học</span>
+            <span class="batch-value">{{ batch.school_year.code }}</span>
+        </div>
+        <div class="batch-item">
+            <span class="batch-label">Xã/phường</span>
+            <span class="batch-value">
+                {{ batch.commune.name }}
+                <small class="small-muted">Mã {{ batch.commune.code }}</small>
+            </span>
+        </div>
+        <div class="batch-item">
+            <span class="batch-label">Mã đợt</span>
+            <span class="batch-value">{{ batch.code }}</span>
+        </div>
+    </section>
+
+    <nav class="quick-toolbar" aria-label="Thao tác nhanh">
+        <div class="quick-toolbar-left">
+            {% if co_quyen_quan_tri_dot and not batch.is_locked %}
+                <button
+                    class="button button-primary"
+                    type="button"
+                    onclick="openHouseholdDialog()"
+                >
+                    ＋ Thêm hộ điều tra
+                </button>
+            {% endif %}
+
+            <!-- === BAI_13B_12_V2_2_NEW_HOUSE_BUTTON_DESKTOP_START === -->
+            {% if nguoi_dung.role_code == 'GIAO_VIEN' and not batch.is_locked %}
+                <a
+                    class="button button-primary b1322-new-household-link"
+                    href="/dieu-tra/phan-cong-to-dieu-tra/nhap-ho-moi/{{ batch.id }}"
+                    hidden
+                    style="display:none"
+                >
+                    ➕ Điều tra mới – Nhập hộ dân mới
+                </a>
+            {% endif %}
+            <!-- === BAI_13B_12_V2_2_NEW_HOUSE_BUTTON_DESKTOP_END === -->
+
+            {% if co_quyen_xem_tien_do %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/tien-do"
+                >
+                    Xem tiến độ
+                </a>
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu"
+                >
+                    ✅ Kiểm tra dữ liệu
+                </a>
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/bao-cao-tong-hop"
+                >
+                    📊 Báo cáo kết quả
+                </a>
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh"
+                >
+                    🔎 Đối chiếu học sinh
+                </a>
+            {% endif %}
+
+            {% if nguoi_dung.role_code in ['ADMIN', 'SO', 'XA'] %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/phan-cong-truong#school-participation"
+                >
+                    🏫 Trường tham gia
+                </a>
+                {% if co_quyen_phan_cong and not batch.is_locked %}
+                    <a
+                        class="button button-primary"
+                        href="/dieu-tra/{{ batch.id }}/giao-phieu-truong"
+                    >
+                        📤 Giao phiếu cho trường
+                    </a>
+                {% endif %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/phan-cong-truong#school-monitoring"
+                >
+                    🔒 Theo dõi và khóa trường
+                </a>
+            {% elif nguoi_dung.role_code == 'TRUONG' %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/phan-cong-truong"
+                >
+                    📨 Nhiệm vụ của trường
+                </a>
+                {% if co_quyen_phan_cong and not batch.is_locked %}
+                    <a
+                        class="button button-primary"
+                        href="/dieu-tra/{{ batch.id }}/giao-phieu-giao-vien"
+                    >
+                        📤 Giao phiếu cho giáo viên
+                    </a>
+                {% endif %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/ho-dan?assignment_status=assigned"
+                >
+                    📊 Theo dõi tiến độ giáo viên
+                </a>
+            {% endif %}
+
+            {% if co_quyen_quan_tri_dot %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/chot-so-lieu"
+                >
+                    {% if batch.is_locked %}
+                        🔓 Quản lý mở khóa
+                    {% else %}
+                        🔒 Chốt số liệu
+                    {% endif %}
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="quick-toolbar-right">
+            {% if co_quyen_xuat_du_lieu %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/ho-dan/xuat-excel"
+                >
+                    Xuất Excel
+                </a>
+            {% endif %}
+
+            {% if nguoi_dung.role_code in ['ADMIN', 'SO', 'XA', 'TRUONG', 'GIAO_VIEN'] and not batch.is_locked %}
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/ho-dan/nhap-excel"
+                >
+                    Nhập Excel cập nhật
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <section class="summary-grid" aria-label="Tổng hợp nhanh">
+        <a
+            class="summary-card"
+            href="/dieu-tra/{{ batch.id }}/ho-dan?page_size={{ selected_page_size | default(20) }}"
+        >
+            <span>Tổng số phiếu</span>
+            <strong>{{ batch_total_records | default(0) }}</strong>
+        </a>
+
+        <a
+            class="summary-card"
+            href="/dieu-tra/{{ batch.id }}/ho-dan?form_status=CHUA_DIEU_TRA&page_size={{ selected_page_size | default(20) }}"
+        >
+            <span>Chưa điều tra</span>
+            <strong>{{ status_counts.get('CHUA_DIEU_TRA', 0) }}</strong>
+        </a>
+
+        <a
+            class="summary-card"
+            href="/dieu-tra/{{ batch.id }}/ho-dan?form_status=DANG_DIEU_TRA&page_size={{ selected_page_size | default(20) }}"
+        >
+            <span>Đang điều tra</span>
+            <strong>{{ status_counts.get('DANG_DIEU_TRA', 0) }}</strong>
+        </a>
+
+        <a
+            class="summary-card"
+            href="/dieu-tra/{{ batch.id }}/ho-dan?form_status=DA_HOAN_THANH&page_size={{ selected_page_size | default(20) }}"
+        >
+            <span>Đã hoàn thành</span>
+            <strong>{{ status_counts.get('DA_HOAN_THANH', 0) }}</strong>
+        </a>
+
+        <a
+            class="summary-card"
+            href="/dieu-tra/{{ batch.id }}/ho-dan?form_status=CAN_BO_SUNG&page_size={{ selected_page_size | default(20) }}"
+        >
+            <span>Cần bổ sung</span>
+            <strong>{{ status_counts.get('CAN_BO_SUNG', 0) }}</strong>
+        </a>
+
+        <a
+            class="summary-card"
+            href="/dieu-tra/{{ batch.id }}/ho-dan?assignment_status=unassigned&page_size={{ selected_page_size | default(20) }}"
+        >
+            <span>
+                {% if nguoi_dung.role_code == 'TRUONG' %}
+                    Chưa giao giáo viên
+                {% else %}
+                    Chưa phân công
+                {% endif %}
+            </span>
+            <strong>{{ unassigned_form_count | default(0) }}</strong>
+        </a>
+
+        <article class="summary-card">
+            <span>Đối tượng đang theo dõi</span>
+            <strong>{{ visible_people_count | default(0) }}</strong>
+        </article>
+    </section>
+
+    <section class="filter-panel">
+        <div class="panel-topline">
+            <div>
+                <p class="panel-kicker">TÌM VÀ LỌC DỮ LIỆU</p>
+                <h2>Tìm đúng hộ cần xử lý</h2>
+                <p class="panel-subtext">
+                    Có thể tìm theo số phiếu, mã hộ, chủ hộ, địa chỉ,
+                    điện thoại, tên thành viên hoặc số định danh cá nhân.
+                </p>
+            </div>
+            <span class="result-count">
+                {{ total_records | default(0) }} kết quả
+            </span>
+        </div>
+
+        <form
+            method="get"
+            action="/dieu-tra/{{ batch.id }}/ho-dan"
+            id="household-filter-form"
+        >
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="q">Tìm nhanh</label>
+                    <input
+                        id="q"
+                        name="q"
+                        type="search"
+                        maxlength="100"
+                        class="form-control"
+                        value="{{ q | default('') }}"
+                        placeholder="Số phiếu, mã hộ, chủ hộ, thành viên..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="hamlet">Thôn/xóm/khối/bản</label>
+                    <select
+                        id="hamlet"
+                        name="hamlet"
+                        class="form-control"
+                    >
+                        <option value="">-- Tất cả địa bàn --</option>
+                        {% for item in hamlet_names | default([]) %}
+                            <option
+                                value="{{ item }}"
+                                {% if selected_hamlet == item %}selected{% endif %}
+                            >
+                                {{ item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="form_status">Trạng thái phiếu</label>
+                    <select
+                        id="form_status"
+                        name="form_status"
+                        class="form-control"
+                    >
+                        <option value="">-- Tất cả trạng thái --</option>
+                        {% for code, label in form_status_labels.items() %}
+                            <option
+                                value="{{ code }}"
+                                {% if selected_form_status == code %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="assignment_status">Tình trạng phân công</label>
+                    <select
+                        id="assignment_status"
+                        name="assignment_status"
+                        class="form-control"
+                    >
+                        <option value="">-- Tất cả --</option>
+                        <option
+                            value="assigned"
+                            {% if selected_assignment_status | default('') == 'assigned' %}selected{% endif %}
+                        >
+                            Đã phân công
+                        </option>
+                        <option
+                            value="unassigned"
+                            {% if selected_assignment_status | default('') == 'unassigned' %}selected{% endif %}
+                        >
+                            Chưa phân công
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-grid filter-grid-secondary">
+                <div class="form-group">
+                    <label for="investigator_id">Người điều tra</label>
+                    <select
+                        id="investigator_id"
+                        name="investigator_id"
+                        class="form-control"
+                    >
+                        <option value="0">-- Tất cả người điều tra --</option>
+                        {% for item in investigator_options | default([]) %}
+                            <option
+                                value="{{ item.id }}"
+                                {% if selected_investigator_id | default(0) == item.id %}selected{% endif %}
+                            >
+                                {{ item.full_name }}
+                                {% if item.school_name %}
+                                    – {{ item.school_name }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sort">Sắp xếp</label>
+                    <select id="sort" name="sort" class="form-control">
+                        {% for code, label in (sort_options | default({'hamlet': 'Thôn/xóm và chủ hộ'})).items() %}
+                            <option
+                                value="{{ code }}"
+                                {% if selected_sort | default('hamlet') == code %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                                {# === BATCH25_OBJECT_FILTER_UI === #}
+                <div class="form-group">
+                    <label for="object_filter">Đối tượng</label>
+                    <select id="object_filter" name="object_filter" class="form-control">
+                        {% for code, label in object_filter_labels.items() %}
+                            <option value="{{ code }}" {% if selected_object_filter == code %}selected{% endif %}>
+                                {% if code %}{{ label }}{% else %}-- Tất cả đối tượng --{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {# === END BATCH25_OBJECT_FILTER_UI === #}
+
+<div class="form-group">
+                    <label for="page_size">Số dòng/trang</label>
+                    <select
+                        id="page_size"
+                        name="page_size"
+                        class="form-control"
+                    >
+                        {% for size in page_size_options | default([20, 50, 100]) %}
+                            <option
+                                value="{{ size }}"
+                                {% if selected_page_size | default(20) == size %}selected{% endif %}
+                            >
+                                {{ size }} dòng
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="filter-actions" style="margin-top: 0;">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            🔎 Tìm kiếm / Lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <a
+                    class="button button-secondary"
+                    href="/dieu-tra/{{ batch.id }}/ho-dan"
+                >
+                    Xóa bộ lọc
+                </a>
+
+                <span class="keyboard-hint">
+                    Mẹo: nhập từ khóa rồi nhấn Enter.
+                </span>
+            </div>
+        </form>
+    </section>
+
+    <section class="list-panel">
+        <div class="panel-topline">
+            <div>
+                <p class="panel-kicker">DỮ LIỆU HỘ DÂN</p>
+                <h2>Danh sách hộ và phiếu điều tra</h2>
+                <p class="panel-subtext">
+                    Đang hiển thị
+                    {% if total_records %}
+                        {{ (page - 1) * page_size + 1 }}
+                        –
+                        {{ [page * page_size, total_records] | min }}
+                    {% else %}
+                        0
+                    {% endif %}
+                    trong tổng số {{ total_records | default(0) }} kết quả.
+                </p>
+            </div>
+        </div>
+
+        {% if survey_forms %}
+            <div class="desktop-table">
+                <div class="table-wrapper">
+                    <table class="data-table household-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số phiếu</th>
+                                <th>Mã hộ</th>
+                                <th>Chủ hộ</th>
+                                <th>Thôn/xóm</th>
+                                <th>Địa chỉ</th>
+                                <th>Điện thoại</th>
+                                <th>Thành viên</th>
+                                <th>Người điều tra</th>
+                                <th>Trạng thái</th>
+                                <th>Cập nhật</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for phieu in survey_forms %}
+                            {% set assigned_people =
+                                (investigator_summaries | default({})).get(
+                                    phieu.id,
+                                    []
+                                )
+                            %}
+                            <tr>
+                                <td>
+                                    {{ (page - 1) * page_size + loop.index }}
+                                </td>
+                                <td class="code-cell">
+                                    {{ phieu.form_number }}
+                                </td>
+                                <td class="code-cell">
+                                    {{ phieu.household.code }}
+                                </td>
+                                <td class="head-cell">
+                                    {{ phieu.household.head_name }}
+                                </td>
+                                <td>
+                                    {{ phieu.household.hamlet_name or '—' }}
+                                </td>
+                                <td class="address-cell">
+                                    {{ phieu.household.address }}
+                                </td>
+                                <td>
+                                    {{ phieu.household.phone or '—' }}
+                                </td>
+                                <td>
+                                    <strong>
+                                        {{ phieu.household.people | length }}
+                                    </strong>
+                                    <span class="small-muted">
+                                        người đang theo dõi
+                                    </span>
+                                </td>
+                                <td class="investigator-cell">
+                                    {% if assigned_people %}
+                                        {# === BAI_13B_11_10_2_DESKTOP_FULL_TEAM_START === #}
+{% for item in assigned_people %}
+                                            <span class="investigator-name">
+                                                {% if item.is_primary %}★ {% endif %}
+                                                {{ item.full_name }}
+                                            </span>
+                                            <span class="small-muted">
+                                                {{ item.role_name }}
+                                                {% if item.school_name %}
+                                                    · {{ item.school_name }}
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                        {# === BAI_13B_11_10_2_DESKTOP_FULL_TEAM_END === #}
+                                    {% else %}
+                                        <span class="investigator-empty">
+                                            Chưa phân công
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span
+                                        class="status-pill
+                                        {% if phieu.status == 'CHUA_DIEU_TRA' %}
+                                            status-not-started
+                                        {% elif phieu.status == 'DANG_DIEU_TRA' %}
+                                            status-running
+                                        {% elif phieu.status == 'CAN_BO_SUNG' %}
+                                            status-needs-update
+                                        {% else %}
+                                            status-finished
+                                        {% endif %}"
+                                    >
+                                        {{ form_status_labels.get(
+                                            phieu.status,
+                                            phieu.status
+                                        ) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ phieu.updated_at.strftime('%d/%m/%Y') }}
+                                    <span class="small-muted">
+                                        {{ phieu.updated_at.strftime('%H:%M') }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-stack">
+                                        <a
+                                            class="button button-small button-primary"
+                                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/nhap-nhanh"
+                                        >
+                                            Nhập nhanh
+                                        </a>
+
+                                        <a
+                                            class="button button-small button-secondary"
+                                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/doi-tuong"
+                                        >
+                                            {% if co_quyen_cap_nhat_du_lieu %}
+                                                Thành viên
+                                            {% else %}
+                                                Xem hộ
+                                            {% endif %}
+                                        </a>
+
+                                        <a
+                                            class="button button-small button-secondary"
+                                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/phieu"
+                                        >
+                                            {% if co_quyen_cap_nhat_du_lieu %}
+                                                Cập nhật phiếu
+                                            {% else %}
+                                                Xem phiếu
+                                            {% endif %}
+                                        </a>
+
+                                        <a
+                                            class="button button-small button-secondary"
+                                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/doi-tuong/nam-hoc"
+                                        >
+                                            Năm học
+                                        </a>
+
+                                        {% if co_quyen_phan_cong and not batch.is_locked %}
+                                            <a
+                                                class="button button-small button-secondary"
+                                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/phan-cong"
+                                            >
+                                                Phân công
+                                                <span class="assignment-count">
+                                                    {{ assigned_people | length }}
+                                                </span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mobile-list">
+                {% for phieu in survey_forms %}
+                    {% set assigned_people =
+                        (investigator_summaries | default({})).get(
+                            phieu.id,
+                            []
+                        )
+                    %}
+                    <article class="household-card">
+                        <div class="card-title-row">
+                            <div>
+                                <h3>{{ phieu.household.head_name }}</h3>
+                                <p class="card-code">
+                                    {{ phieu.form_number }}
+                                    · {{ phieu.household.code }}
+                                </p>
+                            </div>
+                            <span
+                                class="status-pill
+                                {% if phieu.status == 'CHUA_DIEU_TRA' %}
+                                    status-not-started
+                                {% elif phieu.status == 'DANG_DIEU_TRA' %}
+                                    status-running
+                                {% elif phieu.status == 'CAN_BO_SUNG' %}
+                                    status-needs-update
+                                {% else %}
+                                    status-finished
+                                {% endif %}"
+                            >
+                                {{ form_status_labels.get(
+                                    phieu.status,
+                                    phieu.status
+                                ) }}
+                            </span>
+                        </div>
+
+                        <div class="card-details">
+                            <div class="card-detail">
+                                <strong>Thôn/xóm</strong>
+                                {{ phieu.household.hamlet_name or '—' }}
+                            </div>
+                            <div class="card-detail">
+                                <strong>Thành viên</strong>
+                                {{ phieu.household.people | length }} người
+                            </div>
+                            <div class="card-detail">
+                                <strong>Địa chỉ</strong>
+                                {{ phieu.household.address }}
+                            </div>
+                            <div class="card-detail">
+                                <strong>Điện thoại</strong>
+                                {{ phieu.household.phone or '—' }}
+                            </div>
+                            <div class="card-detail">
+                                <strong>Người điều tra</strong>
+                                {# === BAI_13B_11_10_2_MOBILE_FULL_TEAM_START === #}
+                                {% if assigned_people %}
+                                    {% for item in assigned_people %}
+                                        <div class="investigator-name">
+                                            {% if item.is_primary %}★ {% endif %}
+                                            {{ item.full_name }}
+                                        </div>
+                                        <div class="small-muted">
+                                            {{ item.role_name }}
+                                            {% if item.school_name %}
+                                                · {{ item.school_name }}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    Chưa phân công
+                                {% endif %}
+                                {# === BAI_13B_11_10_2_MOBILE_FULL_TEAM_END === #}
+                            </div>
+                            <div class="card-detail">
+                                <strong>Cập nhật gần nhất</strong>
+                                {{ phieu.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <a
+                                class="button button-primary"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/nhap-nhanh"
+                            >
+                                Nhập nhanh
+                            </a>
+                            <a
+                                class="button button-secondary"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/doi-tuong"
+                            >
+                                Thành viên
+                            </a>
+                            <a
+                                class="button button-secondary"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/phieu"
+                            >
+                                Phiếu điều tra
+                            </a>
+                            <a
+                                class="button button-secondary"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/doi-tuong/nam-hoc"
+                            >
+                                Theo dõi năm học
+                            </a>
+                            {% if co_quyen_phan_cong and not batch.is_locked %}
+                                <a
+                                    class="button button-secondary"
+                                    href="/dieu-tra/{{ batch.id }}/ho-dan/{{ phieu.household.id }}/phan-cong"
+                                >
+                                    Phân công
+                                </a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <nav class="pagination" aria-label="Phân trang">
+                {% if previous_url %}
+                    <a class="page-link" href="{{ previous_url }}">
+                        ← Trước
+                    </a>
+                {% else %}
+                    <span class="page-link page-link-disabled">
+                        ← Trước
+                    </span>
+                {% endif %}
+
+                {% for item in page_links %}
+                    <a
+                        class="page-link
+                        {% if item.active %}page-link-active{% endif %}"
+                        href="{{ item.url }}"
+                    >
+                        {{ item.number }}
+                    </a>
+                {% endfor %}
+
+                {% if next_url %}
+                    <a class="page-link" href="{{ next_url }}">
+                        Sau →
+                    </a>
+                {% else %}
+                    <span class="page-link page-link-disabled">
+                        Sau →
+                    </span>
+                {% endif %}
+            </nav>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    {% if has_filters | default(false) %}🔎{% else %}🏠{% endif %}
+                </div>
+                <h3>
+                    {% if has_filters | default(false) %}
+                        Không tìm thấy hộ phù hợp
+                    {% else %}
+                        Chưa có hộ điều tra
+                    {% endif %}
+                </h3>
+                <p>
+                    {% if has_filters | default(false) %}
+                        Hãy kiểm tra từ khóa hoặc xóa bớt bộ lọc.
+                    {% elif co_quyen_quan_tri_dot %}
+                        Nhấn “Thêm hộ điều tra” để tạo phiếu đầu tiên,
+                        hoặc dùng chức năng nhập Excel cập nhật.
+                    {% else %}
+                        Chưa có phiếu nào thuộc phạm vi tài khoản của bạn.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+{% if co_quyen_quan_tri_dot and not batch.is_locked %}
+<dialog
+    id="add-household-dialog"
+    class="household-dialog"
+    aria-labelledby="add-household-title"
+>
+    <div class="dialog-header">
+        <p class="panel-kicker">TẠO PHIẾU ĐIỀU TRA</p>
+        <h2 id="add-household-title">Thêm hộ gia đình</h2>
+        <p class="panel-subtext">
+            Mã hộ và số phiếu sẽ được phần mềm tự sinh.
+        </p>
+    </div>
+
+    <form
+        method="post"
+        action="/dieu-tra/{{ batch.id }}/ho-dan/them"
+        class="dialog-body"
+    >
+        <div class="dialog-grid">
+            <div class="form-group">
+                <label for="hamlet_name">
+                    Thôn/xóm/khối/bản
+                </label>
+                <input
+                    id="hamlet_name"
+                    name="hamlet_name"
+                    type="text"
+                    maxlength="200"
+                    class="form-control"
+                    list="hamlet-options"
+                    value="{{ form_data.hamlet_name if form_data else '' }}"
+                    placeholder="Ví dụ: Khối 12"
+                    autocomplete="off"
+                >
+                <datalist id="hamlet-options">
+                    {% for item in hamlet_names | default([]) %}
+                        <option value="{{ item }}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Số điện thoại chủ hộ</label>
+                <input
+                    id="phone"
+                    name="phone"
+                    type="text"
+                    maxlength="30"
+                    class="form-control"
+                    value="{{ form_data.phone if form_data else '' }}"
+                    placeholder="Ví dụ: 0912345678"
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="form-group span-2">
+                <label for="head_name">
+                    Họ và tên chủ hộ
+                    <span class="required-mark">*</span>
+                </label>
+                <input
+                    id="head_name"
+                    name="head_name"
+                    type="text"
+                    maxlength="200"
+                    class="form-control"
+                    value="{{ form_data.head_name if form_data else '' }}"
+                    placeholder="Nhập họ và tên chủ hộ"
+                    autocomplete="off"
+                    required
+                >
+            </div>
+
+            <div class="form-group span-2">
+                <label for="address">
+                    Địa chỉ cụ thể
+                    <span class="required-mark">*</span>
+                </label>
+                <textarea
+                    id="address"
+                    name="address"
+                    class="form-control"
+                    placeholder="Nhập số nhà, đường, thôn/xóm..."
+                    required
+                >{{ form_data.address if form_data else '' }}</textarea>
+            </div>
+
+            <div class="form-group span-2">
+                <label for="notes">Ghi chú</label>
+                <textarea
+                    id="notes"
+                    name="notes"
+                    class="form-control"
+                    placeholder="Nội dung cần lưu ý khi điều tra"
+                >{{ form_data.notes if form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="dialog-actions">
+            <button
+                class="button button-secondary"
+                type="button"
+                onclick="closeHouseholdDialog()"
+            >
+                Hủy
+            </button>
+            <button
+                class="button button-primary"
+                type="submit"
+            >
+                ＋ Thêm hộ và tạo phiếu
+            </button>
+        </div>
+    </form>
+</dialog>
+{% endif %}
+
+<script>
+    function openHouseholdDialog() {
+        const dialog = document.getElementById("add-household-dialog");
+        if (!dialog) return;
+        if (typeof dialog.showModal === "function") {
+            dialog.showModal();
+        } else {
+            dialog.setAttribute("open", "open");
+        }
+        const field = document.getElementById("hamlet_name");
+        if (field) field.focus();
+    }
+
+    function closeHouseholdDialog() {
+        const dialog = document.getElementById("add-household-dialog");
+        if (!dialog) return;
+        if (typeof dialog.close === "function") {
+            dialog.close();
+        } else {
+            dialog.removeAttribute("open");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const pageSize = document.getElementById("page_size");
+        const sort = document.getElementById("sort");
+
+        [pageSize, sort].forEach(function (element) {
+            if (!element) return;
+            element.addEventListener("change", function () {
+                document.getElementById("household-filter-form").submit();
+            });
+        });
+
+        {% if form_data %}
+            openHouseholdDialog();
+        {% endif %}
+    });
+</script>
+<!-- === BAI_13B_12_V2_2_NEW_HOUSE_BUTTON_JS_START === -->
+<script>
+(function () {
+    "use strict";
+    {% if nguoi_dung.role_code == 'GIAO_VIEN' and not batch.is_locked %}
+    fetch(
+        "/dieu-tra/phan-cong-to-dieu-tra/nhap-ho-moi/{{ batch.id }}/quyen",
+        {credentials: "same-origin"}
+    )
+    .then(function (response) {
+        if (!response.ok) return null;
+        return response.json();
+    })
+    .then(function (data) {
+        if (!data || !data.can_create) return;
+        document.querySelectorAll(
+            ".b1322-new-household-link"
+        ).forEach(function (link) {
+            link.hidden = false;
+            link.style.display = "";
+            // === BAI_13B_12_V2_3_BUTTON_TITLE ===
+            if (Number(data.excess_households || 0) > 0) {
+                link.title =
+                    "Tổ " + data.team_number
+                    + " · đã vượt " + data.excess_households
+                    + " hộ so với kế hoạch; vẫn nhập đủ thực tế";
+            } else {
+                link.title =
+                    "Tổ " + data.team_number
+                    + " · còn " + data.remaining_quota
+                    + " hộ theo kế hoạch";
+            }
+        });
+    })
+    .catch(function () {});
+    {% endif %}
+})();
+</script>
+<!-- === BAI_13B_12_V2_2_NEW_HOUSE_BUTTON_JS_END === -->
+</body>
+</html>

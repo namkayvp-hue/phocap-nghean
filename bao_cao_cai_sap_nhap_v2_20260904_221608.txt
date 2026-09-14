@@ -1,0 +1,24 @@
+BÀI SÁP NHẬP V2 - CÀI ĐẶT THÀNH CÔNG
+Thời gian: 2026-09-04T22:16:08
+Dự án: C:\PhoCap
+Backup mã nguồn: C:\PhoCap\backups\backup_truoc_bai_sap_nhap_v2_20260904_221608
+
+TỆP ĐÃ CÀI:
+ - app/services/school_merger_official_registry.py
+ - data/school_merger_official_registry.json
+ - app/routers/school_merger.py
+ - app/templates/data_tools/school_merger.html
+ - app/templates/data_tools/school_merger_plans.html
+
+KIỂM TRA:
+ - Sổ phương án chính thức: 711 nhóm.
+ - THỰC HIỆN SÁP NHẬP: KHÓA ở giao diện + backend.
+ - Database: KHÔNG thay đổi (SHA256 trước/sau giống nhau).
+ - Cửa Lò - Tiểu học: 4 nhóm
+ - Đối chiếu DB Cửa Lò: 7/7 trường Tiểu học khớp duy nhất.
+
+CỬA LÒ - TIỂU HỌC CHUẨN:
+ 1) Tiểu học Nghi Hương -> Giữ nguyên.
+ 2) Tiểu học Nghi Hoà -> Tiểu học Nghi Hải.
+ 3) Tiểu học Nghi Thuỷ -> Tiểu học Nghi Tân.
+ 4) Tiểu học Nghi Thu -> Tiểu học Thu Thuỷ.

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dữ liệu lịch sử {{ dataset.school_year.code }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .dataset-summary {
+            display:grid;
+            grid-template-columns:repeat(4,minmax(150px,1fr));
+            gap:14px;
+            margin-bottom:22px;
+        }
+        .summary-card {
+            background:#fff;
+            border:1px solid #dfe7ef;
+            border-radius:14px;
+            padding:17px;
+            min-height:105px;
+        }
+        .summary-card span {display:block;color:#66798d;font-size:13px;line-height:1.4;}
+        .summary-card strong {display:block;margin-top:9px;color:#5a2580;font-size:28px;}
+        .history-status {display:inline-block;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;}
+        .status-editing {background:#e3f2fd;color:#0d47a1;}
+        .status-review {background:#fff3e0;color:#9a5700;}
+        .status-locked {background:#e8f5e9;color:#176b32;}
+        .toolbar {display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+        .control {width:100%;padding:11px 12px;border:1px solid #c9d5e2;border-radius:9px;background:#fff;font:inherit;}
+        .import-grid {display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;}
+        .workflow-grid {display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .workflow-card {border:1px solid #dfe7ef;border-radius:12px;padding:17px;background:#fbfdff;}
+        .history-house-table {min-width:1450px;}
+        .person-list {margin:0;padding-left:18px;}
+        .person-list li {margin-bottom:8px;line-height:1.45;}
+        .person-meta {color:#65788c;font-size:12px;}
+        .row-actions {display:flex;flex-direction:column;gap:7px;min-width:155px;}
+        .muted {color:#65788c;font-size:13px;line-height:1.55;}
+        .log-table {min-width:1100px;}
+        @media (max-width:900px){.dataset-summary,.workflow-grid,.import-grid{grid-template-columns:1fr 1fr;}}
+        @media (max-width:650px){.dataset-summary,.workflow-grid,.import-grid{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">BÀI 12D-14A · BỘ DỮ LIỆU LỊCH SỬ</p>
+            <h1>{{ dataset.commune.name }} – {{ dataset.school_year.code }}</h1>
+            <p>Mã xã/phường: {{ dataset.commune.code }} · Cập nhật dữ liệu hộ và đối tượng của năm học đã chọn.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            </div>
+            <a class="button button-light" href="/dieu-tra/du-lieu-lich-su">← Trung tâm dữ liệu lịch sử</a>
+        </div>
+    </div>
+</header>
+
+<main class="admin-container">
+    {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+    {% if error_message %}<div class="alert alert-error">{{ error_message }}</div>{% endif %}
+    {% if inserted_households is not none %}
+        <div class="alert alert-success">
+            Kết quả nhập Excel: hộ mới <strong>{{ inserted_households or 0 }}</strong>, hộ cập nhật <strong>{{ updated_households or 0 }}</strong>,
+            đối tượng mới <strong>{{ inserted_people or 0 }}</strong>, đối tượng cập nhật <strong>{{ updated_people or 0 }}</strong>.
+        </div>
+    {% endif %}
+
+    {% if dataset.status == 'DA_KHOA_LAM_NEN' %}
+        <div class="alert alert-success"><strong>Dữ liệu đã khóa làm nguồn.</strong> Sở hoặc xã/phường chỉ được xem và xuất Excel. Muốn sửa phải được Sở mở lại.</div>
+    {% elif dataset.status == 'DA_GUI_KIEM_TRA' %}
+        <div class="alert" style="background:#fff8e1;color:#8a5800;border:1px solid #ffe0a3;"><strong>Dữ liệu đang chờ Sở kiểm tra.</strong> Mọi thao tác cập nhật tạm khóa cho đến khi Sở khóa làm nền hoặc mở lại.</div>
+    {% endif %}
+
+    <section class="panel" style="margin-bottom:22px;">
+        <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+            <div>
+                <p class="panel-label">TRẠNG THÁI BỘ DỮ LIỆU</p>
+                <h2 style="margin-bottom:8px;">{{ dataset.school_year.name }} · {{ dataset.commune.name }}</h2>
+                <span class="history-status {{ status_classes.get(dataset.status, '') }}">{{ status_labels.get(dataset.status, dataset.status) }}</span>
+                <p class="muted" style="margin:12px 0 0;">Nguồn Excel gần nhất: <strong>{{ dataset.source_file_name or 'Chưa có' }}</strong></p>
+                {% if dataset.notes %}<p class="muted" style="margin:5px 0 0;">Ghi chú: {{ dataset.notes }}</p>{% endif %}
+                {% if dataset.lock_reason %}<p class="muted" style="margin:5px 0 0;">Lý do khóa: <strong>{{ dataset.lock_reason }}</strong></p>{% endif %}
+            </div>
+            <div class="toolbar">
+                <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/xuat-excel">📥 Xuất Excel dữ liệu</a>
+                {% if can_edit %}
+                    <a class="button button-primary" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/ho/them">➕ Thêm hộ</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="dataset-summary">
+        <div class="summary-card"><span>Tổng số hộ đang hoạt động</span><strong>{{ household_total }}</strong></div>
+        <div class="summary-card"><span>Tổng số đối tượng đang hoạt động</span><strong>{{ person_total }}</strong></div>
+        <div class="summary-card"><span>Trạng thái đối chiếu học sinh</span><strong style="font-size:18px;color:#7b1fa2;">Chưa đối chiếu</strong></div>
+        <div class="summary-card"><span>Cập nhật gần nhất</span><strong style="font-size:18px;">{{ dataset.updated_at.strftime('%d/%m/%Y %H:%M') if dataset.updated_at else '' }}</strong></div>
+    </section>
+
+    {% if can_edit %}
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="panel-header"><div><p class="panel-label">NHẬP DỮ LIỆU</p><h2>Cập nhật bằng Excel</h2></div></div>
+        <p class="muted">Tải Excel hiện tại, bổ sung hoặc sửa dữ liệu rồi nhập lại. Hệ thống kiểm tra mã xã/phường, năm học và tự sao lưu cơ sở dữ liệu trước khi cập nhật.</p>
+        <form method="post" action="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/nhap-excel" enctype="multipart/form-data">
+            <div class="import-grid">
+                <div class="form-group" style="margin:0;">
+                    <label for="excel_file">Tệp Excel dữ liệu lịch sử</label>
+                    <input id="excel_file" name="excel_file" type="file" class="control" accept=".xlsx" required>
+                </div>
+                <button class="button button-primary" type="submit" onclick="return confirm('Kiểm tra và cập nhật dữ liệu lịch sử từ tệp Excel này?');">📤 Kiểm tra và nhập dữ liệu</button>
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="panel-header"><div><p class="panel-label">QUY TRÌNH KIỂM TRA</p><h2>Gửi kiểm tra và khóa làm dữ liệu nền</h2></div></div>
+        <div class="workflow-grid">
+            <div class="workflow-card">
+                <h3 style="margin-top:0;">Xã/phường hoặc Sở gửi kiểm tra</h3>
+                <p class="muted">Sau khi rà soát xong, bộ dữ liệu chuyển sang trạng thái chờ kiểm tra và không sửa được.</p>
+                {% if dataset.status == 'DANG_CAP_NHAT' and (can_edit or can_manage_province) %}
+                    <form method="post" action="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/gui-kiem-tra" onsubmit="return confirm('Gửi bộ dữ liệu này để Sở kiểm tra? Sau khi gửi sẽ tạm khóa cập nhật.');">
+                        <button class="button button-primary" type="submit">📨 Gửi Sở kiểm tra</button>
+                    </form>
+                {% else %}
+                    <span class="muted">Không khả dụng ở trạng thái hiện tại.</span>
+                {% endif %}
+            </div>
+            <div class="workflow-card">
+                <h3 style="margin-top:0;">Sở khóa hoặc mở lại dữ liệu</h3>
+                {% if can_manage_province %}
+                    {% if dataset.status == 'DA_KHOA_LAM_NEN' %}
+                        <form method="post" action="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/mo-khoa" onsubmit="return confirm('Mở lại bộ dữ liệu để xã/phường tiếp tục cập nhật?');">
+                            <label for="unlock_reason">Lý do mở lại</label>
+                            <textarea id="unlock_reason" name="reason" class="control" rows="3" required placeholder="Nêu rõ nội dung cần điều chỉnh"></textarea>
+                            <button class="button button-primary" type="submit" style="margin-top:10px;">🔓 Mở lại cập nhật</button>
+                        </form>
+                    {% elif dataset.status == 'DA_GUI_KIEM_TRA' %}
+                        <form method="post" action="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/khoa" onsubmit="return confirm('Khóa bộ dữ liệu này để làm dữ liệu nền?');">
+                            <label for="lock_reason">Kết luận kiểm tra / lý do khóa</label>
+                            <textarea id="lock_reason" name="reason" class="control" rows="3" required placeholder="Ví dụ: Đã kiểm tra, đủ điều kiện làm dữ liệu nền"></textarea>
+                            <button class="button button-primary" type="submit" style="margin-top:10px;">🔒 Khóa làm dữ liệu nền</button>
+                        </form>
+                        <form method="post" action="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/mo-khoa" onsubmit="return confirm('Trả lại bộ dữ liệu để tiếp tục cập nhật?');" style="margin-top:12px;">
+                            <label for="return_reason">Lý do trả lại</label>
+                            <textarea id="return_reason" name="reason" class="control" rows="2" required></textarea>
+                            <button class="button button-light" type="submit" style="margin-top:8px;">↩ Trả lại cập nhật</button>
+                        </form>
+                    {% else %}
+                        <span class="muted">Hãy gửi kiểm tra trước khi khóa làm dữ liệu nền.</span>
+                    {% endif %}
+                {% else %}
+                    <span class="muted">Chỉ tài khoản Sở được khóa hoặc mở lại dữ liệu nền.</span>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="panel-header"><div><p class="panel-label">TRA CỨU</p><h2>Danh sách hộ và đối tượng lịch sử</h2></div></div>
+        <form method="get" action="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:16px;">
+            <div class="form-group" style="margin:0;min-width:320px;flex:1;">
+                <label for="q">Tìm mã hộ, chủ hộ, thôn/xóm, họ tên hoặc số định danh</label>
+                <input id="q" name="q" class="control" value="{{ q }}" placeholder="Nhập nội dung cần tìm">
+            </div>
+            <button class="button button-primary" type="submit">🔎 Tìm kiếm</button>
+            <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}">Xóa tìm kiếm</a>
+        </form>
+        <div class="table-wrapper">
+            <table class="data-table history-house-table">
+                <thead>
+                    <tr>
+                        <th>Mã hộ</th><th>Chủ hộ</th><th>Thôn/xóm</th><th>Địa chỉ</th><th>Điện thoại</th><th>Đối tượng trong hộ</th><th>Ghi chú</th><th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for household in households %}
+                    <tr>
+                        <td><strong>{{ household.household_code }}</strong></td>
+                        <td>{{ household.head_name }}</td>
+                        <td>{{ household.hamlet_name or '' }}</td>
+                        <td>{{ household.address }}</td>
+                        <td>{{ household.phone or '' }}</td>
+                        <td>
+                            {% if household.people %}
+                                <ol class="person-list">
+                                    {% for person in household.people|sort(attribute='full_name') %}
+                                        <li>
+                                            <strong>{{ person.full_name }}</strong> · {{ person.person_code }}
+                                            <div class="person-meta">
+                                                {{ person.date_of_birth.strftime('%d/%m/%Y') if person.date_of_birth else 'Chưa có ngày sinh' }} ·
+                                                {{ person.gender or 'Chưa rõ giới tính' }} ·
+                                                {{ learning_labels.get(person.learning_status, person.learning_status) }}
+                                                {% if person.school_name_reported %} · {{ person.school_name_reported }}{% endif %}
+                                            </div>
+                                            {% if can_edit %}<a href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/doi-tuong/{{ person.id }}/sua">Sửa đối tượng</a>{% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ol>
+                            {% else %}
+                                <span class="muted">Chưa có đối tượng</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ household.notes or '' }}</td>
+                        <td>
+                            <div class="row-actions">
+                                {% if can_edit %}
+                                    <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/ho/{{ household.id }}/sua">Sửa hộ</a>
+                                    <a class="button button-primary" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/ho/{{ household.id }}/doi-tuong/them">Thêm đối tượng</a>
+                                {% else %}
+                                    <span class="muted">Chỉ xem</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8" style="text-align:center;padding:34px;color:#65788c;">Chưa có dữ liệu hộ. Có thể thêm trực tiếp hoặc nhập Excel.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header"><div><p class="panel-label">NHẬT KÝ</p><h2>20 thao tác gần nhất</h2></div></div>
+        <div class="table-wrapper">
+            <table class="data-table log-table">
+                <thead><tr><th>Thời gian</th><th>Thao tác</th><th>Người thực hiện</th><th>Tệp</th><th>Hộ / đối tượng</th><th>Nội dung</th></tr></thead>
+                <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.created_at.strftime('%d/%m/%Y %H:%M:%S') if log.created_at else '' }}</td>
+                        <td><strong>{{ log_action_labels.get(log.action, log.action) }}</strong></td>
+                        <td>{{ log.actor_name_snapshot or '' }}<div class="muted">{{ log.actor_role_snapshot or '' }}</div></td>
+                        <td>{{ log.file_name or '' }}</td>
+                        <td>
+                            Tổng: {{ log.household_total }} hộ / {{ log.person_total }} người
+                            {% if log.inserted_household_total or log.updated_household_total or log.inserted_person_total or log.updated_person_total %}
+                                <div class="muted">Mới: {{ log.inserted_household_total }} hộ, {{ log.inserted_person_total }} người · Sửa: {{ log.updated_household_total }} hộ, {{ log.updated_person_total }} người</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.notes or '' }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6" style="text-align:center;padding:28px;color:#65788c;">Chưa có nhật ký thao tác.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

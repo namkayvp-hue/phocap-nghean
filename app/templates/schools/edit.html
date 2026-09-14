@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sửa thông tin trường</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    PHẦN MỀM PHỔ CẬP GIÁO DỤC
+                </p>
+
+                <h1>Cập nhật thông tin trường</h1>
+
+                <p>
+                    Chỉnh sửa xã trực thuộc, mã,
+                    tên hoặc địa chỉ trường.
+                </p>
+            </div>
+
+            <a class="button button-light" href="/truong">
+                ← Danh sách trường
+            </a>
+        </div>
+    </header>
+
+    <main class="form-page">
+        <section class="panel edit-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">
+                        THÔNG TIN ĐANG LƯU
+                    </p>
+
+                    <h2>{{ truong.name }}</h2>
+                </div>
+
+                {% if truong.is_active %}
+                    <span
+                        class="
+                            status-badge
+                            status-active
+                        "
+                    >
+                        Đang hoạt động
+                    </span>
+                {% else %}
+                    <span
+                        class="
+                            status-badge
+                            status-locked
+                        "
+                    >
+                        Đã khóa
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if thong_bao %}
+                <div class="alert alert-error">
+                    {{ thong_bao }}
+                </div>
+            {% endif %}
+
+            <form
+                class="data-form"
+                method="post"
+                action="/truong/{{ truong.id }}/sua"
+            >
+                <div class="form-group">
+                    <label for="commune_id">
+                        Xã trực thuộc
+                    </label>
+
+                    <select
+                        id="commune_id"
+                        name="commune_id"
+                        required
+                        style="
+                            width: 100%;
+                            padding: 12px 13px;
+                            border: 1px solid #c8d3df;
+                            border-radius: 9px;
+                            background: white;
+                            font-family: inherit;
+                            font-size: 16px;
+                        "
+                    >
+                        {% for xa in danh_sach_xa %}
+                            <option
+                                value="{{ xa.id }}"
+                                {% if xa.id == truong.commune_id %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ xa.name }}
+
+                                {% if not xa.is_active %}
+                                    (Đã khóa)
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ma_truong">
+                        Mã trường
+                    </label>
+
+                    <input
+                        id="ma_truong"
+                        name="ma_truong"
+                        type="text"
+                        maxlength="30"
+                        value="{{ truong.code }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="ten_truong">
+                        Tên trường
+                    </label>
+
+                    <input
+                        id="ten_truong"
+                        name="ten_truong"
+                        type="text"
+                        maxlength="300"
+                        value="{{ truong.name }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="dia_chi">
+                        Địa chỉ
+                    </label>
+
+                    <input
+                        id="dia_chi"
+                        name="dia_chi"
+                        type="text"
+                        maxlength="500"
+                        value="{{ truong.address or '' }}"
+                    >
+                </div>
+
+                <div class="form-actions">
+                    <a
+                        class="button button-secondary"
+                        href="/truong"
+                    >
+                        Hủy
+                    </a>
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

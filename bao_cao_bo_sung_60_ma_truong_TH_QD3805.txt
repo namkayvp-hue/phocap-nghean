@@ -1,0 +1,70 @@
+BỔ SUNG MÃ TRƯỜNG TIỂU HỌC CHO BẢNG KHÓA QĐ3805
+============================================================================================================
+Phương án Tiểu học thuần: 161
+Nguồn thiếu mã ban đầu: 60
+Đã khôi phục mã từ danh mục mạng lưới 2025-2026: 60
+Còn thiếu mã nguồn: 0
+Còn thiếu mã đích: 1
+Phương pháp: {"EXACT_NORMALIZED_NAME": 58, "EXPLICIT_QD3805_NETWORK_ALIAS": 1, "EXACT_COMPACT_NAME": 1}
+
+CHI TIẾT 60 MÃ ĐƯỢC KHÓA:
+QD3805-OP-0095 | STT 179 | Cam Phục | PTDTBT Tiểu học Đôn Phục -> 40422409 | PTDTBT TH Đôn Phục | Xã Cam Phục | EXACT_NORMALIZED_NAME
+QD3805-OP-0095 | STT 180 | Cam Phục | PTDTBT Tiểu học Cam Lâm -> 40422418 | Trường PTDTBT TH Cam Lâm | Xã Cam Phục | EXACT_NORMALIZED_NAME
+QD3805-OP-0124 | STT 232 | Diễn Châu | Tiểu học TT Diễn Châu -> 40425401 | Trường Tiểu học Thị Trấn Diễn Châu | Xã Diễn Châu | EXACT_NORMALIZED_NAME
+QD3805-OP-0158 | STT 300 | Quảng Châu | Tiểu học Diễn Đồng -> 40425406 | TH Diễn Đồng | Xã Quảng Châu | EXACT_NORMALIZED_NAME
+QD3805-OP-0271 | STT 510 | Hữu Kiệm | PTDTBT Tiểu học Bảo Nam 1 -> 40417425 | Trường PTDTBT TH Bảo Nam 1 | Xã Hữu Kiệm | EXACT_NORMALIZED_NAME
+QD3805-OP-0334 | STT 648 | Hải Lộc | Tiểu học Nghi Thiết -> 40429435 | Trường TH Nghi Thiết | Xã Hải Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0339 | STT 657 | Nghi Lộc | Tiểu học Nghi Diên -> 40429412 | Trường TH Nghi Diên | Xã Nghi Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0340 | STT 659 | Nghi Lộc | Tiểu học Nghi Trung -> 40429427 | Trường TH Nghi Trung | Xã Nghi Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0348 | STT 674 | Phúc Lộc | Tiểu học Nghi Mỹ -> 40429406 | Trường TH Nghi Mỹ | Xã Phúc Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0357 | STT 690 | Trung Lộc | Tiểu học Nghi Quang -> 40429421 | Trường TH Nghi Quang | Xã Trung Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0358 | STT 692 | Trung Lộc | Tiểu học Nghi Thuận -> 40429432 | Trường TH Nghi Thuận | Xã Trung Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0362 | STT 700 | Văn Kiều | Tiểu học Nghi Kiều 2 -> 40429408 | Trường TH Nghi Kiều 2 | Xã Văn Kiều | EXACT_NORMALIZED_NAME
+QD3805-OP-0366 | STT 709 | Nghĩa Đàn | Tiểu học Nghĩa Trung -> 40419425 | TH Nghĩa Trung | Xã Nghĩa Đàn | EXACT_NORMALIZED_NAME
+QD3805-OP-0370 | STT 716 | Nghĩa Hưng | Tiểu học Nghĩa Thành -> 40419407 | TH Nghĩa Thành | Xã Nghĩa Hưng | EXACT_NORMALIZED_NAME
+QD3805-OP-0371 | STT 718 | Nghĩa Hưng | Tiểu học Nghĩa Thịnh -> 40419424 | TH Nghĩa Thịnh | Xã Nghĩa Hưng | EXACT_NORMALIZED_NAME
+QD3805-OP-0371 | STT 719 | Nghĩa Hưng | Tiểu học Nghĩa Hưng -> 40419427 | TH Nghĩa Hưng | Xã Nghĩa Hưng | EXACT_NORMALIZED_NAME
+QD3805-OP-0374 | STT 725 | Nghĩa Khánh | Tiểu học Nghĩa An -> 40419433 | TH Nghĩa An | Xã Nghĩa Khánh | EXACT_NORMALIZED_NAME
+QD3805-OP-0374 | STT 726 | Nghĩa Khánh | Tiểu học Nghĩa Đức -> 40419434 | TH Nghĩa Đức | Xã Nghĩa Khánh | EXACT_NORMALIZED_NAME
+QD3805-OP-0379 | STT 735 | Nghĩa Lâm | Tiểu học Nghĩa Lâm -> 40419430 | TH Nghĩa Lâm | Xã Nghĩa Lâm | EXACT_NORMALIZED_NAME
+QD3805-OP-0379 | STT 736 | Nghĩa Lâm | Tiểu học Nghĩa Sơn -> 40419442 | TH Nghĩa Sơn | Xã Nghĩa Lâm | EXACT_NORMALIZED_NAME
+QD3805-OP-0380 | STT 737 | Nghĩa Lâm | Tiểu học Nghĩa Yên -> 40419439 | TH Nghĩa Yên | Xã Nghĩa Lâm | EXACT_NORMALIZED_NAME
+QD3805-OP-0380 | STT 738 | Nghĩa Lâm | Tiểu học Nghĩa Lạc -> 40419438 | TH Nghĩa Lạc | Xã Nghĩa Lâm | EXACT_NORMALIZED_NAME
+QD3805-OP-0384 | STT 744 | Nghĩa Lộc | Tiểu học Nghĩa Lộc 2 -> 40419418 | TH Nghĩa Lộc 2 | Xã Nghĩa Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0384 | STT 745 | Nghĩa Lộc | Tiểu học Nghĩa Long -> 40419408 | TH Nghĩa Long | Xã Nghĩa Lộc | EXACT_NORMALIZED_NAME
+QD3805-OP-0387 | STT 751 | Nghĩa Mai | Tiểu học Nghĩa Hồng -> 40419441 | TH Nghĩa Hồng | Xã Nghĩa Mai | EXACT_NORMALIZED_NAME
+QD3805-OP-0387 | STT 752 | Nghĩa Mai | Tiểu học Nghĩa Minh -> 40419411 | TH Nghĩa Minh | Xã Nghĩa Mai | EXACT_NORMALIZED_NAME
+QD3805-OP-0392 | STT 760 | Nghĩa Thọ | Tiểu học Nghĩa Hội -> 40419406 | TH Nghĩa Hội | Xã Nghĩa Thọ | EXACT_NORMALIZED_NAME
+QD3805-OP-0392 | STT 761 | Nghĩa Thọ | Tiểu học Nghĩa Phú -> 40419450 | TH Nghĩa Phú | Xã Nghĩa Thọ | EXACT_NORMALIZED_NAME
+QD3805-OP-0393 | STT 762 | Nghĩa Thọ | Tiểu học Nghĩa Thọ -> 40419437 | TH Nghĩa Thọ | Xã Nghĩa Thọ | EXACT_NORMALIZED_NAME
+QD3805-OP-0393 | STT 763 | Nghĩa Thọ | Tiểu học Nghĩa Lợi -> 40419432 | TH Nghĩa Lợi | Xã Nghĩa Thọ | EXACT_NORMALIZED_NAME
+QD3805-OP-0397 | STT 770 | Mường Quàng | Tiểu học Cắm Muộn 1 -> 40415421 | Trường TH Cắm Muộn 1 | Xã Mường Quàng | EXACT_NORMALIZED_NAME
+QD3805-OP-0397 | STT 771 | Mường Quàng | Tiểu học Cắm Muộn 2 -> 40415422 | Trường TH Cắm Muộn  2 | Xã Mường Quàng | EXACT_NORMALIZED_NAME
+QD3805-OP-0398 | STT 772 | Mường Quàng | Tiểu học Quang Phong 1 -> 40415409 | TH Quang Phong 1 | Xã Mường Quàng | EXACT_NORMALIZED_NAME
+QD3805-OP-0398 | STT 773 | Mường Quàng | Tiểu học Quang Phong 2 -> 40415410 | Trường TH Quang Phong 2 | Xã Mường Quàng | EXACT_NORMALIZED_NAME
+QD3805-OP-0404 | STT 783 | Quế Phong | Tiểu học Hồng Thái -> 40415417 | Trường TH Hồng Thái | Xã Quế Phong | EXACT_NORMALIZED_NAME
+QD3805-OP-0408 | STT 791 | Thông Thụ | Tiểu học Thông Thụ 1 -> 40415419 | TH Thông Thụ 1 | Xã Thông Thụ | EXACT_NORMALIZED_NAME
+QD3805-OP-0408 | STT 792 | Thông Thụ | Tiểu học Thông Thụ 2 -> 40415420 | TH Thông Thụ 2 | Xã Thông Thụ | EXACT_NORMALIZED_NAME
+QD3805-OP-0415 | STT 805 | Tri Lễ | PTDTBT Tiểu học Tri Lễ 2 -> 40415412 | Trường PTDTBT TH Tri Lễ 2 | Xã Tri Lễ | EXACT_NORMALIZED_NAME
+QD3805-OP-0431 | STT 837 | Quỳ Châu | PTDTBT Tiểu học Châu Hội -> 40416407 | PTDTBT TH Châu Hội | Xã Quỳ Châu | EXACT_NORMALIZED_NAME
+QD3805-OP-0437 | STT 849 | Châu Hồng | Tiểu học Châu Hồng -> 40420411 | TH Châu Hồng | Xã Châu Hồng | EXACT_NORMALIZED_NAME
+QD3805-OP-0443 | STT 862 | Minh Hợp | Tiểu học Hạ Sơn -> 40420416 | TH Hạ Sơn | Xã Minh Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0443 | STT 863 | Minh Hợp | Tiểu học Văn Lợi -> 40420432 | TH Văn Lợi | Xã Minh Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0447 | STT 871 | Mường Chọng | Tiểu học Châu Sơn -> 40420443 | TH Châu Sơn | Xã Mường Chọng | EXACT_NORMALIZED_NAME
+QD3805-OP-0450 | STT 875 | Mường Ham | Tiểu học Châu Thái -> 40420417 | TH Châu Thái | Xã Mường Ham | EXACT_NORMALIZED_NAME
+QD3805-OP-0450 | STT 876 | Mường Ham | Tiểu học Châu Cường -> 40420436 | TH Châu Cường | Xã Mường Ham | EXACT_NORMALIZED_NAME
+QD3805-OP-0454 | STT 884 | Quỳ Hợp | Tiểu học Châu Quang -> 40420407 | TH Châu Quang | Xã Quỳ Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0454 | STT 885 | Quỳ Hợp | Tiểu học Châu Đình -> 40420428 | TH Châu Đình | Xã Quỳ Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0455 | STT 886 | Quỳ Hợp | Tiểu học Thị trấn Quỳ Hợp -> 40420401 | TH Thị Trấn Quỳ Hợp | Xã Quỳ Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0455 | STT 887 | Quỳ Hợp | Tiểu học Thọ Hợp -> 40420427 | TH Thọ Hợp | Xã Quỳ Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0463 | STT 898 | Tam Hợp | Tiểu học 1 Tam Hợp -> 40420419 | TH 1 Tam Hợp | Xã Tam Hợp | EXACT_NORMALIZED_NAME
+QD3805-OP-0471 | STT 911 | Quỳnh Anh | Tiểu học Quỳnh Lương -> 40421438 | TH Quỳnh Lương | Xã Quỳnh Anh | EXACT_NORMALIZED_NAME
+QD3805-OP-0472 | STT 913 | Quỳnh Anh | Tiểu học Quỳnh Thanh A -> 40421455 | TH Quỳnh Thanh A | Xã Quỳnh Anh | EXACT_NORMALIZED_NAME
+QD3805-OP-0472 | STT 914 | Quỳnh Anh | Tiểu học Quỳnh Thanh B -> 40421456 | TH Quỳnh Thanh B | Xã Quỳnh Anh | EXACT_NORMALIZED_NAME
+QD3805-OP-0505 | STT 971 | Quỳnh Sơn | Tiểu học Quỳnh Lâm A -> 40421439 | TH Quỳnh Lâm A | Xã Quỳnh Sơn | EXACT_NORMALIZED_NAME
+QD3805-OP-0505 | STT 972 | Quỳnh Sơn | Tiểu học Quỳnh Lâm B -> 40421440 | TH Quỳnh Lâm B | Xã Quỳnh Sơn | EXACT_NORMALIZED_NAME
+QD3805-OP-0512 | STT 985 | Quỳnh Tam | Tiểu học Quỳnh Tam -> 40421424 | TH Quỳnh Tam | Xã Quỳnh Tam | EXACT_NORMALIZED_NAME
+QD3805-OP-0524 | STT 1003 | Quỳnh Văn | Tiểu học Quỳnh Văn A -> 40421419 | TH Quỳnh Văn A | Xã Quỳnh Văn | EXACT_NORMALIZED_NAME
+QD3805-OP-0587 | STT 1132 | Đại Đồng | Tiểu học TTr Thanh Chương -> 40428441 | Trường Tiểu học Thị Trấn | Xã Đại Đồng | EXPLICIT_QD3805_NETWORK_ALIAS
+QD3805-OP-0625 | STT 1217 | Nga My | PTDTBT Tiểu học Xiêng My -> 40418415 | Trường PTDTBT TH Xiêng My | Xã Nga My | EXACT_NORMALIZED_NAME
+QD3805-OP-0669 | STT 1301 | Hợp Minh | Tiểu học Trần Can -> 40426424 | Tiểu họcTrần Can | Xã Hợp Minh | EXACT_COMPACT_NAME

@@ -1,0 +1,17 @@
+BÁO CÁO KIỂM THỬ BÀI SÁP NHẬP V4.5
+================================================================================
+- Python compile: ĐẠT cho app/main.py, school_merger_future_service.py, school_merger_future.py.
+- Jinja parse: ĐẠT cho các template V4.5.
+- Bộ cài chạy trên bản sao dự án V4.4/V4.3.1: ĐẠT.
+- Database/WAL trước/sau bộ cài: KHÔNG THAY ĐỔI.
+- Smoke dashboard TH: ĐẠT; phân loại đủ tổng phương án.
+- Smoke sáp nhập phát sinh: lấy một phương án READY, kiểm tra V4.3=PASS, V4.1=PASS, mô phỏng RAM=PASS.
+- Kiểm thử thực hiện thật trên bản sao DB (không phải DB người dùng): ĐẠT.
+  + trường đích giữ nguyên school_id;
+  + trường nguồn chuyển inactive;
+  + lịch sử năm trước giữ nguyên;
+  + rollover đội ngũ đúng engine;
+  + integrity_check=ok; foreign_key_check=0;
+  + chạy lặp cùng nguồn/đích/năm bị chặn.
+- Không có chức năng sáp nhập hàng loạt.
+================================================================================

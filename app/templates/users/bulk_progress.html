@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiến độ cấp tài khoản đồng loạt</title>
+    <style>
+        :root {
+            --blue: #176fc1;
+            --blue-dark: #124f8e;
+            --navy: #17365d;
+            --green: #17843b;
+            --orange: #b96d00;
+            --red: #bd2d2d;
+            --line: #d6e2ee;
+            --muted: #607086;
+            --page: #eef4fa;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #172b45;
+            background: var(--page);
+        }
+        .hero {
+            background: linear-gradient(120deg, #1454a0, #1976d2);
+            color: #fff;
+            padding: 30px 28px;
+        }
+        .hero-inner {
+            max-width: 1220px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 22px;
+            align-items: center;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+            font-size: 13px;
+        }
+        h1 { margin: 0; font-size: 34px; }
+        .hero p { margin: 10px 0 0; line-height: 1.55; }
+        main { max-width: 1220px; margin: 26px auto 54px; padding: 0 20px; }
+        .panel {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(41, 76, 112, 0.07);
+            margin-bottom: 20px;
+        }
+        .panel-label {
+            margin: 0 0 7px;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--blue);
+        }
+        h2 { margin: 0; font-size: 25px; }
+        .muted { color: var(--muted); line-height: 1.55; }
+        .scope {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #eaf4ff;
+            color: #164a78;
+            font-weight: 700;
+        }
+        .status-banner {
+            margin-top: 20px;
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            background: #edf6ff;
+            border: 1px solid #bcdaf5;
+        }
+        .status-banner.success { background: #eaf8ee; border-color: #b9dfc4; }
+        .status-banner.warning { background: #fff6df; border-color: #f0d496; }
+        .status-banner.error { background: #fff0f0; border-color: #efb6b6; }
+        .status-icon { font-size: 30px; }
+        .status-title { font-size: 20px; font-weight: 900; }
+        .status-detail { margin-top: 4px; color: var(--muted); }
+        .progress-shell {
+            margin-top: 22px;
+            height: 24px;
+            border-radius: 999px;
+            background: #dfe9f3;
+            overflow: hidden;
+            border: 1px solid #cbd9e6;
+        }
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #1976d2, #22a55a);
+            transition: width .45s ease;
+        }
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .progress-percent { font-size: 24px; font-weight: 900; color: var(--blue-dark); }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 22px;
+        }
+        .stat {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            min-height: 110px;
+            background: #f9fbfd;
+        }
+        .stat span { color: var(--muted); font-weight: 700; font-size: 14px; }
+        .stat strong { display: block; margin-top: 10px; font-size: 30px; color: var(--navy); }
+        .stat.created strong { color: var(--green); }
+        .stat.skipped strong { color: var(--orange); }
+        .stat.failed strong { color: var(--red); }
+        .current-box {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #f5f8fb;
+            border: 1px solid var(--line);
+        }
+        .current-box strong { color: var(--blue-dark); }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 10px 17px;
+            border: 0;
+            border-radius: 10px;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            background: #e7edf3;
+            color: #17324f;
+        }
+        .button-primary { background: var(--blue); color: #fff; }
+        .button-success { background: var(--green); color: #fff; }
+        .button[hidden] { display: none; }
+        .warning-box {
+            margin-top: 16px;
+            padding: 15px 17px;
+            border-radius: 12px;
+            background: #fff6df;
+            border: 1px solid #f0d496;
+            color: #805100;
+            line-height: 1.55;
+        }
+        .error-box {
+            margin-top: 16px;
+            padding: 15px 17px;
+            border-radius: 12px;
+            background: #fff0f0;
+            border: 1px solid #efb6b6;
+            color: #912424;
+            white-space: pre-wrap;
+            display: none;
+        }
+        @media (max-width: 900px) {
+            .hero-inner { align-items: flex-start; flex-direction: column; }
+            .stats { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 560px) {
+            h1 { font-size: 27px; }
+            .stats { grid-template-columns: 1fr; }
+            .progress-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <p class="eyebrow">BÀI 13B-3 V2 · THEO DÕI TIẾN ĐỘ</p>
+            <h1>Cấp tài khoản đồng loạt</h1>
+            <p>Đợt #{{ dot_cap.id }} · {{ ten_loai_don_vi }} · Có thể tải lại trang mà không làm mất tiến độ.</p>
+        </div>
+        <a class="button" href="{{ url_quay_lai }}">← Quản lý tài khoản</a>
+    </div>
+</header>
+
+<main>
+    <section class="panel">
+        <p class="panel-label">PHẠM VI ĐÃ XÁC NHẬN</p>
+        <h2>{{ ten_loai_don_vi }}</h2>
+        <div class="scope">{{ mo_ta_pham_vi }}</div>
+
+        <div class="status-banner" id="status-banner">
+            <div class="status-icon" id="status-icon">⏳</div>
+            <div>
+                <div class="status-title" id="status-title">Đang chuẩn bị xử lý</div>
+                <div class="status-detail" id="status-detail">Trang sẽ tự cập nhật tiến độ sau từng đơn vị.</div>
+            </div>
+        </div>
+
+        <div class="progress-shell" aria-label="Tiến độ xử lý">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-row">
+            <div><span class="progress-percent" id="progress-percent">0%</span></div>
+            <div id="time-detail">Đang tính thời gian còn lại…</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span>Tổng cần xử lý</span>
+                <strong id="total-count">{{ dot_cap.total_candidates or 0 }}</strong>
+            </div>
+            <div class="stat">
+                <span>Đã xử lý</span>
+                <strong id="processed-count">{{ dot_cap.processed_count or 0 }}</strong>
+            </div>
+            <div class="stat created">
+                <span>Tạo mới thành công</span>
+                <strong id="created-count">{{ dot_cap.created_count or 0 }}</strong>
+            </div>
+            <div class="stat skipped">
+                <span>Đã có, bỏ qua</span>
+                <strong id="skipped-count">{{ dot_cap.skipped_count or 0 }}</strong>
+            </div>
+            <div class="stat failed">
+                <span>Có lỗi</span>
+                <strong id="failed-count">{{ dot_cap.failed_count or 0 }}</strong>
+            </div>
+        </div>
+
+        <div class="current-box">
+            <strong>Đơn vị đang xử lý:</strong>
+            <span id="current-unit">{{ dot_cap.current_unit_name or 'Đang chờ bắt đầu' }}</span>
+        </div>
+
+        <div class="warning-box" id="running-note">
+            Có thể chuyển sang thẻ khác hoặc tải lại trang. Không dừng Terminal hoặc tắt phần mềm cho đến khi có thông báo hoàn thành.
+        </div>
+        <div class="error-box" id="error-box"></div>
+
+        <div class="actions">
+            <a class="button button-success" id="download-button" href="{{ url_tai_excel }}" hidden>📊 Tải Excel bàn giao tài khoản</a>
+            <a class="button button-primary" href="{{ url_quay_lai }}">Quay lại quản lý tài khoản</a>
+            <button class="button" id="refresh-button" type="button">Làm mới tiến độ</button>
+        </div>
+    </section>
+</main>
+
+<script>
+(function () {
+    const statusUrl = {{ url_trang_thai | tojson }};
+    const fallbackDownloadUrl = {{ url_tai_excel | tojson }};
+    const banner = document.getElementById("status-banner");
+    const statusIcon = document.getElementById("status-icon");
+    const statusTitle = document.getElementById("status-title");
+    const statusDetail = document.getElementById("status-detail");
+    const progressBar = document.getElementById("progress-bar");
+    const progressPercent = document.getElementById("progress-percent");
+    const totalCount = document.getElementById("total-count");
+    const processedCount = document.getElementById("processed-count");
+    const createdCount = document.getElementById("created-count");
+    const skippedCount = document.getElementById("skipped-count");
+    const failedCount = document.getElementById("failed-count");
+    const currentUnit = document.getElementById("current-unit");
+    const timeDetail = document.getElementById("time-detail");
+    const downloadButton = document.getElementById("download-button");
+    const refreshButton = document.getElementById("refresh-button");
+    const runningNote = document.getElementById("running-note");
+    const errorBox = document.getElementById("error-box");
+    let timer = null;
+    let completionHandled = false;
+
+    function formatDuration(seconds) {
+        if (seconds === null || seconds === undefined || Number.isNaN(Number(seconds))) return "Đang tính…";
+        const value = Math.max(0, Math.round(Number(seconds)));
+        if (value < 60) return value + " giây";
+        const minutes = Math.floor(value / 60);
+        const remain = value % 60;
+        if (minutes < 60) return minutes + " phút " + remain + " giây";
+        const hours = Math.floor(minutes / 60);
+        return hours + " giờ " + (minutes % 60) + " phút";
+    }
+
+    function announceCompletion(data) {
+        if (completionHandled) return;
+        completionHandled = true;
+        document.title = data.failed > 0
+            ? "⚠ Hoàn thành, có lỗi · Cấp tài khoản"
+            : "✅ Hoàn thành · Cấp tài khoản";
+        window.setTimeout(function () {
+            const message = data.failed > 0
+                ? "Đã hoàn thành cấp tài khoản. Có " + data.failed + " đơn vị lỗi; hãy xem số liệu trên màn hình."
+                : "Đã hoàn thành cấp " + data.created + " tài khoản. File Excel bàn giao đã sẵn sàng.";
+            window.alert(message);
+            if (data.file_ready && data.download_url) {
+                window.location.href = data.download_url;
+            }
+        }, 350);
+    }
+
+    function render(data) {
+        const percent = Math.min(100, Math.max(0, Number(data.percent || 0)));
+        progressBar.style.width = percent + "%";
+        progressPercent.textContent = percent.toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + "%";
+        totalCount.textContent = data.total;
+        processedCount.textContent = data.processed;
+        createdCount.textContent = data.created;
+        skippedCount.textContent = data.skipped;
+        failedCount.textContent = data.failed;
+        currentUnit.textContent = data.current_unit || (data.is_finished ? "Đã kết thúc" : "Đang chuẩn bị");
+
+        if (data.is_finished) {
+            runningNote.style.display = "none";
+            currentUnit.parentElement.style.display = "none";
+            timeDetail.textContent = "Thời gian thực hiện: " + formatDuration(data.elapsed_seconds);
+            if (timer) {
+                window.clearInterval(timer);
+                timer = null;
+            }
+
+            if (data.status === "COMPLETED") {
+                banner.className = "status-banner success";
+                statusIcon.textContent = "✅";
+                statusTitle.textContent = "Đã hoàn thành cấp tài khoản";
+                statusDetail.textContent = "Tạo mới " + data.created + ", bỏ qua " + data.skipped + ", không có lỗi.";
+            } else if (data.status === "COMPLETED_WITH_ERRORS") {
+                banner.className = "status-banner warning";
+                statusIcon.textContent = "⚠️";
+                statusTitle.textContent = "Đã hoàn thành nhưng có đơn vị lỗi";
+                statusDetail.textContent = "Tạo mới " + data.created + ", bỏ qua " + data.skipped + ", lỗi " + data.failed + ".";
+            } else {
+                banner.className = "status-banner error";
+                statusIcon.textContent = "❌";
+                statusTitle.textContent = "Tiến trình đã dừng do lỗi";
+                statusDetail.textContent = "Các tài khoản đã tạo trước lỗi vẫn được giữ nguyên.";
+            }
+
+            if (data.error_message) {
+                errorBox.style.display = "block";
+                errorBox.textContent = "Chi tiết: " + data.error_message;
+            }
+            if (data.file_ready) {
+                downloadButton.hidden = false;
+                downloadButton.href = data.download_url || fallbackDownloadUrl;
+            }
+            announceCompletion(data);
+            return;
+        }
+
+        banner.className = "status-banner";
+        statusIcon.textContent = data.status === "PENDING" ? "⏳" : "⚙️";
+        statusTitle.textContent = data.status === "PENDING" ? "Đang xếp hàng xử lý" : "Đang tạo và mã hóa mật khẩu";
+        statusDetail.textContent = "Đã xử lý " + data.processed + "/" + data.total + " đơn vị.";
+        const elapsedText = "Đã chạy " + formatDuration(data.elapsed_seconds);
+        const etaText = data.eta_seconds === null ? "đang tính thời gian còn lại" : "còn khoảng " + formatDuration(data.eta_seconds);
+        timeDetail.textContent = elapsedText + " · " + etaText;
+    }
+
+    async function loadStatus() {
+        refreshButton.disabled = true;
+        try {
+            const response = await fetch(statusUrl, { cache: "no-store", headers: { "Accept": "application/json" } });
+            if (!response.ok) throw new Error("Không đọc được tiến độ (HTTP " + response.status + ").");
+            const data = await response.json();
+            render(data);
+        } catch (error) {
+            statusDetail.textContent = "Tạm thời chưa cập nhật được tiến độ. Hệ thống sẽ tự thử lại.";
+            errorBox.style.display = "block";
+            errorBox.textContent = String(error.message || error);
+        } finally {
+            refreshButton.disabled = false;
+        }
+    }
+
+    refreshButton.addEventListener("click", loadStatus);
+    loadStatus();
+    timer = window.setInterval(loadStatus, 1500);
+})();
+</script>
+</body>
+</html>

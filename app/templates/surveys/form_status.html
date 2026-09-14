@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if batch.is_locked %}Xem phiếu điều tra{% else %}Cập nhật phiếu điều tra{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .page-container { width:min(1120px,calc(100% - 32px)); margin:28px auto 48px; }
+        .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:22px; }
+        .summary-card { padding:16px 18px; background:white; border:1px solid #dce6ef; border-radius:14px; }
+        .summary-label { margin:0 0 5px; color:#657789; font-size:12px; font-weight:bold; text-transform:uppercase; }
+        .summary-value { margin:0; color:#0d47a1; font-size:17px; font-weight:bold; overflow-wrap:anywhere; }
+        .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+        .form-control { width:100%; padding:12px 13px; border:1px solid #c8d3df; border-radius:9px; background:white; font:inherit; }
+        textarea.form-control { min-height:120px; resize:vertical; }
+        .form-control:disabled { background:#eef3f7; color:#334155; cursor:not-allowed; opacity:1; }
+        .form-group-full { grid-column:1/-1; }
+        .check-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .check-card { display:flex; gap:10px; align-items:flex-start; padding:14px; border:1px solid #dce6ef; border-radius:10px; background:#f8fbfe; }
+        .check-card-readonly { background:#f4f7fa; color:#425466; }
+        .check-card input:disabled { cursor:not-allowed; }
+        .check-status { min-width:22px; font-weight:bold; text-align:center; }
+        .action-row { margin-top:22px; display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
+        .warning-box { margin-bottom:18px; padding:13px 15px; border-radius:10px; background:#fff8e1; color:#795f00; line-height:1.55; }
+        .locked-box { margin-bottom:18px; padding:14px 16px; border:1px solid #ef9a9a; border-radius:10px; background:#ffebee; color:#b71c1c; line-height:1.55; font-weight:600; }
+        .required-mark { color:#c62828; }
+        @media(max-width:800px){ .summary-grid,.form-grid,.check-grid{grid-template-columns:1fr}.form-group-full{grid-column:auto}.action-row{flex-direction:column-reverse}.action-row .button{width:100%} }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+{% set readonly_mode = (not can_edit_data) or batch.is_locked %}
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">ĐIỀU TRA PHỔ CẬP GIÁO DỤC</p>
+            <h1>{% if batch.is_locked %}Xem phiếu điều tra{% else %}Cập nhật phiếu điều tra{% endif %}</h1>
+            <p>
+                {% if batch.is_locked %}
+                    Đợt điều tra đã khóa dữ liệu. Phiếu được mở ở chế độ chỉ xem.
+                {% else %}
+                    Quản lý trạng thái, ngày điều tra và xác nhận của phiếu.
+                {% endif %}
+            </p>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            </div>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">← Danh sách hộ</a>
+        </div>
+    </div>
+</header>
+<main class="page-container">
+    {% if thong_bao %}<div class="alert alert-success">{{ thong_bao }}</div>{% endif %}
+    {% if thong_bao_loi %}<div class="alert alert-error">{{ thong_bao_loi }}</div>{% endif %}
+
+    {% if batch.is_locked %}
+        <div class="locked-box">
+            🔒 Đợt điều tra đã được chốt và khóa dữ liệu. Bạn có thể xem thông tin phiếu nhưng không thể thay đổi hoặc lưu lại.
+        </div>
+    {% elif not can_edit_data %}
+        <div class="alert alert-success"><strong>Chế độ chỉ xem:</strong> Tài khoản không được thay đổi thông tin phiếu.</div>
+    {% endif %}
+
+    <section class="summary-grid">
+        <article class="summary-card"><p class="summary-label">Số phiếu</p><p class="summary-value">{{ survey_form.form_number }}</p></article>
+        <article class="summary-card"><p class="summary-label">Mã hộ</p><p class="summary-value">{{ household.code }}</p></article>
+        <article class="summary-card"><p class="summary-label">Chủ hộ</p><p class="summary-value">{{ household.head_name }}</p></article>
+        <article class="summary-card"><p class="summary-label">Đối tượng hoạt động</p><p class="summary-value">{{ active_people_count }}</p></article>
+    </section>
+
+    <section class="panel">
+        {% if active_people_count == 0 %}
+            <div class="warning-box">Hộ chưa có đối tượng đang hoạt động. Phiếu có thể lưu ở trạng thái Chưa điều tra, Đang điều tra hoặc Cần bổ sung, nhưng chưa thể chuyển sang Đã hoàn thành.</div>
+        {% endif %}
+        <form method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/phieu/cap-nhat">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="form_status">Trạng thái phiếu <span class="required-mark">*</span></label>
+                    <select id="form_status" name="form_status" class="form-control" required {% if readonly_mode %}disabled{% endif %}>
+                        {% for code, label in form_status_labels.items() %}
+                            <option value="{{ code }}" {% if form_data.form_status == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="survey_date">Ngày điều tra</label>
+                    <input id="survey_date" name="survey_date" type="date" max="{{ today }}" class="form-control" value="{{ form_data.survey_date }}" {% if readonly_mode %}disabled{% endif %}>
+                    <div class="form-note">Bắt buộc khi phiếu không còn ở trạng thái Chưa điều tra.</div>
+                </div>
+                <div class="form-group">
+                    <label for="village_head_name">Trưởng thôn/xóm/khối/bản</label>
+                    <input id="village_head_name" name="village_head_name" type="text" maxlength="200" class="form-control" value="{{ form_data.village_head_name }}" placeholder="Nhập họ và tên" {% if readonly_mode %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="household_representative_name">Người đại diện hộ xác nhận</label>
+                    <input id="household_representative_name" name="household_representative_name" type="text" maxlength="200" class="form-control" value="{{ form_data.household_representative_name }}" placeholder="Nhập họ và tên" {% if readonly_mode %}disabled{% endif %}>
+                </div>
+                <div class="form-group form-group-full">
+                    <div class="check-grid">
+                        <label class="check-card {% if readonly_mode %}check-card-readonly{% endif %}">
+                            <input type="checkbox" name="household_confirmed" value="1" {% if form_data.household_confirmed %}checked{% endif %} {% if readonly_mode %}disabled{% endif %}>
+                            <span>
+                                <strong>Hộ gia đình đã xác nhận</strong><br>
+                                <small>Ghi nhận thời điểm xác nhận khi lưu.</small>
+                            </span>
+                        </label>
+
+                        {% if can_confirm_commune %}
+                            <label class="check-card {% if readonly_mode %}check-card-readonly{% endif %}">
+                                <input type="checkbox" name="commune_confirmed" value="1" {% if form_data.commune_confirmed %}checked{% endif %} {% if readonly_mode %}disabled{% endif %}>
+                                <span>
+                                    <strong>Xã/phường đã xác nhận</strong><br>
+                                    <small>Tài khoản Xã và ADMIN được thay đổi xác nhận cấp xã/phường.</small>
+                                </span>
+                            </label>
+                        {% else %}
+                            <div class="check-card check-card-readonly">
+                                <span class="check-status">
+                                    {% if form_data.commune_confirmed %}✓{% else %}—{% endif %}
+                                </span>
+                                <span>
+                                    <strong>Xã/phường đã xác nhận</strong><br>
+                                    <small>
+                                        {% if form_data.commune_confirmed %}
+                                            Phiếu đã được xác nhận ở cấp xã/phường.
+                                        {% else %}
+                                            Phiếu chưa được xác nhận ở cấp xã/phường.
+                                        {% endif %}
+                                        Bạn chỉ có quyền xem trạng thái này.
+                                    </small>
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="notes">Nhận xét hoặc nội dung cần bổ sung</label>
+                    <textarea id="notes" name="notes" class="form-control" placeholder="Phiếu Cần bổ sung bắt buộc phải ghi rõ nội dung" {% if readonly_mode %}disabled{% endif %}>{{ form_data.notes }}</textarea>
+                </div>
+            </div>
+            <div class="action-row">
+                <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong">Xem đối tượng</a>
+                <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan">Quay lại danh sách hộ</a>
+                {% if not readonly_mode %}
+                    <button class="button button-primary" type="submit">Lưu trạng thái phiếu</button>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

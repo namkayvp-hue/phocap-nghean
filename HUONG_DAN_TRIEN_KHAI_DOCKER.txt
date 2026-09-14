@@ -1,0 +1,281 @@
+TRIỂN KHAI PHẦN MỀM PHỔ CẬP GIÁO DỤC MẦM NON BẰNG DOCKER
+
+Ngày triển khai: 03/08/2026
+
+
+I. THÔNG TIN MÁY CHỦ
+
+- Địa chỉ: 192.168.1.24
+- Hệ điều hành: Ubuntu 22.04.3 LTS
+- Docker 29.6.0, Docker Compose v5.1.4
+- Tài khoản: sonnh (đã thuộc nhóm docker, chạy docker không cần sudo)
+- Khoá SSH: C:\Users\Admin\.ssh\vantai_deploy
+- Thư mục triển khai: /home/sonnh/data/phocap
+
+Địa chỉ truy cập phần mềm:
+- Trực tiếp trong mạng nội bộ: http://192.168.1.24:5006
+- Qua proxy có SSL: xem mục X
+
+Cổng 5006 được chọn vì máy chủ đã dùng 5000-5005 cho các phần mềm khác.
+Cổng 80 và 443 do Nginx Proxy Manager (container sonnh-app-1) giữ, nên phần mềm
+publish thẳng cổng 5006 và proxy trỏ ngược về cổng này.
+
+Tính đến 03/08/2026, trong Nginx Proxy Manager trên máy 192.168.1.24 CHƯA có
+mục nào trỏ tới cổng 5006. Nếu đang chạy HTTPS thì proxy nằm ở máy khác.
+CẦN GHI BỔ SUNG: tên miền và địa chỉ máy chạy proxy SSL.
+
+
+II. CÁC TỆP PHỤC VỤ TRIỂN KHAI
+
+Dockerfile
+    Ảnh nền python:3.12-slim (mã nguồn dùng cú pháp "str | None" nên cần
+    Python 3.10 trở lên). Đặt múi giờ Asia/Ho_Chi_Minh. Cài thư viện trước,
+    chép mã nguồn sau để tận dụng bộ nhớ đệm khi build lại.
+    Chạy uvicorn kèm --proxy-headers để đọc được X-Forwarded-Proto của proxy
+    (xem mục X).
+
+docker-compose.yml
+    Ánh xạ cổng 5006 của máy chủ vào cổng 8000 trong container.
+    Chạy container bằng user "1000:1000" trùng UID của tài khoản sonnh,
+    nếu không container sẽ không ghi được vào cơ sở dữ liệu SQLite.
+    Gắn thư mục ./data và ./uploads từ máy chủ vào container.
+    restart: unless-stopped để phần mềm tự chạy lại khi máy chủ khởi động lại.
+    Khai báo FORWARDED_ALLOW_IPS, mặc định "*" (xem mục X).
+
+.dockerignore
+    Loại khỏi ảnh Docker: .venv, __pycache__, thư mục PhoCap_Chuyen_May_*
+    (là bản sao của chính dự án này), data/ và uploads/ (được gắn lúc chạy).
+
+requirements.docker.txt
+    Bản UTF-8 của requirements.txt. Tệp requirements.txt gốc mã hoá UTF-16
+    nên lệnh pip install -r trên Linux sẽ báo lỗi. Tệp gốc giữ nguyên,
+    không sửa, để không ảnh hưởng môi trường phát triển trên Windows.
+    KHI THÊM THƯ VIỆN MỚI PHẢI CẬP NHẬT CẢ HAI TỆP.
+
+
+III. THAY ĐỔI TRONG MÃ NGUỒN
+
+app/main.py
+    SESSION_SECRET_KEY trước đây ghi cứng trong mã nguồn.
+    Nay đọc từ biến môi trường PHOCAP_SESSION_SECRET_KEY,
+    nếu không có biến này thì dùng giá trị cũ.
+    Vì vậy chạy phát triển trên Windows không thay đổi gì.
+    Trên máy chủ, khoá thật nằm trong tệp .env (xem mục IV).
+
+app/templates/**.html (35 tệp, ngày 03/08/2026)
+    Đổi url_for('static', path='/css/style.css') thành /static/css/style.css
+    để chạy được sau proxy HTTPS (xem mục X). Không đổi giao diện, không đổi
+    cách chạy trên Windows.
+
+
+IV. TỆP .env TRÊN MÁY CHỦ
+
+Đường dẫn: /home/sonnh/data/phocap/.env
+Quyền: 600 (chỉ tài khoản sonnh đọc được)
+Nội dung: PHOCAP_SESSION_SECRET_KEY=<chuỗi ngẫu nhiên 32 byte>
+
+Tệp này KHÔNG có trong mã nguồn và KHÔNG được đưa lên máy chủ khác.
+Nếu đổi khoá này, toàn bộ người dùng đang đăng nhập sẽ bị đăng xuất.
+
+Tạo lại khi cần:
+    printf "PHOCAP_SESSION_SECRET_KEY=%s\n" "$(openssl rand -hex 32)" > .env
+    chmod 600 .env
+
+
+V. CƠ SỞ DỮ LIỆU
+
+Vẫn dùng SQLite, không đổi sang PostgreSQL.
+Tệp cơ sở dữ liệu nằm trên máy chủ tại:
+    /home/sonnh/data/phocap/data/phocap.db
+
+Thư mục data/ và uploads/ được gắn trực tiếp từ máy chủ (bind mount),
+không dùng named volume, để tiện sao chép tệp ra vào bằng scp.
+
+Dữ liệu đã chuyển lên ngày 03/08/2026: 34 bảng,
+13.422 tài khoản, 891 trường, 130 xã/phường.
+
+Thư mục data/backups trên máy phát triển KHÔNG chuyển lên máy chủ.
+
+CHƯA CÓ CƠ CHẾ SAO LƯU ĐỊNH KỲ TRÊN MÁY CHỦ. Cần bổ sung.
+
+
+VI. TRIỂN KHAI LẦN ĐẦU (đã thực hiện, ghi lại để làm lại khi cần)
+
+1. Trên máy chủ, tạo thư mục (bước này cần quyền sudo):
+       sudo mkdir -p /home/sonnh/data/phocap
+       sudo chown sonnh:sonnh /home/sonnh/data/phocap
+
+2. Trên máy phát triển, đóng gói mã nguồn:
+       tar --exclude='.venv' --exclude='__pycache__' --exclude='*.pyc' \
+           --exclude='PhoCap_Chuyen_May_*' --exclude='./data' \
+           --exclude='./uploads' --exclude='.git' \
+           -czf phocap_src.tar.gz .
+
+3. Đẩy lên và giải nén:
+       scp -i ~/.ssh/vantai_deploy phocap_src.tar.gz \
+           sonnh@192.168.1.24:/home/sonnh/data/phocap/
+       ssh -i ~/.ssh/vantai_deploy sonnh@192.168.1.24 \
+           'cd /home/sonnh/data/phocap && tar -xzf phocap_src.tar.gz \
+            && rm phocap_src.tar.gz && mkdir -p data/backups uploads'
+
+4. Đẩy cơ sở dữ liệu và tệp Excel:
+       scp -i ~/.ssh/vantai_deploy data/phocap.db \
+           sonnh@192.168.1.24:/home/sonnh/data/phocap/data/
+       scp -i ~/.ssh/vantai_deploy uploads/*.xlsx \
+           sonnh@192.168.1.24:/home/sonnh/data/phocap/uploads/
+
+5. Tạo tệp .env (xem mục IV).
+
+6. Build và chạy:
+       cd /home/sonnh/data/phocap
+       docker compose build
+       docker compose up -d
+
+
+VII. CẬP NHẬT MÃ NGUỒN LẦN SAU
+
+Làm lại bước 2, 3 của mục VI (KHÔNG làm bước 4, tránh ghi đè cơ sở dữ liệu
+đang chạy trên máy chủ bằng bản cũ trên máy phát triển), sau đó:
+       cd /home/sonnh/data/phocap
+       docker compose up -d --build
+
+Nếu bản cập nhật có tệp nâng cấp cơ sở dữ liệu (app/upgrade_*.py),
+chạy trong container sau khi build:
+       docker exec phocap python -m app.upgrade_<ten_bai>
+
+Chạy các tệp kiểm tra ngay trong container, không cần cài Python trên máy chủ:
+       docker exec -w /app phocap python check_sua_loi_https_v1.py
+
+
+VIII. LỆNH VẬN HÀNH
+
+Đăng nhập máy chủ:
+       ssh -i C:\Users\Admin\.ssh\vantai_deploy sonnh@192.168.1.24
+       cd /home/sonnh/data/phocap
+
+       docker compose ps          Xem trạng thái
+       docker compose logs -f     Xem nhật ký trực tiếp
+       docker compose restart     Khởi động lại
+       docker compose down        Dừng hẳn
+       docker compose up -d       Chạy lại
+
+Kiểm tra phần mềm còn sống:
+       curl http://192.168.1.24:5006/api/kiem-tra
+Kết quả đúng: {"trang_thai":"hoat_dong", ...}
+
+Xem tình trạng healthcheck:
+       docker inspect --format '{{.State.Health.Status}}' phocap
+Kết quả đúng: healthy
+
+
+IX. KẾT QUẢ KIỂM TRA NGÀY 03/08/2026
+
+    /api/kiem-tra                    trang_thai = hoat_dong
+    /dang-nhap                       HTTP 200
+    /static/css/style.css            HTTP 200
+    /                                HTTP 303 chuyển hướng đăng nhập (đúng)
+    Đọc cơ sở dữ liệu trong container   34 bảng, dữ liệu đầy đủ
+    Ghi cơ sở dữ liệu trong container   Thành công
+    Healthcheck                      healthy
+    Khởi động lại container          Lên lại bình thường
+    Khoá phiên                       Lấy từ .env, không dùng khoá mặc định
+
+
+X. CHẠY SAU PROXY HTTPS (CỔNG 443)
+
+Ngày sửa: 03/08/2026
+
+
+X.1. HIỆN TƯỢNG
+
+Vào bằng cổng 80 thì bình thường, vào bằng cổng 443 thì vỡ hết giao diện:
+chữ đen trên nền trắng, mất toàn bộ bảng kiểu, các nút và bảng biểu xô lệch.
+
+
+X.2. NGUYÊN NHÂN
+
+Proxy nói chuyện với container bằng HTTP và báo giao thức thật của người dùng
+qua đầu mục X-Forwarded-Proto: https.
+
+Uvicorn chỉ tin đầu mục này khi địa chỉ IP gọi đến nằm trong danh sách
+forwarded-allow-ips, MẶC ĐỊNH CHỈ CÓ 127.0.0.1. Chạy trong Docker thì IP gọi
+đến là cổng mạng của Docker chứ không phải 127.0.0.1, nên uvicorn bỏ qua đầu
+mục đó và vẫn tưởng người dùng đang vào bằng HTTP.
+
+Trong khi đó 35 tệp template nạp bảng kiểu bằng url_for('static', ...).
+Hàm này sinh ra URL TUYỆT ĐỐI kèm giao thức. Giao thức bị nhận nhầm là http
+nên trang HTTPS nhận được:
+
+    <link rel="stylesheet" href="http://ten-mien/static/css/style.css">
+
+Trình duyệt chặn thẳng tệp CSS này vì trang HTTPS không được nạp tài nguyên
+HTTP (mixed content). Mất bảng kiểu thì giao diện vỡ. Cổng 80 không sao vì
+lúc đó giao thức http là đúng thật.
+
+
+X.3. HAI VIỆC ĐÃ LÀM
+
+1. Cho phần mềm biết nó đang chạy sau proxy:
+   - Dockerfile: uvicorn chạy kèm --proxy-headers
+   - docker-compose.yml: FORWARDED_ALLOW_IPS: ${PHOCAP_FORWARDED_ALLOW_IPS:-*}
+
+   Nhờ đó phần mềm nhận đúng giao thức https, đồng thời nhật ký ghi được địa
+   chỉ IP thật của người dùng thay vì IP của proxy.
+
+   Muốn chặt chẽ hơn thì đặt PHOCAP_FORWARDED_ALLOW_IPS trong tệp .env đúng
+   bằng địa chỉ IP máy chạy proxy, rồi chạy lại (không cần build lại ảnh):
+       docker compose up -d
+
+2. Đổi 35 tệp template sang đường dẫn /static/css/style.css.
+   Đường dẫn tương đối gốc không mang giao thức, nên giao diện chạy đúng kể cả
+   khi proxy bị cấu hình sai. Bốn tệp template khác trong dự án vốn đã viết
+   theo cách này từ trước.
+
+
+X.4. KIỂM TRA LẠI
+
+Trên máy phát triển:
+       & C:\PhoCap\.venv\Scripts\python.exe check_sua_loi_https_v1.py
+Trên máy chủ:
+       docker exec -w /app phocap python check_sua_loi_https_v1.py
+
+Tệp này kiểm tra ba việc: không còn template nào dùng url_for('static'),
+trang web không còn URL http:// khi có đầu mục X-Forwarded-Proto: https,
+và docker-compose.yml có khai báo FORWARDED_ALLOW_IPS.
+
+
+X.5. KẾT QUẢ KIỂM TRA TRÊN MÁY CHỦ NGÀY 03/08/2026
+
+    Container phocap                     Up, healthy, nhật ký không lỗi
+    FORWARDED_ALLOW_IPS trong container  *
+    Lệnh chạy container                  có --proxy-headers
+    /dang-nhap qua HTTP thường           href="/static/css/style.css"
+    /dang-nhap khi giả lập proxy HTTPS   href="/static/css/style.css"
+    /static/css/style.css                HTTP 200, text/css, 11.770 byte
+    Nhật ký khi có X-Forwarded-For       ghi đúng IP người dùng
+    check_sua_loi_https_v1.py            qua cả ba mục
+
+Đối chứng trước khi sửa, cùng một yêu cầu có X-Forwarded-Proto: https:
+    Trước: href="http://ten-mien/static/css/style.css"   (bị trình duyệt chặn)
+    Sau:   href="https://ten-mien/static/css/style.css"  (hoặc đường dẫn
+           tương đối /static/css/style.css sau khi sửa template)
+
+
+X.6. LƯU Ý
+
+Cookie phiên đăng nhập trong app/main.py đang đặt https_only=False để vẫn dùng
+được khi truy cập thẳng http://192.168.1.24:5006. Nếu sau này chỉ còn vào bằng
+HTTPS thì nên đổi thành True.
+
+Sau khi cập nhật, người dùng cần bấm Ctrl + F5 một lần. Trình duyệt còn giữ
+bản HTML cũ có đường dẫn http:// trong bộ nhớ đệm.
+
+
+XI. VIỆC CÒN LẠI
+
+- Chưa có sao lưu định kỳ cơ sở dữ liệu trên máy chủ.
+- Chưa chuyển thư mục data/backups từ máy phát triển lên (62 MB, 23 tệp).
+- Chưa ghi được tên miền và địa chỉ máy chạy proxy SSL vào mục I.
+- FORWARDED_ALLOW_IPS đang để "*", nên thu hẹp về đúng IP của proxy.
+- Gói PhoCap_Chuyen_May_V1_6_20260803 vẫn còn 35 template kiểu cũ. Nếu còn
+  dùng gói đó để cài máy mới thì phải đóng gói lại, kèm cập nhật SHA256SUMS.txt.

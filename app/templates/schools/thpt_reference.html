@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục trường/lớp THPT</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .thpt-container{width:min(1420px,96%);margin:28px auto 60px;}
+        .thpt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0;}
+        .thpt-card{background:white;border-radius:16px;padding:18px 20px;box-shadow:0 8px 24px rgba(27,65,96,.08);}
+        .thpt-card .label{display:block;color:#63809a;font-size:13px;font-weight:700;text-transform:uppercase;}
+        .thpt-card .value{display:block;margin-top:8px;font-size:28px;font-weight:800;color:#0d5baa;}
+        .thpt-note{background:#fff7df;border:1px solid #f4d48a;border-radius:14px;padding:16px 18px;line-height:1.55;margin:16px 0;}
+        .thpt-age{background:#eaf6ff;border:1px solid #9cccf4;border-radius:14px;padding:16px 18px;line-height:1.6;margin:16px 0;}
+        .thpt-search{display:flex;gap:10px;align-items:center;background:white;padding:16px;border-radius:14px;margin:18px 0;}
+        .thpt-search input{flex:1;padding:12px 14px;border:1px solid #c6d4e1;border-radius:9px;font:inherit;}
+        .thpt-table-wrap{overflow-x:auto;background:white;border-radius:16px;box-shadow:0 8px 24px rgba(27,65,96,.08);}
+        .thpt-table{border-collapse:collapse;width:100%;min-width:1180px;}
+        .thpt-table th,.thpt-table td{padding:12px 11px;border-bottom:1px solid #e3ebf2;text-align:left;vertical-align:top;}
+        .thpt-table th{background:#e7f1fb;color:#173f63;white-space:nowrap;}
+        .school-name{font-weight:800;min-width:270px;}
+        .school-code{font-weight:800;white-space:nowrap;color:#174f85;}
+        .grade-cell{min-width:175px;line-height:1.55;}
+        .linked{color:#15803d;font-weight:700;}
+        .unlinked{color:#9a6700;font-weight:700;}
+        .muted{color:#657789;font-size:13px;}
+        @media(max-width:900px){.thpt-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+        @media(max-width:600px){.thpt-grid{grid-template-columns:1fr}.thpt-search{display:block}.thpt-search .button{margin-top:10px;width:100%;}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">MẠNG LƯỚI TRƯỜNG, LỚP THPT</p>
+            <h1>Danh mục trường/lớp THPT</h1>
+            <p>Dữ liệu tham chiếu năm học {{ source_year }} từ file Sở GD&amp;ĐT Nghệ An.</p>
+        </div>
+        <a class="button button-light" href="/">← Trang chủ</a>
+    </div>
+</header>
+
+<main class="thpt-container">
+    <section class="thpt-grid">
+        <div class="thpt-card"><span class="label">Trường/đơn vị</span><span class="value">{{ summary.school_total }}</span></div>
+        <div class="thpt-card"><span class="label">Tổng số lớp</span><span class="value">{{ summary.class_total }}</span></div>
+        <div class="thpt-card"><span class="label">Tổng học sinh</span><span class="value">{{ summary.student_total }}</span></div>
+        <div class="thpt-card"><span class="label">Đã khớp School hiện có</span><span class="value">{{ summary.linked_total }}</span></div>
+    </section>
+
+    <div class="thpt-age">
+        <strong>Phạm vi đối tượng điều tra đã chốt:</strong>
+        Phổ cập giáo dục <strong>0–18 tuổi</strong> (tính cả 18);
+        Xóa mù chữ <strong>18–60 tuổi</strong> (tính cả 18 và 60).
+        Vì vậy <strong>người 18 tuổi thuộc cả hai phạm vi</strong>.
+    </div>
+
+    <div class="thpt-note">
+        <strong>Lưu ý về “lớp”:</strong> file THPT hiện tại chỉ có <strong>số lượng lớp theo khối 10, 11, 12</strong>,
+        không có tên lớp thực tế như 10A1, 10A2. Hệ thống lưu đúng số liệu khối/lớp tham chiếu và
+        <strong>không tự sinh tên lớp giả</strong>. Khi có danh sách học sinh/lớp chi tiết, ta sẽ tạo Classroom thật.
+        File hiện tại cũng không có cột xã/phường, nên các trường THPT được lưu ở danh mục tham chiếu độc lập,
+        tránh gán sai địa bàn.
+    </div>
+
+    <form class="thpt-search" method="get" action="/truong-thpt">
+        <input name="q" value="{{ q }}" placeholder="Tìm theo mã trường hoặc tên trường THPT">
+        <button class="button button-primary" type="submit">🔎 Tìm</button>
+        {% if q %}<a class="button" href="/truong-thpt">Xóa lọc</a>{% endif %}
+    </form>
+
+    <div class="thpt-table-wrap">
+        <table class="thpt-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã trường</th>
+                    <th>Tên trường</th>
+                    <th>Khối 10</th>
+                    <th>Khối 11</th>
+                    <th>Khối 12</th>
+                    <th>Tổng</th>
+                    <th>Liên kết danh mục</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for school in schools %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="school-code">{{ school.school_code }}</td>
+                    <td class="school-name">{{ school.school_name }}</td>
+                    {% for grade in school.grades %}
+                    <td class="grade-cell">
+                        <strong>Khối {{ grade.grade }}</strong><br>
+                        {{ grade.class_count }} lớp · {{ grade.student_count }} HS
+                        {% if grade.new_student_count is not none %}
+                        <div class="muted">Tuyển mới: {{ grade.new_student_count }}</div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td class="grade-cell">
+                        <strong>{{ school.total_class_count }} lớp</strong><br>
+                        {{ school.total_student_count }} HS
+                    </td>
+                    <td>
+                        {% if school.official_school_id %}
+                        <span class="linked">✓ Đã khớp mã trường</span>
+                        {% else %}
+                        <span class="unlinked">Chưa có School chính thức</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="8">Không tìm thấy trường phù hợp.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

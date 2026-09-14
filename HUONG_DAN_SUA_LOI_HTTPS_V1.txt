@@ -1,0 +1,67 @@
+SỬA LỖI VỠ GIAO DIỆN KHI CHẠY HTTPS (CỔNG 443) - V1
+
+Ngày: 03/08/2026
+
+
+HIỆN TƯỢNG
+
+Vào phần mềm bằng cổng 80 thì bình thường. Vào bằng cổng 443 (có SSL) thì vỡ
+hết giao diện: mất bảng kiểu, chữ đen nền trắng, nút và bảng biểu xô lệch.
+
+
+NGUYÊN NHÂN NGẮN GỌN
+
+Template nạp bảng kiểu bằng url_for('static', ...). Hàm này sinh URL tuyệt đối
+kèm giao thức. Uvicorn chạy trong Docker không tin đầu mục X-Forwarded-Proto
+của proxy (mặc định chỉ tin 127.0.0.1) nên vẫn tưởng là HTTP, sinh ra đường dẫn
+http:// trong trang HTTPS. Trình duyệt chặn tệp CSS đó vì lý do mixed content.
+
+Giải thích đầy đủ ở mục X của HUONG_DAN_TRIEN_KHAI_DOCKER.txt.
+
+
+CÁC TỆP ĐÃ SỬA
+
+- 35 tệp app/templates/**.html
+      đổi {{ url_for('static', path='/css/style.css') }}
+      thành /static/css/style.css
+- Dockerfile
+      uvicorn chạy kèm --proxy-headers
+- docker-compose.yml
+      thêm FORWARDED_ALLOW_IPS: ${PHOCAP_FORWARDED_ALLOW_IPS:-*}
+- check_sua_loi_https_v1.py
+      tệp mới, dùng để kiểm tra
+- HUONG_DAN_TRIEN_KHAI_DOCKER.txt
+      thêm mục X
+
+
+CÀI TRÊN MÁY CHỦ DOCKER
+
+1. Đẩy mã nguồn lên như mục VII của HUONG_DAN_TRIEN_KHAI_DOCKER.txt.
+2. Dựng lại và chạy:
+       cd /home/sonnh/data/phocap
+       docker compose up -d --build
+3. Kiểm tra:
+       docker exec -w /app phocap python check_sua_loi_https_v1.py
+   Đúng thì hiện dòng: KIEM TRA SUA LOI HTTPS V1 THANH CONG
+4. Mở phần mềm bằng HTTPS rồi bấm Ctrl + F5.
+
+Không cần chạy tệp nâng cấp cơ sở dữ liệu. Bản vá này không đụng tới dữ liệu.
+
+
+CÀI TRÊN MÁY WINDOWS
+
+1. Dừng Uvicorn bằng Ctrl + C.
+2. Giải nén gói vào C:\PhoCap và chọn Replace the files in the destination.
+3. Kiểm tra:
+       & C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\check_sua_loi_https_v1.py
+4. Khởi động lại:
+       cd C:\PhoCap
+       & C:\PhoCap\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+
+Chạy trên Windows không qua proxy nên giao diện không đổi gì so với trước.
+
+
+LƯU Ý VỀ SAU
+
+Khi viết template mới, nạp tệp tĩnh bằng đường dẫn /static/... chứ đừng dùng
+url_for('static', ...), để không lặp lại lỗi này.

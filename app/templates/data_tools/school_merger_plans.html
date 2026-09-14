@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phương án sáp nhập chính thức</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .plan-wrap{max-width:1450px;margin:0 auto;padding:24px 18px 60px}.plan-hero,.plan-panel{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:20px;margin-bottom:18px}.plan-hero h1{margin:0 0 8px;font-size:26px}.plan-hero p{margin:6px 0;color:#52606d;line-height:1.55}
+        .plan-grid{display:grid;grid-template-columns:repeat(3,minmax(190px,1fr));gap:14px}.plan-field label{display:block;font-weight:700;margin-bottom:6px}.plan-field select,.plan-field input[type=text]{width:100%;padding:10px;border:1px solid #c9d4df;border-radius:8px;background:#fff}
+        .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;padding:10px 15px;font-weight:700;text-decoration:none;cursor:pointer}.btn.primary{background:#1f5f99;color:#fff}.btn.muted{background:#e8eef4;color:#213547}
+        .note{padding:12px 14px;border-radius:9px;margin:10px 0;line-height:1.55}.note.info{background:#eef6ff;border:1px solid #b9d8fa;color:#164e7a}.note.ok{background:#edf9f2;border:1px solid #a8dfbd;color:#155f3a}.note.warn{background:#fff8e6;border:1px solid #f0d184;color:#785700}.note.error{background:#fff0ef;border:1px solid #f0b4ae;color:#842029}
+        .muted{color:#667788;font-size:13px}.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#e8eef4}.badge.ok{background:#dff5e8;color:#17633e}.badge.warn{background:#fff1c7;color:#7b5700}.badge.locked{background:#fde7e5;color:#8b2b23}.badge.info{background:#e5f1ff;color:#155a8a}
+        .table-wrap{overflow:auto;border:1px solid #e0e6ec;border-radius:10px}.table{width:100%;border-collapse:collapse;min-width:1180px}.table th,.table td{padding:11px;border-bottom:1px solid #e7ecf1;text-align:left;vertical-align:top}.table th{background:#f7f9fb;font-size:13px}.source-list{margin:0;padding-left:18px}.source-list li{margin:4px 0}
+        .combo{position:relative}.combo-list{display:none;position:absolute;z-index:40;left:0;right:0;top:100%;max-height:280px;overflow:auto;background:#fff;border:1px solid #c9d4df;border-radius:8px;box-shadow:0 8px 22px rgba(20,40,60,.16);margin-top:4px}.combo-list.open{display:block}.combo-item{padding:9px 10px;cursor:pointer;border-bottom:1px solid #eef2f6}.combo-item:hover{background:#eef6ff}.combo-item small{display:block;color:#667788;margin-top:2px}.combo-empty{padding:10px;color:#667788}
+        @media(max-width:900px){.plan-grid{grid-template-columns:1fr}.plan-wrap{padding:14px 10px 40px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="plan-wrap">
+    <section class="plan-hero">
+        <h1>Danh sách phương án chính thức toàn tỉnh</h1>
+        <p>Nguồn duy nhất của màn hình này là <code>{{ official_registry_summary.source_file }}</code>. Phần mềm đã chuẩn hóa <strong>{{ official_registry_summary.group_count }}</strong> nhóm theo đúng cách trình bày ở cột “Phương án sắp xếp”.</p>
+        <div class="note info"><strong>KIỂM TRA DỮ LIỆU NGUỒN là bước bắt buộc trước sáp nhập.</strong> Mọi phương án MN/TH/THCS đều phải có nguồn đối chiếu và khớp địa bàn + trường + đội ngũ trước khi nút thực hiện được mở.</div>
+        <div class="actions"><a class="btn muted" href="/cong-cu-du-lieu/sap-nhap-truong">← Quay lại Sáp nhập trường</a><a class="btn primary" href="/cong-cu-du-lieu/sap-nhap-truong/bang-dieu-khien?school_year_id={{ selected_school_year_id or '' }}&commune_id={{ selected_commune_id or '' }}&level_code={{ selected_level_code or 'TH' }}">BẢNG ĐIỀU KHIỂN</a><a class="btn primary" href="/cong-cu-du-lieu/sap-nhap-truong/phat-sinh?school_year_id={{ selected_school_year_id or '' }}&level_code={{ selected_level_code or 'TH' }}">SÁP NHẬP PHÁT SINH</a><a class="btn muted" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an/kiem-tra-nguon?school_year_id={{ selected_school_year_id or '' }}&commune_id={{ selected_commune_id or '' }}&level_code={{ selected_level_code }}">KIỂM TRA NGUỒN</a></div>
+    </section>
+
+    {% if error_message %}<div class="note error">{{ error_message }}</div>{% endif %}
+    {% if status_message %}<div class="note info">{{ status_message }}</div>{% endif %}
+
+    <section class="plan-panel">
+        <h2>1. Lọc danh sách</h2>
+        <form id="plan-filter-form" method="get" action="/cong-cu-du-lieu/sap-nhap-truong/phuong-an">
+            <div class="plan-grid">
+                <div class="plan-field"><label>Năm học</label><select name="school_year_id" required>{% for y in school_years %}<option value="{{ y.id }}" {% if y.id == selected_school_year_id %}selected{% endif %}>{{ y.code or y.name }}</option>{% endfor %}</select></div>
+                <div class="plan-field">
+                    <label>Xã/phường</label>
+                    <div class="combo"><input id="plan-commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off"><input id="plan-commune-id" type="hidden" name="commune_id" value="{{ selected_commune_id or '' }}"><div id="plan-commune-list" class="combo-list"></div></div>
+                    <div class="muted">Ví dụ: Cửa Lò.</div>
+                </div>
+                <div class="plan-field"><label>Cấp học</label><select name="level_code">{% for code,label in level_choices %}<option value="{{ code }}" {% if code == selected_level_code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            </div>
+            <div class="actions"><button class="btn primary" type="submit">Hiển thị phương án</button></div>
+        </form>
+    </section>
+
+    <section class="plan-panel">
+        <h2>2. Danh sách phương án</h2>
+        {% if 'Cửa Lò' in selected_commune_name and selected_level_code == 'TH' %}<div class="note {% if plans|length == 4 %}ok{% else %}error{% endif %}"><strong>Cửa Lò – Tiểu học:</strong> chuẩn phải có 4 nhóm; hiện có <strong>{{ plans|length }}</strong>.</div>{% endif %}
+        {% if plans %}
+        <div class="table-wrap"><table class="table">
+            <thead><tr><th>STT</th><th>Địa bàn / cấp</th><th>Nhóm trường theo Excel</th><th>Phương án</th><th>Nguồn → đích chuẩn hóa</th><th>Khớp DB</th><th>Nguồn & tác động</th></tr></thead>
+            <tbody>
+            {% for p in plans %}
+            <tr>
+                <td><strong>{{ p.first_stt }}</strong>{% if p.last_stt != p.first_stt %}–{{ p.last_stt }}{% endif %}</td>
+                <td><strong>{{ p.commune_excel }}</strong><br><span class="muted">{{ p.level_codes|join(' + ') }}</span></td>
+                <td><ul class="source-list">{% for s in p.member_schools %}<li><strong>{{ s.excel_name }}</strong>{% if s.class_count is not none %} · {{ s.class_count }} lớp{% endif %}{% if s.note %}<br><span class="muted">{{ s.note }}</span>{% endif %}</li>{% endfor %}</ul></td>
+                <td><strong>{{ p.plan_text or 'Chưa ghi phương án' }}</strong></td>
+                <td>
+                    {% if p.action_type == 'KEEP' %}<span class="badge info">GIỮ NGUYÊN</span>
+                    {% elif p.target_school %}{% if p.source_schools %}<span class="muted">Nguồn:</span><ul class="source-list">{% for s in p.source_schools %}<li>{{ s.excel_name }}</li>{% endfor %}</ul>{% endif %}<span class="muted">Đích:</span> <strong>{{ p.target_school.excel_name }}</strong>
+                    {% else %}<span class="badge warn">ĐẶC THÙ – CHƯA TỰ SUY DIỄN</span>{% endif %}
+                </td>
+                <td>{% if p.match_status == 'MATCHED' %}<span class="badge ok">{{ p.match_label }}</span>{% elif p.match_status == 'PARTIAL' %}<span class="badge warn">{{ p.match_label }}</span>{% else %}<span class="badge locked">{{ p.match_label }}</span>{% endif %}<br><span class="muted">Kiểm tra nguồn + mô phỏng + cổng thực hiện</span></td>
+                <td>
+                    {% if p.action_type == 'KEEP' %}<span class="badge info">KHÔNG TÁC ĐỘNG</span>
+                    {% elif p.execution_status and p.execution_status.startswith('COMPLETED') %}<span class="badge ok">ĐÃ THỰC HIỆN</span><br><a class="btn muted" style="margin-top:6px" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an/ket-qua/{{ p.id }}">XEM KẾT QUẢ</a>
+                    {% elif p.action_type == 'MAPPED' and p.match_status == 'MATCHED' and p.target_school and p.source_schools %}
+                    <a class="btn primary" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an/xem-truoc/{{ p.id }}?school_year_id={{ selected_school_year_id or '' }}&commune_id={{ selected_commune_id or '' }}&level_code={{ selected_level_code }}">XEM TRƯỚC + KIỂM TRA NGUỒN</a><br><span class="muted">Kiểm tra nguồn trước; chưa đạt thì khóa thực hiện.</span>
+                    {% else %}<span class="badge locked">CHƯA ĐỦ ĐIỀU KIỆN</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table></div>
+        {% else %}<div class="note warn">Chưa có phương án phù hợp bộ lọc.</div>{% endif %}
+    </section>
+</main>
+<script>
+(function(){
+    const input=document.getElementById('plan-commune-search'),hidden=document.getElementById('plan-commune-id'),list=document.getElementById('plan-commune-list'),form=document.getElementById('plan-filter-form');if(!input||!hidden||!list||!form)return;
+    const items=[{% for c in communes %}{id:{{ c.id }},name:{{ c.name|tojson }},code:{{ c.code|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}];
+    function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/đ/g,'d').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ')}function bare(v){return norm(v).replace(/^(xa|phuong|thi tran|thi xa|thanh pho)\s+/,'')}function matches(q){q=norm(q);if(!q)return items.slice(0,25);return items.filter(x=>norm(x.name).startsWith(q)||bare(x.name).startsWith(q)||bare(x.name).startsWith(bare(q))).slice(0,25)}function close(){list.classList.remove('open');list.innerHTML=''}function choose(x){input.value=x.name;hidden.value=String(x.id);input.setCustomValidity('');close()}function render(){const rows=matches(input.value);list.innerHTML='';if(!rows.length){const e=document.createElement('div');e.className='combo-empty';e.textContent='Không tìm thấy xã/phường.';list.appendChild(e)}else rows.forEach(x=>{const r=document.createElement('div');r.className='combo-item';r.innerHTML='<strong></strong><small></small>';r.querySelector('strong').textContent=x.name;r.querySelector('small').textContent=x.code?'Mã: '+x.code:'';r.addEventListener('mousedown',ev=>{ev.preventDefault();choose(x)});list.appendChild(r)});list.classList.add('open')}
+    input.addEventListener('input',()=>{hidden.value='';input.setCustomValidity('');render()});input.addEventListener('focus',render);input.addEventListener('blur',()=>setTimeout(close,150));form.addEventListener('submit',ev=>{if(hidden.value)return;const rows=matches(input.value),q=norm(input.value),exact=rows.filter(x=>norm(x.name)===q||bare(x.name)===bare(q));if(exact.length===1){choose(exact[0]);return}if(rows.length===1){choose(rows[0]);return}ev.preventDefault();input.setCustomValidity('Hãy chọn đúng một xã/phường trong danh sách.');input.reportValidity();render()});
+})();
+</script>
+</body>
+</html>

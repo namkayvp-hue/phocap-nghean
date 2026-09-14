@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lập tổ điều tra 3 cấp</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .wrap{width:min(1480px,96%);margin:24px auto 60px}
+        .panel{background:#fff;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 8px 24px rgba(30,70,110,.08)}
+        .cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+        .card{border:1px solid #d8e4ef;border-radius:12px;padding:14px}
+        .card small{display:block;color:#60758a;font-weight:800}
+        .card strong{display:block;font-size:25px;color:#1769aa;margin-top:6px}
+        .team-table{width:100%;border-collapse:collapse;min-width:1080px}
+        .team-table th,.team-table td{padding:11px;border-bottom:1px solid #e4ebf2;text-align:left;vertical-align:top}
+        .team-table th{background:#edf5fc}
+        .scroll{overflow-x:auto}
+        .member{margin:3px 0}
+        .badge{display:inline-block;min-width:48px;font-weight:800;color:#0b5cab}
+        .actions{display:flex;gap:10px;flex-wrap:wrap}
+        .ok{background:#eef9f0;border:1px solid #b7dfbd;color:#246b2c;padding:13px;border-radius:12px}
+        .warn{background:#fff7e6;border:1px solid #ebcf8f;color:#795600;padding:13px;border-radius:12px}
+        .reserve{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+        .reserve-item{border:1px solid #e0e6ec;border-radius:10px;padding:10px}
+        select{padding:10px;border:1px solid #c9d6e2;border-radius:9px;min-width:300px}
+        @media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}}
+        @media(max-width:650px){.cards{grid-template-columns:1fr 1fr}.reserve{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<main class="wrap">
+    <section class="panel">
+        <p class="admin-eyebrow">TỔ ĐIỀU TRA 3 CẤP · BƯỚC 2</p>
+        <h1>Ghép tổ ngẫu nhiên và chia đều hộ dân</h1>
+        <p>
+            Mỗi tổ gồm đúng <strong>1 GV Mầm non + 1 GV Tiểu học + 1 GV THCS</strong>.
+            Dự thảo này chưa gửi xuống Trường/Giáo viên.
+        </p>
+
+        {% if message %}
+        <div class="ok">{{ message }}</div>
+        {% endif %}
+
+        <form method="get" action="/dieu-tra/phan-cong-to-dieu-tra/lap-to">
+            <label><strong>Đợt điều tra</strong></label><br>
+            <select name="batch_id" onchange="this.form.submit()">
+                {% for item in batches %}
+                <option value="{{ item.id }}" {% if batch and item.id == batch.id %}selected{% endif %}>
+                    {{ item.school_year_code }} · {{ item.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </section>
+
+    {% if batch %}
+    <section class="panel">
+        <div class="cards">
+            <div class="card"><small>GV MN đã gửi</small><strong>{{ preview.mn_count }}</strong></div>
+            <div class="card"><small>GV TH đã gửi</small><strong>{{ preview.th_count }}</strong></div>
+            <div class="card"><small>GV THCS đã gửi</small><strong>{{ preview.thcs_count }}</strong></div>
+            <div class="card"><small>Tổ có thể lập</small><strong>{{ preview.possible_team_count }}</strong></div>
+            <div class="card"><small>Tổng hộ/phiếu</small><strong>{{ preview.form_total }}</strong></div>
+            <div class="card"><small>Tổ đã tạo</small><strong>{{ preview.team_count }}</strong></div>
+        </div>
+
+        {% if preview.possible_team_count == 0 %}
+        <div class="warn" style="margin-top:14px">
+            Chưa đủ danh sách giáo viên đã gửi ở cả 3 cấp MN, TH và THCS.
+            Xã/phường cần chờ các trường gửi đủ trước khi tạo tổ.
+        </div>
+        {% endif %}
+
+        {% if preview.team_count > 0 %}
+        <div class="ok" style="margin-top:14px">
+            Phân bổ hiện tại: mỗi tổ có từ
+            <strong>{{ preview.min_households }}</strong> đến
+            <strong>{{ preview.max_households }}</strong> hộ.
+            Chênh lệch tối đa:
+            <strong>{{ preview.max_households - preview.min_households }}</strong> hộ.
+        </div>
+        {% endif %}
+
+        <div class="actions" style="margin-top:16px">
+<!-- === BAI_13B_10_V3_2_FINALIZE_BUTTON_START === -->
+            {% if preview.team_count > 0 and preview.team_status == 'DRAFT' %}
+            <form
+                method="post"
+                action="/dieu-tra/phan-cong-to-dieu-tra/lap-to/chot-gui"
+                style="display:inline-block"
+            >
+                <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                <button
+                    class="button button-primary"
+                    type="submit"
+                    onclick="return confirm('Chốt và gửi phân công 3 cấp xuống Trường/Giáo viên? Sau khi chốt sẽ không thể tạo lại ngẫu nhiên bản phân công này.');"
+                >
+                    ✅ Chốt và gửi phân công
+                </button>
+            </form>
+            {% elif preview.team_count > 0 and preview.team_status == 'SENT' %}
+            <span class="ok" style="display:inline-block;margin:0">
+                ✅ Đã chốt và gửi xuống Trường/Giáo viên
+            </span>
+            {% endif %}
+            <!-- === BAI_13B_10_V3_2_FINALIZE_BUTTON_END === -->
+
+            <form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/lap-to/tao-ngau-nhien">
+                <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                <button
+                    class="button button-primary"
+                    type="submit"
+                    {% if preview.possible_team_count == 0 or preview.form_total == 0 %}disabled{% endif %}
+                    onclick="return confirm('Tạo ngẫu nhiên các tổ 3 cấp và chia đều toàn bộ hộ? Nếu đang có dự thảo, dự thảo cũ sẽ được tạo lại.');"
+                >
+                    {% if preview.team_count > 0 %}
+                        🔀 Tạo lại ngẫu nhiên
+                    {% else %}
+                        🎲 Tạo tổ ngẫu nhiên + chia hộ
+                    {% endif %}
+                </button>
+            </form>
+
+            {% if preview.team_count > 0 %}
+            <form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/lap-to/xoa-du-thao">
+                <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                <button
+                    class="button button-secondary"
+                    type="submit"
+                    onclick="return confirm('Xóa toàn bộ dự thảo tổ và phân bổ hộ hiện tại? Danh sách GV trường gửi về vẫn được giữ nguyên.');"
+                >Xóa dự thảo</button>
+            </form>
+            {% endif %}
+
+            <a
+                class="button button-light"
+                href="/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong?batch_id={{ batch.id }}"
+            >← Danh sách trường gửi về</a>
+        </div>
+    </section>
+
+    {% if preview.team_count > 0 %}
+    <section class="panel">
+        <h2>Xem trước các tổ điều tra</h2>
+        <div class="scroll">
+            <table class="team-table">
+                <thead>
+                    <tr>
+                        <th>Tổ</th>
+                        <th>3 giáo viên</th>
+                        <th>Số hộ</th>
+                        <th>Thôn/xóm</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for team in preview.teams %}
+                    <tr>
+                        <td><strong>Tổ {{ team.team_number }}</strong></td>
+                        <td>
+                            {% for member in team.members %}
+                            <div class="member">
+                                <span class="badge">{{ member.level_code }}</span>
+                                <strong>{{ member.full_name }}</strong>
+                                · {{ member.school_name }}
+                            </div>
+                            {% endfor %}
+                        </td>
+                        <td><strong>{{ team.household_count }}</strong></td>
+                        <td>
+                            {% for item in team.hamlet_summary %}
+                                {{ item.hamlet_name }} ({{ item.household_count }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a
+                                class="button button-light"
+                                href="/dieu-tra/phan-cong-to-dieu-tra/lap-to/{{ team.id }}"
+                            >Xem hộ</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if preview.reserve %}
+    <section class="panel">
+        <h2>Giáo viên dự phòng / chưa ghép tổ</h2>
+        <p>
+            Do số GV ba cấp không bằng nhau, giáo viên dư được giữ ở danh sách
+            dự phòng, không tự ghép sai cơ cấu tổ.
+        </p>
+        <div class="reserve">
+            {% for item in preview.reserve %}
+            <div class="reserve-item">
+                <strong>{{ item.level_code }} · {{ item.full_name }}</strong><br>
+                {{ item.school_name }}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    {% endif %}
+</main>
+</body>
+</html>

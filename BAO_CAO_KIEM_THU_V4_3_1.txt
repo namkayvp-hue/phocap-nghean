@@ -1,0 +1,15 @@
+BÁO CÁO KIỂM THỬ V4.3.1
+========================
+
+- py_compile installer: ĐẠT.
+- Chạy lại trên bản sao dự án V4.3: ĐẠT.
+- Smoke audit: ĐẠT.
+- Database: KHÔNG THAY ĐỔI.
+- Registry nguồn: 1 bộ dữ liệu, 518 trường.
+- Tiểu học: 235 phương án; PASS 95; BLOCK 140.
+- Mầm non: 193 phương án; PASS 0; BLOCK 193 do chưa có nguồn.
+- THCS: 196 phương án; PASS 0; BLOCK 196 do chưa có nguồn.
+
+Thay đổi duy nhất so với bộ cài V4.3 trước:
+- sửa mã hóa stdout của subprocess smoke audit để tương thích Windows/cp1252.
+- không thay đổi các file nghiệp vụ nhúng, registry, hash nghiệp vụ hoặc database.

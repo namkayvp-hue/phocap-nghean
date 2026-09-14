@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bộ biểu mẫu PCGDMN 2025</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body{background:#eef4fb;color:#18324f;margin:0;font-family:Arial,sans-serif}
+        .hero{background:linear-gradient(135deg,#1254a5,#1683d8);color:white;padding:34px 48px}
+        .hero-inner{display:flex;justify-content:space-between;gap:24px;align-items:center;max-width:1400px;margin:auto}
+        .eyebrow,.section-label{font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#1474cf}
+        .hero .eyebrow{color:white;margin:0 0 8px}.hero h1{font-size:34px;margin:0 0 10px}.hero p{font-size:17px;margin:0}
+        .user{text-align:right}.nav{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+        .button{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700;border:0;cursor:pointer}
+        .button-light{background:white;color:#1355a3}.button-primary{background:#1675d1;color:white}.button-success{background:#168b3c;color:white}.button-secondary{background:#e6eef7;color:#18324f}
+        .container{max-width:1400px;margin:26px auto;padding:0 24px 50px}.panel{background:white;border-radius:18px;padding:24px;margin-bottom:20px;box-shadow:0 10px 28px rgba(30,73,120,.08)}
+        .panel-head{display:flex;justify-content:space-between;gap:20px;align-items:center}.panel h2{font-size:26px;margin:6px 0 8px}.muted{color:#6f849d;line-height:1.5}
+        .filters{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:14px;margin-top:20px}.filters label{display:block;font-weight:700;margin-bottom:7px}.filters select{width:100%;padding:12px;border:1px solid #cddbea;border-radius:10px;background:white}
+        .filter-actions{display:flex;gap:10px;align-items:end;justify-content:flex-end;margin-top:16px}
+        .notice{border-radius:14px;padding:18px 20px;margin-bottom:20px;background:#fff7df;border:1px solid #f0d188;color:#75520a}.notice strong{display:block;font-size:18px;margin-bottom:5px}
+        .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px}.stat{background:white;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(30,73,120,.07)}.stat span{display:block;color:#6f849d;font-weight:700}.stat strong{display:block;font-size:32px;color:#1454a5;margin-top:10px}.stat.green strong{color:#168b3c}.stat.red strong{color:#c82727}.stat.gold strong{color:#a56b00}
+        .sheet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}.sheet-card{border:1px solid #d8e4f0;border-radius:14px;padding:18px;background:#fbfdff}.sheet-card h3{margin:0 0 8px;font-size:18px}.sheet-card p{color:#6f849d;line-height:1.45;min-height:58px}.badge{display:inline-block;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800}.badge.ready{background:#e5f6ea;color:#19743b}.badge.partial{background:#fff3cf;color:#8a5c00}.badge.next{background:#e8f1fb;color:#27649c}
+        .scope{margin-top:16px;background:#eaf4ff;padding:14px;border-radius:12px;font-weight:700}.check-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.check-item{background:#f6f9fc;border-radius:12px;padding:14px}.check-item strong{display:block;margin-bottom:5px}
+        @media(max-width:1000px){.filters{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr 1fr}.sheet-grid{grid-template-columns:1fr 1fr}.hero-inner,.panel-head{align-items:flex-start;flex-direction:column}.user{text-align:left}.nav{justify-content:flex-start}}
+        @media(max-width:650px){.filters,.stats,.sheet-grid,.check-list{grid-template-columns:1fr}.hero{padding:28px 20px}.container{padding:0 14px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <p class="eyebrow">BÀI 13A-3 V3</p>
+            {# === BAI_13B_12_V2_4_2_MN_SELECTED_SHEET_START === #}
+            <h1>{% if selected_sheet_label %}{{ selected_sheet_label }}{% else %}Xuất bộ biểu mẫu PCGDMN 2025 đúng tệp Excel mẫu{% endif %}</h1>
+            <p>{% if selected_sheet_label %}Xuất riêng đúng trang biểu trong tệp mẫu gốc, giữ nguyên bố cục và vùng in.{% else %}Sao chép nguyên khuôn mẫu, giữ bố cục và điền dữ liệu vào đúng trang biểu.{% endif %}</p>
+            {# === BAI_13B_12_V2_4_2_MN_SELECTED_SHEET_END === #}
+        </div>
+        <div class="user">
+            <strong>{{ nguoi_dung.full_name }}</strong><br>
+            <span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span>
+            <div class="nav">
+                <a class="button button-light" href="/bao-cao">← Trung tâm báo cáo</a>
+                <a class="button button-light" href="/">Trang chủ</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Điều kiện xuất biểu mẫu</p>
+                <h2>Chọn năm học và phạm vi báo cáo</h2>
+                <p class="muted">File xuất giữ nguyên 7 trang, ô gộp, phông chữ, đường viền, kích thước hàng/cột, vùng in và khu vực ký xác nhận của tệp mẫu.</p>
+            </div>
+            <a class="button button-success" href="{{ export_url }}">📊 {% if selected_sheet_label %}Xuất biểu Excel đúng mẫu{% else %}Xuất đúng file Excel mẫu{% endif %}</a>
+        </div>
+        <form method="get" action="/bao-cao/pcgdmn-mau-2025">
+            {% if sheet_code %}<input type="hidden" name="sheet_code" value="{{ sheet_code }}">{% endif %}
+            <div class="filters">
+                <div><label>Năm học</label><select name="school_year_id">{% for year in school_years %}<option value="{{ year.id }}" {% if year.id == selected_year_id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div>
+                <div><label>Xã/phường</label><select name="commune_id"><option value="">-- Toàn tỉnh --</option>{% for commune in communes %}<option value="{{ commune.id }}" {% if commune.id == selected_commune_id %}selected{% endif %}>{{ commune.name }}</option>{% endfor %}</select></div>
+                <div><label>Trường</label><select name="school_id"><option value="">-- Tất cả trường trong phạm vi --</option>{% for school in schools %}<option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}</option>{% endfor %}</select></div>
+                <div><label>Trạng thái dữ liệu</label><select name="data_state">{% for code,label in data_state_labels.items() %}<option value="{{ code }}" {% if code == data_state %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+                <div class="filter-actions"><button class="button button-primary" type="submit">🔎 Lập bộ biểu</button><a class="button button-secondary" href="/bao-cao/pcgdmn-mau-2025">Xóa lọc</a></div>
+            </div>
+        </form>
+        <div class="scope">Phạm vi đang xem: {{ scope_label }} · Trạng thái tệp: {% if is_official %}CHÍNH THỨC{% else %}DỰ THẢO{% endif %}</div>
+    </section>
+
+    <div class="notice">
+        <strong>Không sử dụng dữ liệu minh họa có sẵn trong tệp mẫu.</strong>
+        Khi xuất, phần mềm xóa số liệu minh họa và chỉ điền dữ liệu thật trong hệ thống. Trang đội ngũ được điền từ phân hệ Bài 13B. Hai trang cơ sở vật chất và tài chính tiếp tục được giữ nguyên mẫu, đánh dấu chưa có dữ liệu cho đến khi hoàn thiện Bài 13C và 13D.
+    </div>
+
+    <section class="stats">
+        <article class="stat"><span>Số đợt trong phạm vi</span><strong>{{ summary.batches }}</strong></article>
+        <article class="stat"><span>Đợt đã có dữ liệu</span><strong>{{ summary.with_data }}</strong></article>
+        <article class="stat green"><span>Trẻ 3–5 tuổi</span><strong>{{ stats.children_3_5 }}</strong></article>
+        <article class="stat"><span>Trẻ 3 tuổi</span><strong>{{ stats.age_3 }}</strong></article>
+        <article class="stat"><span>Trẻ 4 tuổi</span><strong>{{ stats.age_4 }}</strong></article>
+        <article class="stat"><span>Trẻ 5 tuổi</span><strong>{{ stats.age_5 }}</strong></article>
+        <article class="stat green"><span>Đang học</span><strong>{{ stats.studying }}</strong></article>
+        <article class="stat"><span>Hoàn thành CT 5 tuổi</span><strong>{{ stats.completed_age_5 }}</strong></article>
+        <article class="stat gold"><span>Trẻ khuyết tật 3–5</span><strong>{{ stats.disabled }}</strong></article>
+        <article class="stat red"><span>Thiếu số định danh</span><strong>{{ stats.missing_personal_id }}</strong></article>
+        <article class="stat green"><span>Tổng đội ngũ</span><strong>{{ staff_summary.staff_total }}</strong></article>
+        <article class="stat"><span>Giáo viên</span><strong>{{ staff_summary.teachers }}</strong></article>
+    </section>
+
+    <section class="panel">
+        <p class="section-label">Cấu trúc tệp xuất</p>
+        <h2>Giữ nguyên 7 trang của biểu mẫu PCGDMN 2025</h2>
+        <div class="sheet-grid">
+            <article class="sheet-card"><h3>MN-01 TE</h3><p>Thống kê trẻ theo năm sinh, độ tuổi, huy động, khuyết tật và hoàn thành chương trình.</p><span class="badge ready">Tự động điền dữ liệu trẻ</span></article>
+            <article class="sheet-card"><h3>MN-01 GV</h3><p>Đội ngũ cán bộ quản lý, giáo viên và nhân viên theo trường, độ tuổi lớp.</p>{% if staff_summary.staff_total > 0 %}<span class="badge ready">Tự động điền {{ staff_summary.staff_total }} nhân sự</span>{% else %}<span class="badge partial">Chưa nhập dữ liệu đội ngũ</span>{% endif %}<div style="margin-top:12px"><a class="button button-secondary" href="/doi-ngu?school_year_id={{ selected_year_id }}{% if selected_commune_id %}&commune_id={{ selected_commune_id }}{% endif %}{% if selected_school_id %}&school_id={{ selected_school_id }}{% endif %}">Quản lý đội ngũ</a></div></article>
+            <article class="sheet-card"><h3>MN-01 CSVC</h3><p>Trường, điểm trường, nhóm lớp, phòng học, thiết bị, nước sạch, bếp và sân chơi.</p><span class="badge ready">Đã có dữ liệu CSVC</span></article>
+            <article class="sheet-card"><h3>MN-02</h3><p>Tổng hợp chỉ tiêu trẻ 3–4 tuổi và 5 tuổi; chưa kết luận đạt chuẩn khi thiếu GV/CSVC.</p><span class="badge ready">Tự động tổng hợp trẻ + GV + CSVC</span></article>
+            <article class="sheet-card"><h3>MN - Tài chính</h3><p>Kinh phí đầu tư, chi thường xuyên và chính sách thực hiện Nghị định 277.</p><span class="badge next">Bài 13D – đang chuẩn bị</span></article>
+            <article class="sheet-card"><h3>MN- Trẻ KT</h3><p>Thống kê trẻ khuyết tật theo tuổi, dạng tật và số trẻ tiếp cận giáo dục.</p><span class="badge ready">Tự động điền dữ liệu</span></article>
+            <article class="sheet-card"><h3>Sổ theo dõi PCGDMN</h3><p>Danh sách chi tiết trẻ, hộ, cha mẹ/người đỡ đầu, chương trình và cơ sở GDMN.</p><span class="badge ready">Tự động điền dữ liệu</span></article>
+        </div>
+    </section>
+
+    <section class="panel">
+        <p class="section-label">Nguyên tắc an toàn</p>
+        <h2>Xuất báo cáo chỉ đọc, không sửa dữ liệu gốc</h2>
+        <div class="check-list">
+            <div class="check-item"><strong>Giữ đúng tệp mẫu</strong><span class="muted">Không đổi tên trang, thứ tự trang, ô gộp, định dạng và vùng in.</span></div>
+            <div class="check-item"><strong>Không dùng số liệu minh họa</strong><span class="muted">Mọi số cũ trong mẫu được xóa trước khi điền số liệu thật.</span></div>
+            <div class="check-item"><strong>Không kết luận vượt dữ liệu</strong><span class="muted">MN-02 ghi “Thiếu dữ liệu GV/CSVC” cho đến khi hai phân hệ được hoàn thiện.</span></div>
+            <div class="check-item"><strong>Sẵn sàng mở rộng</strong><span class="muted">Bài 13B đã điền MN-01 GV; Bài 13C và 13D sẽ tiếp tục điền CSVC và tài chính vào cùng tệp mẫu này.</span></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if household %}Sửa hộ lịch sử{% else %}Thêm hộ lịch sử{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .form-card {max-width:900px;margin:0 auto;}
+        .form-grid {display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .form-grid .wide {grid-column:1/-1;}
+        .control {width:100%;padding:11px 12px;border:1px solid #c9d5e2;border-radius:9px;background:#fff;font:inherit;}
+        .muted {color:#65788c;font-size:13px;line-height:1.55;}
+        @media(max-width:700px){.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto;}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">BÀI 12D-14A · HỘ DỮ LIỆU LỊCH SỬ</p>
+            <h1>{% if household %}Sửa thông tin hộ{% else %}Thêm hộ mới{% endif %}</h1>
+            <p>{{ dataset.commune.name }} · Năm học {{ dataset.school_year.code }}</p>
+        </div>
+        <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}">← Quay lại bộ dữ liệu</a>
+    </div>
+</header>
+<main class="admin-container">
+    <section class="panel form-card">
+        {% if error_message %}<div class="alert alert-error">{{ error_message }}</div>{% endif %}
+        <div class="panel-header"><div><p class="panel-label">THÔNG TIN HỘ</p><h2>{% if household %}Cập nhật hộ {{ household.household_code }}{% else %}Tạo hộ lịch sử{% endif %}</h2></div></div>
+        <p class="muted">Mã hộ nên được giữ ổn định qua các năm. Khi để trống ở bước thêm mới, hệ thống tự sinh mã lịch sử.</p>
+        <form method="post" action="{% if household %}/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/ho/{{ household.id }}/sua{% else %}/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/ho/them{% endif %}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="household_code">Mã hộ {% if not household %}<span class="muted">(để trống để tự sinh)</span>{% endif %}</label>
+                    <input id="household_code" name="household_code" class="control" value="{{ household.household_code if household else '' }}" {% if household %}required{% endif %} placeholder="Ví dụ: HO-16681-000001">
+                </div>
+                <div class="form-group">
+                    <label for="head_name">Họ và tên chủ hộ</label>
+                    <input id="head_name" name="head_name" class="control" value="{{ household.head_name if household else '' }}" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="hamlet_name">Thôn/xóm/khối</label>
+                    <input id="hamlet_name" name="hamlet_name" class="control" value="{{ household.hamlet_name if household and household.hamlet_name else '' }}" maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Điện thoại liên hệ</label>
+                    <input id="phone" name="phone" class="control" value="{{ household.phone if household and household.phone else '' }}" maxlength="30">
+                </div>
+                <div class="form-group wide">
+                    <label for="address">Địa chỉ hộ</label>
+                    <textarea id="address" name="address" class="control" rows="3" required>{{ household.address if household else '' }}</textarea>
+                </div>
+                <div class="form-group wide">
+                    <label for="notes">Ghi chú</label>
+                    <textarea id="notes" name="notes" class="control" rows="3">{{ household.notes if household and household.notes else '' }}</textarea>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
+                <button class="button button-primary" type="submit">💾 {% if household %}Lưu thay đổi{% else %}Thêm hộ{% endif %}</button>
+                <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}">Hủy</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

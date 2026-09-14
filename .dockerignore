@@ -1,0 +1,19 @@
+# Môi trường Python cục bộ trên Windows
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Bản sao toàn bộ dự án dùng để chuyển máy - không cần trong ảnh Docker
+PhoCap_Chuyen_May_*/
+
+# Dữ liệu và tệp tải lên: gắn từ máy chủ lúc chạy, không nhúng vào ảnh
+data/
+uploads/
+
+# Tệp tạm
+*.log
+.git/
+.idea/
+.vscode/

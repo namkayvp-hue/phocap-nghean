@@ -1,0 +1,5 @@
+print("=" * 60)
+print("PHẦN MỀM QUẢN LÝ PHỔ CẬP GIÁO DỤC MẦM NON")
+print("=" * 60)
+print("Dự án đã được khởi tạo thành công!")
+print("Phân quyền: Sở - Xã - Trường - Giáo viên")

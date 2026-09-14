@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sáp nhập phát sinh</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<style>
+.wrap{max-width:1450px;margin:0 auto;padding:24px 18px 60px}.card{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:20px;margin-bottom:18px}.hero h1{margin:0 0 8px}.note{padding:12px 14px;border-radius:9px;margin:10px 0;line-height:1.55}.info{background:#eef6ff;border:1px solid #b9d8fa;color:#164e7a}.warn{background:#fff8e6;border:1px solid #f0d184;color:#785700}.muted{color:#667788;font-size:13px}.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;padding:10px 14px;font-weight:700;text-decoration:none;cursor:pointer}.primary{background:#1f5f99;color:#fff}.mutedbtn{background:#e8eef4;color:#213547}.topgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.field label{display:block;font-weight:700;margin-bottom:6px}.field select,.field input{width:100%;padding:10px;border:1px solid #c9d4df;border-radius:8px;background:#fff;box-sizing:border-box}.selection{display:grid;grid-template-columns:1fr 80px 1fr;gap:16px;align-items:start}.pickbox{border:1px solid #dce5ee;border-radius:12px;padding:14px;background:#fbfcfe}.search-results{max-height:300px;overflow:auto;border:1px solid #e0e6ec;border-radius:8px;margin-top:8px}.result{padding:9px 10px;border-bottom:1px solid #eef2f6;cursor:pointer}.result:hover{background:#eef6ff}.chip{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid #b9d8fa;border-radius:8px;background:#eef6ff;margin:7px 0}.targetchip{border-color:#a8dfbd;background:#edf9f2}.arrow{text-align:center;font-size:30px;font-weight:800;padding-top:90px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:9px;border-bottom:1px solid #e7ecf1;text-align:left}.combo{position:relative}.combo-list{display:none;position:absolute;z-index:50;left:0;right:0;top:100%;max-height:280px;overflow:auto;background:#fff;border:1px solid #c9d4df;border-radius:8px;box-shadow:0 8px 22px rgba(20,40,60,.16);margin-top:4px}.combo-list.open{display:block}.combo-item{padding:9px 10px;border-bottom:1px solid #eef2f6;cursor:pointer}.combo-item:hover{background:#eef6ff}.disabled-box{opacity:.55;pointer-events:none}.step-label{display:inline-block;background:#e5f1ff;color:#155a8a;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px;margin-bottom:8px}@media(max-width:1000px){.topgrid{grid-template-columns:1fr 1fr}}@media(max-width:900px){.selection{grid-template-columns:1fr}.arrow{padding:0;transform:rotate(90deg)}}@media(max-width:650px){.topgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="wrap">
+<section class="card hero">
+  <h1>Sáp nhập phát sinh</h1>
+  <div class="note info"><strong>Luồng thao tác đã chuẩn hóa:</strong> chọn <strong>Xã/phường → Cấp học → Năm hiệu lực</strong>, sau đó mới chọn <strong>trường nguồn → trường đích</strong>. Không sửa 711 phương án chính thức. Mọi lựa chọn vẫn bắt buộc qua kiểm tra dữ liệu nguồn + khóa trạng thái bản xem trước + mô phỏng RAM + backup + transaction + integrity/FK + xác nhận <code>SAP NHAP</code>.</div>
+  <div class="actions"><a class="btn mutedbtn" href="/cong-cu-du-lieu/sap-nhap-truong/bang-dieu-khien?school_year_id={{ selected_school_year_id or '' }}&level_code={{ selected_level_code }}{% if selected_commune_id %}&commune_id={{ selected_commune_id }}{% endif %}">← Bảng điều khiển toàn tỉnh</a></div>
+</section>
+{% if status_message %}<div class="note warn">{{ status_message }}</div>{% endif %}
+
+<section class="card">
+  <h2>1. Chọn phạm vi sáp nhập phát sinh</h2>
+  <form method="get" id="reload-form">
+    <div class="topgrid">
+      <div class="field">
+        <span class="step-label">BƯỚC 1</span>
+        <label>Xã/phường</label>
+        <div class="combo">
+          <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off">
+          <input id="commune-id" type="hidden" name="commune_id" value="{{ selected_commune_id or '' }}">
+          <div id="commune-list" class="combo-list"></div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="step-label">BƯỚC 2</span>
+        <label>Cấp học</label>
+        <select name="level_code" id="level-code">
+          {% for code,label in level_choices %}<option value="{{ code }}" {% if code==selected_level_code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <span class="step-label">BƯỚC 3</span>
+        <label>Năm hiệu lực</label>
+        <select name="school_year_id">
+          {% for y in school_years %}<option value="{{ y.id }}" {% if y.id==selected_school_year_id %}selected{% endif %}>{{ y.code or y.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="actions"><button class="btn primary" type="submit">NẠP DANH SÁCH TRƯỜNG</button></div>
+  </form>
+  {% if not selected_commune_id %}<div class="note warn"><strong>Hãy chọn xã/phường trước.</strong> Sau đó hệ thống mới nạp danh sách trường của đúng xã/phường và cấp học để chọn nguồn/đích.</div>{% endif %}
+</section>
+
+<section class="card {% if not selected_commune_id %}disabled-box{% endif %}">
+  <h2>2. Chọn trường nguồn → trường đích</h2>
+  {% if selected_commune_id %}<div class="note info"><strong>Phạm vi đang chọn:</strong> {{ selected_commune_name }} · {{ selected_level_label }} · năm hiệu lực {{ selected_school_year_label }}. Chỉ các trường đang hoạt động thuộc đúng phạm vi này được đưa vào danh sách nguồn/đích.</div>{% endif %}
+  <form method="post" action="/cong-cu-du-lieu/sap-nhap-truong/phat-sinh/xem-truoc" id="merge-form">
+    <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+    <input type="hidden" name="commune_id" value="{{ selected_commune_id or '' }}">
+    <input type="hidden" name="level_code" value="{{ selected_level_code }}">
+    <div id="hidden-sources"></div>
+    <input type="hidden" id="target-id" name="target_school_id" value="">
+    <div class="selection">
+      <div class="pickbox">
+        <h3>TRƯỜNG NGUỒN</h3>
+        <div class="muted">Có thể chọn một hoặc nhiều trường nguồn trong {{ selected_commune_name or 'xã/phường đã chọn' }}. Gõ tên hoặc mã trường.</div>
+        <div class="field"><input id="source-search" type="text" placeholder="Gõ để tìm trường nguồn..." autocomplete="off"></div>
+        <div id="source-results" class="search-results"></div>
+        <h4>Đã chọn</h4><div id="selected-sources"><div class="muted">Chưa chọn trường nguồn.</div></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="pickbox">
+        <h3>TRƯỜNG ĐÍCH – GIỮ NGUYÊN school_id</h3>
+        <div class="muted">Chọn trường đích trong cùng xã/phường và cấp học đã chọn.</div>
+        <div class="field"><input id="target-search" type="text" placeholder="Gõ để tìm trường đích..." autocomplete="off"></div>
+        <div id="target-results" class="search-results"></div>
+        <h4>Đã chọn</h4><div id="selected-target"><div class="muted">Chưa chọn trường đích.</div></div>
+      </div>
+    </div>
+    <div class="note warn"><strong>Không thể chọn trường đã ngừng hoạt động/đã sáp nhập.</strong> Nguồn và đích không được trùng nhau. Cùng lựa chọn đã có nhật ký thì bị chặn chạy lần hai.</div>
+    <div class="actions"><button class="btn primary" type="submit">XEM TRƯỚC AN TOÀN</button></div>
+  </form>
+</section>
+
+{% if future_executions %}
+<section class="card"><h2>3. Nhật ký sáp nhập phát sinh gần đây</h2><table class="table"><thead><tr><th>ID</th><th>Chữ ký</th><th>Cấp</th><th>Đích</th><th>Thời điểm</th><th></th></tr></thead><tbody>{% for x in future_executions %}<tr><td>{{ x.id }}</td><td><code>{{ x.signature }}</code></td><td>{{ x.level_code }}</td><td>school_id={{ x.target_school_id }}</td><td>{{ x.created_at }}</td><td><a class="btn mutedbtn" href="/cong-cu-du-lieu/sap-nhap-truong/phat-sinh/ket-qua/{{ x.id }}">Xem</a></td></tr>{% endfor %}</tbody></table></section>
+{% endif %}
+</main>
+<script>
+(function(){
+  const communes=[{% for c in communes %}{id:{{ c.id }},name:{{ c.name|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}];
+  const communeInput=document.getElementById('commune-search'), communeId=document.getElementById('commune-id'), communeList=document.getElementById('commune-list');
+  function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/đ/g,'d')}
+  function renderCommunes(){const q=norm(communeInput.value.trim());communeList.innerHTML='';const rows=(q?communes.filter(c=>norm(c.name).startsWith(q)||norm(c.name).includes(q)):communes).slice(0,40);if(!rows.length){communeList.innerHTML='<div class="combo-item muted">Không tìm thấy xã/phường.</div>';communeList.classList.add('open');return}rows.forEach(c=>{const d=document.createElement('div');d.className='combo-item';d.textContent=c.name;d.onclick=()=>{communeInput.value=c.name;communeId.value=c.id;communeList.classList.remove('open')};communeList.appendChild(d)});communeList.classList.add('open')}
+  communeInput.addEventListener('input',()=>{communeId.value='';renderCommunes()});communeInput.addEventListener('focus',renderCommunes);document.addEventListener('click',e=>{if(!e.target.closest('.combo'))communeList.classList.remove('open')});
+  document.getElementById('reload-form').addEventListener('submit',e=>{if(!communeId.value){e.preventDefault();alert('Hãy chọn xã/phường trước.')}});
+
+  const schools=[{% for s in schools %}{id:{{ s.id }},code:{{ s.code|tojson }},name:{{ s.name|tojson }},commune:{{ s.commune_name|tojson }},levels:{{ s.levels|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}];
+  const srcInput=document.getElementById('source-search'),srcResults=document.getElementById('source-results'),srcSelected=document.getElementById('selected-sources'),hiddenSources=document.getElementById('hidden-sources'),tarInput=document.getElementById('target-search'),tarResults=document.getElementById('target-results'),tarSelected=document.getElementById('selected-target'),tarId=document.getElementById('target-id'),form=document.getElementById('merge-form');
+  let sources=[];let target=null;
+  function find(q){q=norm(q.trim());if(!q)return [];return schools.filter(s=>norm(s.name+' '+s.code).includes(q)).slice(0,40)}
+  function renderResults(input,box,onPick){box.innerHTML='';const rows=find(input.value);if(!rows.length){box.innerHTML='<div class="result muted">Gõ để tìm trường.</div>';return}rows.forEach(s=>{const d=document.createElement('div');d.className='result';d.innerHTML='<strong></strong><div class="muted"></div>';d.querySelector('strong').textContent=s.name;d.querySelector('.muted').textContent=s.code+' · '+s.commune+' · '+s.levels.join(', ');d.onclick=()=>onPick(s);box.appendChild(d)})}
+  function renderSources(){srcSelected.innerHTML='';hiddenSources.innerHTML='';if(!sources.length){srcSelected.innerHTML='<div class="muted">Chưa chọn trường nguồn.</div>';return}sources.forEach(s=>{const c=document.createElement('div');c.className='chip';c.innerHTML='<span></span><button type="button">Xóa</button>';c.querySelector('span').textContent=s.name+' · '+s.code;c.querySelector('button').onclick=()=>{sources=sources.filter(x=>x.id!==s.id);renderSources()};srcSelected.appendChild(c);const h=document.createElement('input');h.type='hidden';h.name='source_school_ids';h.value=s.id;hiddenSources.appendChild(h)})}
+  function renderTarget(){tarSelected.innerHTML='';if(!target){tarSelected.innerHTML='<div class="muted">Chưa chọn trường đích.</div>';tarId.value='';return}const c=document.createElement('div');c.className='chip targetchip';c.innerHTML='<span></span><button type="button">Xóa</button>';c.querySelector('span').textContent=target.name+' · '+target.code;c.querySelector('button').onclick=()=>{target=null;renderTarget()};tarSelected.appendChild(c);tarId.value=target.id}
+  if(srcInput&&tarInput){srcInput.oninput=()=>renderResults(srcInput,srcResults,s=>{if(target&&target.id===s.id){alert('Trường đích không được đồng thời là trường nguồn.');return}if(!sources.some(x=>x.id===s.id))sources.push(s);srcInput.value='';srcResults.innerHTML='';renderSources()});tarInput.oninput=()=>renderResults(tarInput,tarResults,s=>{if(sources.some(x=>x.id===s.id)){alert('Trường đích không được đồng thời là trường nguồn.');return}target=s;tarInput.value='';tarResults.innerHTML='';renderTarget()});form.onsubmit=e=>{if(!sources.length||!target){e.preventDefault();alert('Hãy chọn ít nhất một trường nguồn và một trường đích.')}};srcResults.innerHTML='<div class="result muted">Gõ để tìm trường.</div>';tarResults.innerHTML='<div class="result muted">Gõ để tìm trường.</div>'}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng hợp chốt đối chiếu học sinh</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        :root {
+            --blue:#1565c0;
+            --blue-dark:#0d47a1;
+            --ink:#16324f;
+            --muted:#657b91;
+            --line:#dce6ef;
+            --surface:#ffffff;
+            --page:#eef4fa;
+        }
+        * { box-sizing:border-box; }
+        body { margin:0; background:var(--page); color:var(--ink); font-family:Arial, Helvetica, sans-serif; }
+        .header { background:linear-gradient(120deg, #0d47a1, #1976d2); color:#fff; }
+        .header-inner { max-width:1540px; margin:0 auto; padding:28px 32px; display:flex; justify-content:space-between; gap:24px; align-items:center; }
+        .eyebrow { margin:0 0 8px; font-size:13px; font-weight:800; letter-spacing:1.2px; }
+        h1 { margin:0; font-size:32px; line-height:1.2; }
+        .description { margin:10px 0 0; opacity:.93; line-height:1.55; }
+        .user-box { text-align:right; min-width:300px; }
+        .user-detail { font-size:13px; opacity:.92; margin-top:3px; }
+        .header-actions { display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin-top:12px; }
+        .button { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:0; border-radius:10px; padding:11px 15px; text-decoration:none; font:inherit; font-weight:700; cursor:pointer; }
+        .button-light { background:#fff; color:var(--blue-dark); }
+        .button-primary { background:#1976d2; color:#fff; }
+        .button-success { background:#16833a; color:#fff; }
+        .button-muted { background:#e8eef5; color:#2f4a65; }
+        .container { max-width:1540px; margin:0 auto; padding:24px 32px 38px; }
+        .notice { background:#fff7db; color:#7a5600; border:1px solid #f0d68b; border-radius:12px; padding:15px 17px; margin-bottom:18px; line-height:1.55; }
+        .panel { background:var(--surface); border:1px solid var(--line); border-radius:17px; padding:22px; margin-bottom:18px; box-shadow:0 8px 24px rgba(21,54,86,.05); }
+        .panel-header { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; flex-wrap:wrap; margin-bottom:16px; }
+        .panel-label { color:var(--blue); font-size:13px; font-weight:800; letter-spacing:1px; margin:0 0 6px; }
+        h2 { margin:0; font-size:24px; }
+        .muted { color:var(--muted); line-height:1.55; }
+        .year-badge { background:#e3f2fd; color:#0d47a1; border-radius:999px; padding:10px 16px; font-weight:800; }
+        .stats-grid { display:grid; grid-template-columns:repeat(8, minmax(135px, 1fr)); gap:13px; margin-bottom:18px; }
+        .stat-card { background:#fff; border:1px solid var(--line); border-radius:15px; padding:17px; min-height:105px; }
+        .stat-label { color:var(--muted); font-size:13px; line-height:1.35; }
+        .stat-value { font-size:29px; font-weight:800; margin-top:9px; color:#0d47a1; }
+        .stat-value.good { color:#16833a; }
+        .stat-value.warn { color:#b26b00; }
+        .stat-value.bad { color:#c62828; }
+        .filters { display:grid; grid-template-columns:1.1fr 1fr 2fr .8fr auto; gap:12px; align-items:end; }
+        .form-group { margin:0; }
+        .form-group label { display:block; font-weight:700; margin-bottom:7px; }
+        .control { width:100%; min-height:44px; border:1px solid #cad7e4; border-radius:9px; background:#fff; padding:10px 12px; font:inherit; color:var(--ink); }
+        .filter-actions { display:flex; gap:9px; flex-wrap:wrap; }
+        .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:12px; }
+        table { width:100%; border-collapse:collapse; min-width:1490px; }
+        th { background:#eaf2f9; color:#274966; font-size:13px; padding:12px 10px; text-align:left; border-bottom:1px solid var(--line); }
+        td { padding:13px 10px; border-bottom:1px solid #e8eef4; vertical-align:top; font-size:14px; line-height:1.45; }
+        tbody tr:hover { background:#f8fbfe; }
+        .commune-name { font-weight:800; font-size:15px; }
+        .subtle { color:var(--muted); font-size:12px; margin-top:3px; }
+        .state-badge { display:inline-flex; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:800; white-space:nowrap; }
+        .state-signed { background:#e8f5e9; color:#176b32; }
+        .state-reopened { background:#fff3e0; color:#a45d00; }
+        .state-unsigned { background:#ffebee; color:#b71c1c; }
+        .state-missing { background:#eceff1; color:#455a64; }
+        .number { text-align:center; font-weight:800; }
+        .number.good { color:#16833a; }
+        .number.bad { color:#c62828; }
+        .action-stack { display:flex; flex-direction:column; gap:7px; min-width:155px; }
+        .button-small { padding:8px 10px; font-size:12px; border-radius:8px; }
+        .empty { padding:35px; text-align:center; color:var(--muted); }
+        .pagination { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:17px; flex-wrap:wrap; }
+        .page-link { min-width:38px; min-height:38px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:#e8eef5; color:#274966; text-decoration:none; font-weight:700; padding:0 10px; }
+        .page-link.active { background:#1976d2; color:#fff; }
+        .page-link.disabled { opacity:.5; pointer-events:none; }
+        @media (max-width:1250px) {
+            .stats-grid { grid-template-columns:repeat(4, 1fr); }
+            .filters { grid-template-columns:1fr 1fr; }
+        }
+        @media (max-width:760px) {
+            .header-inner, .panel-header { flex-direction:column; align-items:stretch; }
+            .user-box { min-width:0; text-align:left; }
+            .header-actions { justify-content:flex-start; }
+            .container { padding:15px; }
+            .stats-grid, .filters { grid-template-columns:1fr; }
+            h1 { font-size:25px; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">BÀI 12D-18</p>
+            <h1>Tổng hợp trạng thái chốt đối chiếu toàn tỉnh</h1>
+            <p class="description">Theo dõi xã/phường đã chốt, đã mở lại, chưa chốt hoặc chưa có đợt; xuất bảng tổng hợp và toàn bộ lịch sử xác nhận.</p>
+        </div>
+        <div class="user-box">
+            {% if nguoi_dung %}
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div class="user-detail">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            {% endif %}
+            <div class="header-actions">
+                <a class="button button-light" href="/dieu-tra/don-doc-doi-chieu-hoc-sinh">📌 Danh sách đôn đốc</a>
+                <a class="button button-light" href="/dieu-tra">← Danh sách đợt</a>
+                <a class="button button-light" href="/">Trang chủ</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if error_message %}
+        <div class="notice">{{ error_message }}</div>
+    {% else %}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">GIÁM SÁT CẤP TỈNH</p>
+                    <h2>Tiến độ xác nhận kết quả theo từng địa bàn</h2>
+                    <p class="muted" style="margin:8px 0 0;">Số liệu chi tiết lấy từ ảnh chụp tại lần chốt hoặc mở lại gần nhất; hệ thống không tự sửa dữ liệu điều tra và học sinh.</p>
+                </div>
+                {% if selected_year %}<span class="year-badge">Năm học {{ selected_year.code }}</span>{% endif %}
+            </div>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card"><div class="stat-label">Tổng xã/phường</div><div class="stat-value">{{ summary.commune_total }}</div></article>
+            <article class="stat-card"><div class="stat-label">Đã có đợt</div><div class="stat-value">{{ summary.batch_total }}</div></article>
+            <article class="stat-card"><div class="stat-label">Đã chốt</div><div class="stat-value good">{{ summary.signed_total }}</div></article>
+            <article class="stat-card"><div class="stat-label">Đã mở lại</div><div class="stat-value warn">{{ summary.reopened_total }}</div></article>
+            <article class="stat-card"><div class="stat-label">Chưa chốt</div><div class="stat-value bad">{{ summary.unsigned_total }}</div></article>
+            <article class="stat-card"><div class="stat-label">Chưa có đợt</div><div class="stat-value warn">{{ summary.missing_batch_total }}</div></article>
+            <article class="stat-card"><div class="stat-label">Tổng dòng đã có ảnh chụp</div><div class="stat-value">{{ summary.snapshot_rows }}</div></article>
+            <article class="stat-card"><div class="stat-label">Còn chờ tại ảnh chụp gần nhất</div><div class="stat-value bad">{{ summary.snapshot_pending }}</div></article>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div><p class="panel-label">TÌM VÀ LỌC</p><h2>Chọn đúng nhóm địa bàn cần kiểm tra</h2></div>
+                <a class="button button-success" href="{{ export_url }}">📊 Xuất Excel tổng hợp</a>
+            </div>
+            <form method="get" action="/dieu-tra/tong-hop-doi-chieu-hoc-sinh">
+                <div class="filters">
+                    <div class="form-group">
+                        <label for="school_year_id">Năm học</label>
+                        <select class="control" id="school_year_id" name="school_year_id">
+                            {% for year in school_years %}
+                                <option value="{{ year.id }}" {% if selected_year_id == year.id %}selected{% endif %}>{{ year.code }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">Trạng thái chốt</label>
+                        <select class="control" id="state" name="state">
+                            {% for code, label in state_labels.items() %}
+                                <option value="{{ code }}" {% if state == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="q">Tìm xã, mã đợt, người chốt hoặc căn cứ</label>
+                        <input class="control" id="q" name="q" value="{{ q }}" placeholder="Ví dụ: Cửa Lò, 16732, Đậu Hồng Nam...">
+                    </div>
+                    <div class="form-group">
+                        <label for="page_size">Số dòng/trang</label>
+                        <select class="control" id="page_size" name="page_size">
+                            {% for option in page_size_options %}
+                                <option value="{{ option }}" {% if page_size == option %}selected{% endif %}>{{ option }} dòng</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="button button-primary" type="submit">🔎 Lọc</button>
+                        <a class="button button-muted" href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh{% if selected_year_id %}?school_year_id={{ selected_year_id }}{% endif %}">Xóa lọc</a>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">KẾT QUẢ CHI TIẾT</p>
+                    <h2>Theo dõi từng xã/phường</h2>
+                    <p class="muted" style="margin:7px 0 0;">Đang hiển thị {{ rows|length }} trong tổng số {{ total_records }} kết quả phù hợp.</p>
+                </div>
+                <strong>{{ total_records }} địa bàn</strong>
+            </div>
+
+            {% if rows %}
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Xã/phường</th>
+                                <th>Đợt điều tra</th>
+                                <th>Trạng thái đợt</th>
+                                <th>Trạng thái chốt</th>
+                                <th>Thao tác gần nhất</th>
+                                <th>Tổng</th>
+                                <th>Khớp</th>
+                                <th>Cần xử lý</th>
+                                <th>Đã ghi nhận</th>
+                                <th>Còn chờ</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                                <tr>
+                                    <td>{{ (page - 1) * page_size + loop.index }}</td>
+                                    <td>
+                                        <div class="commune-name">{{ row.commune.name }}</div>
+                                        <div class="subtle">{{ row.commune.code }}</div>
+                                    </td>
+                                    <td>
+                                        {% if row.batch %}
+                                            <strong>{{ row.batch.code }}</strong>
+                                            <div class="subtle">{{ row.batch.name }}</div>
+                                            {% if row.extra_batch_count %}<div class="subtle">Có thêm {{ row.extra_batch_count }} đợt khác cùng năm</div>{% endif %}
+                                        {% else %}
+                                            <span class="subtle">Chưa có đợt điều tra</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ row.batch_status_label }}
+                                        {% if row.batch %}<div class="subtle">{% if row.batch.is_locked %}Đã khóa dữ liệu{% else %}Chưa khóa dữ liệu{% endif %}</div>{% endif %}
+                                    </td>
+                                    <td><span class="state-badge {{ row.state_badge }}">{{ row.state_label }}</span></td>
+                                    <td>
+                                        <strong>{{ row.latest_action_label }}</strong>
+                                        {% if row.latest_signoff %}
+                                            <div class="subtle">{{ row.latest_signoff.actor_name_snapshot }} · {{ row.latest_time_label }}</div>
+                                            <div class="subtle">{{ row.latest_signoff.note }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="number">{{ row.total_rows if row.total_rows is not none else '—' }}</td>
+                                    <td class="number good">{{ row.matched_rows if row.matched_rows is not none else '—' }}</td>
+                                    <td class="number bad">{{ row.issue_rows if row.issue_rows is not none else '—' }}</td>
+                                    <td class="number good">{{ row.resolved_rows if row.resolved_rows is not none else '—' }}</td>
+                                    <td class="number bad">{{ row.pending_rows if row.pending_rows is not none else '—' }}</td>
+                                    <td>
+                                        <div class="action-stack">
+                                            {% if row.batch %}
+                                                <a class="button button-primary button-small" href="/dieu-tra/{{ row.batch.id }}/doi-chieu-hoc-sinh">Mở đối chiếu</a>
+                                                <a class="button button-muted button-small" href="/dieu-tra/{{ row.batch.id }}/doi-chieu-hoc-sinh/chot-ket-qua">Biên bản / chốt</a>
+                                            {% else %}
+                                                <a class="button button-muted button-small" href="/dieu-tra">Xem danh sách đợt</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <a class="page-link {% if not previous_url %}disabled{% endif %}" href="{{ previous_url or '#' }}">← Trước</a>
+                    {% for item in page_links %}
+                        <a class="page-link {% if item.number == page %}active{% endif %}" href="{{ item.url }}">{{ item.number }}</a>
+                    {% endfor %}
+                    <span class="page-link disabled">/ {{ total_pages }}</span>
+                    <a class="page-link {% if not next_url %}disabled{% endif %}" href="{{ next_url or '#' }}">Sau →</a>
+                </div>
+            {% else %}
+                <div class="empty">Không có địa bàn phù hợp với bộ lọc hiện tại.</div>
+            {% endif %}
+        </section>
+    {% endif %}
+</main>
+</body>
+</html>

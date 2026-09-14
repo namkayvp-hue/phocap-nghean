@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo dõi năm học trong hộ</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .page-wrap {
+            width: min(1280px, 95%);
+            margin: 28px auto 48px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            background: #fff;
+            border: 1px solid #dfe8f1;
+            border-radius: 13px;
+            padding: 16px 18px;
+        }
+
+        .summary-label {
+            margin: 0 0 5px;
+            color: #637587;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            margin: 0;
+            color: #17324d;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .table-wide {
+            min-width: 1050px;
+        }
+
+        .status-pill,
+        .progress-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 18px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-pill {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .status-missing {
+            background: #fff3e0;
+            color: #9a4d00;
+        }
+
+        .progress-pill {
+            background: #eef3f7;
+            color: #40566b;
+        }
+
+        .person-cards {
+            display: none;
+        }
+
+        .person-card {
+            border: 1px solid #dfe8f1;
+            border-radius: 13px;
+            padding: 15px;
+            background: #fff;
+        }
+
+        .person-card + .person-card {
+            margin-top: 12px;
+        }
+
+        .person-card-title {
+            margin: 0 0 4px;
+            color: #17324d;
+            font-size: 18px;
+        }
+
+        .person-card-meta {
+            margin: 4px 0;
+            color: #617487;
+            font-size: 13px;
+        }
+
+        .person-card-actions {
+            margin-top: 13px;
+        }
+
+        @media (max-width: 800px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .desktop-table {
+                display: none;
+            }
+
+            .person-cards {
+                display: block;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">ĐIỀU TRA PHỔ CẬP GIÁO DỤC MẦM NON</p>
+            <h1>Theo dõi thông tin từng năm học</h1>
+            <p>
+                Chọn từng thành viên để nhập tình trạng học tập và các chỉ báo
+                của năm {{ batch.school_year.code }}.
+            </p>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+
+            <a
+                class="button button-light"
+                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong"
+            >
+                ← Danh sách đối tượng
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="page-wrap">
+    <section class="summary-grid">
+        <article class="summary-card">
+            <p class="summary-label">Số phiếu</p>
+            <p class="summary-value">{{ survey_form.form_number }}</p>
+        </article>
+
+        <article class="summary-card">
+            <p class="summary-label">Mã hộ</p>
+            <p class="summary-value">{{ household.code }}</p>
+        </article>
+
+        <article class="summary-card">
+            <p class="summary-label">Chủ hộ</p>
+            <p class="summary-value">{{ household.head_name }}</p>
+        </article>
+
+        <article class="summary-card">
+            <p class="summary-label">Năm điều tra hiện tại</p>
+            <p class="summary-value">{{ batch.school_year.code }}</p>
+        </article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">DỮ LIỆU TRONG HỘ</p>
+                <h2>Chọn đối tượng cần theo dõi</h2>
+            </div>
+
+            <span class="count-badge">{{ rows|length }} đối tượng</span>
+        </div>
+
+        {% if rows %}
+            <div class="table-wrapper desktop-table">
+                <table class="data-table table-wide">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã đối tượng</th>
+                            <th>Họ và tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Số năm đã lưu</th>
+                            <th>Năm gần nhất</th>
+                            <th>Tình trạng gần nhất</th>
+                            <th>Năm {{ batch.school_year.code }}</th>
+                            <th>Thông tin đã nhập</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><strong>{{ row.person.code }}</strong></td>
+                            <td><strong>{{ row.person.full_name }}</strong></td>
+                            <td>
+                                {{ row.person.date_of_birth.strftime('%d/%m/%Y') if row.person.date_of_birth else '—' }}
+                            </td>
+                            <td>{{ row.record_count }}</td>
+                            <td>{{ row.latest_year_code }}</td>
+                            <td>
+                                <span class="status-pill">
+                                    {{ row.latest_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-pill {% if row.current_year_status == 'Chưa nhập' %}status-missing{% endif %}">
+                                    {{ row.current_year_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="progress-pill">
+                                    {{ row.current_year_answered }}/{{ row.current_year_total }}
+                                </span>
+                            </td>
+                            <td>
+                                <a
+                                    class="button button-small button-primary"
+                                    href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ row.person.id }}/nam-hoc?school_year_id={{ batch.school_year.id }}"
+                                >
+                                    {% if can_edit_data %}Nhập / cập nhật{% else %}Xem{% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="person-cards">
+                {% for row in rows %}
+                    <article class="person-card">
+                        <h3 class="person-card-title">{{ row.person.full_name }}</h3>
+                        <p class="person-card-meta">
+                            {{ row.person.code }} ·
+                            {{ row.person.date_of_birth.strftime('%d/%m/%Y') if row.person.date_of_birth else 'Chưa có ngày sinh' }}
+                        </p>
+                        <p class="person-card-meta">
+                            Năm {{ batch.school_year.code }}:
+                            <strong>{{ row.current_year_status }}</strong>
+                        </p>
+                        <p class="person-card-meta">
+                            Thông tin đã nhập:
+                            <strong>{{ row.current_year_answered }}/{{ row.current_year_total }}</strong>
+                        </p>
+                        <div class="person-card-actions">
+                            <a
+                                class="button button-primary"
+                                href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ row.person.id }}/nam-hoc?school_year_id={{ batch.school_year.id }}"
+                            >
+                                {% if can_edit_data %}Nhập / cập nhật năm học{% else %}Xem năm học{% endif %}
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📘</div>
+                <h3>Chưa có đối tượng</h3>
+                <p>Hãy thêm đối tượng vào hộ trước.</p>
+            </div>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

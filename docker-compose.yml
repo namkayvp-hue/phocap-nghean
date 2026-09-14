@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: phocap:latest
+    container_name: phocap
+    # Chạy bằng UID/GID của tài khoản sonnh để ghi được vào data/ và uploads/
+    user: "1000:1000"
+    ports:
+      - "5006:8000"
+    environment:
+      # Khoá ký phiên đăng nhập. Đặt giá trị thật trong tệp .env cạnh tệp này.
+      PHOCAP_SESSION_SECRET_KEY: ${PHOCAP_SESSION_SECRET_KEY}
+      TZ: Asia/Ho_Chi_Minh
+      # Danh sách IP được tin khi đọc X-Forwarded-Proto / X-Forwarded-For.
+      # Không đặt thì uvicorn chỉ tin 127.0.0.1, nên khi chạy trong Docker sau
+      # Nginx Proxy Manager, phần mềm không biết người dùng đang vào bằng HTTPS
+      # và sinh ra đường dẫn http:// (bị trình duyệt chặn ở cổng 443).
+      # Đặt PHOCAP_FORWARDED_ALLOW_IPS trong .env để thu hẹp về đúng IP proxy.
+      FORWARDED_ALLOW_IPS: ${PHOCAP_FORWARDED_ALLOW_IPS:-*}
+    volumes:
+      # Cơ sở dữ liệu SQLite và các bản sao lưu nằm trên máy chủ
+      - ./data:/app/data
+      # Tệp Excel tải lên nằm trên máy chủ
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/kiem-tra"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3

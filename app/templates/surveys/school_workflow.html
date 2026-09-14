@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân công và khóa đơn vị điều tra</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        body { background:#eef4f9; }
+        .hero { background:linear-gradient(120deg,#0d47a1,#1976d2); color:#fff; }
+        .hero-inner,.container { width:min(1480px,calc(100% - 32px)); margin:auto; }
+        .hero-inner { padding:27px 0; display:flex; justify-content:space-between; gap:20px; align-items:center; flex-wrap:wrap; }
+        .hero h1 { margin:5px 0 7px; font-size:clamp(27px,3vw,39px); }
+        .eyebrow { margin:0; font-size:12px; font-weight:900; letter-spacing:.08em; }
+        .container { margin-top:22px; margin-bottom:55px; }
+        .panel { background:#fff; border:1px solid #d7e3ee; border-radius:15px; padding:20px; margin-bottom:18px; box-shadow:0 6px 18px rgba(31,62,91,.06); }
+        .state-grid,.summary-grid { display:grid; gap:11px; }
+        .state-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+        .summary-grid { grid-template-columns:repeat(7,minmax(110px,1fr)); margin-bottom:18px; }
+        .card { background:#fff; border:1px solid #d7e3ee; border-radius:12px; padding:14px; }
+        .card span { display:block; color:#667b8e; font-size:12px; font-weight:800; text-transform:uppercase; line-height:1.35; }
+        .card strong { display:block; margin-top:7px; color:#0d47a1; font-size:25px; }
+        .lock-box { border-left:5px solid #c62828; }
+        .open-box { border-left:5px solid #198754; }
+        .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+        .toolbar-left,.toolbar-right { display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+        .control { width:100%; min-height:42px; padding:9px 11px; border:1px solid #c8d5e1; border-radius:8px; font:inherit; }
+        .table-wrap { overflow:auto; border:1px solid #d7e3ee; border-radius:12px; }
+        table { width:100%; min-width:1480px; border-collapse:collapse; }
+        th,td { padding:11px 10px; border-bottom:1px solid #e2ebf3; text-align:left; vertical-align:top; font-size:13px; }
+        th { background:#edf5fc; color:#294764; position:sticky; top:0; z-index:1; }
+        .code { font-weight:800; white-space:nowrap; color:#0d47a1; }
+        .muted { color:#667b8e; font-size:12px; line-height:1.45; }
+        .pill { display:inline-flex; padding:5px 9px; border-radius:999px; font-size:11px; font-weight:900; white-space:nowrap; }
+        .pill-green { background:#e7f6eb; color:#176b30; }
+        .pill-blue { background:#e7f1ff; color:#0d4e96; }
+        .pill-amber { background:#fff1db; color:#8b5700; }
+        .pill-red { background:#ffe8e8; color:#a32222; }
+        .pill-gray { background:#eef2f5; color:#52687a; }
+        .action-stack { display:flex; flex-direction:column; gap:7px; min-width:210px; }
+        .inline-form { display:flex; flex-direction:column; gap:6px; margin:0; }
+        .mini-input { min-height:36px; padding:7px 8px; font-size:12px; border:1px solid #cad6e1; border-radius:7px; }
+        .log-list { max-height:420px; overflow:auto; }
+        .log-row { display:grid; grid-template-columns:180px 180px 1fr 160px; gap:10px; padding:10px 0; border-bottom:1px solid #e5edf4; font-size:13px; }
+        .warning { background:#fff7e5; border:1px solid #efd18b; color:#765000; border-radius:10px; padding:13px 15px; line-height:1.55; }
+        @media(max-width:1050px){ .state-grid,.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .log-row{grid-template-columns:1fr;} }
+        @media(max-width:650px){ .state-grid,.summary-grid{grid-template-columns:1fr;} }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <p class="eyebrow">BÀI 13B-4 · QUY TRÌNH SỞ → XÃ → TRƯỜNG</p>
+            <h1>Phân công và khóa đơn vị điều tra</h1>
+            <p style="margin:0;line-height:1.55;">
+                {{ batch.name }} · {{ batch.school_year.code }} · {{ batch.commune.name }}
+            </p>
+        </div>
+        <div style="text-align:right;line-height:1.45;">
+            <strong>{{ nguoi_dung.full_name }}</strong>
+            <div style="font-size:13px;opacity:.9;">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">Danh sách hộ</a>
+                <a class="button button-light" href="/dieu-tra">Danh sách đợt</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+
+    <section class="panel {% if province_locked or commune_locked %}lock-box{% else %}open-box{% endif %}">
+        <div class="toolbar">
+            <div>
+                <p class="eyebrow" style="color:#1976d2;">TRẠNG THÁI ĐỊA BÀN</p>
+                <h2 style="margin:4px 0 7px;">
+                    {% if province_locked %}Bị khóa cấp tỉnh
+                    {% elif commune_locked %}Đã khóa cấp xã
+                    {% else %}Đang mở để thực hiện{% endif %}
+                </h2>
+                <p class="muted" style="margin:0;">
+                    Sở khóa toàn tỉnh có mức ưu tiên cao nhất. Xã chỉ được mở lại khi cấp tỉnh đang mở.
+                </p>
+            </div>
+            {% if can_manage_commune %}
+                <div class="toolbar-right">
+                    {% if not commune_locked and not province_locked %}
+                        <form method="post" action="/dieu-tra/{{ batch.id }}/khoa-xa" class="inline-form" onsubmit="return confirm('Khóa toàn bộ các trường thuộc xã/phường?');">
+                            <input class="mini-input" name="reason" required placeholder="Lý do khóa toàn xã">
+                            <button class="button button-danger" type="submit">🔒 Khóa toàn xã</button>
+                        </form>
+                    {% elif commune_locked and not province_locked %}
+                        <form method="post" action="/dieu-tra/{{ batch.id }}/mo-khoa-xa" class="inline-form" onsubmit="return confirm('Mở lại dữ liệu của xã/phường?');">
+                            <input class="mini-input" name="reason" required placeholder="Lý do mở lại">
+                            <button class="button button-primary" type="submit">🔓 Mở lại toàn xã</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="summary-grid">
+        <div class="card"><span>Trường trong phạm vi</span><strong>{{ summary.school_total }}</strong></div>
+        <div class="card"><span>Đã giao nhiệm vụ</span><strong>{{ summary.assigned_total }}</strong></div>
+        <div class="card"><span>Đã gửi xã</span><strong>{{ summary.submitted_total }}</strong></div>
+        <div class="card"><span>Đã hoàn thành</span><strong>{{ summary.completed_total }}</strong></div>
+        <div class="card"><span>Trường đang khóa</span><strong>{{ summary.locked_total }}</strong></div>
+        <div class="card"><span>Phiếu đã giao trường</span><strong>{{ summary.form_total }}</strong></div>
+        <div class="card"><span>Phiếu hoàn thành</span><strong>{{ summary.completed_form_total }}</strong></div>
+    </section>
+
+    {% if role_code == 'SCHOOL' or role_code == 'TRUONG' %}
+        <section class="panel">
+            <h2 style="margin-top:0;">Nhiệm vụ của trường</h2>
+            {% if rows and rows[0].assignment %}
+                {% set row = rows[0] %}
+                <div class="state-grid">
+                    <div class="card"><span>Trạng thái</span><strong style="font-size:18px;">{{ status_labels.get(row.assignment.status, row.assignment.status) }}</strong></div>
+                    <div class="card"><span>Phiếu được giao</span><strong>{{ row.form_total }}</strong></div>
+                    <div class="card"><span>Đã hoàn thành</span><strong>{{ row.completed_total }}</strong></div>
+                    <div class="card"><span>Quyền cập nhật</span><strong style="font-size:18px;">{% if row.assignment.is_locked or commune_locked or province_locked %}Đang khóa{% else %}Đang mở{% endif %}</strong></div>
+                </div>
+                <div class="toolbar" style="margin-top:15px;">
+                    <div class="toolbar-left">
+                        <a class="button button-primary" href="/dieu-tra/{{ batch.id }}/giao-phieu-giao-vien">
+                            📤 Giao phiếu cho giáo viên
+                        </a>
+                        <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan">
+                            Mở danh sách phiếu
+                        </a>
+                    </div>
+                    {% if not row.assignment.is_locked and not commune_locked and not province_locked %}
+                        <form method="post" action="/dieu-tra/{{ batch.id }}/phan-cong-truong/gui-xa" class="inline-form" onsubmit="return confirm('Gửi kết quả lên xã/phường kiểm tra?');">
+                            <input class="mini-input" name="notes" placeholder="Ghi chú gửi xã (không bắt buộc)">
+                            <button class="button button-primary" type="submit">📨 Gửi xã kiểm tra</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="warning">
+                    Trường chưa được xã/phường giao nhiệm vụ trong đợt này.
+                </div>
+            {% endif %}
+        </section>
+    {% else %}
+        <section class="panel" id="school-participation">
+            <div class="toolbar" style="margin-bottom:15px;">
+                <div>
+                    <p class="eyebrow" style="color:#1976d2;">DANH SÁCH ĐƠN VỊ THUỘC XÃ</p>
+                    <h2 style="margin:4px 0 0;">Phân công, kiểm tra và khóa từng trường</h2>
+                </div>
+                {% if can_manage_commune %}
+                    <a class="button button-primary" href="/dieu-tra/{{ batch.id }}/giao-phieu-truong">
+                        📤 Giao phiếu cho trường
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="warning" style="margin-bottom:14px;">
+                Bước 1: giao nhiệm vụ cho trường. Bước 2: mở “Giao phiếu cho trường” để chọn các phiếu và giao cho tài khoản đơn vị trường. Sau đó trường phân công tiếp cho giáo viên.
+            </div>
+
+            <div class="table-wrap" id="school-monitoring">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Trường/cơ sở</th>
+                            <th>Tài khoản đơn vị</th>
+                            <th>Nhiệm vụ</th>
+                            <th>Phiếu được giao</th>
+                            <th>Tiến độ</th>
+                            <th>Khóa trường</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>
+                                <span class="code">{{ row.school.code }}</span>
+                                <strong style="display:block;margin-top:4px;">{{ row.school.name }}</strong>
+                            </td>
+                            <td>
+                                {% if row.account %}
+                                    <span class="pill pill-green">Đã có tài khoản</span>
+                                    <div class="muted" style="margin-top:5px;">{{ row.account.username }}</div>
+                                {% else %}
+                                    <span class="pill pill-red">Chưa cấp tài khoản</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if row.assignment %}
+                                    <span class="pill {% if row.assignment.status == 'DA_HOAN_THANH' %}pill-green{% elif row.assignment.status == 'DA_GUI_XA' %}pill-blue{% elif row.assignment.status == 'YEU_CAU_BO_SUNG' %}pill-amber{% else %}pill-gray{% endif %}">
+                                        {{ status_labels.get(row.assignment.status, row.assignment.status) }}
+                                    </span>
+                                    <div class="muted" style="margin-top:5px;">Giao lúc {{ row.assignment.assigned_at }}</div>
+                                {% else %}
+                                    <span class="pill pill-gray">Chưa phân công</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ row.form_total }}</strong>
+                                <div class="muted">{{ row.completed_total }} hoàn thành · {{ row.pending_total }} còn lại</div>
+                            </td>
+                            <td>
+                                {% if row.form_total %}
+                                    {{ ((row.completed_total * 100 / row.form_total) | round(1)) }}%
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>
+                                {% if row.assignment and row.assignment.is_locked %}
+                                    <span class="pill pill-red">Đang khóa</span>
+                                    <div class="muted" style="margin-top:5px;">{{ row.assignment.lock_reason or '' }}</div>
+                                {% else %}
+                                    <span class="pill pill-green">Đang mở</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if can_manage_commune %}
+                                <div class="action-stack">
+                                    {% if not row.assignment %}
+                                        <form method="post" action="/dieu-tra/{{ batch.id }}/phan-cong-truong/{{ row.school.id }}/giao">
+                                            <input class="mini-input" name="notes" placeholder="Ghi chú nhiệm vụ">
+                                            <button class="button button-primary button-small" type="submit" style="width:100%;">Giao nhiệm vụ</button>
+                                        </form>
+                                    {% else %}
+                                        <a class="button button-secondary button-small" href="/dieu-tra/{{ batch.id }}/giao-phieu-truong?assignment_status=unassigned">
+                                            Giao phiếu cho trường
+                                        </a>
+
+                                        {% if row.assignment.status == 'DA_GUI_XA' %}
+                                            <form method="post" action="/dieu-tra/{{ batch.id }}/phan-cong-truong/{{ row.school.id }}/yeu-cau-bo-sung" class="inline-form">
+                                                <input class="mini-input" name="reason" required placeholder="Nội dung cần bổ sung">
+                                                <button class="button button-secondary button-small" type="submit">Yêu cầu bổ sung</button>
+                                            </form>
+                                        {% endif %}
+
+                                        {% if row.assignment.is_locked %}
+                                            <form method="post" action="/dieu-tra/{{ batch.id }}/phan-cong-truong/{{ row.school.id }}/mo-khoa" class="inline-form">
+                                                <input class="mini-input" name="reason" required placeholder="Lý do mở lại">
+                                                <button class="button button-primary button-small" type="submit">Mở lại trường</button>
+                                            </form>
+                                        {% else %}
+                                            <form method="post" action="/dieu-tra/{{ batch.id }}/phan-cong-truong/{{ row.school.id }}/khoa" class="inline-form">
+                                                <input class="mini-input" name="reason" required placeholder="Lý do khóa">
+                                                <button class="button button-danger button-small" type="submit">Khóa trường</button>
+                                            </form>
+                                        {% endif %}
+
+                                        {% if row.form_total == 0 %}
+                                            <form method="post" action="/dieu-tra/{{ batch.id }}/phan-cong-truong/{{ row.school.id }}/thu-hoi" class="inline-form">
+                                                <input class="mini-input" name="reason" placeholder="Lý do thu hồi">
+                                                <button class="button button-secondary button-small" type="submit">Thu hồi nhiệm vụ</button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <span class="muted">Chỉ xem</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" style="text-align:center;padding:35px;">Không có trường thuộc phạm vi.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="panel">
+        <h2 style="margin-top:0;">Lịch sử phân công và khóa/mở</h2>
+        <div class="log-list">
+        {% for item in logs %}
+            <div class="log-row">
+                <strong>{{ item.action }}</strong>
+                <span>{{ item.school_name or 'Toàn địa bàn' }}</span>
+                <span>{{ item.reason or '—' }}<br><span class="muted">{{ item.actor_name_snapshot }} · {{ item.actor_role_snapshot }}</span></span>
+                <span>{{ item.created_at }}</span>
+            </div>
+        {% else %}
+            <div class="muted">Chưa có nhật ký thao tác.</div>
+        {% endfor %}
+        </div>
+    </section>
+</main>
+</body>
+</html>

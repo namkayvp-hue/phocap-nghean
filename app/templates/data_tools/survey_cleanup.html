@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Dọn dẹp dữ liệu điều tra</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        .cleanup-page {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 18px 50px;
+        }
+        .hero {
+            padding: 24px;
+            border-radius: 16px;
+            background: linear-gradient(135deg,#0d5fb8,#1976d2);
+            color: #fff;
+        }
+        .hero h1 {
+            margin: 4px 0 8px;
+            font-size: 30px;
+        }
+        .panel {
+            margin-top: 18px;
+            padding: 20px;
+            border: 1px solid #dfe8f1;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(24,54,84,.07);
+        }
+        .panel h2 {
+            margin: 0 0 14px;
+            color: #20364d;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(210px,1fr)
+                minmax(330px,2fr)
+                auto;
+            gap: 12px;
+            align-items: end;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .form-group select,
+        .confirm-input {
+            width: 100%;
+            min-height: 44px;
+            padding: 9px 11px;
+            border: 1px solid #cbd8e6;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(5,minmax(0,1fr));
+            gap: 12px;
+        }
+        .card {
+            padding: 15px;
+            border: 1px solid #dfe8f1;
+            border-radius: 12px;
+            background: #f9fbfd;
+        }
+        .card span {
+            display: block;
+            color: #718197;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .card strong {
+            display: block;
+            margin-top: 7px;
+            color: #0d5fb8;
+            font-size: 27px;
+        }
+        .safe {
+            margin-top: 14px;
+            padding: 13px 15px;
+            border: 1px solid #bfe0c6;
+            border-radius: 10px;
+            background: #edf9ef;
+            color: #236533;
+        }
+        .warn {
+            margin-top: 14px;
+            padding: 13px 15px;
+            border: 1px solid #f0cf7a;
+            border-radius: 10px;
+            background: #fff7de;
+            color: #765500;
+        }
+        .danger {
+            border: 1px solid #efb3b3;
+            background: #fff8f8;
+        }
+        .error {
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px solid #edaaaa;
+            border-radius: 10px;
+            background: #fff0f0;
+            color: #ad2018;
+            font-weight: 700;
+        }
+        .success {
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px solid #9bd0a7;
+            border-radius: 10px;
+            background: #edfaef;
+            color: #1f6d31;
+        }
+        .inventory {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .inventory th,
+        .inventory td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e8eef4;
+            text-align: left;
+            vertical-align: top;
+        }
+        .inventory th {
+            background: #f3f7fb;
+        }
+        .inventory td.num {
+            width: 120px;
+            color: #0d5fb8;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef4fa;
+            color: #526b84;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .pill.keep {
+            background: #e9f8ed;
+            color: #25733a;
+        }
+        .table-list {
+            max-height: 360px;
+            overflow: auto;
+            border: 1px solid #e3eaf1;
+            border-radius: 10px;
+        }
+        .confirm-box {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid #f0c7c7;
+        }
+        .confirm-check {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin: 14px 0;
+            line-height: 1.45;
+        }
+        .danger-button {
+            min-height: 48px;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: #b42318;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .danger-button:disabled {
+            background: #cfd4da;
+            color: #717981;
+            cursor: not-allowed;
+        }
+        .muted {
+            color: #718197;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .filter-grid,
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include "partials/dropdown_menu_v1.html" %}
+
+    <main class="cleanup-page">
+        <section class="hero">
+            <div style="
+                font-size:12px;
+                font-weight:800;
+                letter-spacing:.6px;
+                opacity:.9;
+            ">
+                DANH MỤC → CÔNG CỤ DỮ LIỆU
+            </div>
+
+            <h1>Dọn dẹp dữ liệu điều tra</h1>
+
+            <p style="margin:0;">
+                V3.18B — dọn toàn bộ dữ liệu thử nghiệm
+                năm học <strong>{{ target_year_code }}</strong>,
+                giữ nguyên các bản ghi đợt điều tra.
+            </p>
+        </section>
+
+
+        <!-- === BAI_13B_10_V3_19_MANUAL_BACKUP_UI === -->
+        <section class="panel" style="border-color:#b9d8f6;">
+            <div style="
+                display:flex;
+                gap:16px;
+                align-items:center;
+                justify-content:space-between;
+                flex-wrap:wrap;
+            ">
+                <div style="min-width:260px;flex:1;">
+                    <h2 style="margin-bottom:6px;">
+                        💾 Backup dữ liệu
+                    </h2>
+                    <div style="color:#526b84;line-height:1.5;">
+                        Tạo ngay một bản sao đầy đủ của
+                        <strong>phocap.db</strong> vào thư mục
+                        <code>C:\PhoCap\exports</code>.
+                        Thao tác này <strong>không xóa</strong> và
+                        <strong>không thay đổi</strong> dữ liệu hiện tại.
+                    </div>
+                </div>
+
+                <form
+                    method="post"
+                    action="/cong-cu-du-lieu/don-du-lieu-dieu-tra/backup"
+                    onsubmit="return window.confirm('Tạo một bản Backup đầy đủ của phocap.db ngay bây giờ?');"
+                >
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                        style="min-height:46px;padding:11px 18px;font-weight:800;white-space:nowrap;"
+                    >
+                        💾 BACKUP NGAY
+                    </button>
+                </form>
+
+                <!-- === BAI_13B_10_V3_20_RESTORE_BUTTON === -->
+                <a
+                    href="/cong-cu-du-lieu/don-du-lieu-dieu-tra/khoi-phuc"
+                    style="
+                        min-height:46px;
+                        box-sizing:border-box;
+                        display:inline-flex;
+                        align-items:center;
+                        justify-content:center;
+                        padding:11px 18px;
+                        border:1px solid #d58b16;
+                        border-radius:8px;
+                        background:#fff7e8;
+                        color:#8a5200;
+                        text-decoration:none;
+                        font-weight:800;
+                        white-space:nowrap;
+                    "
+                >
+                    ♻ KHÔI PHỤC
+                </a>
+
+<!-- === BAI_13B_10_V3_21_BACKUP_MANAGER_BUTTON === -->
+<a
+    href="/cong-cu-du-lieu/don-du-lieu-dieu-tra/backup-quan-ly"
+    style="
+        min-height:46px;
+        box-sizing:border-box;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:11px 18px;
+        border:1px solid #6c7f93;
+        border-radius:8px;
+        background:#f5f8fb;
+        color:#34495e;
+        text-decoration:none;
+        font-weight:800;
+        white-space:nowrap;
+    "
+>
+    🗂 QUẢN LÝ BACKUP
+</a>
+
+
+            </div>
+        </section>
+
+        {% if cleanup_status == "backup_success" %}
+        <div class="success">
+            <strong>✓ Backup dữ liệu thành công.</strong><br>
+            Đã tạo bản sao đầy đủ của <code>phocap.db</code> tại:<br>
+            <code>C:\PhoCap\exports\{{ backup_name }}\phocap.db</code>
+        </div>
+        {% endif %}
+
+
+        {% if cleanup_status == "success" %}
+        <div class="success">
+            <strong>✓ Dọn dữ liệu thành công.</strong><br>
+            Đã giữ nguyên {{ expected_batch_count }} đợt
+            {{ target_year_code }}.<br>
+            Backup bắt buộc:
+            <code>C:\PhoCap\exports\{{ backup_name }}</code>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="error">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <section class="panel">
+            <h2>1. Kiểm tra từng đợt nếu cần</h2>
+
+            <form method="get">
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <label>Năm học</label>
+                        <select name="school_year_id">
+                            <option value="">
+                                -- Tất cả năm học --
+                            </option>
+                            {% for year in school_years %}
+                            <option
+                                value="{{ year.id }}"
+                                {% if year.id == selected_school_year_id %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ year.code }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Đợt điều tra</label>
+                        <select name="batch_id">
+                            <option value="">
+                                -- Chọn đợt để kiểm kê --
+                            </option>
+                            {% for batch in batches %}
+                            <option
+                                value="{{ batch.id }}"
+                                {% if batch.id == selected_batch_id %}
+                                    selected
+                                {% endif %}
+                            >
+                                #{{ batch.id }}
+                                · {{ batch.code }}
+                                · {{ batch.commune_name or "Toàn tỉnh" }}
+                                · {{ batch.school_year_code or "" }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        🔍 Kiểm tra đợt
+                    </button>
+                </div>
+            </form>
+
+            {% if selected_batch and inventory %}
+            <div class="cards" style="margin-top:16px;">
+                <div class="card">
+                    <span>Phiếu</span>
+                    <strong>{{ inventory.summary.forms }}</strong>
+                </div>
+                <div class="card">
+                    <span>Hộ liên kết</span>
+                    <strong>
+                        {{ inventory.summary.households_linked }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Hộ riêng</span>
+                    <strong>
+                        {{ inventory.summary.households_private }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Hộ dùng chung</span>
+                    <strong>
+                        {{ inventory.summary.households_shared }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Tổ 3 cấp</span>
+                    <strong>{{ inventory.summary.teams }}</strong>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>
+                2. Phạm vi dọn toàn năm học
+                {{ target_year_code }}
+            </h2>
+
+            <div class="cards">
+                <div class="card">
+                    <span>Đợt được giữ nguyên</span>
+                    <strong>{{ year_plan.batch_count }}</strong>
+                </div>
+
+                <div class="card">
+                    <span>Phiếu sẽ xóa</span>
+                    <strong>{{ year_plan.forms }}</strong>
+                </div>
+
+                <div class="card">
+                    <span>Hộ riêng sẽ xóa</span>
+                    <strong>
+                        {{ year_plan.private_household_count }}
+                    </strong>
+                </div>
+
+                <div class="card">
+                    <span>Hộ dùng chung phải giữ</span>
+                    <strong>
+                        {{ year_plan.shared_household_count }}
+                    </strong>
+                </div>
+
+                <div class="card">
+                    <span>Tổng bản ghi nghiệp vụ</span>
+                    <strong>{{ year_plan.total_rows }}</strong>
+                </div>
+            </div>
+
+            {% if year_plan.batch_count != expected_batch_count %}
+            <div class="warn">
+                <strong>⚠ CHƯA ĐƯỢC PHÉP DỌN.</strong>
+                Hệ thống đang thấy
+                <strong>{{ year_plan.batch_count }}</strong>
+                đợt {{ target_year_code }},
+                trong khi phạm vi đã chốt là
+                <strong>{{ expected_batch_count }}</strong> đợt.
+                Nút xóa sẽ bị khóa.
+            </div>
+            {% else %}
+            <div class="safe">
+                <strong>✓ Phạm vi đợt đạt kiểm tra:</strong>
+                đúng {{ expected_batch_count }} đợt
+                {{ target_year_code }}.
+                Các bản ghi <code>survey_batches</code>
+                không nằm trong danh sách DELETE.
+            </div>
+            {% endif %}
+
+            {% if year_plan.shared_household_count > 0 %}
+            <div class="warn">
+                <strong>Hộ dùng chung sẽ được bảo toàn.</strong>
+                Hệ thống chỉ xóa phiếu và dữ liệu riêng
+                của {{ target_year_code }};
+                hồ sơ hộ còn được đợt khác sử dụng
+                sẽ không bị xóa.
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>3. Dữ liệu hệ thống giữ nguyên</h2>
+
+            <div class="cards">
+                <div class="card">
+                    <span>Xã/phường</span>
+                    <strong>
+                        {{ year_plan.preserved.communes }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Trường</span>
+                    <strong>
+                        {{ year_plan.preserved.schools }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Tài khoản</span>
+                    <strong>
+                        {{ year_plan.preserved.users }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Học sinh</span>
+                    <strong>
+                        {{ year_plan.preserved.students }}
+                    </strong>
+                </div>
+                <div class="card">
+                    <span>Đội ngũ (hồ sơ người)</span>
+                    <strong>
+                        {{ year_plan.preserved.staff }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="safe">
+                Không dọn: xã/phường, trường, tài khoản,
+                học sinh, đội ngũ, danh mục, năm học,
+                mã nguồn và các bản ghi
+                <code>survey_batches</code>.
+                <br><br>
+                <strong>Kiểm kê đội ngũ thực tế:</strong>
+                {{ year_plan.preserved.staff }} hồ sơ người
+                · {{ year_plan.preserved.staff_year_records }}
+                bản ghi đội ngũ theo năm
+                · {{ year_plan.preserved.structured_staff_forms }}
+                biểu TH-01-GV / THCS-01-GV chuyên biệt.
+            </div>
+
+            {% if year_plan.protection_ok %}
+            <div class="safe">
+                <strong>✓ KIỂM TRA VÙNG BẢO VỆ: ĐẠT.</strong>
+                Không có bảng xã/phường, trường, tài khoản,
+                học sinh, đội ngũ, dữ liệu mạng lưới hoặc
+                biểu đội ngũ chuyên biệt nào nằm trong kế hoạch DELETE.
+            </div>
+            {% else %}
+            <div class="warn">
+                <strong>✗ KIỂM TRA VÙNG BẢO VỆ: KHÔNG ĐẠT.</strong>
+                Phát hiện bảng cần giữ trong kế hoạch DELETE:
+                {% for table in year_plan.protected_target_tables %}
+                    <code>{{ table }}</code>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                . Nút dọn dữ liệu đã bị khóa.
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>4. Danh sách bảng sẽ được làm sạch</h2>
+
+            <div class="table-list">
+                <table class="inventory">
+                    <thead>
+                        <tr>
+                            <th>Bảng</th>
+                            <th>Số bản ghi dự kiến xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in year_plan.table_counts %}
+                        <tr>
+                            <td>
+                                <code>{{ item.table }}</code>
+                            </td>
+                            <td class="num">
+                                {{ item.count }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="muted">
+                Danh sách được tạo trực tiếp từ cấu trúc
+                khóa ngoại của database hiện tại.
+                Hệ thống không tắt foreign key để ép xóa.
+            </p>
+        </section>
+
+        <section class="panel danger">
+            <h2>5. Xác nhận dọn dữ liệu thử nghiệm</h2>
+
+            <div class="warn">
+                <strong>⚠ THAO TÁC KHÔNG THỂ HOÀN TÁC TRỰC TIẾP.</strong>
+                Trước khi DELETE, phần mềm bắt buộc tạo
+                một bản backup đầy đủ của
+                <code>phocap.db</code> trong thư mục exports.
+                Nếu có lỗi trong quá trình xóa,
+                transaction sẽ rollback.
+            </div>
+
+            <form
+                method="post"
+                action="/cong-cu-du-lieu/don-du-lieu-dieu-tra/thuc-hien"
+                onsubmit="
+                    return window.confirm(
+                        'XÁC NHẬN LẦN CUỐI:\n\n' +
+                        'Dọn toàn bộ dữ liệu thử nghiệm ' +
+                        '{{ target_year_code }} nhưng GIỮ nguyên ' +
+                        '{{ expected_batch_count }} đợt điều tra?\n\n' +
+                        'Phần mềm sẽ backup database trước khi xóa.'
+                    );
+                "
+            >
+                <div class="confirm-box">
+                                        <!-- === BAI_13B_10_V3_18B6_SCOPE_UI === -->
+                    <div
+                        style="
+                            margin-bottom:16px;
+                            padding:16px;
+                            border:1px solid #bed8f2;
+                            border-radius:10px;
+                            background:#f4f9ff;
+                        "
+                    >
+                        <div
+                            style="
+                                font-weight:800;
+                                color:#244c73;
+                                margin-bottom:12px;
+                            "
+                        >
+                            Phạm vi sẽ dọn
+                        </div>
+
+                        <label style="display:block;margin-bottom:10px;">
+                            <input
+                                type="radio"
+                                name="scope_mode"
+                                value="single"
+                                checked
+                                onchange="window.pcScopeChanged();"
+                            >
+                            <strong>Một xã/phường</strong>
+                            — mặc định là xã/phường của đợt
+                            đang chọn ở mục 1.
+                        </label>
+
+                        <div
+                            id="scope_single_box"
+                            style="
+                                margin:0 0 14px 24px;
+                                padding:10px 12px;
+                                border-radius:8px;
+                                background:#fff;
+                            "
+                        >
+                            {% if selected_batch %}
+                                <input
+                                    type="hidden"
+                                    name="selected_batch_id"
+                                    value="{{ selected_batch.id }}"
+                                >
+                                Đang chọn:
+                                <strong>
+                                    {{ selected_batch.commune_name or "-" }}
+                                </strong>
+                                · đợt #{{ selected_batch.id }}
+                                · {{ selected_batch.code }}
+                            {% else %}
+                                <input
+                                    type="hidden"
+                                    name="selected_batch_id"
+                                    value=""
+                                >
+                                <span style="color:#a21b13;">
+                                    Chưa chọn đợt/xã ở mục 1.
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <label style="display:block;margin-bottom:10px;">
+                            <input
+                                type="radio"
+                                name="scope_mode"
+                                value="multi"
+                                onchange="window.pcScopeChanged();"
+                            >
+                            <strong>Chọn nhiều xã/phường</strong>
+                        </label>
+
+                        <div
+                            id="scope_multi_box"
+                            style="
+                                display:none;
+                                margin:0 0 14px 24px;
+                                padding:12px;
+                                max-height:280px;
+                                overflow:auto;
+                                border:1px solid #d8e5f2;
+                                border-radius:8px;
+                                background:#fff;
+                            "
+                        >
+                            <div style="margin-bottom:10px;">
+                                <button
+                                    type="button"
+                                    class="button button-primary"
+                                    onclick="window.pcCheckAllCommunes();"
+                                >
+                                    ✓ Chọn toàn bộ
+                                    {{ expected_batch_count }} xã/phường
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="button button-secondary"
+                                    style="margin-left:8px;"
+                                    onclick="window.pcUncheckAllCommunes();"
+                                >
+                                    Bỏ chọn
+                                </button>
+
+                                <strong
+                                    id="multi_scope_count"
+                                    style="margin-left:10px;"
+                                >
+                                    0 xã/phường đã chọn
+                                </strong>
+                            </div>
+
+                            <div
+                                style="
+                                    display:grid;
+                                    grid-template-columns:
+                                        repeat(3,minmax(0,1fr));
+                                    gap:8px 14px;
+                                "
+                            >
+                                {% for commune in target_communes %}
+                                <label
+                                    style="
+                                        display:flex;
+                                        gap:7px;
+                                        align-items:flex-start;
+                                    "
+                                >
+                                    <input
+                                        type="checkbox"
+                                        class="pc-commune-checkbox"
+                                        name="commune_ids"
+                                        value="{{ commune.commune_id }}"
+                                        onchange="window.pcUpdateCommuneCount();"
+                                    >
+                                    <span>
+                                        {{ commune.commune_name }}
+                                        <small
+                                            style="
+                                                display:block;
+                                                color:#718197;
+                                            "
+                                        >
+                                            {{ commune.commune_code }}
+                                            · đợt #{{ commune.batch_id }}
+                                        </small>
+                                    </span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <label style="display:block;">
+                            <input
+                                type="radio"
+                                name="scope_mode"
+                                value="all"
+                                onchange="window.pcScopeChanged();"
+                            >
+                            <strong>
+                                Toàn bộ
+                                {{ expected_batch_count }}
+                                xã/phường
+                            </strong>
+                            — chỉ chọn khi thật sự muốn dọn toàn tỉnh.
+                        </label>
+
+                        <div
+                            id="scope_all_warning"
+                            style="
+                                display:none;
+                                margin:10px 0 0 24px;
+                                padding:10px 12px;
+                                border:1px solid #efc36d;
+                                border-radius:8px;
+                                background:#fff7de;
+                                color:#745200;
+                            "
+                        >
+                            ⚠ Bạn đang chọn phạm vi
+                            <strong>TOÀN BỘ TỈNH</strong>.
+                        </div>
+                    </div>
+
+<label class="confirm-check">
+                        <input
+                            type="checkbox"
+                            name="confirm_scope"
+                            value="yes"
+                            {% if not year_plan.safe_to_execute %}
+                                disabled
+                            {% endif %}
+                            required
+                        >
+                        <span>
+                            Tôi xác nhận phạm vi:
+                            <strong>
+                                dọn toàn bộ dữ liệu thử nghiệm
+                                {{ target_year_code }}
+                            </strong>,
+                            nhưng giữ nguyên
+                            <strong>
+                                {{ expected_batch_count }}
+                                bản ghi đợt điều tra
+                            </strong>,
+                            xã/phường, trường, tài khoản,
+                            đội ngũ và học sinh.
+                        </span>
+                    </label>
+
+                    <div class="form-group">
+                        <label>
+                            Nhập chính xác câu xác nhận:
+                        </label>
+
+                        <div style="
+                            margin:6px 0 8px;
+                            font-weight:800;
+                            color:#a21b13;
+                        ">
+                            {{ confirm_phrase }}
+                        </div>
+
+                        <input
+                            class="confirm-input"
+                            type="text"
+                            name="confirm_text"
+                            autocomplete="off"
+                            {% if not year_plan.safe_to_execute %}
+                                disabled
+                            {% endif %}
+                            required
+                        >
+                    </div>
+
+                    <button
+                        class="danger-button"
+                        type="submit"
+                        {% if not year_plan.safe_to_execute %}
+                            disabled
+                        {% endif %}
+                    >
+                        🗑 DỌN TOÀN BỘ DỮ LIỆU THỬ
+                        {{ target_year_code }}
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+<script>
+(function () {
+    "use strict";
+
+    const form = document.querySelector(
+        'form[action="/cong-cu-du-lieu/don-du-lieu-dieu-tra/thuc-hien"]'
+    );
+
+    if (form) {
+        form.removeAttribute("onsubmit");
+
+        form.addEventListener("submit", function (event) {
+            const mode = form.querySelector(
+                'input[name="scope_mode"]:checked'
+            );
+
+            if (!mode) {
+                event.preventDefault();
+                alert("Chưa chọn phạm vi dọn.");
+                return;
+            }
+
+            if (mode.value === "single") {
+                const batchInput = form.querySelector(
+                    'input[name="selected_batch_id"]'
+                );
+
+                if (!batchInput || !batchInput.value) {
+                    event.preventDefault();
+                    alert(
+                        "Hãy chọn một đợt/xã ở mục 1 trước khi dọn."
+                    );
+                    return;
+                }
+            }
+
+            if (mode.value === "multi") {
+                const count = form.querySelectorAll(
+                    ".pc-commune-checkbox:checked"
+                ).length;
+
+                if (count === 0) {
+                    event.preventDefault();
+                    alert("Hãy chọn ít nhất một xã/phường.");
+                    return;
+                }
+            }
+
+            let scopeText = "";
+
+            if (mode.value === "single") {
+                scopeText = "CHỈ xã/phường đang chọn ở mục 1";
+            } else if (mode.value === "multi") {
+                scopeText =
+                    form.querySelectorAll(
+                        ".pc-commune-checkbox:checked"
+                    ).length +
+                    " xã/phường đã chọn";
+            } else {
+                scopeText =
+                    "TOÀN BỘ {{ expected_batch_count }} xã/phường";
+            }
+
+            const ok = window.confirm(
+                "XÁC NHẬN LẦN CUỐI:\\n\\n" +
+                "Phạm vi: " + scopeText + "\\n" +
+                "Năm học: {{ target_year_code }}\\n\\n" +
+                "Phần mềm sẽ backup database trước khi xóa."
+            );
+
+            if (!ok) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    window.pcUpdateCommuneCount = function () {
+        const count = document.querySelectorAll(
+            ".pc-commune-checkbox:checked"
+        ).length;
+
+        const label = document.getElementById(
+            "multi_scope_count"
+        );
+
+        if (label) {
+            label.textContent =
+                count + " xã/phường đã chọn";
+        }
+    };
+
+    window.pcCheckAllCommunes = function () {
+        document.querySelectorAll(
+            ".pc-commune-checkbox"
+        ).forEach(function (checkbox) {
+            checkbox.checked = true;
+        });
+
+        window.pcUpdateCommuneCount();
+    };
+
+    window.pcUncheckAllCommunes = function () {
+        document.querySelectorAll(
+            ".pc-commune-checkbox"
+        ).forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+
+        window.pcUpdateCommuneCount();
+    };
+
+    window.pcScopeChanged = function () {
+        const selected = document.querySelector(
+            'input[name="scope_mode"]:checked'
+        );
+
+        const multi = document.getElementById(
+            "scope_multi_box"
+        );
+        const allWarning = document.getElementById(
+            "scope_all_warning"
+        );
+
+        if (multi) {
+            multi.style.display =
+                selected && selected.value === "multi"
+                    ? "block"
+                    : "none";
+        }
+
+        if (allWarning) {
+            allWarning.style.display =
+                selected && selected.value === "all"
+                    ? "block"
+                    : "none";
+        }
+    };
+
+    window.pcScopeChanged();
+    window.pcUpdateCommuneCount();
+})();
+</script>
+
+</body>
+</html>

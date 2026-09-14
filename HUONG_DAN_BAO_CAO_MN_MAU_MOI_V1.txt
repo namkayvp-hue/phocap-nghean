@@ -1,0 +1,25 @@
+BÁO CÁO MẦM NON MẪU MỚI V1
+============================
+
+Thay thế:
+- MN-01-TE (sửa lại) thay MN-M1.
+- MN-01-GV BGD thay MN-01-GV cũ trong mục Báo cáo.
+
+Cài đặt:
+1. Dừng Uvicorn bằng Ctrl+C.
+2. Chép cai_dat_bao_cao_mn_mau_moi_v1.py vào C:\PhoCap.
+3. Chạy:
+
+   cd C:\PhoCap
+   .\.venv\Scripts\python.exe .\cai_dat_bao_cao_mn_mau_moi_v1.py
+
+4. Chờ dòng:
+   CÀI ĐẶT BÁO CÁO MẦM NON MẪU MỚI V1 THÀNH CÔNG
+
+5. Chạy lại:
+   .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 80
+
+6. Ctrl+F5, vào 5. Báo cáo -> Báo cáo Mầm non.
+7. Mở MN-01-TE và MN-01-GV, xuất thử mỗi biểu 1 file Excel.
+
+Bộ cài không sửa database. Mẫu Excel được nhúng nguyên byte từ hai file đã gửi.

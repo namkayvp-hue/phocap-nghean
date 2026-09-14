@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sửa thông tin xã</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    PHẦN MỀM PHỔ CẬP GIÁO DỤC
+                </p>
+
+                <h1>Cập nhật thông tin xã</h1>
+
+                <p>
+                    Chỉnh sửa mã xã hoặc tên xã
+                    đang lưu trong hệ thống.
+                </p>
+            </div>
+
+            <a class="button button-light" href="/xa">
+                ← Danh sách xã
+            </a>
+        </div>
+    </header>
+
+    <main class="form-page">
+        <section class="panel edit-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">
+                        THÔNG TIN ĐANG LƯU
+                    </p>
+
+                    <h2>{{ xa.name }}</h2>
+                </div>
+
+                {% if xa.is_active %}
+                    <span
+                        class="
+                            status-badge
+                            status-active
+                        "
+                    >
+                        Đang hoạt động
+                    </span>
+                {% else %}
+                    <span
+                        class="
+                            status-badge
+                            status-locked
+                        "
+                    >
+                        Đã khóa
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if thong_bao %}
+                <div class="alert alert-error">
+                    {{ thong_bao }}
+                </div>
+            {% endif %}
+
+            <form
+                class="data-form"
+                method="post"
+                action="/xa/{{ xa.id }}/sua"
+            >
+                <div class="form-group">
+                    <label for="ma_xa">
+                        Mã xã
+                    </label>
+
+                    <input
+                        id="ma_xa"
+                        name="ma_xa"
+                        type="text"
+                        maxlength="30"
+                        value="{{ xa.code }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="ten_xa">
+                        Tên xã
+                    </label>
+
+                    <input
+                        id="ten_xa"
+                        name="ten_xa"
+                        type="text"
+                        maxlength="200"
+                        value="{{ xa.name }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex;align-items:flex-start;gap:10px;">
+                        <input
+                            name="is_special_difficulty_area"
+                            type="checkbox"
+                            value="true"
+                            style="width:auto;margin-top:3px;"
+                            {% if xa.is_special_difficulty_area %}checked{% endif %}
+                        >
+                        <span>
+                            Địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn
+                            <small style="display:block;margin-top:5px;">
+                                Dùng để áp dụng ngưỡng chỉ tiêu trẻ em theo Nghị định 277/2025/NĐ-CP.
+                            </small>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <a
+                        class="button button-secondary"
+                        href="/xa"
+                    >
+                        Hủy
+                    </a>
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

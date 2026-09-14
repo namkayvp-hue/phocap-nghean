@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kế thừa dữ liệu năm học</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        body {
+            background: #f2f6fb;
+            color: #102a43;
+        }
+
+        .page-container {
+            width: min(1320px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 26px 0 48px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+
+        .survey-form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: white;
+            font-family: inherit;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .source-card,
+        .panel,
+        .summary-card {
+            background: white;
+            border: 1px solid #dce6f0;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(30, 64, 110, 0.06);
+        }
+
+        .source-card {
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .source-card h2 {
+            margin: 6px 0 8px;
+            font-size: 25px;
+        }
+
+        .code-label,
+        .eyebrow,
+        .panel-label {
+            margin: 0;
+            color: #1769aa;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .locked-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 15px;
+            border-radius: 999px;
+            background: #ffebee;
+            color: #a11b1b;
+            border: 1px solid #ffc8ce;
+            font-weight: 800;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .summary-card {
+            padding: 18px;
+        }
+
+        .summary-card span {
+            display: block;
+            color: #627d98;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .summary-card strong {
+            font-size: 27px;
+            color: #0b4f9c;
+        }
+
+        .panel {
+            padding: 22px;
+            margin-top: 18px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .panel h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+        .notice,
+        .warning,
+        .success-box {
+            border-radius: 12px;
+            padding: 15px 17px;
+            line-height: 1.55;
+            margin-bottom: 18px;
+        }
+
+        .notice {
+            background: #e9f4ff;
+            border: 1px solid #bcdcff;
+            color: #0c4a7d;
+        }
+
+        .warning {
+            background: #fff8e6;
+            border: 1px solid #f1d28d;
+            color: #745100;
+        }
+
+        .success-box {
+            background: #e9f8ed;
+            border: 1px solid #b8e2c1;
+            color: #176b2d;
+        }
+
+        .error-box {
+            background: #ffeded;
+            border: 1px solid #ffbcbc;
+            color: #a61b1b;
+            border-radius: 12px;
+            padding: 15px 17px;
+            margin-bottom: 18px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.72);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #dfe7ef;
+            border-radius: 12px;
+        }
+
+        .inheritance-table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+
+        .inheritance-table th,
+        .inheritance-table td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #e7edf3;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .inheritance-table th {
+            background: #edf4fb;
+            font-size: 13px;
+            color: #334e68;
+        }
+
+        .inheritance-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .inheritance-table tr.selected-row {
+            background: #f0f8ff;
+        }
+
+        .number-good {
+            color: #147a34;
+            font-weight: 800;
+        }
+
+        .number-muted {
+            color: #627d98;
+            font-weight: 700;
+        }
+
+        .confirm-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 16px;
+            margin-top: 18px;
+            border: 1px solid #d7e2ec;
+            border-radius: 12px;
+            background: #f7fafc;
+        }
+
+        .confirm-box input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 34px 20px;
+            color: #627d98;
+        }
+
+        .backup-path {
+            font-family: Consolas, monospace;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            padding: 3px 7px;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 900px) {
+            .summary-grid,
+            .result-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 620px) {
+            .summary-grid,
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-container {
+                width: min(100% - 18px, 1320px);
+            }
+
+            .header-actions,
+            .header-actions .button,
+            .form-actions,
+            .form-actions .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">BÀI 12D-7</p>
+            <h1>Kế thừa dữ liệu sang năm học mới</h1>
+            <p>Tạo phiếu mới từ dữ liệu đã chốt, giữ nguyên hồ sơ hộ và đối tượng.</p>
+        </div>
+
+        <div class="header-actions">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+            <a class="button button-light" href="/dieu-tra/{{ source_batch.id }}/bao-cao-tong-hop">
+                ← Báo cáo nguồn
+            </a>
+            <a class="button button-light" href="/dieu-tra">
+                Danh sách đợt
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="page-container">
+    {% if thong_bao_loi %}
+        <div class="error-box"><strong>{{ thong_bao_loi }}</strong></div>
+    {% endif %}
+
+    {% if thong_bao %}
+        <div class="success-box"><strong>{{ thong_bao }}</strong></div>
+    {% endif %}
+
+    {% if result_summary %}
+        <section class="success-box">
+            <strong>{{ result_summary.message }}</strong>
+            <div class="result-grid">
+                <div class="result-item">
+                    Phiếu mới: <strong>{{ result_summary.created_forms }}</strong>
+                </div>
+                <div class="result-item">
+                    Hộ đã có và bỏ qua: <strong>{{ result_summary.skipped_forms }}</strong>
+                </div>
+                <div class="result-item">
+                    Hồ sơ năm học mới: <strong>{{ result_summary.created_year_records }}</strong>
+                </div>
+            </div>
+            {% if result_summary.backup %}
+                <div style="margin-top:12px;">
+                    Bản sao an toàn:
+                    <span class="backup-path">C:\PhoCap\data\backups\{{ result_summary.backup }}</span>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <section class="source-card">
+        <div>
+            <p class="code-label">ĐỢT NGUỒN · {{ source_batch.code }}</p>
+            <h2>{{ source_batch.name }}</h2>
+            <div>
+                Năm học {{ source_batch.school_year.code }} · {{ source_batch.commune.name }}
+            </div>
+        </div>
+        <span class="locked-pill">🔒 DỮ LIỆU NGUỒN ĐÃ KHÓA</span>
+    </section>
+
+    <section class="summary-grid" aria-label="Số liệu nguồn">
+        <article class="summary-card">
+            <span>Tổng số phiếu nguồn</span>
+            <strong>{{ source_summary.form_total }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Hộ gia đình</span>
+            <strong>{{ source_summary.household_total }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Đối tượng đang theo dõi</span>
+            <strong>{{ source_summary.active_person_total }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Hồ sơ năm học nguồn</span>
+            <strong>{{ source_summary.year_record_total }}</strong>
+        </article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">NGUYÊN TẮC KẾ THỪA</p>
+                <h2>Dữ liệu nào được giữ lại?</h2>
+            </div>
+        </div>
+
+        <div class="notice">
+            <strong>Hệ thống giữ nguyên hồ sơ hộ và thông tin cá nhân của đối tượng.</strong>
+            Đợt đích được tạo phiếu mới ở trạng thái <em>Chưa điều tra</em>. Mỗi đối tượng
+            đang theo dõi được tạo một hồ sơ năm học mới để rà soát lại trường, lớp,
+            trạng thái học tập và 8 chỉ báo.
+        </div>
+
+        <div class="warning">
+            <strong>Không sao chép kết quả xác nhận, ngày điều tra, người điều tra hoặc kết quả chỉ báo cũ.</strong>
+            Những nội dung này phải được kiểm tra và xác nhận lại cho năm học mới.
+            Các hộ đã tồn tại trong đợt đích sẽ được bỏ qua và không bị ghi đè.
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">CHỌN ĐỢT ĐÍCH</p>
+                <h2>Đợt điều tra của năm học sau</h2>
+            </div>
+        </div>
+
+        {% if target_rows %}
+            <form
+                method="post"
+                action="/dieu-tra/{{ source_batch.id }}/ke-thua-du-lieu"
+                onsubmit="return confirm('Bạn chắc chắn muốn tạo phiếu kế thừa sang đợt đã chọn?');"
+            >
+                <div class="table-wrapper">
+                    <table class="inheritance-table">
+                        <thead>
+                            <tr>
+                                <th>Chọn</th>
+                                <th>Mã đợt</th>
+                                <th>Năm học</th>
+                                <th>Tên đợt</th>
+                                <th>Phiếu đã có</th>
+                                <th>Phiếu sẽ tạo</th>
+                                <th>Hồ sơ năm học sẽ tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in target_rows %}
+                                <tr{% if item.batch.id == selected_target_id %} class="selected-row"{% endif %}>
+                                    <td>
+                                        <input
+                                            type="radio"
+                                            name="target_batch_id"
+                                            value="{{ item.batch.id }}"
+                                            {% if item.batch.id == selected_target_id %}checked{% endif %}
+                                            required
+                                        >
+                                    </td>
+                                    <td><strong>{{ item.batch.code }}</strong></td>
+                                    <td>{{ item.batch.school_year.code }}</td>
+                                    <td>
+                                        {{ item.batch.name }}
+                                        <div style="color:#627d98;font-size:13px;margin-top:4px;">
+                                            {{ item.batch.commune.name }} ·
+                                            {{ item.batch.start_date.strftime('%d/%m/%Y') if item.batch.start_date else 'Chưa đặt ngày' }}
+                                        </div>
+                                    </td>
+                                    <td class="number-muted">{{ item.existing_form_total }}</td>
+                                    <td class="number-good">{{ item.new_form_total }}</td>
+                                    <td class="number-good">{{ item.new_year_record_total }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <label class="confirm-box">
+                    <input type="checkbox" name="confirm_inheritance" value="yes" required>
+                    <span>
+                        <strong>Tôi xác nhận đã chọn đúng đợt của năm học sau.</strong><br>
+                        Tôi hiểu rằng hệ thống sẽ tạo phiếu mới, không ghi đè phiếu đã có,
+                        đồng thời tự động sao lưu cơ sở dữ liệu trước khi thực hiện.
+                    </span>
+                </label>
+
+                <div class="form-actions">
+                    <a class="button button-secondary" href="/dieu-tra">
+                        Hủy và quay lại
+                    </a>
+                    <button class="button button-primary" type="submit">
+                        ♻️ Kế thừa dữ liệu sang đợt đã chọn
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <div class="empty-state" style="padding-bottom:18px;">
+                <div style="font-size:42px;">📅</div>
+                <h3>Chưa có đợt đích phù hợp</h3>
+                <p>
+                    Tạo nhanh năm học và đợt điều tra kế tiếp cho
+                    <strong>{{ source_batch.commune.name }}</strong>.
+                    Sau khi tạo, hệ thống sẽ quay lại để bạn kiểm tra số lượng trước khi kế thừa.
+                </p>
+            </div>
+
+            <form
+                method="post"
+                action="/dieu-tra/{{ source_batch.id }}/ke-thua-du-lieu/tao-dot-dich"
+                onsubmit="return confirm('Bạn chắc chắn muốn tạo đợt điều tra của năm học mới?');"
+                style="max-width:760px;margin:0 auto;"
+            >
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+                    <div class="form-group">
+                        <label for="school_year_code">Mã năm học mới</label>
+                        <input
+                            id="school_year_code"
+                            class="survey-form-control"
+                            type="text"
+                            name="school_year_code"
+                            value="{{ quick_create.school_year_code }}"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="target_name">Tên đợt điều tra</label>
+                        <input
+                            id="target_name"
+                            class="survey-form-control"
+                            type="text"
+                            name="target_name"
+                            value="{{ quick_create.name }}"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="start_date">Ngày bắt đầu</label>
+                        <input
+                            id="start_date"
+                            class="survey-form-control"
+                            type="date"
+                            name="start_date"
+                            value="{{ quick_create.start_date }}"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">Ngày kết thúc dự kiến</label>
+                        <input
+                            id="end_date"
+                            class="survey-form-control"
+                            type="date"
+                            name="end_date"
+                            value="{{ quick_create.end_date }}"
+                        >
+                    </div>
+                </div>
+
+                <label class="confirm-box">
+                    <input type="checkbox" name="confirm_create_target" value="yes" required>
+                    <span>
+                        <strong>Tôi xác nhận tạo năm học và đợt điều tra kế tiếp.</strong><br>
+                        Hệ thống chỉ tạo danh mục và đợt trống; chưa kế thừa dữ liệu cho đến khi tôi xác nhận ở bước sau.
+                    </span>
+                </label>
+
+                <div class="form-actions">
+                    <a class="button button-secondary" href="/dieu-tra">Hủy</a>
+                    <button class="button button-primary" type="submit">
+                        ➕ Tạo đợt năm học mới
+                    </button>
+                </div>
+            </form>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

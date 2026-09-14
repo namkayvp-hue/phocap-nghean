@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xem trường đã sáp nhập</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { background:#f4f7fb; color:#17324d; margin:0; }
+        .v1315-wrap { width:min(1100px, calc(100% - 32px)); margin:28px auto 50px; }
+        .v1315-card {
+            background:#fff; border:1px solid #dbe5ef; border-radius:16px;
+            box-shadow:0 8px 28px rgba(18,56,94,.08); padding:24px;
+        }
+        .v1315-head {
+            display:flex; justify-content:space-between; gap:18px; align-items:flex-start;
+            margin-bottom:22px; flex-wrap:wrap;
+        }
+        .v1315-eyebrow {
+            margin:0 0 7px; color:#1976d2; font-size:12px; font-weight:800;
+            letter-spacing:.08em; text-transform:uppercase;
+        }
+        .v1315-head h1 { margin:0; font-size:28px; line-height:1.2; }
+        .v1315-note {
+            margin:10px 0 0; color:#5d7185; max-width:760px; line-height:1.55;
+        }
+        .v1315-badge {
+            display:inline-flex; align-items:center; border-radius:999px;
+            padding:7px 11px; font-size:13px; font-weight:800;
+            background:#ffe9ee; color:#b42337;
+        }
+        .v1315-grid {
+            display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+        .v1315-field {
+            border:1px solid #e1e8f0; border-radius:11px; padding:13px 14px;
+            background:#fbfdff; min-height:68px;
+        }
+        .v1315-field.full { grid-column:1/-1; }
+        .v1315-label {
+            display:block; margin-bottom:5px; color:#698095; font-size:12px;
+            font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+        }
+        .v1315-value { font-size:15px; font-weight:700; word-break:break-word; }
+        .v1315-target {
+            margin-top:20px; padding:17px; border-radius:12px;
+            border:1px solid #b9dcff; background:#f0f8ff;
+        }
+        .v1315-target strong { color:#0c5ca8; }
+        .v1315-actions {
+            margin-top:22px; display:flex; gap:10px; flex-wrap:wrap;
+        }
+        .v1315-btn {
+            display:inline-flex; min-height:40px; align-items:center; justify-content:center;
+            padding:0 15px; border-radius:9px; text-decoration:none; font-weight:800;
+            border:1px solid #cbd8e5; background:#fff; color:#245072;
+        }
+        .v1315-btn.primary { background:#1976d2; color:#fff; border-color:#1976d2; }
+        .v1315-lock {
+            margin-top:16px; padding:12px 14px; border-radius:10px;
+            background:#fff8e7; color:#785400; font-weight:700; line-height:1.5;
+        }
+        @media (max-width:700px) {
+            .v1315-grid { grid-template-columns:1fr; }
+            .v1315-field.full { grid-column:auto; }
+        }
+    </style>
+</head>
+<body>
+<!-- === V13_15_MERGED_SOURCE_READONLY_PAGE === -->
+{% include "partials/dropdown_menu_v1.html" %}
+
+<main class="v1315-wrap">
+    <section class="v1315-card">
+        <div class="v1315-head">
+            <div>
+                <p class="v1315-eyebrow">Hồ sơ lịch sử sau sáp nhập</p>
+                <h1>{{ truong.name }}</h1>
+                <p class="v1315-note">
+                    Trường này là trường nguồn đã hoàn thành sáp nhập.
+                    Hồ sơ được giữ để tra cứu lịch sử và không còn được chỉnh sửa.
+                </p>
+            </div>
+            <span class="v1315-badge">Đã sáp nhập</span>
+        </div>
+
+        <div class="v1315-grid">
+            <div class="v1315-field">
+                <span class="v1315-label">Mã trường nguồn</span>
+                <div class="v1315-value">{{ truong.code }}</div>
+            </div>
+            <div class="v1315-field">
+                <span class="v1315-label">Tên trường nguồn</span>
+                <div class="v1315-value">{{ truong.name }}</div>
+            </div>
+            <div class="v1315-field">
+                <span class="v1315-label">Xã/phường</span>
+                <div class="v1315-value">
+                    {{ truong.commune.name if truong.commune else '—' }}
+                </div>
+            </div>
+            <div class="v1315-field">
+                <span class="v1315-label">Trạng thái</span>
+                <div class="v1315-value">Đã sáp nhập · Chỉ đọc</div>
+            </div>
+            <div class="v1315-field full">
+                <span class="v1315-label">Địa chỉ lịch sử</span>
+                <div class="v1315-value">{{ truong.address or '—' }}</div>
+            </div>
+        </div>
+
+        <div class="v1315-target">
+            <span class="v1315-label">Trường đích sau sáp nhập</span>
+            <strong>
+                {{ merger_target.target_code }}
+                {% if merger_target.target_code %} · {% endif %}
+                {{ merger_target.target_name }}
+            </strong>
+        </div>
+
+        <div class="v1315-lock">
+            🔒 Hồ sơ trường nguồn đã được khóa đối với thao tác sửa thông tin
+            và mở lại. Các nghiệp vụ hiện hành thực hiện tại trường đích.
+        </div>
+
+        <div class="v1315-actions">
+            <a class="v1315-btn primary" href="/truong">← Danh mục trường</a>
+            <a class="v1315-btn"
+               href="/truong/{{ merger_target.target_school_id }}/sua">
+                Xem/Sửa trường đích
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sáp nhập trường</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .merge-wrap{max-width:1450px;margin:0 auto;padding:24px 18px 60px}
+        .merge-hero,.merge-panel{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:20px;margin-bottom:18px}
+        .merge-hero h1{margin:0 0 8px;font-size:26px}.merge-hero p{margin:6px 0;color:#52606d;line-height:1.55}
+        .merge-grid{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:14px}.merge-field label{display:block;font-weight:700;margin-bottom:6px}
+        .merge-field select,.merge-field input[type=text]{width:100%;padding:10px;border:1px solid #c9d4df;border-radius:8px;background:#fff}
+        .merge-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}.merge-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;padding:10px 16px;font-weight:700;text-decoration:none;cursor:pointer}.merge-btn.primary{background:#1f5f99;color:#fff}.merge-btn.muted{background:#e8eef4;color:#213547}
+        .merge-note{padding:12px 14px;border-radius:9px;margin:10px 0;line-height:1.55}.merge-note.info{background:#eef6ff;border:1px solid #b9d8fa;color:#164e7a}.merge-note.ok{background:#edf9f2;border:1px solid #a8dfbd;color:#155f3a}.merge-note.warn{background:#fff8e6;border:1px solid #f0d184;color:#785700}.merge-note.error{background:#fff0ef;border:1px solid #f0b4ae;color:#842029}
+        .merge-table-wrap{overflow:auto;border:1px solid #e0e6ec;border-radius:10px}.merge-table{width:100%;border-collapse:collapse;min-width:1180px}.merge-table th,.merge-table td{padding:10px;border-bottom:1px solid #e7ecf1;text-align:left;vertical-align:top}.merge-table th{background:#f7f9fb;font-size:13px}
+        .merge-badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700;background:#e8eef4;color:#314254}.merge-badge.ok{background:#dff5e8;color:#17633e}.merge-badge.warn{background:#fff1c7;color:#7b5700}.merge-badge.locked{background:#fde7e5;color:#8b2b23}.merge-badge.info{background:#e5f1ff;color:#155a8a}
+        .member-list,.source-list{margin:0;padding-left:18px}.member-list li,.source-list li{margin:5px 0}.muted-text{color:#667788;font-size:13px}.plan-text{font-weight:700;color:#173f62}.row-note{margin-top:3px;color:#6c757d;font-size:12px}
+        .merge-combo{position:relative}.merge-combo-list{display:none;position:absolute;z-index:40;left:0;right:0;top:100%;max-height:280px;overflow:auto;background:#fff;border:1px solid #c9d4df;border-radius:8px;box-shadow:0 8px 22px rgba(20,40,60,.16);margin-top:4px}.merge-combo-list.is-open{display:block}.merge-combo-item{padding:9px 10px;cursor:pointer;border-bottom:1px solid #eef2f6}.merge-combo-item:hover{background:#eef6ff}.merge-combo-item small{display:block;color:#667788;margin-top:2px}.merge-combo-empty{padding:10px;color:#667788}
+        @media(max-width:1000px){.merge-grid{grid-template-columns:repeat(2,minmax(180px,1fr))}}@media(max-width:720px){.merge-grid{grid-template-columns:1fr}.merge-wrap{padding:14px 10px 40px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="merge-wrap">
+    <section class="merge-hero">
+        <h1>Sáp nhập trường</h1>
+        <p><strong>Giai đoạn hiện tại: đối chiếu phương án chính thức và xem trước tác động kỹ thuật.</strong> Dữ liệu phương án được lấy từ file <code>{{ official_registry_summary.source_file }}</code>, sheet <code>{{ official_registry_summary.source_sheet }}</code>.</p>
+        <p>Đã chuẩn hóa <strong>{{ official_registry_summary.group_count }}</strong> nhóm phương án cho năm học <strong>{{ official_registry_summary.school_year_code }}</strong>. Hệ thống chỉ hiển thị đúng nhóm trường nằm chung một ô/phương án trong Excel.</p>
+        <div class="merge-note info"><strong>Quy trình an toàn:</strong> phương án chỉ được thực hiện khi kiểm tra dữ liệu nguồn, bản xem trước và mô phỏng đều đạt. Trước khi ghi, hệ thống tự backup, khóa dữ liệu, chạy trong một transaction và hậu kiểm integrity/FK trước COMMIT.</div>
+        <div class="merge-actions">
+            <a class="merge-btn muted" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an">Danh sách phương án chính thức toàn tỉnh</a>
+            <a class="merge-btn primary" href="/cong-cu-du-lieu/sap-nhap-truong/bang-dieu-khien">BẢNG ĐIỀU KHIỂN TOÀN TỈNH</a>
+            <a class="merge-btn muted" href="/cong-cu-du-lieu/doi-ten-truong">Đổi tên trường</a>
+        </div>
+    </section>
+
+    {% if error_message %}<div class="merge-note error"><strong>Thông báo:</strong> {{ error_message }}</div>{% endif %}
+    {% if status_message %}<div class="merge-note ok">{{ status_message }}</div>{% endif %}
+
+    <section class="merge-panel">
+        <h2>1. Chọn phạm vi đối chiếu</h2>
+        <form id="merge-filter-form" method="get" action="/cong-cu-du-lieu/sap-nhap-truong">
+            <div class="merge-grid">
+                <div class="merge-field">
+                    <label>Năm học</label>
+                    <select name="school_year_id" required>
+                        {% for y in school_years %}
+                        <option value="{{ y.id }}" {% if y.id == selected_school_year_id %}selected{% endif %}>{{ y.code or y.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="merge-field">
+                    <label>Xã/phường</label>
+                    <div class="merge-combo">
+                        <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off">
+                        <input id="commune-id" name="commune_id" type="hidden" value="{{ selected_commune_id or '' }}">
+                        <div id="commune-list" class="merge-combo-list"></div>
+                    </div>
+                    <div class="muted-text">Có thể gõ “Cửa Lò”, “Nghi Lộc”, “Diễn Châu”...</div>
+                </div>
+                <div class="merge-field">
+                    <label>Cấp học</label>
+                    <select name="level_code">
+                        {% for code,label in level_choices %}<option value="{{ code }}" {% if code == selected_level_code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="merge-field">
+                    <label>Loại hiển thị</label>
+                    <select name="display_mode">
+                        {% for code,label in display_choices %}<option value="{{ code }}" {% if code == selected_display_mode %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="merge-actions"><button class="merge-btn primary" type="submit">Hiển thị phương án</button></div>
+        </form>
+    </section>
+
+    {% if selected_commune_id %}
+    <section class="merge-panel">
+        <h2>2. Phương án chính thức theo Excel</h2>
+        {% if 'Cửa Lò' in selected_commune_name and selected_level_code == 'TH' %}
+        <div class="merge-note {% if plans|length == 4 %}ok{% else %}error{% endif %}">
+            <strong>Điểm kiểm chứng Cửa Lò – Tiểu học:</strong> phải có đúng 4 nhóm phương án. Hệ thống hiện đọc được <strong>{{ plans|length }}</strong> nhóm.
+        </div>
+        {% endif %}
+
+        {% if plans %}
+        <div class="merge-table-wrap"><table class="merge-table">
+            <thead><tr><th>STT Excel</th><th>Các trường trong cùng phương án</th><th>Phương án sắp xếp</th><th>Chuẩn hóa nguồn → đích</th><th>Đối chiếu database</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+            {% for p in plans %}
+            <tr>
+                <td><strong>{{ p.first_stt }}</strong>{% if p.last_stt != p.first_stt %}–{{ p.last_stt }}{% endif %}<br><span class="muted-text">Dòng Excel: {{ p.excel_rows|join(', ') }}</span></td>
+                <td>
+                    <ul class="member-list">
+                    {% for s in p.member_schools %}
+                        <li>
+                            <strong>{{ s.excel_name }}</strong>{% if s.class_count is not none %} · {{ s.class_count }} lớp{% endif %}
+                            {% if s.db_matched %}<br><span class="muted-text">DB: {{ s.name }} · {{ s.code }}{% if not s.is_active %} · đã khóa{% endif %}</span>{% else %}<br><span class="merge-badge warn">Chưa khớp tên DB</span>{% endif %}
+                            {% if s.note %}<div class="row-note">Ghi chú: {{ s.note }}</div>{% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </td>
+                <td><div class="plan-text">{{ p.plan_text or 'Chưa ghi phương án trong Excel' }}</div><div class="muted-text">Cấp nhận diện: {{ p.level_codes|join(' + ') }}</div></td>
+                <td>
+                    {% if p.action_type == 'KEEP' %}
+                        <span class="merge-badge info">GIỮ NGUYÊN</span><br><span class="muted-text">Các trường trong nhóm giữ nguyên theo nội dung Excel.</span>
+                    {% elif p.target_school %}
+                        {% if p.source_schools %}<div class="muted-text">Nguồn:</div><ul class="source-list">{% for s in p.source_schools %}<li>{{ s.excel_name }}</li>{% endfor %}</ul>{% endif %}
+                        <div class="muted-text">Đích:</div><strong>{{ p.target_school.excel_name }}</strong>
+                    {% else %}
+                        <span class="merge-badge warn">PHƯƠNG ÁN ĐẶC THÙ</span><br><span class="muted-text">Giữ nguyên nội dung gốc để đối chiếu; chưa tự suy diễn nguồn/đích.</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if p.match_status == 'MATCHED' %}<span class="merge-badge ok">{{ p.match_label }}</span>
+                    {% elif p.match_status == 'PARTIAL' %}<span class="merge-badge warn">{{ p.match_label }}</span>
+                    {% else %}<span class="merge-badge locked">{{ p.match_label }}</span>{% endif %}
+                    <div class="muted-text" style="margin-top:5px">Địa bàn Excel: {{ p.commune_excel }}{% if p.commune_db %}<br>DB: {{ p.commune_db.name }}{% endif %}</div>
+                </td>
+                <td>
+                    {% if p.action_type == 'KEEP' %}<span class="merge-badge info">KHÔNG TÁC ĐỘNG</span>
+                    {% elif p.action_type == 'MAPPED' and p.match_status == 'MATCHED' and p.target_school and p.source_schools %}
+                    <a class="merge-btn primary" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an/xem-truoc/{{ p.id }}?school_year_id={{ selected_school_year_id or '' }}&commune_id={{ selected_commune_id or '' }}&level_code={{ selected_level_code }}">XEM TRƯỚC TÁC ĐỘNG</a><br><span class="muted-text">Chỉ mở thực hiện khi các cổng an toàn đều đạt.</span>
+                    {% else %}<span class="merge-badge locked">CHƯA ĐỦ ĐIỀU KIỆN</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table></div>
+        {% else %}<div class="merge-note warn">Không có nhóm phương án phù hợp bộ lọc hiện tại.</div>{% endif %}
+    </section>
+    {% endif %}
+</main>
+
+<script>
+(function () {
+    const input=document.getElementById('commune-search'), hidden=document.getElementById('commune-id'), list=document.getElementById('commune-list'), form=document.getElementById('merge-filter-form');
+    if(!input||!hidden||!list||!form)return;
+    const items=[{% for c in communes %}{id:{{ c.id }},name:{{ c.name|tojson }},code:{{ c.code|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}];
+    function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/đ/g,'d').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
+    function bare(v){return norm(v).replace(/^(xa|phuong|thi tran|thi xa|thanh pho)\s+/,'')}
+    function matches(q){q=norm(q);if(!q)return items.slice(0,25);return items.filter(x=>norm(x.name).startsWith(q)||bare(x.name).startsWith(q)||bare(x.name).startsWith(bare(q))).slice(0,25)}
+    function close(){list.classList.remove('is-open');list.innerHTML=''}
+    function choose(x){input.value=x.name;hidden.value=String(x.id);input.setCustomValidity('');close()}
+    function render(){const rows=matches(input.value);list.innerHTML='';if(!rows.length){const e=document.createElement('div');e.className='merge-combo-empty';e.textContent='Không tìm thấy xã/phường.';list.appendChild(e)}else rows.forEach(x=>{const r=document.createElement('div');r.className='merge-combo-item';r.innerHTML='<strong></strong><small></small>';r.querySelector('strong').textContent=x.name;r.querySelector('small').textContent=x.code?'Mã: '+x.code:'';r.addEventListener('mousedown',ev=>{ev.preventDefault();choose(x)});list.appendChild(r)});list.classList.add('is-open')}
+    input.addEventListener('input',()=>{hidden.value='';input.setCustomValidity('');render()});input.addEventListener('focus',render);input.addEventListener('blur',()=>setTimeout(close,150));
+    form.addEventListener('submit',ev=>{if(hidden.value)return;const rows=matches(input.value),q=norm(input.value),exact=rows.filter(x=>norm(x.name)===q||bare(x.name)===bare(q));if(exact.length===1){choose(exact[0]);return}if(rows.length===1){choose(rows[0]);return}ev.preventDefault();input.setCustomValidity('Hãy chọn đúng một xã/phường trong danh sách.');input.reportValidity();render()});
+})();
+</script>
+</body>
+</html>
