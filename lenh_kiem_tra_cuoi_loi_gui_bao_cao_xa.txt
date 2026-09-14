@@ -1,6 +1,0 @@
-$c = Get-Content .\app\access_control.py
-$c[796..834]
-
-Write-Host ""
-Write-Host "===== ROUTE PHAN-CONG-TRUONG ====="
-Get-ChildItem .\app\routers -Filter *.py | Select-String -Pattern "phan-cong-truong" -Context 8,20
