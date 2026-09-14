@@ -277,5 +277,48 @@ XI. VIỆC CÒN LẠI
 - Chưa chuyển thư mục data/backups từ máy phát triển lên (62 MB, 23 tệp).
 - Chưa ghi được tên miền và địa chỉ máy chạy proxy SSL vào mục I.
 - FORWARDED_ALLOW_IPS đang để "*", nên thu hẹp về đúng IP của proxy.
-- Gói PhoCap_Chuyen_May_V1_6_20260803 vẫn còn 35 template kiểu cũ. Nếu còn
-  dùng gói đó để cài máy mới thì phải đóng gói lại, kèm cập nhật SHA256SUMS.txt.
+- Gói PhoCap_Chuyen_May_V1_6_20260803 đã bị xoá khỏi máy phát triển ngày
+  14/09/2026 (xem mục XII). Nếu cần đóng gói cài máy mới, phải tạo lại từ
+  đầu, không còn bản cũ để tham khảo trên máy phát triển.
+
+
+XII. CẬP NHẬT NGÀY 14/09/2026
+
+1. Đồng bộ toàn bộ mã nguồn máy phát triển (C:\project\PHOCAP) từ tệp
+   PhoCap_SERVER_LITE_20260914_093248.zip, mirror y hệt (xoá phần thừa).
+   Xoá các thư mục không còn trong zip: Bai_13A_2_V4_Sua_loi_duong_dan_import,
+   PhoCap_Chuyen_May_V1_6_20260803, tools/, uploads/, documents/.
+   Trước khi mirror đã sao lưu toàn bộ máy phát triển vào
+   C:\project\PHOCAP_BACKUP_20260914_094623 (giữ lại đến khi không cần nữa).
+
+2. Thay data/phocap.db trên MÁY PHÁT TRIỂN bằng bản 85 MB lấy từ zip trên
+   (bản cũ 12,6 MB không giữ lại riêng, nhưng còn trong thư mục backup ở
+   mục 1). Sau đó ĐÃ đẩy tiếp bản 85 MB này lên GHI ĐÈ cơ sở dữ liệu THẬT
+   trên máy chủ 192.168.1.24 (chấp nhận rủi ro dù không rõ nguồn gốc chính
+   xác của bản 85 MB). Quy trình: docker compose stop → sao lưu DB cũ vào
+   data/backups/phocap_before_replace_85mb_20260914_100324.db trên máy
+   chủ → scp đè data/phocap.db → docker compose start. Kiểm tra sau khi
+   thay: healthy, 69 bảng (trước đó ghi nhận 34 bảng ở mục V, đã tăng do
+   phát triển thêm tính năng).
+
+   CẦN LÀM RÕ SAU: bản DB 85 MB lấy từ đâu, có đúng là dữ liệu mới nhất/
+   đầy đủ nhất không — lúc thay chưa xác minh được nguồn gốc, chỉ dựa vào
+   xác nhận của người dùng.
+
+3. Đã chạy lại đúng quy trình mục VII (đóng gói tar trừ data/uploads/.venv,
+   scp, docker compose up -d --build) để cập nhật mã nguồn ứng dụng lên
+   máy chủ TRƯỚC bước 2 ở trên.
+
+4. Khởi tạo git lần đầu cho project (trước đó project không có version
+   control). .gitignore loại trừ data/, uploads/, .env, .venv/. Chưa có
+   remote — nếu cần push lên GitHub/GitLab/Gitea, phải cấu hình remote
+   trước.
+
+5. Dọn dẹp 861 file rời ở gốc project (script/báo cáo một-lần đã hoàn
+   thành: cai_dat_*, kiem_tra_*, check_*, BATCH_*, chan_doan_*, xac_dinh_*,
+   thuc_hien_*, bao_cao_*, HUONG_DAN_* cũ...). Giữ lại 14 file: 5 script
+   vận hành (BAT_DAU_MAY_CHU_NOI_BO.cmd, BAT_DAU_PHAT_TRIEN.cmd,
+   DONG_GOI_TOAN_BO_DU_AN.cmd, KIEM_TRA_HE_THONG.cmd, SAO_LUU_DU_LIEU.cmd),
+   hạ tầng Docker, 2 tài liệu triển khai, .gitignore, và
+   check_sua_loi_https_v1.py. Muốn tìm lại file cũ: git log
+   --diff-filter=D --summary, hoặc xem C:\project\PHOCAP_BACKUP_20260914_094623.
