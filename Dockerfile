@@ -20,8 +20,12 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Toàn bộ mã nguồn dự án
 COPY . .
 
-# data/ và uploads/ được gắn từ máy chủ khi chạy, chỉ tạo sẵn để chắc chắn có
-RUN mkdir -p /app/data/backups /app/uploads
+# data/ và uploads/ được gắn từ máy chủ khi chạy, chỉ tạo sẵn để chắc chắn có.
+# exports/ không gắn từ máy chủ (chỉ tồn tại trong container) nên phải chown
+# sẵn cho UID 1000, nếu không container chạy user 1000:1000 sẽ không tạo được
+# thư mục này trong /app (thuộc root) và ghi file xuất ra sẽ báo lỗi quyền.
+RUN mkdir -p /app/data/backups /app/uploads /app/exports \
+    && chown -R 1000:1000 /app/exports
 
 EXPOSE 8000
 

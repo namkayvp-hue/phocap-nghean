@@ -24,6 +24,9 @@ services:
       - ./data:/app/data
       # Tệp Excel tải lên nằm trên máy chủ
       - ./uploads:/app/uploads
+      # Các bản xuất/sao lưu (backup_truoc_khoi_phuc, backup_thu_cong...) nằm
+      # trên máy chủ, không để trong tầng ghi container kẻo mất khi tạo lại container
+      - ./exports:/app/exports
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/kiem-tra"]
