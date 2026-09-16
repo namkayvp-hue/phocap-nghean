@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo tổng hợp kết quả điều tra</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17324d;
+            background: #eef4fa;
+        }
+        a { text-decoration: none; }
+        .report-header {
+            color: #fff;
+            background: linear-gradient(120deg, #0d47a1, #1976d2);
+            padding: 28px 24px;
+        }
+        .report-header-inner {
+            max-width: 1380px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+        }
+        h1 { margin: 0; font-size: 32px; }
+        .header-description { margin: 10px 0 0; line-height: 1.55; }
+        .user-box { text-align: right; min-width: 280px; }
+        .user-box strong { font-size: 17px; }
+        .user-detail { margin-top: 5px; font-size: 13px; opacity: .92; }
+        .header-actions {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .container { max-width: 1380px; margin: 0 auto; padding: 24px; }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 10px 15px;
+            border: 0;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .button-light { background: #fff; color: #0d47a1; }
+        .button-primary { background: #1565c0; color: #fff; }
+        .button-secondary { background: #e5edf5; color: #17324d; }
+        .button-success { background: #1d7f3b; color: #fff; }
+        .button-disabled {
+            background: #d7dee7;
+            color: #6b7785;
+            cursor: not-allowed;
+        }
+        .alert {
+            margin-bottom: 18px;
+            padding: 15px 17px;
+            border-radius: 10px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+        .alert-warning { background: #fff6dd; border: 1px solid #efd184; color: #7a5200; }
+        .alert-success { background: #e8f6ec; border: 1px solid #b5dfc0; color: #176d31; }
+        .hero-card, .panel, .stat-card {
+            background: #fff;
+            border: 1px solid #dbe5ef;
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(26, 62, 96, .06);
+        }
+        .hero-card {
+            padding: 22px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: center;
+        }
+        .batch-code {
+            margin: 0 0 7px;
+            color: #587189;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .6px;
+        }
+        .batch-name { margin: 0; font-size: 25px; }
+        .batch-meta { margin: 10px 0 0; color: #587189; line-height: 1.55; }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .status-locked { background: #fdebed; color: #a61c25; border: 1px solid #f5c5ca; }
+        .status-open { background: #e8f6ec; color: #176d31; border: 1px solid #b5dfc0; }
+        .toolbar {
+            margin-top: 16px;
+            background: #fff;
+            border: 1px solid #dbe5ef;
+            border-radius: 13px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .stats-grid {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .stat-card { padding: 18px; }
+        .stat-label { color: #647b90; font-size: 13px; font-weight: 700; line-height: 1.4; }
+        .stat-value { margin-top: 10px; font-size: 28px; font-weight: 800; color: #0d47a1; }
+        .stat-note { margin-top: 6px; color: #71869a; font-size: 12px; }
+        .panel { margin-top: 16px; padding: 22px; }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .panel-kicker {
+            margin: 0 0 7px;
+            color: #1976d2;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .8px;
+        }
+        .panel h2 { margin: 0; font-size: 23px; }
+        .panel-description { margin: 8px 0 0; color: #647b90; line-height: 1.55; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 720px; }
+        th, td {
+            padding: 12px 11px;
+            border-bottom: 1px solid #e3ebf3;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.45;
+        }
+        th { background: #f1f6fb; color: #27435e; font-size: 13px; }
+        tbody tr:hover { background: #f8fbfe; }
+        .number { text-align: right; font-variant-numeric: tabular-nums; }
+        .center { text-align: center; }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .quality-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .quality-item {
+            padding: 14px;
+            border-radius: 11px;
+            background: #f4f8fc;
+            border: 1px solid #dbe5ef;
+        }
+        .quality-item strong { display: block; font-size: 22px; margin-top: 5px; }
+        .text-good { color: #18783a; }
+        .text-warning { color: #996400; }
+        .text-danger { color: #b4232c; }
+        .small-note { color: #6d8296; font-size: 13px; line-height: 1.55; }
+        .lock-info {
+            margin-top: 12px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #fff7e3;
+            border: 1px solid #ecd08d;
+            line-height: 1.6;
+        }
+        .empty-state {
+            padding: 24px;
+            text-align: center;
+            color: #6b8195;
+            background: #f7fafc;
+            border-radius: 11px;
+        }
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .two-column { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 720px) {
+            .report-header-inner, .hero-card { flex-direction: column; align-items: stretch; }
+            .user-box { text-align: left; min-width: 0; }
+            .header-actions { justify-content: flex-start; }
+            .container { padding: 14px; }
+            h1 { font-size: 25px; }
+            .stats-grid, .quality-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="report-header">
+    <div class="report-header-inner">
+        <div>
+            <p class="eyebrow">BÀI 12D-6</p>
+            <h1>Báo cáo tổng hợp kết quả điều tra</h1>
+            <p class="header-description">
+                Tổng hợp số phiếu, đối tượng, độ tuổi, trạng thái học tập và các chỉ báo năm học.
+            </p>
+        </div>
+        <div class="user-box">
+            <strong>{{ nguoi_dung.full_name }}</strong>
+            <div class="user-detail">
+                {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+            </div>
+            <div class="header-actions">
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">← Danh sách hộ</a>
+                <a class="button button-light" href="/dieu-tra">Danh sách đợt</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if thong_bao %}
+        <div class="alert alert-warning">{{ thong_bao }}</div>
+    {% endif %}
+
+    {% if batch.is_locked %}
+        <div class="alert alert-success">
+            🔒 Dữ liệu đã được chốt. Báo cáo Excel xuất tại thời điểm này là báo cáo kết quả chính thức của đợt.
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            ⚠ Báo cáo hiện đang ở chế độ xem trước vì đợt chưa khóa. Hãy kiểm tra dữ liệu và chốt đợt trước khi xuất báo cáo chính thức.
+        </div>
+    {% endif %}
+
+    <section class="hero-card">
+        <div>
+            <p class="batch-code">{{ batch.code }}</p>
+            <h2 class="batch-name">{{ batch.name }}</h2>
+            <p class="batch-meta">
+                Năm học {{ batch.school_year.code }} · {{ batch.commune.name }} ·
+                Phạm vi: {{ scope_label }}<br>
+                Ngày tham chiếu tính tuổi: {{ reference_date.strftime('%d/%m/%Y') }}
+            </p>
+        </div>
+        {% if batch.is_locked %}
+            <span class="status-pill status-locked">🔒 ĐÃ KHÓA DỮ LIỆU</span>
+        {% else %}
+            <span class="status-pill status-open">🔓 ĐANG MỞ CẬP NHẬT</span>
+        {% endif %}
+    </section>
+
+    <nav class="toolbar">
+        <div class="toolbar-group">
+            <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/tien-do">Xem tiến độ</a>
+            <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu">Kiểm tra dữ liệu</a>
+            <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh">🔎 Đối chiếu học sinh</a>
+            {% if co_quyen_quan_tri_dot %}
+                <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/chot-so-lieu">
+                    {% if batch.is_locked %}Quản lý mở khóa{% else %}Chốt số liệu{% endif %}
+                </a>
+            {% endif %}
+        </div>
+        <div class="toolbar-group">
+            {% if batch.is_locked and co_quyen_xuat_du_lieu %}
+                <a class="button button-success" href="/dieu-tra/{{ batch.id }}/bao-cao-tong-hop/xuat-excel">
+                    📊 Xuất Excel báo cáo chính thức
+                </a>
+            {% else %}
+                <span class="button button-disabled" title="Cần chốt và khóa đợt trước khi xuất báo cáo chính thức">
+                    🔒 Chưa thể xuất báo cáo chính thức
+                </span>
+            {% endif %}
+        </div>
+    </nav>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <div class="stat-label">Tổng số phiếu</div>
+            <div class="stat-value">{{ progress_data.total_forms }}</div>
+            <div class="stat-note">Hoàn thành {{ progress_data.completed_forms }} phiếu</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-label">Tổng số đối tượng</div>
+            <div class="stat-value">{{ total_people }}</div>
+            <div class="stat-note">Đang được theo dõi trong phạm vi báo cáo</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-label">Có dữ liệu năm học</div>
+            <div class="stat-value">{{ people_with_year_record }}</div>
+            <div class="stat-note">Năm học {{ batch.school_year.code }}</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-label">Đang học</div>
+            <div class="stat-value">{{ studying_people }}</div>
+            <div class="stat-note">Theo trạng thái dữ liệu năm học</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-label">Hoàn thành CTGDMN theo độ tuổi</div>
+            <div class="stat-value">{{ completed_preschool_by_age }}</div>
+            <div class="stat-note">Chỉ tính chỉ báo đang được theo dõi</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-label">Trẻ có khuyết tật</div>
+            <div class="stat-value">{{ disability_total }}</div>
+            <div class="stat-note">Học hòa nhập {{ inclusive_education_total }} trẻ</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-label">Phiếu đạt yêu cầu</div>
+            <div class="stat-value">{{ quality_summary.passed_forms }}</div>
+            <div class="stat-note">Cần xử lý {{ quality_summary.need_action_forms }} phiếu</div>
+        </article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">CHẤT LƯỢNG DỮ LIỆU</p>
+                <h2>Tình trạng sẵn sàng của báo cáo</h2>
+                <p class="panel-description">Các chỉ số này được lấy từ bảng kiểm chất lượng dữ liệu hiện tại.</p>
+            </div>
+        </div>
+        <div class="quality-grid">
+            <div class="quality-item">Đạt yêu cầu<strong class="text-good">{{ quality_summary.passed_forms }}</strong></div>
+            <div class="quality-item">Sẵn sàng hoàn thành<strong>{{ quality_summary.ready_forms }}</strong></div>
+            <div class="quality-item">Cần kiểm tra<strong class="text-warning">{{ quality_summary.need_review_forms }}</strong></div>
+            <div class="quality-item">Cần xử lý<strong class="text-danger">{{ quality_summary.need_action_forms }}</strong></div>
+        </div>
+        {% if batch.is_locked %}
+            <div class="lock-info">
+                <strong>Thông tin lần khóa hiện tại</strong><br>
+                Thời gian: {{ batch.locked_at.strftime('%d/%m/%Y %H:%M:%S') if batch.locked_at else '—' }}<br>
+                Lý do: {{ batch.lock_reason or '—' }}
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">TRẺ KHUYẾT TẬT</p>
+                <h2>Tình trạng khuyết tật, học hòa nhập và hỗ trợ</h2>
+                <p class="panel-description">Tổng hợp từ hồ sơ theo dõi riêng của năm học {{ batch.school_year.code }}.</p>
+            </div>
+        </div>
+        <div class="quality-grid" style="margin-bottom:16px;">
+            <div class="quality-item">Có khuyết tật<strong class="text-danger">{{ disability_total }}</strong></div>
+            <div class="quality-item">Có giấy xác nhận<strong>{{ disability_certificate_total }}</strong></div>
+            <div class="quality-item">Học hòa nhập<strong class="text-good">{{ inclusive_education_total }}</strong></div>
+            <div class="quality-item">Được hỗ trợ<strong>{{ disability_support_total }}</strong></div>
+        </div>
+        <div class="two-column">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Tình trạng</th><th class="number">Số lượng</th></tr></thead>
+                    <tbody>
+                    {% for item in disability_status_rows %}
+                        <tr><td>{{ item.label }}</td><td class="number"><strong>{{ item.total }}</strong></td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Dạng / mức độ khuyết tật</th><th class="number">Số lượng</th></tr></thead>
+                    <tbody>
+                    {% for item in disability_type_rows %}
+                        <tr><td>{{ item.label }}</td><td class="number"><strong>{{ item.total }}</strong></td></tr>
+                    {% endfor %}
+                    {% for item in disability_level_rows %}
+                        <tr><td>{{ item.label }}</td><td class="number"><strong>{{ item.total }}</strong></td></tr>
+                    {% endfor %}
+                    {% if not disability_type_rows and not disability_level_rows %}
+                        <tr><td colspan="2">Chưa có trẻ được xác định dạng và mức độ khuyết tật.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <div class="two-column">
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">CƠ CẤU ĐỐI TƯỢNG</p>
+                    <h2>Theo độ tuổi</h2>
+                    <p class="panel-description">Tuổi tròn tại ngày {{ reference_date.strftime('%d/%m/%Y') }}.</p>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Nhóm tuổi</th><th class="number">Tổng số</th><th class="number">Nam</th><th class="number">Nữ</th></tr></thead>
+                    <tbody>
+                    {% for item in age_rows %}
+                        <tr>
+                            <td>{{ item.age_group }}{% if item.age_group not in ['6+', 'Chưa rõ'] %} tuổi{% endif %}</td>
+                            <td class="number"><strong>{{ item.total }}</strong></td>
+                            <td class="number">{{ item.male }}</td>
+                            <td class="number">{{ item.female }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">TRẠNG THÁI NĂM HỌC</p>
+                    <h2>Theo trạng thái học tập</h2>
+                    <p class="panel-description">Tổng hợp từ hồ sơ năm học {{ batch.school_year.code }}.</p>
+                </div>
+            </div>
+            {% if learning_rows %}
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Trạng thái</th><th class="number">Số lượng</th></tr></thead>
+                        <tbody>
+                        {% for item in learning_rows %}
+                            <tr><td>{{ item.label }}</td><td class="number"><strong>{{ item.total }}</strong></td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">Chưa có dữ liệu trạng thái học tập.</div>
+            {% endif %}
+        </section>
+    </div>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">CHỈ BÁO NĂM HỌC</p>
+                <h2>Kết quả các chỉ báo theo dõi</h2>
+                <p class="panel-description">Giá trị Chưa xác định cần được rà soát trước khi sử dụng cho báo cáo chuyên môn.</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>STT</th><th>Chỉ báo</th><th class="number">Có</th><th class="number">Không</th><th class="number">Chưa xác định</th><th class="number">Tổng</th></tr>
+                </thead>
+                <tbody>
+                {% for item in indicator_rows %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ item.label }}</strong></td>
+                        <td class="number text-good">{{ item.yes }}</td>
+                        <td class="number">{{ item.no }}</td>
+                        <td class="number {% if item.unknown %}text-warning{% endif %}">{{ item.unknown }}</td>
+                        <td class="number">{{ item.yes + item.no + item.unknown }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="two-column">
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">ĐỊA BÀN</p>
+                    <h2>Theo thôn/xóm/khối/bản</h2>
+                </div>
+            </div>
+            {% if hamlet_rows %}
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Địa bàn</th><th class="number">Số hộ</th><th class="number">Số phiếu</th><th class="number">Đối tượng</th></tr></thead>
+                        <tbody>
+                        {% for item in hamlet_rows %}
+                            <tr><td>{{ item.hamlet_name }}</td><td class="number">{{ item.household_total }}</td><td class="number">{{ item.form_total }}</td><td class="number"><strong>{{ item.people_total }}</strong></td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">Chưa có dữ liệu địa bàn.</div>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">TRƯỜNG HỌC</p>
+                    <h2>Theo trường đang học</h2>
+                </div>
+            </div>
+            {% if school_rows %}
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Mã trường</th><th>Tên trường</th><th class="number">Tổng đối tượng</th><th class="number">Đang học</th></tr></thead>
+                        <tbody>
+                        {% for item in school_rows %}
+                            <tr><td>{{ item.school_code or '—' }}</td><td>{{ item.school_name }}</td><td class="number">{{ item.people_total }}</td><td class="number"><strong>{{ item.studying_total }}</strong></td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">Chưa có dữ liệu trường học.</div>
+            {% endif %}
+        </section>
+    </div>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">LƯU Ý SỬ DỤNG</p>
+                <h2>Phạm vi và nguyên tắc số liệu</h2>
+                <p class="panel-description">
+                    Báo cáo được tổng hợp theo đúng phạm vi tài khoản đang đăng nhập. Một báo cáo chỉ được coi là chính thức khi đợt điều tra đã khóa dữ liệu. Tệp Excel gồm các trang Tổng quan, Theo độ tuổi, Trạng thái học tập, Chỉ báo, Theo địa bàn, Theo trường và Chi tiết đối tượng.
+                </p>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Điều hành triển khai toàn tỉnh</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<style>
+body{background:#eef4f9}.hero{background:linear-gradient(120deg,#0d47a1,#1976d2);color:#fff}.inner,.container{width:min(1450px,calc(100% - 32px));margin:auto}.inner{padding:27px 0;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}.container{margin-top:22px;margin-bottom:50px}.panel{background:#fff;border:1px solid #d7e3ee;border-radius:15px;padding:20px;margin-bottom:18px}.summary{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:11px;margin-bottom:18px}.card{background:#fff;border:1px solid #d7e3ee;border-radius:12px;padding:14px}.card span{display:block;color:#65798c;font-size:12px;font-weight:800;text-transform:uppercase}.card strong{display:block;margin-top:7px;color:#0d47a1;font-size:27px}.toolbar{display:flex;gap:10px;justify-content:space-between;align-items:end;flex-wrap:wrap}.control{min-height:42px;padding:9px 11px;border:1px solid #c8d5e1;border-radius:8px;font:inherit}.table-wrap{overflow:auto;border:1px solid #d7e3ee;border-radius:12px}table{width:100%;min-width:1150px;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid #e1eaf2;text-align:left;font-size:13px}th{background:#edf5fc}.pill{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900}.green{background:#e6f5e9;color:#176c30}.red{background:#ffe8e8;color:#a32323}.amber{background:#fff1d8;color:#8b5600}.muted{color:#687d90;font-size:12px}.lock-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.reason{min-width:280px}.code{font-weight:850;color:#0d47a1}
+@media(max-width:850px){.summary{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero"><div class="inner">
+<div><p style="margin:0;font-size:12px;font-weight:900;letter-spacing:.08em;">ĐIỀU HÀNH CẤP SỞ</p><h1 style="margin:5px 0 7px;">Triển khai và khóa đợt điều tra toàn tỉnh</h1><p style="margin:0;">Sở tạo đợt cho toàn tỉnh; xã phân công và khóa các trường thuộc địa bàn.</p></div>
+<div style="text-align:right;"><strong>{{ nguoi_dung.full_name }}</strong><div style="font-size:13px;">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div><a class="button button-light" style="margin-top:10px;" href="/dieu-tra">← Danh sách đợt</a></div>
+</div></header>
+<main class="container">
+{% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+<section class="panel">
+<form method="get" action="/dieu-tra/dieu-hanh-trien-khai" class="toolbar">
+<div><label for="school_year_id" style="display:block;font-weight:800;margin-bottom:6px;">Năm học</label><select id="school_year_id" name="school_year_id" class="control" onchange="this.form.submit()">{% for y in school_years %}<option value="{{ y.id }}" {% if y.id == selected_school_year_id %}selected{% endif %}>{{ y.code }}</option>{% endfor %}</select></div>
+<div><a class="button button-secondary" href="/dieu-tra/khoi-tao-nam-hoc-toan-tinh">＋ Tạo đợt toàn tỉnh</a></div>
+</form>
+{% if can_manage %}
+<div class="lock-actions">
+<form method="post" action="/dieu-tra/dieu-hanh-trien-khai/khoa-toan-tinh" class="inline" onsubmit="return confirm('Khóa toàn bộ các xã/phường trong năm học này?');">
+<input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}"><input class="control reason" name="reason" required placeholder="Lý do khóa toàn tỉnh"><button class="button button-danger" type="submit">🔒 Khóa toàn tỉnh</button>
+</form>
+<form method="post" action="/dieu-tra/dieu-hanh-trien-khai/mo-khoa-toan-tinh" class="inline" onsubmit="return confirm('Mở khóa cấp tỉnh? Các xã đã khóa vẫn giữ trạng thái khóa.');">
+<input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}"><input class="control reason" name="reason" required placeholder="Lý do mở khóa cấp tỉnh"><button class="button button-primary" type="submit">🔓 Mở khóa cấp tỉnh</button>
+</form>
+</div>
+{% endif %}
+</section>
+<section class="summary">
+<div class="card"><span>Xã/phường có đợt</span><strong>{{ summary.commune_total }}</strong></div>
+<div class="card"><span>Bị khóa cấp tỉnh</span><strong>{{ summary.province_locked_total }}</strong></div>
+<div class="card"><span>Đã khóa cấp xã</span><strong>{{ summary.commune_locked_total }}</strong></div>
+<div class="card"><span>Đang mở</span><strong>{{ summary.open_total }}</strong></div>
+<div class="card"><span>Lượt trường đã giao</span><strong>{{ summary.assigned_school_total }}</strong></div>
+</section>
+<section class="panel">
+<h2 style="margin-top:0;">Trạng thái triển khai 130 xã/phường</h2>
+<div class="table-wrap"><table><thead><tr><th>Xã/phường</th><th>Mã đợt</th><th>Trạng thái khóa</th><th>Trường đã giao</th><th>Thao tác</th></tr></thead><tbody>
+{% for row in rows %}<tr>
+<td><span class="code">{{ row.batch.commune.code }}</span><strong style="display:block;margin-top:4px;">{{ row.batch.commune.name }}</strong></td>
+<td>{{ row.batch.code }}<div class="muted">{{ row.batch.name }}</div></td>
+<td>{% if row.state.is_province_locked %}<span class="pill red">Khóa cấp tỉnh</span>{% elif row.state.is_commune_locked %}<span class="pill amber">Khóa cấp xã</span>{% else %}<span class="pill green">Đang mở</span>{% endif %}</td>
+<td><strong>{{ row.assigned_school_total }}</strong></td>
+<td><a class="button button-small button-secondary" href="/dieu-tra/{{ row.batch.id }}/phan-cong-truong">Mở địa bàn</a></td>
+</tr>{% else %}<tr><td colspan="5" style="text-align:center;padding:35px;">Năm học chưa có đợt điều tra.</td></tr>{% endfor %}
+</tbody></table></div>
+</section>
+</main>
+</body>
+</html>

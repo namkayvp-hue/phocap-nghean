@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xử lý kết quả đối chiếu học sinh</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17324d;
+            background: #eef4fa;
+        }
+        a { color: inherit; text-decoration: none; }
+        .header {
+            color: white;
+            background: linear-gradient(120deg, #0d47a1, #1976d2);
+            padding: 26px 24px;
+        }
+        .header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 1.1px;
+        }
+        h1 { margin: 0; font-size: 30px; }
+        .description { margin: 10px 0 0; line-height: 1.55; }
+        .user-box { min-width: 280px; text-align: right; }
+        .user-box strong { font-size: 17px; }
+        .user-detail { margin-top: 5px; font-size: 13px; opacity: .92; }
+        .header-actions {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .container { max-width: 1440px; margin: 0 auto; padding: 24px; }
+        .button {
+            min-height: 40px;
+            padding: 10px 15px;
+            border: 0;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .button-light { background: white; color: #0d47a1; }
+        .button-primary { background: #1565c0; color: white; }
+        .button-secondary { background: #e4edf5; color: #17324d; }
+        .button-success { background: #1b7e3b; color: white; }
+        .button-warning { background: #a56800; color: white; }
+        .button-danger { background: #b4232c; color: white; }
+        .panel, .summary-card {
+            background: white;
+            border: 1px solid #dbe5ef;
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(26, 62, 96, .06);
+        }
+        .panel { margin-top: 16px; padding: 22px; }
+        .notice {
+            padding: 15px 17px;
+            border-radius: 11px;
+            background: #e8f3ff;
+            border: 1px solid #b8d8fa;
+            color: #164f86;
+            line-height: 1.55;
+        }
+        .notice-warning {
+            background: #fff5dc;
+            border-color: #efd18a;
+            color: #7b5200;
+        }
+        .notice-success {
+            background: #e8f6ec;
+            border-color: #b6dfc1;
+            color: #176d31;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .summary-card { padding: 20px; }
+        .card-title {
+            margin: 0 0 14px;
+            color: #1976d2;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: .7px;
+        }
+        .person-name { margin: 0 0 5px; font-size: 24px; font-weight: 900; }
+        .code { color: #5f7890; font-weight: 800; }
+        .info-grid {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 18px;
+        }
+        .info-item {
+            padding: 11px 0;
+            border-top: 1px solid #e4ecf4;
+            line-height: 1.45;
+        }
+        .info-label { color: #6b8094; font-size: 12px; font-weight: 800; }
+        .info-value { margin-top: 4px; font-weight: 700; }
+        .result-box {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 11px;
+            background: #f6f9fc;
+            border: 1px solid #dce6ef;
+            line-height: 1.5;
+        }
+        .pill {
+            display: inline-flex;
+            padding: 6px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1.25;
+        }
+        .pill-good { background: #e7f5eb; color: #18783a; }
+        .pill-warning { background: #fff1d5; color: #955f00; }
+        .pill-danger { background: #fde8e9; color: #b4232c; }
+        .pill-neutral { background: #e8eef4; color: #425b72; }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .panel-kicker {
+            margin: 0 0 7px;
+            color: #1976d2;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .8px;
+        }
+        .panel h2 { margin: 0; font-size: 23px; }
+        .panel-description { margin: 8px 0 0; color: #657d92; line-height: 1.5; }
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: end;
+        }
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd8e5;
+            border-radius: 9px;
+            background: white;
+            color: #17324d;
+            font-size: 14px;
+        }
+        input, select { min-height: 44px; }
+        textarea { min-height: 82px; resize: vertical; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; min-width: 1240px; border-collapse: collapse; }
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2ebf3;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.45;
+            font-size: 13px;
+        }
+        th { background: #eef4fa; color: #294761; font-size: 12px; }
+        tbody tr:hover { background: #f8fbfe; }
+        .muted { color: #71879b; font-size: 12px; }
+        .candidate-name { font-weight: 900; font-size: 14px; }
+        .conflict-list { margin: 7px 0 0; padding-left: 18px; color: #a11f27; }
+        .link-form { min-width: 260px; }
+        .link-form textarea { min-height: 62px; margin-top: 8px; }
+        .confirm-line {
+            margin: 8px 0;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            color: #7b5200;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .confirm-line input { width: auto; min-height: 0; margin-top: 2px; }
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .review-box {
+            padding: 16px;
+            border: 1px solid #dce6ef;
+            border-radius: 12px;
+            background: #f9fbfd;
+        }
+        .review-box h3 { margin: 0 0 10px; font-size: 17px; }
+        .review-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .history-list { display: grid; gap: 10px; }
+        .history-item {
+            padding: 14px;
+            border: 1px solid #dce6ef;
+            border-radius: 11px;
+            background: #f9fbfd;
+        }
+        .history-meta { margin-top: 6px; color: #71879b; font-size: 12px; }
+        .history-note { margin-top: 8px; line-height: 1.5; }
+        .empty { padding: 28px; text-align: center; color: #6d8296; }
+        @media (max-width: 980px) {
+            .summary-grid, .review-grid { grid-template-columns: 1fr; }
+            .search-form { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 720px) {
+            .header-inner, .panel-header { flex-direction: column; align-items: stretch; }
+            .user-box { min-width: 0; text-align: left; }
+            .header-actions { justify-content: flex-start; }
+            .container { padding: 14px; }
+            h1 { font-size: 25px; }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">BÀI 12D-16</p>
+            <h1>Xử lý kết quả đối chiếu</h1>
+            <p class="description">Liên kết đúng hồ sơ, xác nhận sai khác và lưu lịch sử rà soát.</p>
+        </div>
+        <div class="user-box">
+            {% if nguoi_dung %}
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div class="user-detail">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            {% endif %}
+            <div class="header-actions">
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh">← Danh sách đối chiếu</a>
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/bao-cao-tong-hop">Báo cáo kết quả</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if status_message %}
+        <div class="notice {% if status_message.kind == 'success' %}notice-success{% else %}notice-warning{% endif %}">
+            {{ status_message.text }}
+        </div>
+    {% endif %}
+
+    {% if not can_write %}
+        <div class="notice notice-warning" style="margin-top: 16px;">
+            Tài khoản hiện tại chỉ được xem nội dung xử lý và lịch sử, không được thay đổi liên kết.
+        </div>
+    {% endif %}
+
+    <section class="summary-grid" style="margin-top: 16px;">
+        {% if mode == 'SURVEY' %}
+            <article class="summary-card">
+                <p class="card-title">ĐỐI TƯỢNG ĐIỀU TRA</p>
+                <h2 class="person-name">{{ person.full_name }}</h2>
+                <div class="code">{{ person.code }} · {{ form.form_number }} · {{ household.code }}</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Ngày sinh</div>
+                        <div class="info-value">{% if person.date_of_birth %}{{ person.date_of_birth.strftime('%d/%m/%Y') }}{% else %}Chưa xác định{% endif %}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Giới tính</div>
+                        <div class="info-value">{{ person.gender or 'Chưa xác định' }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Số định danh</div>
+                        <div class="info-value">{{ person.personal_id or '—' }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Mã học sinh trên phiếu</div>
+                        <div class="info-value">{{ person.ministry_student_code or '—' }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Trường / lớp điều tra</div>
+                        <div class="info-value">{{ comparison_row.survey_school_name }} / {{ comparison_row.survey_class_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Trạng thái điều tra</div>
+                        <div class="info-value">{{ comparison_row.survey_status_label }}</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="summary-card">
+                <p class="card-title">HỒ SƠ HỌC SINH ĐANG KHỚP</p>
+                {% if student %}
+                    <h2 class="person-name">{{ student.full_name }}</h2>
+                    <div class="code">{{ student.code }}</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Ngày sinh</div>
+                            <div class="info-value">{% if student.date_of_birth %}{{ student.date_of_birth.strftime('%d/%m/%Y') }}{% else %}Chưa xác định{% endif %}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Số định danh</div>
+                            <div class="info-value">{{ student.personal_id or '—' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Trường / lớp</div>
+                            <div class="info-value">{{ comparison_row.student_school_name }} / {{ comparison_row.student_class_name }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Trạng thái học sinh</div>
+                            <div class="info-value">{{ comparison_row.student_status_label }}</div>
+                        </div>
+                    </div>
+                    {% if can_write and person.student_id %}
+                        <form method="post" action="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/doi-tuong/{{ person.id }}/bo-lien-ket" style="margin-top: 14px;">
+                            <label for="unlink_note">Lý do bỏ liên kết</label>
+                            <textarea id="unlink_note" name="note" placeholder="Ghi rõ căn cứ kiểm tra trước khi bỏ liên kết..."></textarea>
+                            <button class="button button-danger" type="submit" onclick="return confirm('Bỏ liên kết học sinh hiện tại?');">Bỏ liên kết</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <div class="empty">Chưa có hồ sơ học sinh được xác định.</div>
+                {% endif %}
+            </article>
+        {% else %}
+            <article class="summary-card">
+                <p class="card-title">HỒ SƠ HỌC SINH</p>
+                <h2 class="person-name">{{ student.full_name }}</h2>
+                <div class="code">{{ student.code }}</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Ngày sinh</div>
+                        <div class="info-value">{% if student.date_of_birth %}{{ student.date_of_birth.strftime('%d/%m/%Y') }}{% else %}Chưa xác định{% endif %}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Giới tính</div>
+                        <div class="info-value">{{ student.gender or 'Chưa xác định' }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Số định danh</div>
+                        <div class="info-value">{{ student.personal_id or '—' }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Trường / lớp</div>
+                        <div class="info-value">{{ comparison_row.student_school_name }} / {{ comparison_row.student_class_name }}</div>
+                    </div>
+                </div>
+            </article>
+            <article class="summary-card">
+                <p class="card-title">KẾT QUẢ HIỆN TẠI</p>
+                <div class="result-box">
+                    <span class="pill pill-{{ comparison_row.result_class }}">{{ comparison_row.result_label }}</span>
+                    <div style="margin-top: 10px;">{{ comparison_row.detail }}</div>
+                </div>
+                {% if comparison_row.resolution %}
+                    <div class="result-box">
+                        <strong>{{ comparison_row.resolution_action_label }}</strong><br>
+                        <span class="muted">{{ comparison_row.resolution_actor_name }} · {{ comparison_row.resolution_created_at_text }}</span>
+                        {% if comparison_row.resolution_note %}<div style="margin-top: 8px;">{{ comparison_row.resolution_note }}</div>{% endif %}
+                    </div>
+                {% endif %}
+            </article>
+        {% endif %}
+    </section>
+
+    {% if mode == 'SURVEY' %}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">KẾT QUẢ ĐỐI CHIẾU HIỆN TẠI</p>
+                    <h2>{{ comparison_row.result_label }}</h2>
+                    <p class="panel-description">{{ comparison_row.detail }}</p>
+                </div>
+                <span class="pill pill-{{ comparison_row.result_class }}">{{ comparison_row.match_basis_label }}</span>
+            </div>
+            {% if comparison_row.resolution %}
+                <div class="result-box">
+                    <strong>{{ comparison_row.resolution_action_label }}</strong><br>
+                    <span class="muted">{{ comparison_row.resolution_actor_name }} · {{ comparison_row.resolution_created_at_text }}</span>
+                    {% if comparison_row.resolution_note %}<div style="margin-top: 8px;">{{ comparison_row.resolution_note }}</div>{% endif %}
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">TÌM HỒ SƠ PHÙ HỢP</p>
+                <h2>{% if mode == 'SURVEY' %}Chọn học sinh để liên kết{% else %}Chọn đối tượng điều tra để liên kết{% endif %}</h2>
+                <p class="panel-description">
+                    Tìm theo họ tên, mã học sinh, mã đối tượng, số định danh, cha/mẹ hoặc số điện thoại. Hệ thống chỉ liên kết khi người dùng bấm xác nhận.
+                </p>
+            </div>
+        </div>
+
+        <form class="search-form" method="get">
+            <div>
+                <label for="q">Nội dung tìm kiếm</label>
+                <input id="q" name="q" value="{{ q }}" placeholder="Nhập họ tên, mã hoặc số định danh...">
+            </div>
+            <button class="button button-primary" type="submit">🔎 Tìm</button>
+            <a class="button button-secondary" href="{% if mode == 'SURVEY' %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/doi-tuong/{{ person.id }}{% else %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/hoc-sinh/{{ student.id }}{% endif %}">Xóa tìm</a>
+        </form>
+
+        {% if candidates %}
+            <div class="table-wrap" style="margin-top: 16px;">
+                <table>
+                    <thead>
+                    {% if mode == 'SURVEY' %}
+                        <tr>
+                            <th>Học sinh</th>
+                            <th>Nhận diện</th>
+                            <th>Trường / lớp</th>
+                            <th>Đánh giá khớp</th>
+                            <th>Liên kết</th>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <th>Đối tượng điều tra</th>
+                            <th>Nhận diện</th>
+                            <th>Phiếu / hộ</th>
+                            <th>Đánh giá khớp</th>
+                            <th>Liên kết</th>
+                        </tr>
+                    {% endif %}
+                    </thead>
+                    <tbody>
+                    {% for item in candidates %}
+                        <tr>
+                            {% if mode == 'SURVEY' %}
+                                <td>
+                                    <div class="candidate-name">{{ item.student.full_name }}</div>
+                                    <div class="muted">{{ item.student.code }} · {% if item.student.date_of_birth %}{{ item.student.date_of_birth.strftime('%d/%m/%Y') }}{% else %}Chưa có ngày sinh{% endif %}</div>
+                                </td>
+                                <td>
+                                    <strong>SĐD:</strong> {{ item.student.personal_id or '—' }}<br>
+                                    <span class="muted">{{ item.student.gender or 'Chưa xác định giới tính' }}</span>
+                                </td>
+                                <td>
+                                    {{ item.school_name }}<br>
+                                    <span class="muted">Lớp {{ item.class_name }} · {{ item.status_label }}</span>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="candidate-name">{{ item.person.full_name }}</div>
+                                    <div class="muted">{{ item.person.code }} · {% if item.person.date_of_birth %}{{ item.person.date_of_birth.strftime('%d/%m/%Y') }}{% else %}Chưa có ngày sinh{% endif %}</div>
+                                </td>
+                                <td>
+                                    <strong>SĐD:</strong> {{ item.person.personal_id or '—' }}<br>
+                                    <strong>Mã HS phiếu:</strong> {{ item.person.ministry_student_code or '—' }}
+                                </td>
+                                <td>
+                                    {{ item.form.form_number }}<br>
+                                    <span class="muted">{{ item.household.code }} · {{ item.household.head_name }}</span>
+                                </td>
+                            {% endif %}
+                            <td>
+                                <span class="pill {% if item.score >= 75 %}pill-good{% elif item.score > 0 %}pill-warning{% else %}pill-neutral{% endif %}">{{ item.basis }} · {{ item.score }} điểm</span>
+                                {% if item.conflicts %}
+                                    <ul class="conflict-list">
+                                        {% for conflict in item.conflicts %}<li>{{ conflict }}</li>{% endfor %}
+                                    </ul>
+                                {% endif %}
+                                {% if item.linked_to_other %}
+                                    <div class="notice notice-warning" style="margin-top: 8px; padding: 9px;">
+                                        {% if mode == 'SURVEY' %}Học sinh đã liên kết với {{ item.linked_person.full_name }}.{% else %}Đối tượng đã liên kết với học sinh khác.{% endif %}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if can_write and item.can_link %}
+                                    <form class="link-form" method="post" action="{% if mode == 'SURVEY' %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/doi-tuong/{{ person.id }}/lien-ket{% else %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/hoc-sinh/{{ student.id }}/lien-ket{% endif %}">
+                                        {% if mode == 'SURVEY' %}
+                                            <input type="hidden" name="student_id" value="{{ item.student.id }}">
+                                        {% else %}
+                                            <input type="hidden" name="person_id" value="{{ item.person.id }}">
+                                        {% endif %}
+                                        <textarea name="note" placeholder="Ghi căn cứ kiểm tra, số hồ sơ giấy hoặc nội dung xác minh..."></textarea>
+                                        {% if item.requires_confirmation %}
+                                            <label class="confirm-line">
+                                                <input type="checkbox" name="confirm_conflict" value="1">
+                                                Tôi đã kiểm tra hồ sơ gốc và xác nhận vẫn liên kết dù có thông tin khác nhau.
+                                            </label>
+                                        {% endif %}
+                                        <button class="button button-success" type="submit" onclick="return confirm('Xác nhận liên kết hai hồ sơ này?');">Liên kết</button>
+                                    </form>
+                                {% elif item.linked_to_other %}
+                                    <span class="muted">Không thể liên kết trùng.</span>
+                                {% else %}
+                                    <span class="muted">Chỉ xem.</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty">
+                {% if q %}Không tìm thấy hồ sơ phù hợp với nội dung đã nhập.{% else %}Chưa có ứng viên tự động. Hãy nhập họ tên, mã học sinh hoặc số định danh để tìm thêm.{% endif %}
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">GHI NHẬN RÀ SOÁT</p>
+                <h2>Lưu kết luận mà không tự sửa dữ liệu gốc</h2>
+                <p class="panel-description">Các kết luận dưới đây được lưu vào nhật ký và có thể lọc, xuất Excel trên trang đối chiếu.</p>
+            </div>
+        </div>
+
+        {% if can_write %}
+            <div class="review-grid">
+                <div class="review-box">
+                    <h3>Kết luận đã xử lý</h3>
+                    <form method="post" action="{% if mode == 'SURVEY' %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/doi-tuong/{{ person.id }}/ghi-nhan{% else %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/hoc-sinh/{{ student.id }}/ghi-nhan{% endif %}">
+                        <label for="done_action">Kết luận</label>
+                        <select id="done_action" name="action_code">
+                            <option value="DA_RA_SOAT">Đã rà soát</option>
+                            <option value="XAC_NHAN_SAI_KHAC">Đã xác nhận sai khác giữa hai nguồn</option>
+                            {% if mode == 'SURVEY' %}<option value="KHONG_TIM_THAY">Không tìm thấy hồ sơ học sinh phù hợp</option>{% endif %}
+                        </select>
+                        <label for="done_note" style="margin-top: 10px;">Nội dung ghi nhận</label>
+                        <textarea id="done_note" name="note" placeholder="Nêu căn cứ, người đã xác minh, hồ sơ giấy đã kiểm tra..."></textarea>
+                        <div class="review-actions">
+                            <button class="button button-success" type="submit">Lưu kết luận</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="review-box">
+                    <h3>Chưa đủ căn cứ</h3>
+                    <form method="post" action="{% if mode == 'SURVEY' %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/doi-tuong/{{ person.id }}/ghi-nhan{% else %}/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/hoc-sinh/{{ student.id }}/ghi-nhan{% endif %}">
+                        <input type="hidden" name="action_code" value="CHO_XAC_MINH">
+                        <label for="pending_note">Nội dung cần xác minh tiếp</label>
+                        <textarea id="pending_note" name="note" placeholder="Ví dụ: chờ bản sao giấy khai sinh, chờ trường xác nhận mã học sinh..."></textarea>
+                        <div class="review-actions">
+                            <button class="button button-warning" type="submit">Ghi chờ xác minh</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty">Tài khoản hiện tại không có quyền ghi nhận kết luận.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">NHẬT KÝ XỬ LÝ</p>
+                <h2>Lịch sử các lần rà soát</h2>
+            </div>
+            <strong>{{ history|length }} bản ghi</strong>
+        </div>
+        {% if history %}
+            <div class="history-list">
+                {% for item in history %}
+                    <div class="history-item">
+                        <span class="pill {% if item.log.action_code in ['LIEN_KET', 'DA_RA_SOAT', 'KHONG_TIM_THAY', 'XAC_NHAN_SAI_KHAC'] %}pill-good{% elif item.log.action_code == 'CHO_XAC_MINH' %}pill-warning{% else %}pill-neutral{% endif %}">{{ item.action_label }}</span>
+                        <div class="history-meta">{{ item.actor_name }} · {{ item.created_at_text }} · Kết quả trước xử lý: {{ item.log.result_before or '—' }}</div>
+                        {% if item.log.note %}<div class="history-note">{{ item.log.note }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">Chưa có lịch sử xử lý.</div>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

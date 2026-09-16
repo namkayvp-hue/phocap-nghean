@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đội ngũ</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body{margin:0;background:#eef4fb;color:#17324f;font-family:Arial,sans-serif}.hero{background:linear-gradient(135deg,#1453a2,#1883d7);color:white;padding:32px 48px}.hero-inner{max-width:1450px;margin:auto;display:flex;justify-content:space-between;gap:24px;align-items:center}.eyebrow,.section-label{font-weight:800;letter-spacing:.08em;text-transform:uppercase}.hero h1{font-size:34px;margin:5px 0 8px}.hero p{margin:0;font-size:17px}.user{text-align:right}.nav{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}.container{max-width:1450px;margin:24px auto;padding:0 22px 50px}.panel{background:white;border-radius:18px;padding:22px;margin-bottom:18px;box-shadow:0 10px 28px rgba(34,76,120,.08)}.panel-head{display:flex;justify-content:space-between;gap:20px;align-items:center}.button{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;padding:11px 16px;font-weight:800;text-decoration:none;cursor:pointer}.button-primary{background:#1676d2;color:white}.button-success{background:#168b3c;color:white}.button-light{background:white;color:#1453a2}.button-secondary{background:#e7eef6;color:#18324f}.button-warning{background:#c78100;color:white}.button-danger{background:#c92a2a;color:white}.filters{display:grid;grid-template-columns:1.1fr 1.2fr 1.6fr 1fr 1.5fr .8fr auto;gap:12px;align-items:end}.filters label{font-weight:700;display:block;margin-bottom:6px}.filters select,.filters input,.upload input{box-sizing:border-box;width:100%;padding:11px;border:1px solid #ccdaea;border-radius:10px;background:white}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:18px}.stat{background:white;border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(34,76,120,.07)}.stat span{color:#6b8199;font-weight:700}.stat strong{display:block;font-size:32px;color:#1453a2;margin-top:8px}.stat.green strong{color:#168b3c}.stat.red strong{color:#c92a2a}.actions{display:flex;gap:10px;flex-wrap:wrap}.notice{padding:14px 16px;border-radius:12px;margin-bottom:16px;background:#eaf6ee;border:1px solid #b9dfc5;color:#176b34}.notice.error{background:#fff0f0;border-color:#efb7b7;color:#9b2020}.tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.tool{border:1px solid #d8e4f0;border-radius:14px;padding:17px;background:#fbfdff}.tool h3{margin:0 0 7px}.tool p{color:#6b8199;line-height:1.45}.upload{display:grid;grid-template-columns:1fr 1.5fr auto;gap:10px;align-items:end}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:1250px}.data-table th{background:#eaf2fb;text-align:left;padding:12px 10px;font-size:14px}.data-table td{border-bottom:1px solid #e3ebf3;padding:12px 10px;vertical-align:top}.badge{display:inline-block;border-radius:999px;padding:6px 9px;font-weight:800;font-size:12px}.badge.blue{background:#e4f0ff;color:#165ea5}.badge.green{background:#e5f6ea;color:#176f38}.badge.gold{background:#fff2cf;color:#805500}.muted{color:#71879f;font-size:13px;line-height:1.45}.small-actions{display:flex;gap:7px;flex-wrap:wrap}.small-actions .button{padding:8px 10px;font-size:13px}.empty{text-align:center;padding:36px;color:#71879f}.readonly{background:#fff6dd;border:1px solid #efd28c;color:#75520a;padding:14px;border-radius:12px;margin-bottom:16px}.audit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.audit-item{border:1px solid #d7e4f0;border-radius:13px;padding:15px;background:#f8fbff}.audit-item span{display:block;color:#6b8199;font-weight:700;font-size:13px}.audit-item strong{display:block;font-size:27px;color:#1453a2;margin-top:7px}.audit-item.warn strong{color:#c77800}.audit-item.danger strong{color:#c92a2a}.audit-note{margin-top:14px;padding:14px;border-radius:12px;background:#edf7ff;color:#24577f;line-height:1.5}.pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px}.pagination a,.pagination span{padding:9px 13px;border-radius:9px;text-decoration:none;font-weight:800}.pagination a{background:#e7eef6;color:#18324f}.pagination .current{background:#1676d2;color:white}.pagination .disabled{background:#f0f3f6;color:#9aa9b7}.count-line{font-weight:800;color:#315b84}
+        @media(max-width:1100px){.filters{grid-template-columns:1fr 1fr}.stats,.audit-grid{grid-template-columns:1fr 1fr}.tool-grid{grid-template-columns:1fr}.hero-inner,.panel-head{align-items:flex-start;flex-direction:column}.user{text-align:left}.nav{justify-content:flex-start}}@media(max-width:650px){.filters,.stats,.audit-grid,.upload{grid-template-columns:1fr}.hero{padding:26px 18px}.container{padding:0 12px}}
+    </style>
+
+    <!-- === MO_RONG_HIEN_THI_DOI_NGU_V1_START === -->
+    <style id="MO_RONG_HIEN_THI_DOI_NGU_V1">
+        /*
+         * Chỉ thay đổi bố cục hiển thị trang Danh sách đội ngũ.
+         * Không thay đổi dữ liệu, route, quyền, import/export.
+         */
+
+        @media (min-width: 1101px) {
+            .hero-inner {
+                width: 100% !important;
+                max-width: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .container {
+                width: 100% !important;
+                max-width: none !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                box-sizing: border-box !important;
+            }
+
+            .container > * {
+                max-width: none !important;
+            }
+
+            .panel {
+                width: 100% !important;
+                max-width: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .table-wrap {
+                width: 100% !important;
+                max-width: none !important;
+                overflow-x: auto !important;
+                box-sizing: border-box !important;
+            }
+
+            .data-table {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                table-layout: fixed !important;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 9px 7px !important;
+                font-size: 13px !important;
+                line-height: 1.35 !important;
+                white-space: normal !important;
+                overflow-wrap: anywhere !important;
+                word-break: normal !important;
+                vertical-align: top !important;
+            }
+
+            .data-table th:nth-child(1),
+            .data-table td:nth-child(1)  { width: 4% !important; }
+
+            .data-table th:nth-child(2),
+            .data-table td:nth-child(2)  { width: 13% !important; }
+
+            .data-table th:nth-child(3),
+            .data-table td:nth-child(3)  { width: 12% !important; }
+
+            .data-table th:nth-child(4),
+            .data-table td:nth-child(4)  { width: 9% !important; }
+
+            .data-table th:nth-child(5),
+            .data-table td:nth-child(5)  { width: 9% !important; }
+
+            .data-table th:nth-child(6),
+            .data-table td:nth-child(6)  { width: 11% !important; }
+
+            .data-table th:nth-child(7),
+            .data-table td:nth-child(7)  { width: 9% !important; }
+
+            .data-table th:nth-child(8),
+            .data-table td:nth-child(8)  { width: 6% !important; }
+
+            .data-table th:nth-child(9),
+            .data-table td:nth-child(9)  { width: 9% !important; }
+
+            .data-table th:nth-child(10),
+            .data-table td:nth-child(10) { width: 9% !important; }
+
+            .data-table th:nth-child(11),
+            .data-table td:nth-child(11) { width: 9% !important; }
+
+            .data-table th:nth-child(12),
+            .data-table td:nth-child(12) { width: 10% !important; }
+
+            .small-actions {
+                gap: 5px !important;
+            }
+
+            .small-actions .button {
+                padding: 7px 8px !important;
+                font-size: 12px !important;
+            }
+
+            .tool-grid,
+            .stats,
+            .filters,
+            .audit-grid {
+                width: 100% !important;
+                max-width: none !important;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .table-wrap {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .data-table {
+                min-width: 1250px !important;
+                table-layout: auto !important;
+            }
+        }
+    </style>
+    <!-- === MO_RONG_HIEN_THI_DOI_NGU_V1_END === -->
+
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero"><div class="hero-inner"><div><p class="eyebrow">BÀI 13B-2</p><h1>Kiểm tra, chuyển và quản lý dữ liệu đội ngũ</h1><p>Rà soát danh sách toàn tỉnh, xuất Excel mẫu, nhập cập nhật chống trùng và lập biểu MN-01 GV.</p></div><div class="user"><strong>{{ nguoi_dung.full_name }}</strong><br><span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span><div class="nav"><a class="button button-light" href="/bao-cao/pcgdmn-mau-2025?school_year_id={{ selected_year_id }}">Biểu mẫu PCGDMN</a><a class="button button-light" href="/">Trang chủ</a></div></div></div></header>
+<main class="container">
+    {% if status %}
+        {% if status in ['forbidden','import_error','duplicate','duplicate_code','not_found'] %}<div class="notice error">
+            {% if status == 'forbidden' %}Tài khoản không có quyền thực hiện thao tác này.{% elif status == 'import_error' %}Không nhập được tệp Excel. Hãy dùng đúng file mẫu, kiểm tra tên trường và năm học.{% elif status in ['duplicate','duplicate_code'] %}Dữ liệu bị trùng trong năm học hoặc trùng mã định danh cán bộ.{% else %}Không tìm thấy hồ sơ cần xử lý.{% endif %}
+        </div>{% else %}<div class="notice">
+            {% if status == 'created' %}Đã thêm hồ sơ đội ngũ.{% elif status == 'updated' %}Đã cập nhật hồ sơ đội ngũ.{% elif status == 'archived' %}Đã ngừng theo dõi bản ghi năm học.{% elif status.startswith('synced_') %}Đã đồng bộ tài khoản. Kết quả tạo mới / đã tồn tại: {{ status.replace('synced_','').replace('_',' / ') }}.{% elif status.startswith('imported_') %}Đã nhập Excel. Kết quả tạo mới / cập nhật / bỏ qua / lỗi định danh: {{ status.replace('imported_','').replace('_',' / ') }}.{% endif %}
+        </div>{% endif %}
+    {% endif %}
+    {% if not can_manage %}<div class="readonly">Tài khoản hiện tại được xem và xuất báo cáo, không được thay đổi dữ liệu đội ngũ.</div>{% endif %}
+    <section class="panel">
+        <div class="panel-head"><div><p class="section-label">Phạm vi dữ liệu</p><h2>Danh sách đội ngũ theo năm học</h2><p class="muted">Phạm vi đang xem: <strong>{{ scope_label }}</strong>. Dữ liệu được tách theo năm học, trường và vị trí việc làm.</p></div>{% if can_manage %}<div class="actions"><a class="button button-success" href="/doi-ngu/them?{{ scope_query }}">＋ Thêm nhân sự</a><a class="button button-secondary" href="/doi-ngu/cau-hinh-lop?{{ scope_query }}">Cấu hình số lớp</a></div>{% endif %}</div>
+        <form id="staff-filter-form" method="get" action="/doi-ngu"><div class="filters">
+            <div><label>Năm học</label><select id="staff-school-year" name="school_year_id">{% for year in school_years %}<option value="{{ year.id }}" {% if year.id == selected_year_id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div>
+            <div><label>Xã/phường</label><select id="staff-commune" name="commune_id"><option value="">-- Toàn tỉnh --</option>{% for commune in communes %}<option value="{{ commune.id }}" {% if commune.id == selected_commune_id %}selected{% endif %}>{{ commune.name }}</option>{% endfor %}</select></div>
+            <div><label>Trường</label><select id="staff-school" name="school_id"><option value="">{% if selected_commune_id %}-- Tất cả đơn vị thuộc xã/phường --{% else %}-- Tất cả trường trong phạm vi --{% endif %}</option>{% for school in schools %}<option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}{% if not school.is_active %} — Đã sáp nhập/ngừng hoạt động{% endif %}</option>{% endfor %}</select></div>
+            <div><label>Vị trí</label><select name="position_group"><option value="">-- Tất cả --</option>{% for code,label in position_labels.items() %}<option value="{{ code }}" {% if code == position_group %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div><label>Tìm nhanh</label><input name="q" value="{{ q }}" placeholder="Họ tên, mã cán bộ, trường..."></div>
+            <div><label>Số dòng/trang</label><select name="page_size">{% for size in [20,50,100,200] %}<option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }} dòng</option>{% endfor %}</select></div>
+            <div class="actions"><button class="button button-primary" type="submit">Lọc</button><a class="button button-secondary" href="/doi-ngu">Xóa lọc</a></div>
+        </div></form>
+    </section>
+    <section class="stats"><article class="stat"><span>Tổng đang làm việc</span><strong>{{ summary.total }}</strong></article><article class="stat"><span>Cán bộ quản lý</span><strong>{{ summary.managers }}</strong></article><article class="stat green"><span>Giáo viên</span><strong>{{ summary.teachers }}</strong></article><article class="stat"><span>Nhân viên</span><strong>{{ summary.employees }}</strong></article><article class="stat red"><span>GV thiếu thông tin báo cáo</span><strong>{{ summary.incomplete }}</strong></article></section>
+
+    <section class="panel"><div class="panel-head"><div><p class="section-label">Kiểm tra và chuyển dữ liệu</p><h2>Đối chiếu danh sách tài khoản với hồ sơ đội ngũ</h2><p class="muted">File kiểm tra cho biết danh sách đội ngũ hiện có, tài khoản chưa chuyển và trường chưa có hồ sơ. File mẫu có sẵn danh mục trường, danh mục lựa chọn và tài khoản gợi ý.</p></div><div class="actions"><a class="button button-primary" href="/doi-ngu/kiem-tra-du-lieu?{{ scope_query }}">🔎 Kiểm tra dữ liệu hiện có</a><a class="button button-success" href="/doi-ngu/xuat-mau-excel?{{ scope_query }}">📥 Xuất Excel mẫu nhập</a><a class="button button-warning" href="/doi-ngu/xuat-danh-sach-excel?{{ scope_query }}">📊 Xuất danh sách hiện có</a></div></div>
+        {% if audit %}<div class="audit-grid">
+            <article class="audit-item"><span>Tài khoản đủ điều kiện</span><strong>{{ audit.eligible_accounts }}</strong></article>
+            <article class="audit-item"><span>Hồ sơ đội ngũ năm học</span><strong>{{ audit.staff_records }}</strong></article>
+            <article class="audit-item"><span>Tài khoản đã chuyển</span><strong>{{ audit.converted_accounts }}</strong></article>
+            <article class="audit-item warn"><span>Tài khoản chưa chuyển</span><strong>{{ audit.unconverted_accounts }}</strong></article>
+            <article class="audit-item"><span>Trường có tài khoản</span><strong>{{ audit.schools_with_accounts }}</strong></article>
+            <article class="audit-item warn"><span>Trường chưa có hồ sơ</span><strong>{{ audit.schools_without_records }}</strong></article>
+            <article class="audit-item danger"><span>GV thiếu thông tin báo cáo</span><strong>{{ audit.incomplete_records }}</strong></article>
+            <article class="audit-item danger"><span>Hồ sơ thiếu mã Bộ GD&amp;ĐT</span><strong>{{ audit.records_without_code }}</strong></article>
+        </div><div class="audit-note">Kết quả kiểm tra không sửa dữ liệu. Nếu hồ sơ đội ngũ bằng 0 nhưng tài khoản đủ điều kiện lớn hơn 0, anh có thể bấm <strong>Đồng bộ tài khoản</strong> hoặc tải <strong>Excel mẫu nhập</strong>, sao chép dữ liệu từ trang “Tài khoản gợi ý”, bổ sung các trường còn thiếu rồi nhập lại.</div>{% endif %}
+    </section>
+
+    {% if can_manage %}<section class="panel"><p class="section-label">Khởi tạo và nhập dữ liệu</p><div class="tool-grid">
+        <article class="tool"><h3>Đồng bộ từ tài khoản trường</h3><p>Tạo hồ sơ ban đầu từ các tài khoản cán bộ quản lý và giáo viên đang hoạt động. Không xóa tài khoản, không tạo trùng mã Bộ GD&amp;ĐT và không ghi đè hồ sơ đã có.</p><form method="post" action="/doi-ngu/dong-bo-tai-khoan"><input type="hidden" name="school_year_id" value="{{ selected_year_id }}"><input type="hidden" name="school_id" value="{{ selected_school_id or '' }}"><button class="button button-primary" type="submit">Đồng bộ tài khoản</button></form></article>
+        <article class="tool"><h3>Nhập hoặc cập nhật từ Excel</h3><p>Dùng file do phần mềm xuất. Hệ thống nhận diện theo Mã Bộ GD&amp;ĐT → số định danh cá nhân → họ tên và ngày sinh; dòng đã có sẽ cập nhật, dòng mâu thuẫn sẽ bỏ qua.</p><form method="post" action="/doi-ngu/nhap-excel" enctype="multipart/form-data"><div class="upload"><div><label>Năm học</label><input type="hidden" name="school_year_id" value="{{ selected_year_id }}"><input value="{{ selected_year_id }}" disabled></div><div><label>Tệp Excel</label><input type="file" name="excel_file" accept=".xlsx" required></div><input type="hidden" name="school_id" value="{{ selected_school_id or '' }}"><button class="button button-success" type="submit">Nhập Excel</button></div></form></article>
+    </div></section>{% endif %}
+
+    <section class="panel"><div class="panel-head"><div><p class="section-label">Dữ liệu chi tiết</p><h2>{{ total_records }} hồ sơ theo năm học</h2><p class="count-line">Đang hiển thị {{ records|length }} hồ sơ ở trang {{ page }}/{{ page_count }}.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>STT</th><th>Họ tên / mã cán bộ</th><th>Trường</th><th>Vị trí</th><th>Hợp đồng</th><th>Cấp/Môn dạy</th><th>Trình độ</th><th>Dân tộc</th><th>Đánh giá viên chức</th><th>Chuẩn nghề nghiệp</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+        {% for record in records %}<tr><td>{{ (page-1)*page_size + loop.index }}</td><td><strong>{{ record.staff_member.full_name }}</strong><div class="muted">{{ record.staff_member.ministry_staff_code or record.staff_member.code }}{% if record.staff_member.date_of_birth %} · {{ record.staff_member.date_of_birth.strftime('%d/%m/%Y') }}{% endif %}</div></td><td><strong>{{ record.school.name }}</strong><div class="muted">{{ record.school.commune.name }}</div></td><td><span class="badge blue">{{ position_labels.get(record.position_group, record.position_group) }}</span><div class="muted">{{ record.position_title or '' }}</div></td><td>{{ employment_labels.get(record.employment_type, record.employment_type) }}</td><td><strong>{{ teaching_level_labels.get(record.teaching_level, record.teaching_level) }}</strong><div class="muted">{{ record.teaching_subject or record.main_specialty or '' }}</div></td><td>{{ qualification_level_labels.get(record.qualification_level, record.qualification_level) }}<div class="muted">{{ qualification_standard_labels.get(record.qualification_standard, record.qualification_standard) }}</div></td><td>{{ record.staff_member.ethnic_group or '' }}</td><td>{{ record.staff_evaluation or '' }}</td><td>{{ professional_standard_labels.get(record.professional_standard, record.professional_standard) }}</td><td><span class="badge {% if record.status_code == 'DANG_LAM_VIEC' and record.is_active %}green{% else %}gold{% endif %}">{{ status_labels.get(record.status_code, record.status_code) }}</span></td><td><div class="small-actions">{% if can_manage %}<a class="button button-primary" href="/doi-ngu/{{ record.id }}/sua">Sửa</a>{% if record.is_active %}<form method="post" action="/doi-ngu/{{ record.id }}/ngung-theo-doi" onsubmit="return confirm('Ngừng theo dõi bản ghi năm học này?')"><button class="button button-danger" type="submit">Ngừng</button></form>{% endif %}{% else %}<span class="muted">Chỉ xem</span>{% endif %}</div></td></tr>{% else %}<tr><td colspan="12" class="empty">Chưa có dữ liệu đội ngũ trong phạm vi đã chọn.</td></tr>{% endfor %}
+    </tbody></table></div>
+        <div class="pagination">
+            {% if page > 1 %}<a href="/doi-ngu?{{ base_query }}&page={{ page-1 }}">← Trước</a>{% else %}<span class="disabled">← Trước</span>{% endif %}
+            <span class="current">{{ page }}</span><span>/ {{ page_count }}</span>
+            {% if page < page_count %}<a href="/doi-ngu?{{ base_query }}&page={{ page+1 }}">Sau →</a>{% else %}<span class="disabled">Sau →</span>{% endif %}
+        </div>
+    </section>
+</main>
+<script>
+(function () {
+    const form = document.getElementById('staff-filter-form');
+    const communeSelect = document.getElementById('staff-commune');
+    const schoolSelect = document.getElementById('staff-school');
+
+    if (!form || !communeSelect || !schoolSelect) {
+        return;
+    }
+
+    communeSelect.addEventListener('change', function () {
+        schoolSelect.value = '';
+        schoolSelect.disabled = true;
+        schoolSelect.innerHTML = '<option value="">Đang tải đơn vị thuộc xã/phường...</option>';
+        form.submit();
+    });
+})();
+</script>
+</body></html>

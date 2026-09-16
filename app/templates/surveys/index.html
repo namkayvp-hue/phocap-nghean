@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Quản lý đợt điều tra</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+
+    <style>
+        .survey-layout {
+            display: grid;
+            grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.7fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .survey-layout-single {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .survey-form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: white;
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .survey-form-control:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+        }
+
+        textarea.survey-form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .survey-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+
+        .survey-table {
+            min-width: 1080px;
+        }
+
+        .survey-code {
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-ready {
+            background: #fff8e1;
+            color: #8d6e00;
+        }
+
+        .status-running {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .status-finished {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .status-locked {
+            background: #ffebee;
+            color: #8a1c1c;
+        }
+
+        .survey-action-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 7px;
+            min-width: 165px;
+        }
+
+        .muted-note {
+            color: #657789;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .survey-menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+            align-items: stretch;
+        }
+
+        .survey-menu-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 270px;
+            padding: 22px;
+            border: 1px solid #d7e3ee;
+            border-top: 6px solid #1976d2;
+            border-radius: 15px;
+            background: #ffffff;
+            box-shadow: 0 7px 20px rgba(31, 62, 91, 0.07);
+        }
+
+        .survey-menu-card h2 {
+            margin: 7px 0 10px;
+            font-size: 22px;
+            line-height: 1.25;
+        }
+
+        .survey-menu-card .muted-note {
+            margin: 0 0 18px;
+            font-size: 14px;
+        }
+
+        .survey-menu-card .button {
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .menu-purple { border-top-color: #7b1fa2; }
+        .menu-teal { border-top-color: #00897b; }
+        .menu-orange { border-top-color: #ef6c00; }
+        .menu-indigo { border-top-color: #5e35b1; }
+        .menu-blue { border-top-color: #1976d2; }
+        .menu-green { border-top-color: #2e7d32; }
+
+        @media (max-width: 1100px) {
+            .survey-menu-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .survey-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .survey-menu-grid,
+            .survey-filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .survey-menu-card {
+                min-height: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+{# === GV_MOBILE_V18_HOME_START === #}
+{% if nguoi_dung.role_code == 'GIAO_VIEN' %}
+<style>
+.pc-gv-v18-home { display: none; }
+@media (max-width: 760px) {
+    html, body { margin: 0 !important; min-height: 100dvh; background: #f3f6fa !important; }
+    body > *:not(.pc-gv-v18-home) { display: none !important; }
+    .pc-gv-v18-home {
+        display: flex !important;
+        min-height: 100dvh;
+        padding: 22px 16px;
+        align-items: flex-start;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    .pc-gv-v18-home-inner {
+        width: min(100%, 520px);
+        display: grid;
+        gap: 18px;
+        margin-top: 8px;
+    }
+
+    /* === GV_MOBILE_V18C_TITLE_CSS === */
+    .pc-gv-v18-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 16px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #0f5fa8, #1976d2);
+        color: #ffffff;
+        box-shadow: 0 5px 14px rgba(23,105,170,.16);
+    }
+
+    .pc-gv-v18-brand-logo {
+        flex: 0 0 52px;
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #155fa5;
+        font-size: 22px;
+        font-weight: 900;
+        letter-spacing: .5px;
+    }
+
+    .pc-gv-v18-brand-text {
+        min-width: 0;
+    }
+
+    .pc-gv-v18-brand-title {
+        margin: 0;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 900;
+        line-height: 1.22;
+        text-transform: uppercase;
+    }
+
+    .pc-gv-v18-brand-subtitle {
+        margin: 4px 0 0;
+        color: rgba(255,255,255,.90);
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .pc-gv-v18-year {
+        width: 100%;
+        min-height: 58px;
+        padding: 10px 14px;
+        border: 1px solid #b8c8d8;
+        border-radius: 13px;
+        background: #fff;
+        color: #17324d;
+        font: inherit;
+        font-size: 17px;
+        font-weight: 800;
+        box-sizing: border-box;
+    }
+    .pc-gv-v18-assignment {
+        display: flex;
+        min-height: 68px;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: #1769aa;
+        color: #fff !important;
+        text-decoration: none !important;
+        font-size: 20px;
+        font-weight: 850;
+        box-shadow: 0 5px 14px rgba(23,105,170,.18);
+        box-sizing: border-box;
+    }
+    .pc-gv-v18-assignment.is-disabled {
+        background: #ccd5de;
+        color: #667684 !important;
+        box-shadow: none;
+        pointer-events: none;
+    }
+}
+</style>
+<section class="pc-gv-v18-home">
+    <div class="pc-gv-v18-home-inner">
+
+        <!-- === GV_MOBILE_V18C_TITLE_HTML === -->
+        <div class="pc-gv-v18-brand">
+            <div class="pc-gv-v18-brand-logo">PC</div>
+            <div class="pc-gv-v18-brand-text">
+                <p class="pc-gv-v18-brand-title">
+                    Phổ cập giáo dục và xóa mù chữ
+                </p>
+                <p class="pc-gv-v18-brand-subtitle">
+                    Hệ thống quản lý dữ liệu
+                </p>
+            </div>
+        </div>
+
+        <form method="get" action="/dieu-tra" id="pc-gv-v18-year-form">
+            <select class="pc-gv-v18-year" id="pc-gv-v18-year" name="school_year_id" aria-label="Chọn năm học">
+                <option value="">-- Chọn năm học --</option>
+                {% for nam_hoc in school_years %}
+                    <option value="{{ nam_hoc.id }}" {% if nam_hoc.id == selected_school_year_id %}selected{% endif %}>
+                        {{ nam_hoc.code }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+
+        {% if selected_school_year_id and survey_batches %}
+            <a class="pc-gv-v18-assignment" href="/dieu-tra/{{ survey_batches[0].id }}/ho-dan?page_size=100&sort=hamlet">
+                Phiếu phân công
+            </a>
+        {% else %}
+            <span class="pc-gv-v18-assignment is-disabled">Phiếu phân công</span>
+        {% endif %}
+    </div>
+</section>
+<script>
+window.addEventListener('load', function () {
+    if (window.innerWidth > 760) return;
+    const year = document.getElementById('pc-gv-v18-year');
+    const form = document.getElementById('pc-gv-v18-year-form');
+    if (year && form) {
+        year.addEventListener('change', function () { form.submit(); });
+    }
+});
+</script>
+{% endif %}
+{# === GV_MOBILE_V18_HOME_END === #}
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    ĐIỀU TRA PHỔ CẬP GIÁO DỤC
+                </p>
+
+                <h1>Quản lý đợt điều tra</h1>
+
+                <p>
+                    Tổ chức điều tra theo năm học, xã,
+                    thôn/xóm và hộ gia đình.
+                </p>
+            </div>
+
+            <div
+                style="
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    flex-wrap: wrap;
+                "
+            >
+                <div
+                    style="
+                        text-align: right;
+                        line-height: 1.4;
+                    "
+                >
+                    <strong>
+                        {{ nguoi_dung.full_name }}
+                    </strong>
+
+                    <div
+                        style="
+                            font-size: 13px;
+                            opacity: 0.9;
+                        "
+                    >
+                        {{ nguoi_dung.role_name }}
+                        – {{ nguoi_dung.unit_name }}
+                    </div>
+                </div>
+
+                <a
+                    class="button button-light"
+                    href="/"
+                >
+                    ← Trang chủ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        {% if thong_bao %}
+            <div class="alert alert-success">
+                {{ thong_bao }}
+            </div>
+        {% endif %}
+
+        {% if thong_bao_loi %}
+            <div class="alert alert-error">
+                {{ thong_bao_loi }}
+            </div>
+        {% endif %}
+
+        {% if pham_vi_han_che %}
+            <div class="alert alert-success">
+                <strong>Phạm vi dữ liệu:</strong>
+                {{ pham_vi_mo_ta }}
+            </div>
+        {% endif %}
+
+
+        <section class="survey-menu-grid" aria-label="Các chức năng điều hành điều tra">
+            {% if co_quyen_dieu_hanh_toan_tinh %}
+                <article class="survey-menu-card menu-purple">
+                    <p class="panel-label">BÀI 13B-4 · SỞ → XÃ → TRƯỜNG</p>
+                    <h2>Điều hành triển khai toàn tỉnh</h2>
+                    <p class="muted-note">
+                        Sở triển khai đợt; xã phân công và khóa/mở các trường;
+                        theo dõi trạng thái toàn bộ địa bàn.
+                    </p>
+                    <a class="button button-primary" href="/dieu-tra/dieu-hanh-trien-khai">
+                        🧭 Mở điều hành toàn tỉnh
+                    </a>
+                </article>
+            {% endif %}
+
+            {% if nguoi_dung.role_code in ['ADMIN', 'SO', 'PHONG_BAN'] %}
+                <article class="survey-menu-card menu-teal">
+                    <p class="panel-label">BÀI 12D-18 · GIÁM SÁT CẤP TỈNH</p>
+                    <h2>Tổng hợp chốt đối chiếu học sinh</h2>
+                    <p class="muted-note">
+                        Theo dõi địa bàn đã chốt, đã mở lại, chưa chốt;
+                        xem ảnh chụp số liệu và xuất Excel toàn tỉnh.
+                    </p>
+                    <a class="button button-primary" href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh">
+                        📊 Mở tổng hợp đối chiếu
+                    </a>
+                </article>
+
+                <article class="survey-menu-card menu-orange">
+                    <p class="panel-label">BÀI 12D-19 · DANH SÁCH ĐÔN ĐỐC</p>
+                    <h2>Giám sát tiến độ và nhắc việc</h2>
+                    <p class="muted-note">
+                        Xếp ưu tiên theo trạng thái chốt, thời hạn và lịch sử mở lại;
+                        xuất danh sách phục vụ đôn đốc.
+                    </p>
+                    <a class="button button-primary" href="/dieu-tra/don-doc-doi-chieu-hoc-sinh">
+                        📌 Mở danh sách đôn đốc
+                    </a>
+                </article>
+            {% endif %}
+
+            {% if nguoi_dung.role_code in ['ADMIN', 'SO', 'PHONG_BAN', 'XA'] %}
+                <article class="survey-menu-card menu-indigo">
+                    <p class="panel-label">DỮ LIỆU NỀN CÁC NĂM TRƯỚC</p>
+                    <h2>Trung tâm dữ liệu lịch sử</h2>
+                    <p class="muted-note">
+                        Cập nhật dữ liệu 2020-2021 đến 2025-2026, nhập/xuất Excel,
+                        gửi kiểm tra và khóa làm dữ liệu nền.
+                    </p>
+                    <a class="button button-primary" href="/dieu-tra/du-lieu-lich-su">
+                        🗂️ Mở dữ liệu lịch sử
+                    </a>
+                </article>
+            {% endif %}
+
+            {% if co_quyen_quan_tri_dot %}
+                <article class="survey-menu-card menu-blue">
+                    <p class="panel-label">ĐẦU NĂM HỌC MỚI</p>
+                    <h2>Khởi tạo đợt toàn tỉnh</h2>
+                    <p class="muted-note">
+                        Tạo đồng loạt đợt cho tất cả xã/phường và chuyển dữ liệu
+                        năm trước đã khóa sang năm học mới.
+                    </p>
+                    <a class="button button-primary" href="/dieu-tra/khoi-tao-nam-hoc-toan-tinh">
+                        🚀 Khởi tạo năm học mới
+                    </a>
+                </article>
+            {% endif %}
+
+            {% if nguoi_dung.role_code in ['ADMIN', 'SO', 'PHONG_BAN', 'XA'] %}
+                <article class="survey-menu-card menu-green">
+                    <p class="panel-label">PHÁT HÀNH VÀ TIẾP NHẬN</p>
+                    <h2>Trung tâm phiếu điều tra</h2>
+                    <p class="muted-note">
+                        Xuất phiếu theo từng địa bàn, theo dõi lần phát hành
+                        và tiếp nhận tệp cập nhật từ đơn vị thực hiện.
+                    </p>
+                    <a class="button button-primary" href="/dieu-tra/trung-tam-phieu">
+                        📬 Mở trung tâm phiếu
+                    </a>
+                </article>
+            {% endif %}
+        </section>
+
+        <section
+            class="survey-layout{% if not co_quyen_tao_dot %} survey-layout-single{% endif %}"
+        >
+            {% if co_quyen_tao_dot %}
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-label">
+                            TẠO MỚI
+                        </p>
+
+                        <h2>Đợt điều tra</h2>
+                    </div>
+                </div>
+
+                
+                {# === BAI_13B_11_PROVINCE_BATCH_ADMIN_UI_START === #}
+                <div
+                    style="
+                        margin-bottom: 16px;
+                        padding: 14px;
+                        border: 1px solid #b9d8f2;
+                        border-radius: 10px;
+                        background: #eef7ff;
+                    "
+                >
+                    <strong>Khuyến nghị cấp tỉnh:</strong>
+                    tạo đợt cho toàn bộ xã/phường trong một lần và kiểm tra/xóa
+                    đợt tạo nhầm theo cơ chế an toàn.
+                    <div style="margin-top:10px;">
+                        <a
+                            class="button button-primary"
+                            href="/dieu-tra/quan-ly-dot-toan-tinh"
+                        >
+                            🌐 Khởi tạo toàn tỉnh / Xóa đợt an toàn
+                        </a>
+                    </div>
+                </div>
+                {# === BAI_13B_11_PROVINCE_BATCH_ADMIN_UI_END === #}
+
+<form
+                    class="data-form"
+                    method="post"
+                    action="/dieu-tra/them"
+                >
+                    <div class="form-group">
+                        <label for="school_year_id">
+                            Năm học
+                        </label>
+
+                        <select
+                            id="school_year_id"
+                            name="school_year_id"
+                            class="survey-form-control"
+                            required
+                        >
+                            <option value="">
+                                -- Chọn năm học --
+                            </option>
+
+                            {% for nam_hoc in school_years %}
+                                <option
+                                    value="{{ nam_hoc.id }}"
+                                    {% if form_data is defined and nam_hoc.id == form_data.school_year_id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ nam_hoc.code }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commune_id">
+                            Xã/phường
+                        </label>
+
+                        <select
+                            id="commune_id"
+                            name="commune_id"
+                            class="survey-form-control"
+                            required
+                        >
+                            <option value="">
+                                -- Chọn xã/phường --
+                            </option>
+
+                            {% for xa in communes %}
+                                <option
+                                    value="{{ xa.id }}"
+                                    {% if form_data is defined and xa.id == form_data.commune_id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ xa.code }} – {{ xa.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">
+                            Tên đợt điều tra
+                        </label>
+
+                        <input
+                            id="name"
+                            name="name"
+                            type="text"
+                            maxlength="300"
+                            value="{{ form_data.name if form_data is defined else '' }}"
+                            placeholder="Ví dụ: Điều tra đầu năm học 2025-2026"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="start_date">
+                            Ngày bắt đầu
+                        </label>
+
+                        <input
+                            id="start_date"
+                            name="start_date"
+                            type="date"
+                            class="survey-form-control"
+                            value="{{ form_data.start_date if form_data is defined else today }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date">
+                            Ngày kết thúc dự kiến
+                        </label>
+
+                        <input
+                            id="end_date"
+                            name="end_date"
+                            type="date"
+                            class="survey-form-control"
+                            value="{{ form_data.end_date if form_data is defined else '' }}"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">
+                            Ghi chú
+                        </label>
+
+                        <textarea
+                            id="notes"
+                            name="notes"
+                            class="survey-form-control"
+                            placeholder="Nhập nội dung cần lưu ý"
+                        >{{ form_data.notes if form_data is defined else '' }}</textarea>
+                    </div>
+
+                    <button
+                        class="button button-primary button-full"
+                        type="submit"
+                    >
+                        ＋ Tạo đợt điều tra
+                    </button>
+                </form>
+
+                <p class="muted-note" style="margin-top: 18px;">
+                    Sau khi tạo đợt điều tra, bước tiếp theo
+                    sẽ nhập danh sách hộ, phân công giáo viên
+                    và xuất file Excel đi điều tra.
+                </p>
+            </article>
+            {% endif %}
+
+            <article class="panel panel-wide">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-label">
+                            DỮ LIỆU HIỆN CÓ
+                        </p>
+
+                        <h2>
+                            {% if nguoi_dung.role_code in ['TRUONG', 'GIAO_VIEN'] %}
+                                Đợt điều tra được phân công
+                            {% else %}
+                                Danh sách đợt điều tra
+                            {% endif %}
+                        </h2>
+                    </div>
+
+                    <span class="count-badge">
+                        {{ survey_batches | length }} đợt
+                    </span>
+                </div>
+
+                <form
+                    method="get"
+                    action="/dieu-tra"
+                    style="margin-bottom: 22px;"
+                >
+                    <div class="survey-filter-grid">
+                        <div class="form-group">
+                            <label for="filter_school_year_id">
+                                Năm học
+                            </label>
+
+                            <select
+                                id="filter_school_year_id"
+                                name="school_year_id"
+                                class="survey-form-control"
+                            >
+                                <option value="">
+                                    -- Tất cả năm học --
+                                </option>
+
+                                {% for nam_hoc in school_years %}
+                                    <option
+                                        value="{{ nam_hoc.id }}"
+                                        {% if nam_hoc.id == selected_school_year_id %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ nam_hoc.code }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter_commune_id">
+                                Xã/phường
+                            </label>
+
+                            <select
+                                id="filter_commune_id"
+                                name="commune_id"
+                                class="survey-form-control"
+                            >
+                                <option value="">
+                                    -- Tất cả xã/phường --
+                                </option>
+
+                                {% for xa in communes %}
+                                    <option
+                                        value="{{ xa.id }}"
+                                        {% if xa.id == selected_commune_id %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ xa.code }} – {{ xa.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="survey_status">
+                                Trạng thái
+                            </label>
+
+                            <select
+                                id="survey_status"
+                                name="survey_status"
+                                class="survey-form-control"
+                            >
+                                <option value="">
+                                    -- Tất cả trạng thái --
+                                </option>
+
+                                {% for code, label in status_labels.items() %}
+                                    <option
+                                        value="{{ code }}"
+                                        {% if code == selected_status %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div
+                        style="
+                            margin-top: 15px;
+                            display: flex;
+                            gap: 10px;
+                            flex-wrap: wrap;
+                        "
+                    >
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Lọc danh sách
+                        </button>
+
+                        <a
+                            class="button button-secondary"
+                            href="/dieu-tra"
+                        >
+                            Xóa bộ lọc
+                        </a>
+                    </div>
+                </form>
+
+                {% if survey_batches %}
+                    <div class="table-wrapper">
+                        <table class="data-table survey-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã đợt</th>
+                                    <th>Tên đợt điều tra</th>
+                                    <th>Năm học</th>
+                                    <th>Xã/phường</th>
+                                    <th>Thời gian</th>
+                                    <th>Trạng thái</th>
+                                    <th>Số phiếu</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for dot in survey_batches %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+
+                                        <td class="survey-code">
+                                            {{ dot.code }}
+                                        </td>
+
+                                        <td>{{ dot.name }}</td>
+
+                                        <td>
+                                            {{ dot.school_year.code }}
+                                        </td>
+
+                                        <td>
+                                            {{ dot.commune.name }}
+
+                                            <div class="muted-note">
+                                                Mã {{ dot.commune.code }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {% if dot.start_date %}
+                                                {{ dot.start_date.strftime('%d/%m/%Y') }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+
+                                            {% if dot.end_date %}
+                                                <div class="muted-note">
+                                                    đến {{ dot.end_date.strftime('%d/%m/%Y') }}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if dot.is_locked %}
+                                                <span class="status-pill status-locked">
+                                                    🔒 Đã khóa dữ liệu
+                                                </span>
+                                                <div class="muted-note" style="margin-top: 6px;">
+                                                    {{ status_labels.get(dot.status, dot.status) }}
+                                                </div>
+                                            {% else %}
+                                                <span
+                                                    class="
+                                                        status-pill
+                                                        {% if dot.status == 'CHUAN_BI' %}
+                                                            status-ready
+                                                        {% elif dot.status == 'DANG_DIEU_TRA' %}
+                                                            status-running
+                                                        {% else %}
+                                                            status-finished
+                                                        {% endif %}
+                                                    "
+                                                >
+                                                    {{ status_labels.get(dot.status, dot.status) }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {{ batch_visible_counts.get(dot.id, 0) }}
+                                        </td>
+
+                                        <td>
+                                            <div class="survey-action-stack">
+                                                <a
+                                                    class="button button-small button-primary"
+                                                    href="/dieu-tra/{{ dot.id }}/ho-dan"
+                                                >
+                                                    Mở danh sách hộ
+                                                </a>
+
+                                                {% if co_quyen_xem_tien_do %}
+                                                    <a
+                                                        class="button button-small button-secondary"
+                                                        href="/dieu-tra/{{ dot.id }}/bao-cao-tong-hop"
+                                                    >
+                                                        📊 Báo cáo kết quả
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if co_quyen_xem_tien_do %}
+                                                    <a
+                                                        class="button button-small button-secondary"
+                                                        href="/dieu-tra/{{ dot.id }}/doi-chieu-nam-hoc"
+                                                    >
+                                                        🔎 Đối chiếu năm học
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if co_quyen_xem_tien_do %}
+                                                    <a
+                                                        class="button button-small button-secondary"
+                                                        href="/dieu-tra/{{ dot.id }}/xu-huong-lien-nam"
+                                                    >
+                                                        📈 Xu hướng liên năm
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if co_quyen_xem_tien_do and nguoi_dung.role_code in ['ADMIN', 'SO', 'PHONG_BAN', 'XA'] %}
+                                                    <a
+                                                        class="button button-small button-secondary"
+                                                        href="/dieu-tra/{{ dot.id }}/bang-dieu-hanh-dia-ban"
+                                                    >
+                                                        🗺️ Bảng điều hành năm học
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if co_quyen_quan_tri_dot and dot.is_locked %}
+                                                    <a
+                                                        class="button button-small button-secondary"
+                                                        href="/dieu-tra/{{ dot.id }}/ke-thua-du-lieu"
+                                                    >
+                                                        ♻️ Kế thừa năm sau
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if co_quyen_phan_cong_truong or co_quyen_gui_xa %}
+                                                    <a
+                                                        class="button button-small button-primary"
+                                                        href="/dieu-tra/{{ dot.id }}/phan-cong-hang-loat"
+                                                    >
+                                                        {% if nguoi_dung.role_code == 'TRUONG' %}
+                                                            👩‍🏫 Giao phiếu cho giáo viên
+                                                        {% else %}
+                                                            🏫 Phân công và khóa trường
+                                                        {% endif %}
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if co_quyen_quan_tri_dot %}
+                                                    <a
+                                                        class="button button-small button-secondary"
+                                                        href="/dieu-tra/{{ dot.id }}/chot-so-lieu"
+                                                    >
+                                                        {% if dot.is_locked %}
+                                                            🔓 Quản lý khóa
+                                                        {% else %}
+                                                            🔒 Chốt số liệu
+                                                        {% endif %}
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+
+                        <h3>Chưa có đợt điều tra</h3>
+
+                        <p>
+                            {{ empty_scope_message }}
+                        </p>
+                    </div>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhập Excel cập nhật</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .import-container { width:min(1180px,calc(100% - 32px)); margin:28px auto 48px; }
+        .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:22px; }
+        .summary-card { padding:16px 18px; background:#fff; border:1px solid #dce6ef; border-radius:14px; }
+        .summary-label { margin:0 0 5px; color:#657789; font-size:12px; font-weight:bold; text-transform:uppercase; }
+        .summary-value { margin:0; color:#0d47a1; font-size:17px; font-weight:bold; overflow-wrap:anywhere; }
+        .upload-box { padding:24px; border:2px dashed #9ec4e8; border-radius:14px; background:#f7fbff; }
+        .file-control { width:100%; padding:13px; border:1px solid #c8d3df; border-radius:9px; background:#fff; font:inherit; }
+        .action-row { margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; }
+        .instruction-list { margin:14px 0 0; padding-left:22px; color:#41576b; line-height:1.7; }
+        .result-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-top:16px; }
+        .result-item { padding:14px; border-radius:10px; background:#eef7ff; border:1px solid #cfe4f7; }
+        .result-item strong { display:block; margin-top:4px; color:#0d47a1; font-size:20px; }
+        .result-item.success { background:#edf9f0; border-color:#cdebd5; }
+        .result-item.warning { background:#fff7e8; border-color:#f0d9a7; }
+        .result-item.danger { background:#fff0f0; border-color:#f2caca; }
+        .preview-table { min-width:860px; }
+        .status-pill { display:inline-block; padding:5px 9px; border-radius:999px; font-size:12px; font-weight:800; white-space:nowrap; }
+        .status-update { color:#0d47a1; background:#e8f2ff; }
+        .status-create { color:#16743a; background:#e7f7ec; }
+        .status-same { color:#536577; background:#eef2f5; }
+        .status-error { color:#b42318; background:#fdecec; }
+        .status-skip { color:#8a5a00; background:#fff3d6; }
+        .backup-note { margin-top:14px; padding:12px 14px; border-radius:9px; background:#f5f7fa; color:#4d6174; overflow-wrap:anywhere; }
+        .notice-list { margin:12px 0 0; padding-left:22px; color:#5b4a21; line-height:1.65; }
+        @media (max-width:900px) {
+            .summary-grid,.result-grid { grid-template-columns:1fr; }
+            .action-row { flex-direction:column; }
+            .action-row .button { width:100%; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">ĐIỀU TRA PHỔ CẬP GIÁO DỤC</p>
+            <h1>Nhập Excel cập nhật</h1>
+            <p>Xem trước toàn bộ thay đổi trước khi xác nhận cập nhật dữ liệu.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            </div>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">← Quản lý hộ</a>
+        </div>
+    </div>
+</header>
+
+<main class="import-container">
+    <section class="summary-grid">
+        <article class="summary-card"><p class="summary-label">Mã đợt</p><p class="summary-value">{{ batch.code }}</p></article>
+        <article class="summary-card"><p class="summary-label">Năm học</p><p class="summary-value">{{ batch.school_year.code }}</p></article>
+        <article class="summary-card"><p class="summary-label">Xã/phường</p><p class="summary-value">{{ batch.commune.name }}</p></article>
+        <article class="summary-card"><p class="summary-label">File đang xử lý</p><p class="summary-value">{{ file_name or 'Chưa chọn' }}</p></article>
+    </section>
+
+    {% if summary %}
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="alert alert-success">Đã cập nhật file Excel thành công sau bước xác nhận.</div>
+        <div class="result-grid">
+            <div class="result-item success">Hộ đã cập nhật<strong>{{ summary.updated_households }}</strong></div>
+            <div class="result-item success">Đối tượng đã sửa<strong>{{ summary.updated_people }}</strong></div>
+            <div class="result-item success">Đối tượng mới<strong>{{ summary.created_people }}</strong></div>
+            <div class="result-item success">Năm học đã sửa<strong>{{ summary.updated_year_records }}</strong></div>
+            <div class="result-item success">Năm học mới<strong>{{ summary.created_year_records }}</strong></div>
+        </div>
+        <div class="backup-note">Bản sao dữ liệu trước khi nhập đã được tạo tại:<br><strong>{{ summary.backup_path }}</strong></div>
+        <div class="action-row">
+            <a class="button button-primary" href="/dieu-tra/{{ batch.id }}/ho-dan">Xem dữ liệu sau cập nhật</a>
+            <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan/nhap-excel">Nhập file khác</a>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if preview %}
+    <section class="panel" style="margin-bottom:22px;">
+        <p class="panel-label">XEM TRƯỚC THAY ĐỔI</p>
+        <h2>{{ preview.preview_title if preview.preview_title else ("Phiếu " ~ preview.form.form_number ~ " – Hộ " ~ preview.household.code) }}</h2>
+        <p class="form-note">Chưa có dữ liệu nào được ghi vào hệ thống. Hãy kiểm tra danh sách dưới đây trước khi xác nhận.</p>
+        <div class="result-grid">
+            <div class="result-item success">Sẽ cập nhật<strong>{{ preview.summary.updated_people }}</strong></div>
+            <div class="result-item success">Sẽ thêm mới<strong>{{ preview.summary.created_people }}</strong></div>
+            <div class="result-item">Không thay đổi<strong>{{ preview.summary.unchanged_people }}</strong></div>
+            <div class="result-item danger">Lỗi/xung đột<strong>{{ preview.summary.error_total + preview.summary.conflict_total }}</strong></div>
+            <div class="result-item warning">Cảnh báo<strong>{{ preview.summary.warning_total }}</strong></div>
+        </div>
+
+        {% if preview.errors or preview.conflicts %}
+        <div class="alert alert-error" style="margin-top:16px;">File còn lỗi hoặc xung đột. Chưa thể xác nhận cập nhật.</div>
+        <ul class="notice-list">
+            {% for message in preview.errors %}<li>{{ message }}</li>{% endfor %}
+            {% for message in preview.conflicts %}<li>{{ message }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        {% if preview.warnings %}
+        <div class="alert alert-warning" style="margin-top:16px;">Có cảnh báo an toàn; các dòng này sẽ không bị xóa tự động.</div>
+        <ul class="notice-list">{% for message in preview.warnings %}<li>{{ message }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <div class="table-wrapper" style="margin-top:16px;">
+            <table class="data-table preview-table">
+                <thead><tr><th>Dòng Excel</th><th>Họ và tên</th><th>Kết quả</th><th>Nội dung phát hiện</th></tr></thead>
+                <tbody>
+                {% for row in preview.rows %}
+                    <tr>
+                        <td><strong>{{ row.excel_row }}</strong></td>
+                        <td>{{ row.full_name }}</td>
+                        <td>
+                            {% set css = 'status-same' %}
+                            {% if row.status == 'CẬP NHẬT' %}{% set css = 'status-update' %}{% endif %}
+                            {% if row.status == 'THÊM MỚI' %}{% set css = 'status-create' %}{% endif %}
+                            {% if row.status == 'LỖI' %}{% set css = 'status-error' %}{% endif %}
+                            {% if row.status == 'BỎ QUA AN TOÀN' %}{% set css = 'status-skip' %}{% endif %}
+                            <span class="status-pill {{ css }}">{{ row.status }}</span>
+                        </td>
+                        <td>{{ row.details }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="action-row">
+            {% if preview.can_confirm %}
+            <form method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/nhap-excel" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Đang cập nhật...';">
+                <input type="hidden" name="confirm_token" value="{{ confirm_token }}">
+                <button class="button button-primary" type="submit">✅ Xác nhận cập nhật dữ liệu</button>
+            </form>
+            {% endif %}
+            <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan/nhap-excel">Chọn lại file khác</a>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if errors and not preview %}
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="alert alert-error">File chưa được xử lý. Chưa có dữ liệu nào được cập nhật.</div>
+        <div class="table-wrapper">
+            <table class="data-table preview-table">
+                <thead><tr><th>STT</th><th>Dòng Excel</th><th>Nội dung lỗi</th></tr></thead>
+                <tbody>{% for error in errors %}<tr><td>{{ loop.index }}</td><td><strong>{{ error.row }}</strong></td><td>{{ error.message }}</td></tr>{% endfor %}</tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not summary and not preview %}
+    <section class="panel">
+        <p class="panel-label">CHỌN PHIẾU ĐÃ ĐIỀU TRA</p>
+        <h2>Kiểm tra file trước khi cập nhật</h2>
+        <div class="upload-box">
+            <form method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/nhap-excel" enctype="multipart/form-data">
+                <label for="excel_file"><strong>File Excel điều tra (.xlsx)</strong></label>
+                <input id="excel_file" name="excel_file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="file-control" required>
+                <div class="action-row">
+                    <button class="button button-primary" type="submit">🔎 Kiểm tra và xem trước</button>
+                    <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan/xuat-excel">Tải lại bộ phiếu mới</a>
+                </div>
+            </form>
+        </div>
+        <ul class="instruction-list">
+            <li>File có thể gồm <strong>một hộ hoặc nhiều hộ</strong>, theo đúng thứ tự phân công khi xuất.</li>
+            <li>Chỉ dùng file được xuất từ đúng đợt <strong>{{ batch.code }}</strong>.</li>
+            <li>Nhập trực tiếp trên trang <strong>Phiếu điều tra</strong>; giữ nguyên tên trang này và các trang kỹ thuật ẩn.</li>
+            <li>Có thể bổ sung thành viên phát sinh vào các dòng trống của đúng hộ; không xóa dòng người cũ để yêu cầu xóa dữ liệu.</li>
+            <li>Phần mềm luôn hiển thị bản xem trước và chỉ ghi dữ liệu sau khi bấm xác nhận.</li>
+        </ul>
+    </section>
+    {% endif %}
+</main>
+</body>
+</html>

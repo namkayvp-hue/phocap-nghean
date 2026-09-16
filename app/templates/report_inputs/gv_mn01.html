@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MN-01-GV – Đội ngũ giáo viên Mầm non</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root{
+            --blue:#0f5fa8;--blue2:#1976d2;--bg:#eef4f9;--line:#d6e3ee;
+            --text:#17324d;--muted:#678097;--green:#198f42;--amber:#a36a00;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+        .hero{background:linear-gradient(135deg,#0f5fa8,#1682d6);color:#fff;padding:27px 3vw}
+        .hero-inner,.wrap{max-width:1320px;margin:auto}
+        .eyebrow{font-size:13px;font-weight:900;letter-spacing:.08em}
+        .hero h1{margin:7px 0 7px;font-size:30px}
+        .hero p{margin:0;line-height:1.5;opacity:.94}
+        .wrap{padding:20px 3vw 60px}
+        .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px;margin-bottom:17px;box-shadow:0 7px 20px rgba(23,50,77,.05)}
+        .filters{display:grid;grid-template-columns:1fr 1.25fr 1.4fr auto;gap:12px;align-items:end}
+        .field label{display:block;font-weight:800;margin:0 0 7px}
+        .field select,.field input,.field textarea{width:100%;min-height:45px;border:1px solid #bfd0df;border-radius:10px;background:#fff;padding:9px 11px;color:var(--text);font:inherit}
+        .field textarea{min-height:86px}
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:10px;padding:10px 14px;text-decoration:none;font-weight:850;cursor:pointer}
+        .primary{background:var(--blue2);color:#fff}.success{background:var(--green);color:#fff}.secondary{background:#e7eef5;color:var(--text)}
+        .btn[disabled]{opacity:.5;cursor:not-allowed}
+        .scope{margin-top:13px;padding:11px 13px;background:#eaf4ff;border-radius:10px;font-weight:800}
+        .notice{padding:13px 14px;border-radius:12px;margin:0 0 16px;line-height:1.45}
+        .notice-ok{background:#e8f7ed;border:1px solid #bde3c8;color:#176e36}
+        .notice-ref{background:#fff6df;border:1px solid #ecd196;color:#795607}
+        .cards{display:grid;grid-template-columns:1.4fr repeat(3,minmax(0,.58fr));gap:12px;margin-bottom:17px}
+        .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
+        .card span{display:block;color:var(--muted);font-weight:700;font-size:13px}
+        .card strong{display:block;margin-top:5px;font-size:22px}
+        .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+        .tab{display:inline-flex;padding:9px 12px;border-radius:9px;background:#e7eef5;color:var(--text);text-decoration:none;font-weight:800;font-size:13px}
+        .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .section-title{margin:0 0 14px}
+        .staff-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+        .staff-head h2{margin:0}
+        .staff-meta{color:var(--muted);font-size:13px;line-height:1.45;font-weight:700}
+        .badge{display:inline-block;padding:5px 8px;border-radius:999px;background:#edf4fa;font-size:12px;font-weight:900}
+        .table-wrap{width:100%;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+        table{width:100%;min-width:1060px;border-collapse:collapse}
+        th,td{padding:10px 9px;border-bottom:1px solid #e3edf5;text-align:left;vertical-align:top;line-height:1.35}
+        th{position:sticky;top:0;z-index:1;background:#e8f1f9;font-size:13px;font-weight:900}
+        td{font-size:13px}
+        tr:last-child td{border-bottom:0}
+        .name{font-weight:900;min-width:170px}
+        .mini-select{min-width:140px;min-height:38px;border:1px solid #c7d6e4;border-radius:8px;padding:6px;background:#fff}
+        details{margin-top:16px}
+        details summary{cursor:pointer;font-weight:900;color:#0f5fa8;padding:10px 0}
+        .footer-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+        .muted{color:var(--muted)}
+        @media(max-width:950px){.filters,.cards,.grid{grid-template-columns:1fr 1fr}}
+        @media(max-width:650px){
+            .hero{padding:22px 14px}.hero h1{font-size:24px}.wrap{padding:12px}
+            .filters,.cards,.grid{grid-template-columns:1fr}.panel{padding:14px}
+            .btn{width:100%}.tabs{display:grid;grid-template-columns:1fr 1fr}
+        }
+    </style>
+</head>
+<body>
+{% include 'partials/dropdown_menu_v1.html' %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div class="eyebrow">BÀI 13B-6 · NHẬP DỮ LIỆU CHUYÊN BIỆT THEO MẪU</div>
+        <h1>MN-01-GV – Đội ngũ giáo viên Mầm non</h1>
+        <p>Hiển thị thống nhất với Tiểu học và THCS; dữ liệu nguồn 2025-2026 chỉ dùng làm tham chiếu cho năm học mới cho đến khi được rà soát và lưu.</p>
+    </div>
+</header>
+
+<main class="wrap">
+    {% if status == 'saved' %}
+    <div class="notice notice-ok"><strong>✓ Đã lưu dữ liệu MN-01-GV.</strong></div>
+    {% endif %}
+
+    <section class="panel">
+        <form method="get" action="/doi-ngu/nhap-mn-01-gv" id="mn-filter-form">
+            <div class="filters">
+                <div class="field">
+                    <label>Năm học</label>
+                    <select name="school_year_id">
+                        {% for y in school_years %}
+                        <option value="{{ y.id }}" {% if y.id == selected_year_id %}selected{% endif %}>{{ y.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Xã/phường</label>
+                    <select name="commune_id">
+                        <option value="">-- Chọn xã/phường --</option>
+                        {% for c in communes %}
+                        <option value="{{ c.id }}" {% if c.id == selected_commune_id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Trường/cơ sở Mầm non</label>
+                    <select name="school_id">
+                        <option value="">-- Chọn trường --</option>
+                        {% for s in schools %}
+                        <option value="{{ s.id }}" {% if s.id == selected_school_id %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div><button class="btn primary" id="mn-open-button" type="submit">Mở dữ liệu</button></div>
+            </div>
+        </form>
+        <div class="scope">
+            Phạm vi: {{ scope_label }}
+            {% if selected_year %} · Năm học {{ selected_year.code }}{% endif %}
+            · Chỉ hiển thị cơ sở thuộc cấp Mầm non.
+        </div>
+    </section>
+
+    {% if selected_school_id %}
+        {% if network_reference_year and selected_year and network_reference_year != selected_year.code %}
+        <div class="notice notice-ref">
+            ↻ Dữ liệu mạng lưới <strong>{{ network_reference_year }}</strong> đã được nạp làm tham chiếu.
+            Bạn đang nhập năm học <strong>{{ selected_year.code }}</strong>; hãy rà soát rồi bấm Lưu toàn bộ biểu.
+        </div>
+        {% endif %}
+
+        <section class="cards">
+            <div class="card">
+                <span>Trường đang nhập</span>
+                <strong>{{ selected_school.name if selected_school else scope_label }}</strong>
+            </div>
+            <div class="card">
+                <span>Tổng đội ngũ hiển thị</span>
+                <strong>{{ display_summary.total }}</strong>
+            </div>
+            <div class="card">
+                <span>Số nhóm/lớp tham chiếu</span>
+                <strong>{{ class_prefill.total_groups_classes }}</strong>
+            </div>
+            <div class="card">
+                <span>Tỉ lệ giáo viên/lớp</span>
+                <strong>{{ teacher_class_ratio if teacher_class_ratio is not none else '—' }}</strong>
+            </div>
+        </section>
+
+        <div class="notice notice-ok">
+            ✓ Dữ liệu nguồn Mầm non đã được ghép theo xã/phường và trường.
+            {% if display_year %}
+            Danh sách nhân sự đang hiển thị theo năm học <strong>{{ display_year }}</strong>.
+            {% endif %}
+        </div>
+
+        <nav class="tabs">
+            <a class="tab" href="#thong-tin-truong">1. Thông tin cấp trường</a>
+            <a class="tab" href="#danh-sach-nhan-su">2. Danh sách nhân sự</a>
+            <a class="tab" href="#ra-soat">3. Rà soát chỉ tiêu</a>
+        </nav>
+
+        <form method="post" action="/doi-ngu/nhap-mn-01-gv" id="mn-data-form">
+            <input type="hidden" name="school_year_id" value="{{ selected_year_id }}">
+            <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+
+            {# === BAI_13B_11_14_7_2_MN01GV_START === #}
+<section class="panel" id="thong-tin-truong">
+                <h2 class="section-title">
+                    1. Thông tin cấp trường và tham chiếu CSVC
+                </h2>
+
+                {% if csvc_has_data %}
+                <div class="notice notice-ok">
+                    ✓ Số nhóm/lớp dưới đây được lấy trực tiếp từ
+                    <strong>CSVC → Nhóm/lớp và phòng học</strong>.
+                    Màn Đội ngũ không nhập lại số lớp.
+                </div>
+                {% else %}
+                <div class="notice notice-ref">
+                    Chưa có dữ liệu CSVC của trường/năm học này.
+                    Hãy nhập tại <strong>CSVC → Nhóm/lớp và phòng học</strong>;
+                    MN-01-GV sẽ tự lấy số lớp để tính tỷ lệ GV/lớp.
+                </div>
+                {% endif %}
+
+                <div class="grid">
+                    <div class="field">
+                        <label>Loại cơ sở</label>
+                        <input
+                            type="text"
+                            value="{{ institution_group_labels.get(class_prefill.institution_group, class_prefill.institution_group) }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Tổng số nhóm/lớp từ CSVC</label>
+                        <input
+                            type="number"
+                            value="{{ class_prefill.total_groups_classes }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Số lớp mẫu giáo 3–4 tuổi từ CSVC</label>
+                        <input
+                            type="number"
+                            value="{{ class_prefill.preschool_classes_3_4 }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Số lớp mẫu giáo 5 tuổi từ CSVC</label>
+                        <input
+                            type="number"
+                            value="{{ class_prefill.preschool_classes_5 }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Số CBQL/GV/NV dân tộc thiểu số</label>
+                        <input
+                            type="number"
+                            min="0"
+                            name="ethnic_staff_count"
+                            value="{{ ethnic_prefill }}"
+                            {% if not can_edit %}readonly{% endif %}
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Ghi chú báo cáo</label>
+                        <textarea
+                            name="notes"
+                            {% if not can_edit %}readonly{% endif %}
+                        >{{ extra.notes if extra and extra.notes else '' }}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" id="danh-sach-nhan-su">
+                <div class="staff-head">
+                    <div>
+                        <h2>2. Danh sách nhân sự của trường</h2>
+                        <div class="staff-meta">
+                            Hiển thị CBQL, giáo viên và nhân viên đang làm việc.
+                            {% if display_year and selected_year and display_year != selected_year.code %}
+                            Nguồn tham chiếu: năm học <strong>{{ display_year }}</strong>.
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="badge">{{ display_rows|length }} nhân sự</span>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ và tên</th>
+                                <th>Vị trí</th>
+                                <th>Chức vụ</th>
+                                <th>Dạy nhóm/lớp</th>
+                                <th>Trình độ đào tạo</th>
+                                <th>Hình thức làm việc</th>
+                                <th>Đánh giá viên chức</th>
+                                <th>Dạy lớp ghép</th>
+                                <th>CT 4 tuổi</th>
+                                <th>CT 5 tuổi</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in display_rows %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td class="name">{{ r.staff_member.full_name if r.staff_member else '—' }}</td>
+                                <td>{{ position_labels.get(r.position_group, r.position_group or '—') }}</td>
+                                <td>{{ r.position_title or '—' }}</td>
+                                <td>{{ teaching_level_labels.get(r.teaching_level, r.teaching_level or '—') }}</td>
+                                <td>{{ qualification_level_labels.get(r.qualification_level, r.qualification_level or '—') }}</td>
+                                <td>{{ employment_labels.get(r.employment_type, r.employment_type or '—') }}</td>
+                                <td>{{ r.staff_evaluation or '—' }}</td>
+
+                                {% if r.position_group == 'GIAO_VIEN' %}
+                                <td>
+                                    {% if r.teaches_multigrade is sameas true %}
+                                    Có
+                                    {% elif r.teaches_multigrade is sameas false %}
+                                    Không
+                                    {% else %}
+                                    Chưa xác định
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if r.teaches_multigrade is sameas true %}
+                                        {% if r.uses_multigrade_program_4yo is sameas true %}
+                                        Có
+                                        {% elif r.uses_multigrade_program_4yo is sameas false %}
+                                        Không
+                                        {% else %}
+                                        Chưa xác định
+                                        {% endif %}
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if r.teaches_multigrade is sameas true %}
+                                        {% if r.uses_multigrade_program_5yo is sameas true %}
+                                        Có
+                                        {% elif r.uses_multigrade_program_5yo is sameas false %}
+                                        Không
+                                        {% else %}
+                                        Chưa xác định
+                                        {% endif %}
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </td>
+                                {% else %}
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                                {% endif %}
+
+                                <td>{{ r.source_status_label or status_labels.get(r.status_code, r.status_code or '—') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="12" class="muted">Chưa có danh sách nhân sự của trường.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            {# === BAI_13B_11_14_7_3_SOURCE_FIELDS === #}
+            <section class="panel" id="ra-soat">
+                <h2 class="section-title">3. Rà soát chỉ tiêu MN-01-GV</h2>
+                <div class="notice notice-ref" style="margin-bottom:16px;">
+                    Các trường dưới đây là dữ liệu gốc phục vụ biểu MN-01-GV.
+                    <strong>Tỷ lệ GV/lớp không nhập tay</strong>; hệ thống tự tính
+                    từ số giáo viên và số nhóm/lớp lấy từ CSVC.
+                </div>
+                {% if rows %}
+                <p class="muted">Các hồ sơ dưới đây thuộc đúng năm học đang nhập và có thể chỉnh các chỉ tiêu chuyên biệt.</p>
+                <details>
+                    <summary>Mở bảng rà soát chi tiết từng nhân sự</summary>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th><th>Họ và tên</th><th>Hình thức</th><th>Dạy nhóm/lớp</th>
+                                    <th>Dạy lớp ghép</th><th>CT 4 tuổi</th><th>CT 5 tuổi</th>
+                                    <th>Trình độ</th><th>Mức chuẩn đào tạo</th><th>Chuẩn nghề nghiệp</th><th>Hưởng chế độ/chính sách</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in rows %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td class="name">{{ r.staff_member.full_name }}</td>
+                                    <td><select class="mini-select" name="staff_{{ r.id }}_employment" {% if not can_edit %}disabled{% endif %}>{% for code,label in employment_labels.items() %}<option value="{{ code }}" {% if r.employment_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+                                    <td><select class="mini-select" name="staff_{{ r.id }}_age_group" {% if not can_edit %}disabled{% endif %}>{% for code,label in teaching_age_labels.items() %}<option value="{{ code }}" {% if r.teaching_age_group == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+                                    {% if r.position_group == 'GIAO_VIEN' %}
+                                    <td>
+                                        <select
+                                            class="mini-select"
+                                            name="staff_{{ r.id }}_multigrade"
+                                            data-multigrade-master
+                                            {% if not can_edit %}disabled{% endif %}
+                                        >
+                                            <option
+                                                value="CHUA_XAC_DINH"
+                                                {% if r.teaches_multigrade is none %}selected{% endif %}
+                                            >
+                                                -- Chưa xác định --
+                                            </option>
+                                            <option
+                                                value="CO"
+                                                {% if r.teaches_multigrade is sameas true %}selected{% endif %}
+                                            >
+                                                Có
+                                            </option>
+                                            <option
+                                                value="KHONG"
+                                                {% if r.teaches_multigrade is sameas false %}selected{% endif %}
+                                            >
+                                                Không
+                                            </option>
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <span data-multigrade-program-wrap>
+                                            <select
+                                                class="mini-select"
+                                                name="staff_{{ r.id }}_program_4yo"
+                                                data-multigrade-program
+                                                {% if not can_edit %}disabled{% endif %}
+                                            >
+                                                <option
+                                                    value="CHUA_XAC_DINH"
+                                                    {% if r.uses_multigrade_program_4yo is none %}selected{% endif %}
+                                                >
+                                                    -- Chưa xác định --
+                                                </option>
+                                                <option
+                                                    value="CO"
+                                                    {% if r.uses_multigrade_program_4yo is sameas true %}selected{% endif %}
+                                                >
+                                                    Có
+                                                </option>
+                                                <option
+                                                    value="KHONG"
+                                                    {% if r.uses_multigrade_program_4yo is sameas false %}selected{% endif %}
+                                                >
+                                                    Không
+                                                </option>
+                                            </select>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span data-multigrade-program-wrap>
+                                            <select
+                                                class="mini-select"
+                                                name="staff_{{ r.id }}_program_5yo"
+                                                data-multigrade-program
+                                                {% if not can_edit %}disabled{% endif %}
+                                            >
+                                                <option
+                                                    value="CHUA_XAC_DINH"
+                                                    {% if r.uses_multigrade_program_5yo is none %}selected{% endif %}
+                                                >
+                                                    -- Chưa xác định --
+                                                </option>
+                                                <option
+                                                    value="CO"
+                                                    {% if r.uses_multigrade_program_5yo is sameas true %}selected{% endif %}
+                                                >
+                                                    Có
+                                                </option>
+                                                <option
+                                                    value="KHONG"
+                                                    {% if r.uses_multigrade_program_5yo is sameas false %}selected{% endif %}
+                                                >
+                                                    Không
+                                                </option>
+                                            </select>
+                                        </span>
+                                    </td>
+                                    {% else %}
+                                    <td class="muted">—</td>
+                                    <td class="muted">—</td>
+                                    <td class="muted">—</td>
+                                    {% endif %}
+                                    <td><select class="mini-select" name="staff_{{ r.id }}_qualification" {% if not can_edit %}disabled{% endif %}>{% for code,label in qualification_level_labels.items() %}<option value="{{ code }}" {% if r.qualification_level == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+                                    <td><select class="mini-select" name="staff_{{ r.id }}_qual_standard" {% if not can_edit %}disabled{% endif %}>{% for code,label in qualification_standard_labels.items() %}<option value="{{ code }}" {% if r.qualification_standard == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+                                    <td><select class="mini-select" name="staff_{{ r.id }}_professional" {% if not can_edit %}disabled{% endif %}>{% for code,label in professional_standard_labels.items() %}<option value="{{ code }}" {% if r.professional_standard == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+                                    <td><select
+                                            class="mini-select"
+                                            name="staff_{{ r.id }}_policy"
+                                            {% if not can_edit %}disabled{% endif %}
+                                        >
+                                            <option value="CHUA_XAC_DINH"
+                                                {% if r.receives_policy is none %}selected{% endif %}>
+                                                Chưa xác định
+                                            </option>
+                                            <option value="CO"
+                                                {% if r.receives_policy is sameas true %}selected{% endif %}>
+                                                Có
+                                            </option>
+                                            <option value="KHONG"
+                                                {% if r.receives_policy is sameas false %}selected{% endif %}>
+                                                Không
+                                            </option>
+                                        </select></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+                {% else %}
+                <div class="notice notice-ref">
+                    Danh sách phía trên đang là dữ liệu tham chiếu {{ display_year or '' }}.
+                    Chưa có hồ sơ chi tiết của năm {{ selected_year.code if selected_year else '' }} để chỉnh từng nhân sự.
+                </div>
+                {% endif %}
+            </section>
+
+            {% if can_edit %}
+            <section class="panel">
+                <div class="footer-actions">
+                    <button class="btn success" type="submit">✓ Lưu toàn bộ biểu MN-01-GV</button>
+                </div>
+            </section>
+            {% endif %}
+        </form>
+    {% endif %}
+{# === BAI_13B_11_14_7_2_MN01GV_END === #}
+</main>
+
+<script>
+(function () {
+    const form = document.getElementById('mn-filter-form');
+    if (!form) return;
+
+    const year = form.querySelector('select[name="school_year_id"]');
+    const commune = form.querySelector('select[name="commune_id"]');
+    const school = form.querySelector('select[name="school_id"]');
+    const open = document.getElementById('mn-open-button');
+
+    function syncOpen() {
+        if (open && school) open.disabled = !school.value;
+    }
+
+    // === BAI_13B_6_V1_1_SAFE_SCOPE_SUBMIT ===
+    function safeScopeSubmit() {
+        const params = new URLSearchParams();
+        if (year && year.value) params.set('school_year_id', year.value);
+        if (commune && commune.value) params.set('commune_id', commune.value);
+        if (school && school.value) params.set('school_id', school.value);
+
+        const query = params.toString();
+        window.location.href = form.action + (query ? '?' + query : '');
+    }
+
+    if (year) year.addEventListener('change', function () {
+        if (school) school.value = '';
+        safeScopeSubmit();
+    });
+
+    if (commune) commune.addEventListener('change', function () {
+        if (school) school.value = '';
+        safeScopeSubmit();
+    });
+
+    if (school) school.addEventListener('change', syncOpen);
+
+    form.addEventListener('submit', function (event) {
+        if ((commune && !commune.value) || (school && !school.value)) {
+            event.preventDefault();
+            safeScopeSubmit();
+        }
+    });
+
+    syncOpen();
+})();
+</script>
+
+<script>
+(function () {
+    // === BAI_13B_11_14_7_2_MULTIGRADE_UI ===
+    const masters = document.querySelectorAll(
+        'select[data-multigrade-master]'
+    );
+
+    masters.forEach(function (master) {
+        const name = master.getAttribute('name') || '';
+        const suffix = '_multigrade';
+
+        if (!name.endsWith(suffix)) {
+            return;
+        }
+
+        const prefix = name.slice(
+            0,
+            name.length - suffix.length
+        );
+
+        const program4 = document.querySelector(
+            'select[name="' + prefix + '_program_4yo"]'
+        );
+
+        const program5 = document.querySelector(
+            'select[name="' + prefix + '_program_5yo"]'
+        );
+
+        function syncPrograms() {
+            const show = (
+                master.value === 'CO'
+            );
+
+            [program4, program5].forEach(
+                function (select) {
+                    if (!select) {
+                        return;
+                    }
+
+                    const wrap = select.closest(
+                        '[data-multigrade-program-wrap]'
+                    );
+
+                    if (wrap) {
+                        wrap.style.display = (
+                            show
+                                ? ''
+                                : 'none'
+                        );
+                    }
+
+                    if (!master.disabled) {
+                        select.disabled = !show;
+                    }
+                }
+            );
+        }
+
+        master.addEventListener(
+            'change',
+            syncPrograms
+        );
+
+        syncPrograms();
+    });
+})();
+</script>
+
+</body>
+</html>

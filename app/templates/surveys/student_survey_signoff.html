@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chốt kết quả đối chiếu học sinh</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17324d;
+            background: #eef4fa;
+        }
+        a { color: inherit; text-decoration: none; }
+        .header {
+            color: white;
+            background: linear-gradient(120deg, #0d47a1, #1976d2);
+            padding: 28px 24px;
+        }
+        .header-inner {
+            max-width: 1380px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 1.1px;
+        }
+        h1 { margin: 0; font-size: 31px; }
+        .description { margin: 10px 0 0; line-height: 1.55; }
+        .user-box { min-width: 300px; text-align: right; }
+        .user-box strong { font-size: 17px; }
+        .user-detail { margin-top: 5px; font-size: 13px; opacity: .92; }
+        .header-actions {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .container { max-width: 1380px; margin: 0 auto; padding: 24px; }
+        .button {
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .button-light { background: white; color: #0d47a1; }
+        .button-primary { background: #1565c0; color: white; }
+        .button-success { background: #1b7e3b; color: white; }
+        .button-warning { background: #b87500; color: white; }
+        .button-secondary { background: #e4edf5; color: #17324d; }
+        .notice {
+            margin-bottom: 16px;
+            padding: 15px 17px;
+            border-radius: 11px;
+            line-height: 1.55;
+            background: #e8f3ff;
+            border: 1px solid #b8d8fa;
+            color: #164f86;
+        }
+        .notice-success { background: #e8f6ec; border-color: #b6dfc1; color: #176d31; }
+        .notice-warning { background: #fff5dc; border-color: #efd18a; color: #7b5200; }
+        .hero, .panel, .stat-card {
+            background: white;
+            border: 1px solid #dbe5ef;
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(26, 62, 96, .06);
+        }
+        .hero {
+            padding: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+        .batch-code { margin: 0 0 7px; color: #1976d2; font-size: 13px; font-weight: 900; }
+        .hero h2 { margin: 0; font-size: 25px; }
+        .meta { margin: 10px 0 0; color: #637a90; line-height: 1.55; }
+        .status-badge {
+            padding: 11px 16px;
+            border-radius: 999px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+        .status-signed { background: #e8f6ec; border: 1px solid #b6dfc1; color: #176d31; }
+        .status-ready { background: #e8f3ff; border: 1px solid #b8d8fa; color: #164f86; }
+        .status-pending { background: #fff5dc; border: 1px solid #efd18a; color: #7b5200; }
+        .stats-grid {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .stat-card { padding: 17px; }
+        .stat-label { color: #657d92; font-size: 13px; font-weight: 800; line-height: 1.4; }
+        .stat-value { margin-top: 8px; font-size: 28px; font-weight: 900; color: #0d47a1; }
+        .stat-good .stat-value { color: #18783a; }
+        .stat-warning .stat-value { color: #a56800; }
+        .stat-danger .stat-value { color: #bd252d; }
+        .panel { margin-top: 16px; padding: 22px; }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .panel-kicker { margin: 0 0 7px; color: #1976d2; font-size: 12px; font-weight: 900; letter-spacing: .8px; }
+        .panel h2 { margin: 0; font-size: 23px; }
+        .panel-description { margin: 8px 0 0; color: #657d92; line-height: 1.55; }
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 16px;
+            align-items: stretch;
+        }
+        .action-card {
+            border: 1px solid #dbe5ef;
+            border-radius: 13px;
+            padding: 18px;
+            background: #f9fbfd;
+        }
+        .action-card h3 { margin: 0 0 8px; font-size: 19px; }
+        .action-card p { margin: 0 0 13px; color: #62798e; line-height: 1.5; }
+        label { display: block; margin-bottom: 7px; font-weight: 900; font-size: 14px; }
+        textarea {
+            width: 100%;
+            min-height: 105px;
+            padding: 12px;
+            border: 1px solid #cbd8e5;
+            border-radius: 9px;
+            resize: vertical;
+            font: inherit;
+            color: #17324d;
+            background: white;
+        }
+        .form-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .latest-box {
+            border-left: 5px solid #1976d2;
+            border-radius: 12px;
+            padding: 17px;
+            background: #edf6ff;
+            line-height: 1.55;
+        }
+        .latest-box strong { display: block; margin-bottom: 6px; font-size: 16px; }
+        .history-list { display: grid; gap: 12px; }
+        .history-item {
+            border: 1px solid #dbe5ef;
+            border-radius: 12px;
+            padding: 15px;
+            background: #fbfdff;
+        }
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .pill {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+        }
+        .pill-signed { background: #e7f5eb; color: #18783a; }
+        .pill-open { background: #fff1d5; color: #955f00; }
+        .history-meta { color: #6d8296; font-size: 13px; }
+        .history-note { margin: 8px 0 0; line-height: 1.55; }
+        .snapshot {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            color: #506b82;
+            font-size: 12px;
+        }
+        .snapshot span { background: #edf3f8; border-radius: 7px; padding: 5px 8px; }
+        .empty { padding: 30px; text-align: center; color: #6d8296; }
+        @media (max-width: 1050px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .action-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 720px) {
+            .header-inner, .hero, .panel-header { flex-direction: column; align-items: stretch; }
+            .user-box { min-width: 0; text-align: left; }
+            .header-actions { justify-content: flex-start; }
+            .container { padding: 14px; }
+            h1 { font-size: 25px; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">BÀI 12D-17</p>
+            <h1>Chốt kết quả đối chiếu và lập biên bản</h1>
+            <p class="description">Xác nhận số liệu sau rà soát, khóa thao tác xử lý và lưu toàn bộ lịch sử chốt hoặc mở lại.</p>
+        </div>
+        <div class="user-box">
+            <strong>{{ nguoi_dung.full_name }}</strong>
+            <div class="user-detail">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            <div class="header-actions">
+                <a class="button button-light" href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh">Tổng hợp toàn tỉnh</a>
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh">← Danh sách đối chiếu</a>
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/bao-cao-tong-hop">Báo cáo kết quả</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if status_message %}
+        <div class="notice {% if status_message.kind == 'success' %}notice-success{% else %}notice-warning{% endif %}">
+            {{ status_message.text }}
+        </div>
+    {% endif %}
+
+    <section class="hero">
+        <div>
+            <p class="batch-code">{{ batch.code }}</p>
+            <h2>{{ batch.name }}</h2>
+            <p class="meta">Năm học {{ batch.school_year.code }} · {{ batch.commune.name }} · {{ scope_label }}</p>
+        </div>
+        {% if comparison_signed %}
+            <span class="status-badge status-signed">✅ ĐÃ CHỐT KẾT QUẢ</span>
+        {% elif ready_to_sign %}
+            <span class="status-badge status-ready">📝 ĐỦ ĐIỀU KIỆN CHỐT</span>
+        {% else %}
+            <span class="status-badge status-pending">⏳ CHƯA ĐỦ ĐIỀU KIỆN</span>
+        {% endif %}
+    </section>
+
+    <section class="stats-grid">
+        <article class="stat-card"><div class="stat-label">Tổng số dòng</div><div class="stat-value">{{ stats.TOTAL }}</div></article>
+        <article class="stat-card stat-good"><div class="stat-label">Khớp hoàn toàn</div><div class="stat-value">{{ stats.KHOP_HOAN_TOAN }}</div></article>
+        <article class="stat-card stat-danger"><div class="stat-label">Tổng cần xử lý</div><div class="stat-value">{{ stats.CAN_XU_LY }}</div></article>
+        <article class="stat-card stat-good"><div class="stat-label">Đã ghi nhận xử lý</div><div class="stat-value">{{ stats.DA_GHI_NHAN_XU_LY }}</div></article>
+        <article class="stat-card stat-warning"><div class="stat-label">Còn chờ xử lý</div><div class="stat-value">{{ stats.CON_CHO_XU_LY }}</div></article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">XÁC NHẬN KẾT QUẢ</p>
+                <h2>{% if comparison_signed %}Quản lý biên bản đã chốt{% else %}Kiểm tra trước khi chốt{% endif %}</h2>
+                <p class="panel-description">
+                    Chỉ được chốt khi không còn dòng chờ xử lý. Sau khi chốt, liên kết thủ công và ghi nhận kết luận sẽ bị khóa cho đến khi quản trị viên mở lại.
+                </p>
+            </div>
+            <a class="button button-success" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/chot-ket-qua/xuat-bien-ban">📊 Xuất biên bản Excel</a>
+        </div>
+
+        {% if latest_signoff %}
+            <div class="latest-box" style="margin-bottom: 16px;">
+                <strong>{{ signoff_action_labels.get(latest_signoff.action_code, latest_signoff.action_code) }}</strong>
+                {{ latest_signoff.actor_name_snapshot }} · {{ latest_signoff.actor_role_snapshot }} · {{ latest_signoff.created_at.strftime('%d/%m/%Y %H:%M') }}<br>
+                <b>Căn cứ/lý do:</b> {{ latest_signoff.note }}
+            </div>
+        {% endif %}
+
+        <div class="action-grid">
+            <article class="action-card">
+                {% if comparison_signed %}
+                    <h3>✅ Kết quả đang được bảo vệ</h3>
+                    <p>Ảnh chụp số liệu tại lần chốt gần nhất được giữ trong nhật ký. Tệp biên bản có thể xuất lại bất cứ lúc nào.</p>
+                    {% if can_manage_signoff %}
+                        <form method="post" action="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/chot-ket-qua/mo-lai">
+                            <label for="reopen_note">Lý do mở lại *</label>
+                            <textarea id="reopen_note" name="note" maxlength="1500" required placeholder="Ví dụ: Phát hiện hồ sơ học sinh mới cần liên kết và tính lại kết quả..."></textarea>
+                            <div class="form-actions">
+                                <button class="button button-warning" type="submit">🔓 Mở lại để xử lý</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="notice notice-warning" style="margin: 14px 0 0;">Tài khoản hiện tại chỉ được xem và xuất biên bản.</div>
+                    {% endif %}
+                {% else %}
+                    <h3>{% if ready_to_sign %}📝 Sẵn sàng chốt{% else %}⏳ Chưa thể chốt{% endif %}</h3>
+                    {% if ready_to_sign %}
+                        <p>Tất cả các dòng cần xử lý đã có kết luận. Việc chốt chỉ ghi nhận trạng thái và ảnh chụp thống kê, không tự sửa dữ liệu gốc.</p>
+                        {% if can_manage_signoff %}
+                            <form method="post" action="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/chot-ket-qua/chot">
+                                <label for="sign_note">Căn cứ chốt kết quả *</label>
+                                <textarea id="sign_note" name="note" maxlength="1500" required placeholder="Ví dụ: Đã rà soát toàn bộ kết quả đối chiếu, đối chiếu hồ sơ gốc và xác nhận số liệu đủ điều kiện chốt..."></textarea>
+                                <div class="form-actions">
+                                    <button class="button button-success" type="submit">✅ Chốt kết quả đối chiếu</button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="notice notice-warning" style="margin: 14px 0 0;">Chỉ tài khoản quản trị cấp Sở mới được chốt kết quả.</div>
+                        {% endif %}
+                    {% else %}
+                        <p>Còn <strong>{{ stats.CON_CHO_XU_LY }}</strong> dòng chưa được ghi nhận xử lý. Hãy quay lại danh sách đối chiếu, chọn bộ lọc “Còn chờ xử lý” và hoàn tất từng dòng.</p>
+                        <div class="form-actions">
+                            <a class="button button-primary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh?resolution_state=PENDING">Mở danh sách còn chờ xử lý</a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </article>
+
+            <article class="action-card">
+                <h3>Nguyên tắc an toàn</h3>
+                <p>Chốt kết quả không xóa hoặc ghi đè dữ liệu điều tra, học sinh và nhật ký xử lý.</p>
+                <p>Muốn thay đổi liên kết hoặc kết luận sau khi chốt, quản trị viên phải mở lại và nhập rõ lý do.</p>
+                <p>Mỗi lần chốt hoặc mở lại đều lưu người thực hiện, thời điểm, căn cứ và ảnh chụp thống kê.</p>
+                <div class="form-actions">
+                    <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh">Xem chi tiết đối chiếu</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-kicker">NHẬT KÝ CHỐT</p>
+                <h2>Lịch sử xác nhận và mở lại</h2>
+                <p class="panel-description">Các bản ghi được lưu nối tiếp, không sửa hoặc xóa lịch sử cũ.</p>
+            </div>
+            <strong>{{ history|length }} bản ghi</strong>
+        </div>
+
+        {% if history %}
+            <div class="history-list">
+                {% for item in history %}
+                    <article class="history-item">
+                        <div class="history-top">
+                            <span class="pill {% if item.action_code == 'CHOT' %}pill-signed{% else %}pill-open{% endif %}">
+                                {{ signoff_action_labels.get(item.action_code, item.action_code) }}
+                            </span>
+                            <span class="history-meta">{{ item.actor_name_snapshot }} · {{ item.actor_role_snapshot }} · {{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                        </div>
+                        <p class="history-note">{{ item.note }}</p>
+                        <div class="snapshot">
+                            <span>Tổng: {{ item.total_rows }}</span>
+                            <span>Khớp: {{ item.matched_rows }}</span>
+                            <span>Cần xử lý: {{ item.issue_rows }}</span>
+                            <span>Đã ghi nhận: {{ item.resolved_rows }}</span>
+                            <span>Còn chờ: {{ item.pending_rows }}</span>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">Chưa có lần chốt hoặc mở lại nào.</div>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

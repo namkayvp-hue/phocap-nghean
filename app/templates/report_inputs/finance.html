@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BC-Tài chính trường / tổng hợp</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<style>
+:root{--blue:#0f5fa8;--bg:#eef4f9;--line:#d8e4ef;--text:#17324d;--green:#198f42;--amber:#fff6dc}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.hero{background:linear-gradient(135deg,#0f5fa8,#1b7fc8);color:#fff;padding:28px 3vw}.hero-inner,.wrap{max-width:1320px;margin:auto}.hero h1{margin:6px 0}.wrap{padding:20px 3vw 50px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:17px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.field label{display:block;font-weight:800;margin-bottom:7px}.field input,.field select{width:100%;min-height:44px;border:1px solid #bfd0df;border-radius:10px;padding:9px 11px;font:inherit}.fixed{min-height:44px;border:1px solid #bfd0df;border-radius:10px;padding:11px;background:#f6f9fc;font-weight:700}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:10px;padding:10px 16px;text-decoration:none;font-weight:800;cursor:pointer}.primary{background:#1976d2;color:#fff}.success{background:var(--green);color:#fff}.actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.notice{padding:12px 14px;border-radius:12px;background:#eaf7ed;color:#176f32;border:1px solid #bce0c5;font-weight:800;margin-bottom:14px}.summary{padding:12px 14px;border-radius:12px;background:var(--amber);border:1px solid #efd387;margin-bottom:14px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;min-width:1000px;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid var(--line);vertical-align:middle}th{background:#eaf2f9;text-align:left;position:sticky;top:0}.money{width:170px;text-align:right}.note{width:260px}.level-1 .label{padding-left:22px}.level-2 .label{padding-left:42px}.level-0{font-weight:800;background:#f8fbfd}.muted{color:#6c8295}.navline{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.navline a{color:#fff;text-decoration:none;font-weight:800;background:rgba(255,255,255,.15);padding:8px 10px;border-radius:9px}@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:12px}.panel{padding:14px}.actions .btn{width:100%}}
+</style>
+</head>
+<body>
+{% include 'partials/dropdown_menu_v1.html' %}
+<header class="hero"><div class="hero-inner"><strong>BC-TÀI CHÍNH · THEO TRƯỜNG</strong><h1>{% if can_edit %}Nhập dữ liệu tài chính của trường{% else %}Tổng hợp dữ liệu tài chính{% endif %}</h1><p>Trường chỉ nhập số liệu của chính mình; Xã/Sở xem và tổng hợp tự động từ dữ liệu các trường.</p><div class="navline"><a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-tc">Mở MN-TC đúng mẫu</a><a href="/bao-cao">Trung tâm báo cáo</a></div></div></header>
+<main class="wrap">
+{% if status=='saved' %}<div class="notice">✓ Đã lưu dữ liệu tài chính của trường.</div>{% endif %}
+<section class="panel">
+<form method="get" action="/bao-cao/tai-chinh/nhap">
+<div class="grid">
+<div class="field"><label>Năm học dùng để lập báo cáo</label><select name="school_year_id">{% for y in school_years %}<option value="{{ y.id }}" {% if y.id==selected_year_id %}selected{% endif %}>{{ y.code }}</option>{% endfor %}</select></div>
+<div class="field"><label>Xã/phường</label>{% if role_code in ['TRUONG','XA'] %}<div class="fixed">{{ communes[0].name if communes else '' }}</div><input type="hidden" name="commune_id" value="{{ selected_commune_id or '' }}">{% else %}<select name="commune_id"><option value="">-- Toàn tỉnh --</option>{% for c in communes %}<option value="{{ c.id }}" {% if c.id==selected_commune_id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>{% endif %}</div>
+<div class="field"><label>Trường</label>{% if role_code=='TRUONG' %}<div class="fixed">{{ selected_school.name if selected_school else '' }}</div><input type="hidden" name="school_id" value="{{ selected_school_id or '' }}">{% else %}<select name="school_id"><option value="">{% if selected_commune_id %}-- Tổng hợp các trường trong xã --{% else %}-- Tổng hợp toàn tỉnh --{% endif %}</option>{% for s in schools %}<option value="{{ s.id }}" {% if s.id==selected_school_id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>{% endif %}</div>
+<div class="field"><label>Năm tài chính</label><select name="report_year">{% for y in report_year_options %}<option value="{{ y }}" {% if y==report_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></div>
+</div><div class="actions" style="margin-top:12px"><button class="btn primary">Mở dữ liệu</button></div>
+</form>
+</section>
+
+{% if is_aggregate %}<div class="summary"><strong>Phạm vi tổng hợp:</strong> {{ scope_label }} · Có dữ liệu {{ data_school_count }}/{{ total_school_count }} trường Mầm non. Các chỉ tiêu tiền được cộng; F02 được tổng hợp theo trọng số Ngân sách thường xuyên; F03 lấy bình quân các trường có dữ liệu.</div>{% else %}<div class="summary"><strong>Phạm vi:</strong> {{ scope_label }}. {% if can_edit %}Tài khoản trường chỉ được sửa số liệu của chính trường này.{% else %}Chế độ xem, không chỉnh sửa dữ liệu của trường.{% endif %}</div>{% endif %}
+
+{% if selected_school_id or is_aggregate %}
+{% if can_edit %}<form method="post" action="/bao-cao/tai-chinh/nhap"><input type="hidden" name="school_year_id" value="{{ selected_year_id }}"><input type="hidden" name="commune_id" value="{{ selected_commune_id }}"><input type="hidden" name="school_id" value="{{ selected_school_id }}"><input type="hidden" name="report_year" value="{{ report_year }}">{% endif %}
+<section class="panel"><h2>BC-Tài chính · Năm {{ report_year }}</h2><p class="muted">Đơn vị nhập theo cột ĐVT của mẫu. Với chỉ tiêu tỷ lệ, nhập số phần trăm (ví dụ 12,5). Số nhập được hiển thị gọn, không thêm các số 0 không cần thiết.</p>{# === BAI_33A_3_FINANCE_INPUT_DISPLAY === #}<div class="table-wrap"><table><thead><tr><th style="width:70px">TT</th><th>Nội dung</th><th style="width:90px">ĐVT</th><th style="width:190px">Giá trị năm {{ report_year }}</th><th>Ghi chú</th></tr></thead><tbody>{% for item in items %}{% set row=values.get(item.code) %}<tr class="level-{{ item.level }}"><td>{{ item.stt }}</td><td class="label">{{ item.label }}</td><td>{{ item.unit }}</td><td><input class="money" type="text" inputmode="decimal" name="amount_{{ item.code }}" value="{{ (('%s' % row.amount).rstrip('0').rstrip('.')) if row and row.amount is not none else '' }}" {% if not can_edit %}readonly{% endif %}></td><td><input class="note" type="text" name="note_{{ item.code }}" value="{{ row.note if row and row.note else '' }}" {% if not can_edit %}readonly{% endif %}></td></tr>{% endfor %}</tbody></table></div>{% if can_edit %}<div class="actions" style="margin-top:16px"><button class="btn success" type="submit">✓ Lưu tài chính của trường năm {{ report_year }}</button></div>{% endif %}</section>
+{% if can_edit %}</form>{% endif %}
+{% endif %}
+</main>
+</body>
+</html>

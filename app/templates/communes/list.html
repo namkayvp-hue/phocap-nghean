@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Danh mục xã</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    PHẦN MỀM PHỔ CẬP GIÁO DỤC
+                </p>
+
+                <h1>Quản lý danh mục xã</h1>
+
+                <p>
+                    Thêm, cập nhật, khóa và kiểm tra
+                    thông tin các xã trong hệ thống.
+                </p>
+            </div>
+
+            <a class="button button-light" href="/">
+                ← Trang chủ
+            </a>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        {% if thong_bao %}
+            <div
+                class="
+                    alert
+                    {% if trang_thai in ['duplicate', 'invalid'] %}
+                        alert-error
+                    {% else %}
+                        alert-success
+                    {% endif %}
+                "
+            >
+                {{ thong_bao }}
+            </div>
+        {% endif %}
+
+        <section class="admin-grid">
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-label">
+                            NHẬP DỮ LIỆU
+                        </p>
+
+                        <h2>Thêm xã mới</h2>
+                    </div>
+                </div>
+
+                <form
+                    class="data-form"
+                    method="post"
+                    action="/xa/them"
+                >
+                    <div class="form-group">
+                        <label for="ma_xa">
+                            Mã xã
+                        </label>
+
+                        <input
+                            id="ma_xa"
+                            name="ma_xa"
+                            type="text"
+                            maxlength="30"
+                            placeholder="Ví dụ: XA001"
+                            autocomplete="off"
+                            required
+                        >
+
+                        <small>
+                            Mã xã không được trùng và
+                            không dài quá 30 ký tự.
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ten_xa">
+                            Tên xã
+                        </label>
+
+                        <input
+                            id="ten_xa"
+                            name="ten_xa"
+                            type="text"
+                            maxlength="200"
+                            placeholder="Nhập tên xã"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display:flex;align-items:flex-start;gap:10px;">
+                            <input
+                                name="is_special_difficulty_area"
+                                type="checkbox"
+                                value="true"
+                                style="width:auto;margin-top:3px;"
+                            >
+                            <span>Địa bàn KTXH đặc biệt khó khăn</span>
+                        </label>
+                    </div>
+
+                    <button
+                        class="button button-primary button-full"
+                        type="submit"
+                    >
+                        ＋ Thêm xã
+                    </button>
+                </form>
+            </article>
+
+            <article class="panel panel-wide">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-label">
+                            DỮ LIỆU HIỆN CÓ
+                        </p>
+
+                        <h2>Danh sách xã</h2>
+                    </div>
+
+                    <span class="count-badge">
+                        {{ danh_sach_xa | length }} xã
+                    </span>
+                </div>
+
+                {% if danh_sach_xa %}
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã xã</th>
+                                    <th>Tên xã</th>
+                                    <th>Loại địa bàn</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for xa in danh_sach_xa %}
+                                    <tr
+                                        class="
+                                            {% if not xa.is_active %}
+                                                row-inactive
+                                            {% endif %}
+                                        "
+                                    >
+                                        <td>{{ loop.index }}</td>
+
+                                        <td>
+                                            <strong>
+                                                {{ xa.code }}
+                                            </strong>
+                                        </td>
+
+                                        <td>{{ xa.name }}</td>
+
+                                        <td>
+                                            {% if xa.is_special_difficulty_area %}
+                                                <span class="status-badge status-locked">ĐBKK</span>
+                                            {% else %}
+                                                <span class="status-badge status-active">Thông thường</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if xa.is_active %}
+                                                <span
+                                                    class="
+                                                        status-badge
+                                                        status-active
+                                                    "
+                                                >
+                                                    Đang hoạt động
+                                                </span>
+                                            {% else %}
+                                                <span
+                                                    class="
+                                                        status-badge
+                                                        status-locked
+                                                    "
+                                                >
+                                                    Đã khóa
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {{
+                                                xa.created_at.strftime(
+                                                    '%d/%m/%Y'
+                                                )
+                                            }}
+                                        </td>
+
+                                        <td>
+                                            <div class="action-group">
+                                                <a
+                                                    class="
+                                                        button
+                                                        button-small
+                                                        button-edit
+                                                    "
+                                                    href="/xa/{{ xa.id }}/sua"
+                                                >
+                                                    Sửa
+                                                </a>
+
+                                                <form
+                                                    method="post"
+                                                    action="
+                                                        /xa/{{ xa.id }}/khoa-mo
+                                                    "
+                                                >
+                                                    <button
+                                                        class="
+                                                            button
+                                                            button-small
+                                                            {% if xa.is_active %}
+                                                                button-lock
+                                                            {% else %}
+                                                                button-unlock
+                                                            {% endif %}
+                                                        "
+                                                        type="submit"
+                                                    >
+                                                        {% if xa.is_active %}
+                                                            Khóa
+                                                        {% else %}
+                                                            Mở lại
+                                                        {% endif %}
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🏘️</div>
+
+                        <h3>Chưa có xã nào</h3>
+
+                        <p>
+                            Hãy nhập mã xã và tên xã
+                            trong biểu mẫu bên cạnh.
+                        </p>
+                    </div>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+</body>
+</html>

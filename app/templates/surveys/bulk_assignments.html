@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <style>
+        :root {
+            --blue-900: #164f9d;
+            --blue-700: #1f78d1;
+            --blue-100: #eaf4ff;
+            --ink: #172b45;
+            --muted: #64748b;
+            --line: #dce7f3;
+            --panel: #ffffff;
+            --page: #eef5fb;
+            --green-bg: #eaf8ed;
+            --green: #176b2c;
+            --red-bg: #fff0f0;
+            --red: #b42318;
+            --amber-bg: #fff7df;
+            --amber: #8a5a00;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--ink);
+            background: var(--page);
+        }
+        a { color: inherit; text-decoration: none; }
+        button, input, select, textarea { font: inherit; }
+
+        .hero {
+            background: linear-gradient(120deg, var(--blue-900), var(--blue-700));
+            color: #fff;
+            padding: 28px 4%;
+        }
+        .hero-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+        h1 { margin: 0 0 10px; font-size: 34px; }
+        .hero p { margin: 0; line-height: 1.55; }
+        .hero-user { text-align: right; }
+        .hero-user strong, .hero-user span { display: block; }
+        .hero-user span { margin-top: 4px; opacity: .9; }
+
+        .container {
+            width: min(1500px, 97%);
+            margin: 24px auto 48px;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 10px 16px;
+            border-radius: 9px;
+            border: 0;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .button-primary { background: var(--blue-700); color: #fff; }
+        .button-secondary { background: #e8eef5; color: var(--ink); }
+        .button-light { background: #fff; color: var(--blue-900); }
+        .button-danger { background: #dc3545; color: #fff; }
+
+        .alert, .scope-banner {
+            border-radius: 10px;
+            padding: 15px 18px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        .alert-success { background: var(--green-bg); color: var(--green); border: 1px solid #bfe7c7; }
+        .alert-error { background: var(--red-bg); color: var(--red); border: 1px solid #ffc8c8; }
+        .scope-banner { background: var(--green-bg); color: var(--green); border: 1px solid #bfe7c7; }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(23, 43, 69, .05);
+            margin-bottom: 18px;
+        }
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 16px;
+        }
+        .panel-kicker {
+            margin: 0 0 7px;
+            color: var(--blue-700);
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: .06em;
+        }
+        h2 { margin: 0 0 8px; font-size: 26px; }
+        .muted { color: var(--muted); line-height: 1.55; }
+        .result-badge {
+            background: var(--blue-100);
+            color: var(--blue-900);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1.3fr repeat(4, minmax(170px, .75fr));
+            gap: 12px;
+            align-items: end;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
+        .control {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid #cad8e8;
+            border-radius: 9px;
+            padding: 10px 12px;
+            background: #fff;
+        }
+        textarea.control { min-height: 88px; resize: vertical; }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .assignment-layout {
+            display: grid;
+            grid-template-columns: minmax(360px, .76fr) minmax(0, 1.7fr);
+            gap: 18px;
+            align-items: start;
+        }
+        .sticky-panel {
+            position: sticky;
+            top: 12px;
+        }
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 14px 0;
+        }
+        .mode-option {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 10px;
+            background: #f8fbfe;
+            cursor: pointer;
+        }
+        .mode-option input { margin-right: 6px; }
+
+        .candidate-filter {
+            display: grid;
+            grid-template-columns: 1fr 170px;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .candidate-list {
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 8px;
+            background: #f9fbfd;
+        }
+        .candidate {
+            display: grid;
+            grid-template-columns: 28px 1fr 42px;
+            gap: 8px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 9px;
+            background: #fff;
+            margin-bottom: 7px;
+            border: 1px solid transparent;
+        }
+        .candidate:hover { border-color: #a9c9ec; }
+        .candidate.hidden { display: none; }
+        .candidate-disabled {
+            opacity: .62;
+            background: #f3f6f9;
+            cursor: not-allowed;
+        }
+        .candidate-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .candidate-toolbar .button {
+            min-height: 34px;
+            padding: 7px 10px;
+            font-size: 12px;
+        }
+        .candidate-name { font-weight: 800; margin-bottom: 3px; }
+        .candidate-meta { color: var(--muted); font-size: 12px; line-height: 1.35; }
+        .primary-cell { text-align: center; }
+        .primary-cell small { display: block; color: var(--muted); font-size: 9px; margin-top: 3px; }
+
+        .selected-count {
+            padding: 11px 13px;
+            border-radius: 9px;
+            background: var(--blue-100);
+            color: var(--blue-900);
+            font-weight: 800;
+            margin: 12px 0;
+        }
+        .print-option {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            margin-top: 12px;
+            padding: 12px;
+            border: 1px solid #b9d8f7;
+            border-radius: 10px;
+            background: #f2f8ff;
+            line-height: 1.45;
+        }
+        .print-option input { margin-top: 3px; }
+        .actions {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+        table {
+            width: 100%;
+            min-width: 1160px;
+            border-collapse: collapse;
+            background: #fff;
+        }
+        th, td {
+            border-bottom: 1px solid var(--line);
+            padding: 12px 10px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+        th {
+            background: #edf5fc;
+            color: #294764;
+            font-size: 13px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        tbody tr:hover { background: #f8fbfe; }
+        .code { font-weight: 800; white-space: nowrap; }
+        .small { color: var(--muted); font-size: 12px; line-height: 1.4; }
+        .assignment-name { display: block; font-weight: 800; margin-bottom: 3px; }
+        .status-pill {
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .status-assigned { background: var(--green-bg); color: var(--green); }
+        .status-unassigned { background: var(--amber-bg); color: var(--amber); }
+        .audit {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .history-table td { vertical-align: top; }
+        .history-schools strong { display: block; margin-bottom: 3px; }
+        .history-empty { padding: 28px; text-align: center; color: var(--muted); }
+        .row-checkbox { width: 20px; height: 20px; }
+
+        .select-toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 16px;
+        }
+        .page-link {
+            min-width: 40px;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #e8eef5;
+            font-weight: 800;
+        }
+        .page-link-active { background: var(--blue-700); color: #fff; }
+        .page-link-disabled { opacity: .45; cursor: default; }
+
+        .empty-state {
+            padding: 46px 20px;
+            text-align: center;
+            color: var(--muted);
+            border: 1px dashed #cbd8e6;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        @media (max-width: 1180px) {
+            .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .assignment-layout { grid-template-columns: 1fr; }
+            .sticky-panel { position: static; }
+        }
+        @media (max-width: 700px) {
+            .hero-inner { display: block; }
+            .hero-user { text-align: left; margin-top: 18px; }
+            h1 { font-size: 28px; }
+            .filter-grid, .candidate-filter, .mode-grid { grid-template-columns: 1fr; }
+            .container { width: 94%; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <p class="eyebrow">BÀI 13B-4 V4 · {{ page_kicker }}</p>
+            <h1>{{ page_title }}</h1>
+            <p>
+                {{ batch.code }} · {{ batch.school_year.code }}
+                · {{ batch.commune.name }}
+            </p>
+        </div>
+        <div class="hero-user">
+            <strong>{{ nguoi_dung.full_name }}</strong>
+            <span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span>
+            <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                {% if assignment_level == 'school' %}
+                    <a class="button button-light" href="/dieu-tra/{{ batch.id }}/phan-cong-truong">
+                        🔒 Theo dõi và khóa trường
+                    </a>
+                {% else %}
+                    <a class="button button-light" href="/dieu-tra/{{ batch.id }}/phan-cong-truong">
+                        📨 Nhiệm vụ của trường
+                    </a>
+                {% endif %}
+                <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">
+                    ← Danh sách hộ
+                </a>
+                <a class="button button-light" href="/dieu-tra">
+                    Danh sách đợt
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if thong_bao %}
+        <div class="alert alert-success">{{ thong_bao }}</div>
+    {% endif %}
+    {% if thong_bao_loi %}
+        <div class="alert alert-error">{{ thong_bao_loi }}</div>
+    {% endif %}
+
+    <div class="scope-banner">
+        <strong>Quy trình đang thực hiện:</strong>
+        {% if assignment_level == 'school' %}
+            Xã/phường chọn phiếu và giao cho một hoặc nhiều trường; phải xác định một trường chủ trì.
+        {% else %}
+            Trường chỉ thấy phiếu xã đã giao cho đơn vị mình và phân công tiếp cho cán bộ, giáo viên của trường.
+        {% endif %}
+    </div>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="panel-kicker">TÌM ĐÚNG NHÓM PHIẾU</p>
+                <h2>Lọc trước khi phân công</h2>
+                <p class="muted">
+                    Chỉ các phiếu đang hiển thị trong phạm vi của tài khoản
+                    mới có thể được chọn.
+                </p>
+            </div>
+            <span class="result-badge">{{ total_records }} phiếu</span>
+        </div>
+
+        <form method="get" action="{{ filter_url }}">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="q">Tìm nhanh</label>
+                    <input
+                        id="q"
+                        name="q"
+                        class="control"
+                        value="{{ q }}"
+                        placeholder="Số phiếu, mã hộ, chủ hộ, địa chỉ..."
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="hamlet">Thôn/xóm/khối/bản</label>
+                    <select id="hamlet" name="hamlet" class="control">
+                        <option value="">-- Tất cả địa bàn --</option>
+                        {% for item in hamlet_names %}
+                            <option value="{{ item }}" {% if selected_hamlet == item %}selected{% endif %}>
+                                {{ item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignment_status">
+                        {% if assignment_level == 'teacher' %}Tình trạng giao giáo viên{% else %}Tình trạng giao trường{% endif %}
+                    </label>
+                    <select id="assignment_status" name="assignment_status" class="control">
+                        <option value="">-- Tất cả --</option>
+                        <option value="unassigned" {% if selected_assignment_status == 'unassigned' %}selected{% endif %}>
+                            {% if assignment_level == 'teacher' %}Chưa giao giáo viên{% else %}Chưa giao trường{% endif %}
+                        </option>
+                        <option value="assigned" {% if selected_assignment_status == 'assigned' %}selected{% endif %}>
+                            {% if assignment_level == 'teacher' %}Đã giao giáo viên{% else %}Đã giao trường{% endif %}
+                        </option>
+                    </select>
+                </div>
+                {% if assignment_level == 'teacher' %}
+                    <div class="form-group">
+                        <label for="investigator_id">Cán bộ/giáo viên</label>
+                        <select id="investigator_id" name="investigator_id" class="control">
+                            <option value="0">-- Tất cả cán bộ/giáo viên --</option>
+                            {% for item in candidates %}
+                                <option value="{{ item.id }}" {% if selected_investigator_id == item.id %}selected{% endif %}>
+                                    {{ item.full_name }} – {{ item.role_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% else %}
+                    <div class="form-group">
+                        <label for="school_id">Trường đã được giao</label>
+                        <select id="school_id" name="school_id" class="control">
+                            <option value="0">-- Tất cả trường --</option>
+                            {% for item in schools %}
+                                <option value="{{ item.id }}" {% if selected_school_id == item.id %}selected{% endif %}>
+                                    {{ item.code }} – {{ item.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="page_size">Số dòng/trang</label>
+                    <select id="page_size" name="page_size" class="control">
+                        {% for item in page_size_options %}
+                            <option value="{{ item }}" {% if selected_page_size == item %}selected{% endif %}>
+                                {{ item }} dòng
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button class="button button-primary" type="submit">🔎 Tìm kiếm / Lọc</button>
+                <a class="button button-secondary" href="{{ filter_url }}">
+                    Xóa bộ lọc
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <form
+        method="post"
+        action="{{ save_url }}"
+        id="bulk-form"
+    >
+        <div class="assignment-layout">
+            <aside class="panel sticky-panel">
+                <p class="panel-kicker">THAO TÁC PHÂN CÔNG</p>
+                <h2>Chọn cách xử lý</h2>
+                {# === DONG_BO_GIAO_PHIEU_THEO_PHAN_CONG_HIEN_CO_V1 === #}
+                <div class="notice notice-info" style="margin-bottom: 12px;">
+                    <strong>Giao theo phân công hiện có:</strong>
+                    chỉ cần chọn phiếu rồi bấm
+                    <strong>Giao phiếu</strong>, không cần chọn lại nơi nhận.
+                    Khi có thay đổi mới chọn trường/giáo viên mới để giao lại.
+                </div>
+                <p class="muted">
+                    {% if assignment_level == 'school' %}
+                        “Giao/chuyển trường” sẽ thay toàn bộ trường cũ và thu hồi phân công giáo viên phía dưới của các phiếu đã chọn.
+                    {% else %}
+                        “Thay thế/điều chỉnh” chỉ thay cán bộ, giáo viên thuộc trường mình; phân công 3 cấp do xã/phường chốt và 2 giáo viên của các trường còn lại vẫn được giữ nguyên.
+                    {% endif %}
+                </p>
+
+                <div class="mode-grid">
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="replace" checked onchange="syncMode()">
+                        {% if assignment_level == 'school' %}Giao/chuyển trường{% else %}Thay thế/điều chỉnh{% endif %}
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="add" onchange="syncMode()">
+                        {% if assignment_level == 'school' %}Thêm trường phối hợp{% else %}Thêm người phối hợp{% endif %}
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="clear" onchange="syncMode()">
+                        {% if assignment_level == 'school' %}Thu hồi khỏi trường{% else %}Thu hồi giáo viên{% endif %}
+                    </label>
+                </div>
+
+                <div id="candidate-zone">
+                    <div class="candidate-filter">
+                        <input
+                            id="candidate-search"
+                            class="control"
+                            type="search"
+                            placeholder="{% if assignment_level == 'school' %}Tìm tên hoặc mã trường{% else %}Tìm cán bộ, giáo viên{% endif %}"
+                        >
+                        <select id="candidate-role" class="control">
+                            {% if assignment_level == 'school' %}
+                                <option value="TRUONG">Các trường trong xã</option>
+                            {% else %}
+                                <option value="">Tất cả vai trò</option>
+                                <option value="TRUONG">Cán bộ quản lý</option>
+                                <option value="GIAO_VIEN">Giáo viên</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    {% if assignment_level == 'school' %}
+                        <div class="candidate-toolbar">
+                            <button class="button button-secondary" type="button" onclick="toggleVisibleCandidates(true)">
+                                Chọn các trường đang hiện
+                            </button>
+                            <button class="button button-secondary" type="button" onclick="toggleVisibleCandidates(false)">
+                                Bỏ chọn trường
+                            </button>
+                        </div>
+                        <p class="small" style="margin: 0 0 10px;">
+                            Danh mục có <strong>{{ schools | length }}</strong> trường/cơ sở;
+                            <strong>{{ schools_with_account_total }}</strong> đơn vị đã có tài khoản để phân công.
+                            {% if schools_without_account_total %}
+                                <span style="color: var(--amber);">
+                                    {{ schools_without_account_total }} đơn vị chưa có tài khoản và tạm thời không thể chọn.
+                                </span>
+                            {% endif %}
+                        </p>
+
+                        {% if schools %}
+                            <div class="candidate-list">
+                                {% for item in schools %}
+                                    <label
+                                        class="candidate {% if not item.account_id %}candidate-disabled{% endif %}"
+                                        data-search="{{ (item.name ~ ' ' ~ item.code ~ ' ' ~ (item.account_username or '')) | lower }}"
+                                        data-role="TRUONG"
+                                    >
+                                        <input
+                                            class="{% if not item.account_id %}permanent-disabled{% endif %}"
+                                            type="checkbox"
+                                            name="investigator_ids"
+                                            value="{{ item.account_id or 0 }}"
+                                            {% if not item.account_id %}disabled{% endif %}
+                                            onchange="syncPrimaryOptions()"
+                                        >
+                                        <span>
+                                            <span class="candidate-name">{{ item.name }}</span>
+                                            <span class="candidate-meta">
+                                                Mã trường: {{ item.code }}
+                                                {% if item.account_id %}
+                                                    <br>Tài khoản: {{ item.account_username }}
+                                                {% else %}
+                                                    <br><strong>Chưa có tài khoản đơn vị trường</strong>
+                                                {% endif %}
+                                            </span>
+                                        </span>
+                                        <span class="primary-cell">
+                                            {% if item.account_id %}
+                                                <input type="radio" name="primary_user_id" value="{{ item.account_id }}">
+                                                <small>Chính</small>
+                                            {% else %}
+                                                <small>Chưa cấp</small>
+                                            {% endif %}
+                                        </span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                Xã/phường này chưa có trường đang hoạt động trong danh mục.
+                            </div>
+                        {% endif %}
+                    {% elif candidates %}
+                        <div class="candidate-list">
+                            {% for item in candidates %}
+                                <label
+                                    class="candidate"
+                                    data-search="{{ (item.full_name ~ ' ' ~ item.username ~ ' ' ~ (item.school_name or '')) | lower }}"
+                                    data-role="{{ item.role_code }}"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        name="investigator_ids"
+                                        value="{{ item.id }}"
+                                        onchange="syncPrimaryOptions()"
+                                    >
+                                    <span>
+                                        <span class="candidate-name">{{ item.full_name }}</span>
+                                        <span class="candidate-meta">
+                                            {{ item.username }} · {{ item.role_name }}
+                                            {% if item.school_name %}<br>{{ item.school_name }}{% endif %}
+                                        </span>
+                                    </span>
+                                    <span class="primary-cell">
+                                        <input type="radio" name="primary_user_id" value="{{ item.id }}">
+                                        <small>Chính</small>
+                                    </span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            Không có tài khoản phù hợp để phân công.
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label for="assignment_notes">Ghi chú phân công</label>
+                        <textarea
+                            id="assignment_notes"
+                            name="assignment_notes"
+                            class="control"
+                            maxlength="1000"
+                            placeholder="{% if assignment_level == 'school' %}Ví dụ: Trường chủ trì khu vực Khối 1{% else %}Ví dụ: Giáo viên phụ trách chính, hoàn thành trước ngày...{% endif %}"
+                        ></textarea>
+                    </div>
+
+                    <label class="print-option">
+                        <input type="checkbox" name="print_after" value="1" checked>
+                        <span>
+                            <strong>{% if assignment_level == 'school' %}Sau khi giao trường, mở ngay bản in các phiếu vừa chọn.{% else %}Sau khi giao giáo viên, mở ngay bản in các phiếu vừa chọn.{% endif %}</strong><br>
+                            <span class="small">
+                                Phần mềm chỉ in đúng nhóm phiếu của lần thao tác này, không in lại toàn bộ đợt.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="selected-count">
+                    Đã chọn <span id="selected-form-count">0</span> phiếu
+                    và <span id="selected-candidate-count">0</span>
+                    {% if assignment_level == 'school' %}trường{% else %}người{% endif %}.
+                </div>
+
+                <div class="actions">
+                    <button class="button button-primary" type="submit">
+                        {% if assignment_level == 'school' %}Giao phiếu cho trường{% else %}📤 Giao phiếu{% endif %}
+                    </button>
+                    <button class="button button-secondary" type="button" onclick="clearSelections()">
+                        Bỏ chọn
+                    </button>
+                    {% if assignment_level == 'teacher' %}
+                        {# === BAI_13B_10_V3_12_GIAO_PHIEU_TEAM === #}
+                        <a
+                            class="button button-secondary"
+                            href="/dieu-tra/{{ batch.id }}/phan-cong-truong"
+                            title="Mở nhiệm vụ trường để gửi/cập nhật kết quả về xã/phường"
+                        >
+                            📨 Gửi lại báo cáo cho xã/phường
+                        </a>
+                    {% endif %}
+                </div>
+            </aside>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="panel-kicker">DANH SÁCH PHIẾU</p>
+                        <h2>Chọn các hộ cần xử lý</h2>
+                        <p class="muted">
+                            Đang hiển thị
+                            {% if total_records %}
+                                {{ (page - 1) * selected_page_size + 1 }}
+                                –
+                                {{ [page * selected_page_size, total_records] | min }}
+                            {% else %}
+                                0
+                            {% endif %}
+                            trong tổng số {{ total_records }} phiếu.
+                        </p>
+                    </div>
+                </div>
+
+                {% if survey_forms %}
+                    <div class="select-toolbar">
+                        <label>
+                            <input id="select-all" type="checkbox" onchange="toggleAllForms(this.checked)">
+                            <strong>Chọn toàn bộ trang hiện tại</strong>
+                        </label>
+                        <span class="small">
+                            Có thể phân công tối đa {{ selected_page_size }} phiếu trong lần này.
+                        </span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Chọn</th>
+                                    <th>STT</th>
+                                    <th>Số phiếu / Mã hộ</th>
+                                    <th>Chủ hộ</th>
+                                    <th>Địa bàn</th>
+                                    <th>Trạng thái</th>
+                                    <th>Phân công hiện tại</th>
+                                    <th>Nhật ký gần nhất</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for phieu in survey_forms %}
+                                {% set assigned = assignment_summaries.get(phieu.id, []) %}
+                                {% set log = latest_logs.get(phieu.id) %}
+                                <tr>
+                                    <td>
+                                        <input
+                                            class="row-checkbox form-checkbox"
+                                            type="checkbox"
+                                            name="survey_form_ids"
+                                            value="{{ phieu.id }}"
+                                            onchange="updateSelectedCount()"
+                                            data-assigned-user-ids="{% for item in assigned %}{{ item.user_id }}{% if not loop.last %},{% endif %}{% endfor %}">
+                                    </td>
+                                    <td>{{ (page - 1) * selected_page_size + loop.index }}</td>
+                                    <td>
+                                        <span class="code">{{ phieu.form_number }}</span>
+                                        <span class="small">{{ phieu.household.code }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ phieu.household.head_name }}</strong>
+                                        <span class="small">{{ phieu.household.phone or 'Không có điện thoại' }}</span>
+                                    </td>
+                                    <td>
+                                        {{ phieu.household.hamlet_name or '—' }}
+                                        <span class="small">{{ phieu.household.address }}</span>
+                                    </td>
+                                    {% if assignment_level == 'school' %}
+                                        {% set assigned_level = assigned | selectattr('assignment_level', 'equalto', 'school') | list %}
+                                    {% else %}
+                                        {% set assigned_level = assigned | selectattr('assignment_level', 'equalto', 'teacher') | selectattr('school_id', 'equalto', scope.school_id) | list %}
+                                    {% endif %}
+                                    <td>
+                                        {% if assigned_level %}
+                                            <span class="status-pill status-assigned">
+                                                {% if assignment_level == 'school' %}Đã giao trường{% else %}Đã giao giáo viên{% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="status-pill status-unassigned">
+                                                {% if assignment_level == 'school' %}Chưa giao trường{% else %}Chưa giao giáo viên{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if assigned_level %}
+                                            {% for item in assigned_level[:4] %}
+                                                <span class="assignment-name">
+                                                    {% if item.is_primary %}★ {% endif %}
+                                                    {% if assignment_level == 'school' %}{{ item.school_name or item.full_name }}{% else %}{{ item.full_name }}{% endif %}
+                                                </span>
+                                                <span class="small">
+                                                    {% if assignment_level == 'school' %}
+                                                        {{ item.school_code }} · {{ item.username }}
+                                                    {% else %}
+                                                        {{ item.role_name }}
+                                                    {% endif %}
+                                                </span>
+                                                {% if item.signed_at %}
+                                                    <span class="small">Giao lúc {{ item.signed_at }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if assigned_level | length > 4 %}
+                                                <span class="small">+{{ assigned_level | length - 4 }} đơn vị/người khác</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="small">
+                                                {% if assignment_level == 'school' %}Chưa giao cho trường nào.{% else %}Chưa giao cán bộ/giáo viên.{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="audit">
+                                        {% if log %}
+                                            {{ log.actor_name_snapshot or 'Không xác định' }}<br>
+                                            {{ log.created_at }}<br>
+                                            {{ log.action }}
+                                        {% else %}
+                                            Chưa có nhật ký mới.
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav class="pagination" aria-label="Phân trang">
+                        {% if previous_url %}
+                            <a class="page-link" href="{{ previous_url }}">← Trước</a>
+                        {% else %}
+                            <span class="page-link page-link-disabled">← Trước</span>
+                        {% endif %}
+
+                        {% for item in page_links %}
+                            <a class="page-link {% if item.active %}page-link-active{% endif %}" href="{{ item.url }}">
+                                {{ item.number }}
+                            </a>
+                        {% endfor %}
+
+                        {% if next_url %}
+                            <a class="page-link" href="{{ next_url }}">Sau →</a>
+                        {% else %}
+                            <span class="page-link page-link-disabled">Sau →</span>
+                        {% endif %}
+                    </nav>
+                {% else %}
+                    <div class="empty-state">
+                        Không có phiếu phù hợp với bộ lọc hiện tại.
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </form>
+    {% if assignment_level == 'school' %}
+        <section class="panel" id="danh-sach-da-thuc-hien">
+            <div class="panel-head">
+                <div>
+                    <p class="panel-kicker">DANH SÁCH ĐÃ THỰC HIỆN</p>
+                    <h2>Lịch sử giao phiếu cho trường</h2>
+                    <p class="muted">
+                        Hiển thị rõ thời điểm, phiếu, trường được giao và người thao tác.
+                    </p>
+                </div>
+                <span class="result-badge">{{ assignment_history|length }} thao tác</span>
+            </div>
+
+            {% if assignment_history %}
+                <div class="table-wrapper">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Thời điểm</th>
+                                <th>Phiếu / Hộ</th>
+                                <th>Thao tác</th>
+                                <th>Trường được giao</th>
+                                <th>Người thực hiện</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in assignment_history %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td><strong>{{ item.created_at }}</strong></td>
+                                    <td>
+                                        <span class="code">{{ item.form_number }}</span>
+                                        <span class="small">{{ item.household_code }} · {{ item.head_name }}</span>
+                                        <span class="small">{{ item.hamlet_name or '—' }}</span>
+                                    </td>
+                                    <td><strong>{{ item.action_label }}</strong></td>
+                                    <td class="history-schools">
+                                        {% if item.school_names %}
+                                            {% for school_name in item.school_names %}
+                                                <strong>{{ school_name }}</strong>
+                                                {% if item.school_codes[loop.index0] %}
+                                                    <span class="small">Mã trường: {{ item.school_codes[loop.index0] }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="small">Không còn trường được giao.</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ item.actor_name_snapshot or 'Không xác định' }}
+                                        <span class="small">{{ item.actor_role_snapshot or '—' }}</span>
+                                    </td>
+                                    <td>{{ item.notes or '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="history-empty">Chưa có thao tác giao phiếu cho trường trong đợt này.</div>
+            {% endif %}
+        </section>
+    {% endif %}
+</main>
+
+<script>
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.form-checkbox:checked').length;
+        document.getElementById('selected-form-count').textContent = count;
+
+        const all = Array.from(document.querySelectorAll('.form-checkbox'));
+        const selectAll = document.getElementById('select-all');
+        if (selectAll) {
+            selectAll.checked = all.length > 0 && all.every((item) => item.checked);
+            selectAll.indeterminate = count > 0 && count < all.length;
+        }
+    }
+
+    function toggleAllForms(checked) {
+        document.querySelectorAll('.form-checkbox').forEach((item) => {
+            item.checked = checked;
+        });
+        updateSelectedCount();
+    }
+
+    function clearSelections() {
+        document.querySelectorAll('.form-checkbox').forEach((item) => {
+            item.checked = false;
+        });
+        document.querySelectorAll('input[name="investigator_ids"]').forEach((item) => {
+            item.checked = false;
+        });
+        document.querySelectorAll('input[name="primary_user_id"]').forEach((item) => {
+            item.checked = false;
+        });
+        updateSelectedCount();
+        syncPrimaryOptions();
+    }
+
+    function updateSelectedCandidateCount() {
+        const count = document.querySelectorAll('input[name="investigator_ids"]:checked').length;
+        const target = document.getElementById('selected-candidate-count');
+        if (target) {
+            target.textContent = count;
+        }
+    }
+
+    function toggleVisibleCandidates(checked) {
+        document.querySelectorAll('.candidate:not(.hidden)').forEach((row) => {
+            const checkbox = row.querySelector('input[name="investigator_ids"]');
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = checked;
+            }
+        });
+        syncPrimaryOptions();
+    }
+
+    function filterCandidates() {
+        const query = document.getElementById('candidate-search').value.trim().toLowerCase();
+        const role = document.getElementById('candidate-role').value;
+
+        document.querySelectorAll('.candidate').forEach((row) => {
+            const matchesQuery = !query || row.dataset.search.includes(query);
+            const matchesRole = !role || row.dataset.role === role;
+            row.classList.toggle('hidden', !(matchesQuery && matchesRole));
+        });
+    }
+
+    function syncPrimaryOptions() {
+        const rows = Array.from(document.querySelectorAll('.candidate'));
+        let hasPrimary = false;
+
+        rows.forEach((row) => {
+            const checkbox = row.querySelector('input[name="investigator_ids"]');
+            const radio = row.querySelector('input[name="primary_user_id"]');
+            if (!checkbox || !radio) {
+                return;
+            }
+            radio.disabled = !checkbox.checked;
+            if (!checkbox.checked && radio.checked) {
+                radio.checked = false;
+            }
+            if (checkbox.checked && radio.checked) {
+                hasPrimary = true;
+            }
+        });
+
+        if (!hasPrimary) {
+            const first = rows.find((row) => {
+                const checkbox = row.querySelector('input[name="investigator_ids"]');
+                return checkbox && checkbox.checked;
+            });
+            if (first) {
+                const radio = first.querySelector('input[name="primary_user_id"]');
+                if (radio) {
+                    radio.checked = true;
+                }
+            }
+        }
+        updateSelectedCandidateCount();
+    }
+
+    function syncMode() {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const zone = document.getElementById('candidate-zone');
+        zone.style.opacity = mode === 'clear' ? '.45' : '1';
+        zone.querySelectorAll('input, select, textarea').forEach((control) => {
+            if (control.classList.contains('permanent-disabled')) {
+                control.disabled = true;
+            } else {
+                control.disabled = mode === 'clear';
+            }
+        });
+        if (mode !== 'clear') {
+            syncPrimaryOptions();
+        }
+    }
+
+    document.getElementById('candidate-search').addEventListener('input', filterCandidates);
+    document.getElementById('candidate-role').addEventListener('change', filterCandidates);
+
+    const assignmentLevel = '{{ assignment_level }}';
+
+    document.getElementById('bulk-form').addEventListener('submit', (event) => {
+        const formCount = document.querySelectorAll('.form-checkbox:checked').length;
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const userCount = document.querySelectorAll('input[name="investigator_ids"]:checked').length;
+
+        if (!formCount) {
+            event.preventDefault();
+            alert('Bạn cần chọn ít nhất một phiếu.');
+            return;
+        }
+
+        if (mode !== 'clear' && !userCount && mode !== 'replace') {
+            event.preventDefault();
+            alert(assignmentLevel === 'school' ? 'Bạn cần chọn ít nhất một trường.' : 'Bạn cần chọn ít nhất một cán bộ hoặc giáo viên.');
+            return;
+        }
+
+        if (mode !== 'clear') {
+            const label = assignmentLevel === 'school'
+                ? (userCount > 1 ? `${userCount} trường` : '1 trường')
+                : (userCount > 1 ? `${userCount} cán bộ/giáo viên` : '1 cán bộ/giáo viên');
+            if (!confirm(`Xác nhận giao ${formCount} phiếu cho ${label}?`)) {
+                event.preventDefault();
+                return;
+            }
+        }
+
+        if (mode === 'clear' && !confirm('Bạn chắc chắn muốn thu hồi phân công của các phiếu đã chọn?')) {
+            event.preventDefault();
+        }
+    });
+
+    syncPrimaryOptions();
+    syncMode();
+    updateSelectedCount();
+    updateSelectedCandidateCount();
+</script>
+
+{# === BAI_13B_10_V3_15_DUPLICATE_ASSIGN_WARNING_START === #}
+<script>
+(function () {
+    "use strict";
+
+    if (!window.location.pathname.includes("/giao-phieu-giao-vien")) {
+        return;
+    }
+
+    function selectedMode() {
+        const radio = document.querySelector('input[name="mode"]:checked');
+        return radio ? String(radio.value || "").toLowerCase() : "replace";
+    }
+
+    function selectedInvestigatorIds() {
+        return new Set(
+            Array.from(
+                document.querySelectorAll(
+                    'input[name="investigator_ids"]:checked'
+                )
+            )
+            .map(function (item) {
+                return String(item.value || "").trim();
+            })
+            .filter(Boolean)
+        );
+    }
+
+    function selectedFormCheckboxes() {
+        return Array.from(
+            document.querySelectorAll('.form-checkbox:checked')
+        );
+    }
+
+    function assignedIdsOfForm(checkbox) {
+        const raw = String(
+            checkbox.getAttribute("data-assigned-user-ids") || ""
+        );
+
+        return new Set(
+            raw.split(",")
+                .map(function (item) { return item.trim(); })
+                .filter(Boolean)
+        );
+    }
+
+    function formLabel(checkbox) {
+        const row = checkbox.closest("tr");
+        if (!row) {
+            return "Phiếu #" + String(checkbox.value || "");
+        }
+
+        const code = row.querySelector(".code");
+        if (code && (code.textContent || "").trim()) {
+            return (code.textContent || "").trim();
+        }
+
+        return "Phiếu #" + String(checkbox.value || "");
+    }
+
+    function candidateLabelById(userId) {
+        const checkbox = document.querySelector(
+            'input[name="investigator_ids"][value="' +
+            String(userId).replace(/"/g, '\\"') +
+            '"]'
+        );
+
+        if (!checkbox) {
+            return "Tài khoản #" + userId;
+        }
+
+        const candidate = checkbox.closest(".candidate");
+        if (!candidate) {
+            return "Tài khoản #" + userId;
+        }
+
+        const nameNode = candidate.querySelector(".candidate-name");
+        const metaNode = candidate.querySelector(".candidate-meta");
+
+        const name = nameNode
+            ? (nameNode.textContent || "").replace(/\s+/g, " ").trim()
+            : "";
+        const meta = metaNode
+            ? (metaNode.textContent || "").replace(/\s+/g, " ").trim()
+            : "";
+
+        if (name && meta) return name + " — " + meta;
+        return name || meta || ("Tài khoản #" + userId);
+    }
+
+    function findDuplicateAssignments() {
+        const selectedUsers = selectedInvestigatorIds();
+        const forms = selectedFormCheckboxes();
+        const duplicates = [];
+
+        if (!selectedUsers.size || !forms.length) {
+            return duplicates;
+        }
+
+        forms.forEach(function (formCheckbox) {
+            const current = assignedIdsOfForm(formCheckbox);
+
+            selectedUsers.forEach(function (userId) {
+                if (current.has(userId)) {
+                    duplicates.push({
+                        formId: String(formCheckbox.value || ""),
+                        formLabel: formLabel(formCheckbox),
+                        userId: userId,
+                        userLabel: candidateLabelById(userId)
+                    });
+                }
+            });
+        });
+
+        return duplicates;
+    }
+
+    const form = document.getElementById("bulk-form");
+    if (!form) {
+        return;
+    }
+
+    /*
+     * Capture phase:
+     * chạy trước listener xác nhận chung đã có sẵn.
+     * Chỉ cảnh báo khi CHÍNH giáo viên được chọn đã có trên CHÍNH phiếu
+     * được chọn. Giáo viên có các phiếu khác vẫn giao bình thường.
+     */
+    form.addEventListener("submit", function (event) {
+        const mode = selectedMode();
+
+        if (mode === "clear") {
+            return;
+        }
+
+        const duplicates = findDuplicateAssignments();
+
+        if (!duplicates.length) {
+            return;
+        }
+
+        const shown = duplicates.slice(0, 8).map(function (item) {
+            return "• " + item.formLabel + ": " + item.userLabel;
+        });
+
+        if (duplicates.length > 8) {
+            shown.push(
+                "• ... và " + (duplicates.length - 8) +
+                " trường hợp trùng khác"
+            );
+        }
+
+        const ok = window.confirm(
+            "CẢNH BÁO: Có phiếu đã được giao cho đúng người này rồi.\n\n" +
+            shown.join("\n") +
+            "\n\nNếu tiếp tục, hệ thống sẽ thực hiện lại thao tác phân công " +
+            "theo chế độ bạn đang chọn và ghi nhật ký mới.\n\n" +
+            "Bạn có chắc chắn muốn tiếp tục?"
+        );
+
+        if (!ok) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            return false;
+        }
+    }, true);
+})();
+</script>
+{# === BAI_13B_10_V3_15_DUPLICATE_ASSIGN_WARNING_END === #}
+
+</body>
+</html>
+
+
+{# === BAI_13B_10_V3_13B3_CBQL_WARNING_START === #}
+<style>
+.pc-cbql-warning-v313b3 {
+    margin: 10px 0 12px;
+    padding: 12px 14px;
+    border: 1px solid #e8bd56;
+    border-radius: 10px;
+    background: #fff5cf;
+    color: #6f4d00;
+    line-height: 1.45;
+}
+.pc-cbql-warning-v313b3[hidden] {
+    display: none !important;
+}
+.pc-cbql-warning-v313b3 strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #8f5f00;
+}
+</style>
+
+<script>
+(function () {
+    "use strict";
+
+    if (!window.location.pathname.includes("/giao-phieu-giao-vien")) {
+        return;
+    }
+
+    function cleanText(el) {
+        return ((el && (el.innerText || el.textContent)) || "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function personCardOf(checkbox) {
+        let node = checkbox.parentElement;
+        let fallback = checkbox.parentElement;
+
+        for (let i = 0; i < 10 && node; i += 1, node = node.parentElement) {
+            const boxes = node.querySelectorAll('input[type="checkbox"]');
+
+            if (boxes.length === 1 && boxes[0] === checkbox) {
+                fallback = node;
+
+                const text = cleanText(node);
+                const hasUsername = /\b(?:cbql|gv)\.\d+\b/i.test(text);
+
+                if (hasUsername) {
+                    return node;
+                }
+            }
+
+            if (boxes.length > 1) {
+                break;
+            }
+        }
+
+        return fallback;
+    }
+
+    function selectedCbqlPeople() {
+        const checked = Array.from(
+            document.querySelectorAll('input[type="checkbox"]:checked')
+        );
+
+        const result = [];
+
+        for (const checkbox of checked) {
+            const card = personCardOf(checkbox);
+            const text = cleanText(card);
+
+            if (/\bcbql\.\d+\b/i.test(text)) {
+                result.push(text);
+            }
+        }
+
+        return Array.from(new Set(result));
+    }
+
+    function shortLabel(text) {
+        let value = String(text || "")
+            .replace(/\bChính\b/gi, "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (value.length > 150) {
+            value = value.slice(0, 147) + "...";
+        }
+
+        return value;
+    }
+
+    function findGiaoButton() {
+        const elements = Array.from(
+            document.querySelectorAll('button, input[type="submit"]')
+        );
+
+        return elements.find(function (el) {
+            const t = cleanText(el).toLowerCase();
+            const v = String(el.value || "").toLowerCase();
+            return t.includes("giao phiếu") || v.includes("giao phiếu");
+        }) || null;
+    }
+
+    const warning = document.createElement("div");
+    warning.className = "pc-cbql-warning-v313b3";
+    warning.hidden = true;
+    warning.innerHTML =
+        "<strong>⚠ Cảnh báo người được giao là CBQL</strong>" +
+        "<span></span>";
+
+    const giaoButton = findGiaoButton();
+
+    if (giaoButton && giaoButton.parentElement) {
+        giaoButton.parentElement.insertBefore(warning, giaoButton);
+    } else {
+        const form = document.querySelector("form");
+        (form || document.body).appendChild(warning);
+    }
+
+    function refreshWarning() {
+        const cbqlPeople = selectedCbqlPeople();
+        const detail = warning.querySelector("span");
+
+        if (!cbqlPeople.length) {
+            warning.hidden = true;
+            detail.textContent = "";
+            return;
+        }
+
+        warning.hidden = false;
+        detail.textContent =
+            "Tổ điều tra vẫn phải giữ đủ 3 cấp: 1 Mầm non + 1 Tiểu học + 1 THCS. " +
+            "Bạn đang chọn CBQL: " +
+            cbqlPeople.map(shortLabel).join(" | ") +
+            ". Đây là trường hợp thay thế/điều chỉnh đặc biệt.";
+    }
+
+    function isGiaoPhieuButton(target) {
+        const button = target && target.closest
+            ? target.closest('button, input[type="submit"]')
+            : null;
+
+        if (!button) {
+            return false;
+        }
+
+        const t = cleanText(button).toLowerCase();
+        const v = String(button.value || "").toLowerCase();
+
+        return t.includes("giao phiếu") || v.includes("giao phiếu");
+    }
+
+    document.addEventListener("click", function (event) {
+        if (!isGiaoPhieuButton(event.target)) {
+            return;
+        }
+
+        const cbqlPeople = selectedCbqlPeople();
+
+        if (!cbqlPeople.length) {
+            return;
+        }
+
+        const preview = cbqlPeople
+            .map(function (text) {
+                return "• " + shortLabel(text);
+            })
+            .join("\n");
+
+        const ok = window.confirm(
+            "CẢNH BÁO: Người được giao có tài khoản CBQL.\n\n" +
+            "Nguyên tắc tổ vẫn là 1 người Mầm non + 1 người Tiểu học + 1 người THCS.\n" +
+            "CBQL chỉ là trường hợp thay thế/điều chỉnh có chủ đích.\n\n" +
+            preview +
+            "\n\nBạn xác nhận vẫn tiếp tục?"
+        );
+
+        if (!ok) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    document.addEventListener("change", function (event) {
+        if (
+            event.target &&
+            event.target.matches &&
+            event.target.matches('input[type="checkbox"]')
+        ) {
+            refreshWarning();
+        }
+    }, true);
+
+    refreshWarning();
+})();
+</script>
+{# === BAI_13B_10_V3_13B3_CBQL_WARNING_END === #}
+
+<!-- === BAI_13B_11_8_3_1_UI_START === -->
+<script>
+(function () {
+    function normalizeText(value) {
+        return String(value || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+    }
+
+    function applySchoolTeacherAssignmentUi() {
+        var path = String(window.location.pathname || "");
+
+        if (!/\/dieu-tra\/\d+\/giao-phieu-giao-vien\/?$/.test(path)) {
+            return;
+        }
+
+        var forms = Array.prototype.slice.call(document.querySelectorAll("form"));
+        var assignmentForm = forms.find(function (form) {
+            var action = form.getAttribute("action") || "";
+            try {
+                action = new URL(action, window.location.origin).pathname;
+            } catch (e) {
+            }
+
+            return /\/dieu-tra\/\d+\/giao-phieu-giao-vien\/luu\/?$/.test(action);
+        });
+
+        if (assignmentForm) {
+            var submitButton = assignmentForm.querySelector(
+                'button[type="submit"], input[type="submit"]'
+            );
+
+            if (submitButton) {
+                if (submitButton.tagName.toLowerCase() === "input") {
+                    submitButton.value =
+                        "Giao phiếu / Gửi báo cáo xã, phường";
+                } else {
+                    submitButton.textContent =
+                        "📤 Giao phiếu / Gửi báo cáo xã, phường";
+                }
+
+                submitButton.setAttribute(
+                    "title",
+                    "Giao phiếu cho giáo viên và đồng thời gửi báo cáo xã/phường"
+                );
+            }
+        }
+
+        Array.prototype.slice
+            .call(document.querySelectorAll("a, button"))
+            .forEach(function (el) {
+                var text = normalizeText(el.textContent || el.value);
+
+                if (
+                    text.indexOf("gửi lại báo cáo cho xã/phường") !== -1 ||
+                    text.indexOf("gửi lại báo cáo cho phường/xã") !== -1
+                ) {
+                    el.style.display = "none";
+                    el.setAttribute("aria-hidden", "true");
+                }
+            });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            applySchoolTeacherAssignmentUi
+        );
+    } else {
+        applySchoolTeacherAssignmentUi();
+    }
+})();
+</script>
+<!-- === BAI_13B_11_8_3_1_UI_END === -->

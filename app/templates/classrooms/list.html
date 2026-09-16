@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục lớp {{ selected_level_label }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .classroom-page{max-width:1440px;margin:0 auto;padding:22px 18px 40px}
+        .classroom-hero{background:linear-gradient(135deg,#0f4fa8,#147ad6);color:#fff;border-radius:18px;padding:24px 28px;margin-bottom:18px;box-shadow:0 12px 30px rgba(20,76,140,.16)}
+        .classroom-hero__eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin:0 0 6px}
+        .classroom-hero h1{margin:0;font-size:30px;line-height:1.2}
+        .classroom-hero p{margin:8px 0 0;opacity:.92}
+        .classroom-card{background:#fff;border:1px solid #dbe5ef;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 7px 20px rgba(29,67,105,.06)}
+        .classroom-card h2{margin:0 0 14px;font-size:21px;color:#183653}
+        .filter-grid{display:grid;grid-template-columns:repeat(5,minmax(160px,1fr));gap:12px;align-items:end}
+        .filter-grid label,.classroom-form label{display:block;font-size:13px;font-weight:750;color:#344c63;margin-bottom:6px}
+        .filter-grid select,.filter-grid input,.classroom-form input,.classroom-form textarea{width:100%;box-sizing:border-box;border:1px solid #cbd8e5;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}
+        .classroom-form textarea{min-height:110px;resize:vertical}
+        .button-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .classroom-btn{border:0;border-radius:10px;padding:10px 14px;font-weight:750;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+        .classroom-btn--primary{background:#1473d1;color:#fff}
+        .classroom-btn--soft{background:#eaf3fc;color:#135a9f}
+        .classroom-btn--warn{background:#fff1df;color:#9b5b00}
+        .classroom-btn--muted{background:#eef2f6;color:#41546a}
+        .classroom-btn--small{padding:7px 10px;font-size:13px}
+        .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px;margin-top:14px}
+        .summary-box{border:1px solid #dce7f1;border-radius:13px;padding:13px;background:#f8fbfe}
+        .summary-box strong{display:block;font-size:24px;color:#0f5ca8;margin-top:3px}
+        .notice{border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1px solid}
+        .notice--ok{background:#edf9f0;border-color:#b9e4c3;color:#226a34}
+        .notice--error{background:#fff1f0;border-color:#f0c5c1;color:#9b2c25}
+        .notice--info{background:#eef6ff;border-color:#c7dcf4;color:#205c91}
+        .notice--warn{background:#fff8e8;border-color:#ecd699;color:#74530c}
+        .manage-grid{display:grid;grid-template-columns:minmax(310px,.75fr) minmax(520px,1.7fr);gap:16px}
+        .class-table-wrap{overflow-x:auto;border:1px solid #dbe5ef;border-radius:12px}
+        .class-table{width:100%;border-collapse:collapse;min-width:820px}
+        .class-table th{background:#eef5fb;color:#274761;text-align:left;font-size:13px;padding:10px;border-bottom:1px solid #dbe5ef;white-space:nowrap}
+        .class-table td{padding:10px;border-bottom:1px solid #edf1f5;vertical-align:top}
+        .class-table tr:last-child td{border-bottom:0}
+        .inline-edit{display:grid;grid-template-columns:120px minmax(190px,1fr) auto;gap:8px;align-items:center}
+        .inline-edit input{width:100%;box-sizing:border-box;border:1px solid #ccd8e4;border-radius:8px;padding:8px}
+        .badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
+        .badge--active{background:#e7f7ec;color:#27743a}
+        .badge--locked{background:#f1f2f4;color:#66717d}
+        .usage{font-size:12px;color:#5c6e7e;line-height:1.45}
+        .empty{padding:34px 18px;text-align:center;color:#66798b}
+        .help{font-size:13px;color:#64798d;line-height:1.5;margin:7px 0 0}
+        @media(max-width:1050px){.filter-grid{grid-template-columns:repeat(2,minmax(180px,1fr))}.manage-grid{grid-template-columns:1fr}}
+        @media(max-width:680px){.classroom-page{padding:14px 10px 30px}.classroom-hero{padding:20px 18px}.classroom-hero h1{font-size:25px}.filter-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:1fr}.inline-edit{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<main class="classroom-page">
+    <section class="classroom-hero">
+        <p class="classroom-hero__eyebrow">DANH MỤC DÙNG CHUNG CHO ĐIỀU TRA VÀ HỌC SINH</p>
+        <h1>Danh mục lớp {{ selected_level_label }}</h1>
+        <p>Mỗi lớp gắn đúng Trường + Năm học. Khi đã có trong danh mục, màn hình Năm học của đối tượng sẽ chọn được lớp từ danh sách gợi ý.</p>
+    </section>
+
+    {% if message %}
+    <div class="notice {% if status in ['invalid','invalid_scope','invalid_level','survey_locked','forbidden','duplicate','no_previous'] %}notice--error{% else %}notice--ok{% endif %}">
+        <strong>{{ message }}</strong>{% if detail_message %} {{ detail_message }}.{% endif %}
+    </div>
+    {% endif %}
+
+    {% if lock_message %}
+    <div class="notice notice--error"><strong>Danh mục đang khóa:</strong> {{ lock_message }} Muốn sửa lớp phải mở khóa ở đúng cấp trước.</div>
+    {% endif %}
+
+    {% if selected_level == 'THPT' and thpt_unlinked > 0 %}
+    <div class="notice notice--warn">
+        Có {{ thpt_unlinked }} trường THPT tham chiếu chưa liên kết với bảng trường chính thức. Các trường này vẫn xem được ở Danh mục THPT cũ nhưng chưa thể tạo lớp dùng trực tiếp cho phiếu điều tra cho tới khi có liên kết trường chính thức.
+    </div>
+    {% endif %}
+
+    <section class="classroom-card">
+        <h2>1. Chọn phạm vi</h2>
+        <form method="get" action="/lop-hoc" class="filter-grid">
+            <div>
+                <label for="cap">Cấp học</label>
+                <select id="cap" name="cap">
+                    {% for code, label in levels.items() %}
+                    <option value="{{ code }}" {% if code == selected_level %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="school_year_id">Năm học</label>
+                <select id="school_year_id" name="school_year_id" required>
+                    {% for year in school_years %}
+                    <option value="{{ year.id }}" {% if year.id == selected_school_year_id %}selected{% endif %}>{{ year.code }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="commune_id">Xã/phường</label>
+                <select id="commune_id" name="commune_id">
+                    <option value="">-- Tất cả/Phạm vi tài khoản --</option>
+                    {% for commune in communes %}
+                    <option value="{{ commune.id }}" {% if commune.id == selected_commune_id %}selected{% endif %}>{{ commune.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="school_id">Trường</label>
+                <select id="school_id" name="school_id">
+                    <option value="">-- Chọn trường --</option>
+                    {% for school in schools %}
+                    <option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="button-row">
+                <button class="classroom-btn classroom-btn--primary" type="submit">🔎 Xem danh mục</button>
+            </div>
+        </form>
+        <p class="help">Nếu đổi cấp học/xã/năm học, bấm <strong>Xem danh mục</strong> rồi chọn trường phù hợp. Tài khoản Xã và Trường chỉ thấy đúng phạm vi được giao.</p>
+    </section>
+
+    {% if selected_school and selected_year %}
+    <section class="classroom-card">
+        <h2>2. {{ selected_school.name }} · {{ selected_year.code }}</h2>
+        <div class="summary-grid">
+            <div class="summary-box">Tổng lớp đang hiển thị<strong>{{ classes|length }}</strong></div>
+            <div class="summary-box">Đang sử dụng<strong>{{ active_count }}</strong></div>
+            <div class="summary-box">Đã khóa<strong>{{ inactive_count }}</strong></div>
+        </div>
+    </section>
+
+    <section class="manage-grid">
+        <article class="classroom-card">
+            <h2>3. Thêm lớp</h2>
+            {% if can_manage %}
+            <form method="post" action="/lop-hoc/them" class="classroom-form">
+                <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+                <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+                <input type="hidden" name="cap" value="{{ selected_level or '' }}">
+                <label for="ten_lop">Tên lớp</label>
+                <textarea id="ten_lop" name="ten_lop" required placeholder="Có thể nhập nhiều lớp, mỗi dòng một lớp. Ví dụ:&#10;1A&#10;1B&#10;1C"></textarea>
+                <p class="help">Có thể nhập tối đa 200 lớp/lần. Hệ thống không tự sinh tên lớp và không tạo học sinh giả.</p>
+                <div class="button-row" style="margin-top:12px">
+                    <button class="classroom-btn classroom-btn--primary" type="submit">＋ Thêm vào danh mục</button>
+                </div>
+            </form>
+            <hr style="border:0;border-top:1px solid #e3eaf1;margin:18px 0">
+            <form method="post" action="/lop-hoc/sao-chep-nam-truoc" onsubmit="return confirm('Sao chép các lớp đang hoạt động từ năm học trước sang năm hiện tại?');">
+                <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+                <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+                <input type="hidden" name="cap" value="{{ selected_level or '' }}">
+                <button class="classroom-btn classroom-btn--soft" type="submit">⧉ Sao chép lớp năm trước</button>
+            </form>
+            {% else %}
+            <div class="notice notice--info">Tài khoản đang ở chế độ chỉ xem hoặc dữ liệu đã bị khóa.</div>
+            {% endif %}
+        </article>
+
+        <article class="classroom-card">
+            <h2>4. Danh sách lớp</h2>
+            <form method="get" action="/lop-hoc" class="button-row" style="margin-bottom:12px">
+                <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+                <input type="hidden" name="cap" value="{{ selected_level or '' }}">
+                {% if selected_commune_id %}<input type="hidden" name="commune_id" value="{{ selected_commune_id }}">{% endif %}
+                <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+                <input name="q" value="{{ q }}" placeholder="Tìm tên lớp" style="min-width:220px;border:1px solid #cbd8e5;border-radius:10px;padding:10px 11px">
+                <button class="classroom-btn classroom-btn--soft" type="submit">Tìm</button>
+                {% if q %}<a class="classroom-btn classroom-btn--muted" href="/lop-hoc?school_year_id={{ selected_school_year_id }}&cap={{ selected_level or '' }}&school_id={{ selected_school_id }}{% if selected_commune_id %}&commune_id={{ selected_commune_id }}{% endif %}">Xóa lọc</a>{% endif %}
+            </form>
+
+            {% if classes %}
+            <div class="class-table-wrap">
+                <table class="class-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã lớp / Tên lớp</th>
+                            <th>Đang được dùng</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for classroom in classes %}
+                        {% set usage = usage_by_class.get(classroom.id, {}) %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                {% if can_manage %}
+                                <form method="post" action="/lop-hoc/{{ classroom.id }}/cap-nhat" class="inline-edit">
+                                    <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+                                    <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+                                    <input type="hidden" name="cap" value="{{ selected_level or '' }}">
+                                    <input name="ma_lop" value="{{ classroom.code or '' }}" maxlength="50" placeholder="Mã lớp">
+                                    <input name="ten_lop" value="{{ classroom.name }}" maxlength="200" required>
+                                    <button class="classroom-btn classroom-btn--soft classroom-btn--small" type="submit">Lưu</button>
+                                </form>
+                                {% else %}
+                                <strong>{{ classroom.name }}</strong>{% if classroom.code %}<div class="usage">Mã: {{ classroom.code }}</div>{% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="usage">
+                                Học sinh: {{ usage.get('students', 0) }}<br>
+                                Phiếu điều tra: {{ usage.get('surveys', 0) }}
+                            </td>
+                            <td>
+                                {% if classroom.is_active %}<span class="badge badge--active">Đang hoạt động</span>{% else %}<span class="badge badge--locked">Đã khóa</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if can_manage %}
+                                <form method="post" action="/lop-hoc/{{ classroom.id }}/khoa-mo" onsubmit="return confirm('{% if classroom.is_active %}Khóa lớp này khỏi danh sách chọn mới? Dữ liệu đã lưu vẫn được giữ nguyên.{% else %}Mở lại lớp này?{% endif %}');">
+                                    <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+                                    <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+                                    <input type="hidden" name="cap" value="{{ selected_level or '' }}">
+                                    <button class="classroom-btn {% if classroom.is_active %}classroom-btn--warn{% else %}classroom-btn--soft{% endif %} classroom-btn--small" type="submit">{% if classroom.is_active %}Khóa{% else %}Mở lại{% endif %}</button>
+                                </form>
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty">Chưa có lớp nào trong trường và năm học đã chọn.</div>
+            {% endif %}
+        </article>
+    </section>
+    {% else %}
+    <section class="classroom-card">
+        <div class="empty"><strong>Chọn một trường để bắt đầu quản lý danh mục lớp.</strong></div>
+    </section>
+    {% endif %}
+</main>
+</body>
+</html>

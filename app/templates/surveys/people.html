@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Đối tượng điều tra trong hộ</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+
+    <style>
+        .survey-page {
+            width: min(1500px, 96%);
+            margin: 28px auto 45px;
+        }
+
+        .household-summary {
+            margin-bottom: 22px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .summary-item {
+            padding: 16px 18px;
+            background: white;
+            border: 1px solid #dfe8f1;
+            border-radius: 13px;
+            box-shadow: 0 4px 14px rgba(31, 65, 98, 0.06);
+        }
+
+        .summary-label {
+            margin: 0 0 5px;
+            color: #637587;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            margin: 0;
+            color: #17324d;
+            font-size: 16px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .survey-layout {
+            display: grid;
+            grid-template-columns: minmax(390px, 0.86fr) minmax(680px, 1.6fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .sticky-panel {
+            position: sticky;
+            top: 18px;
+        }
+
+        .section-title {
+            margin: 0 0 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e1e9f0;
+            color: #0d47a1;
+            font-size: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: white;
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+        }
+
+        textarea.form-control {
+            min-height: 82px;
+            resize: vertical;
+        }
+
+        .required-mark {
+            color: #c62828;
+        }
+
+        .form-note {
+            margin-top: 5px;
+            color: #687b8d;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .code-preview {
+            padding: 12px 13px;
+            border: 1px dashed #90caf9;
+            border-radius: 9px;
+            background: #eef7ff;
+            color: #0d47a1;
+            font-weight: 700;
+        }
+
+        .student-link-box {
+            padding: 14px;
+            border-radius: 11px;
+            background: #f5f9fd;
+            border: 1px solid #dce8f3;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 2fr) minmax(190px, 1fr);
+            gap: 14px;
+            align-items: end;
+        }
+
+        .filter-actions {
+            margin: 15px 0 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .people-table {
+            min-width: 1450px;
+        }
+
+        .action-buttons {
+            min-width: 285px;
+            display: flex;
+            gap: 7px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .inline-form {
+            display: inline;
+            margin: 0;
+        }
+
+        .button-danger {
+            border: 1px solid #ef9a9a;
+            background: #ffebee;
+            color: #b71c1c;
+        }
+
+        .button-danger:hover {
+            background: #ffcdd2;
+        }
+
+        .code-cell {
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
+        .name-cell {
+            min-width: 190px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 18px;
+            background: #e8f5e9;
+            color: #1b5e20;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .linked-pill {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 18px;
+            background: #e3f2fd;
+            color: #0d47a1;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .not-linked-pill {
+            background: #f1f3f5;
+            color: #596a7a;
+        }
+
+        .pagination {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            min-width: 39px;
+            height: 39px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            border: 1px solid #cbd7e3;
+            border-radius: 8px;
+            background: white;
+            color: #0d47a1;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-link-active {
+            background: #1976d2;
+            border-color: #1976d2;
+            color: white;
+        }
+
+        .page-link-disabled {
+            color: #9aa7b4;
+            background: #f3f5f7;
+            pointer-events: none;
+        }
+
+        .button-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        @media (max-width: 1180px) {
+            .survey-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sticky-panel {
+                position: static;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .household-summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .form-grid,
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-full {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .household-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        .member-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin: -8px 0 24px;
+        }
+
+        .metric-card {
+            background: #ffffff;
+            border: 1px solid #dbe6f0;
+            border-radius: 12px;
+            padding: 13px 15px;
+        }
+
+        .metric-card strong {
+            display: block;
+            margin-top: 4px;
+            color: #0d4f91;
+            font-size: 22px;
+        }
+
+        .student-lookup-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+        }
+
+        .student-clear-button {
+            border: 0;
+            border-radius: 9px;
+            padding: 0 15px;
+            background: #edf2f7;
+            color: #29435c;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .student-suggestions {
+            position: relative;
+            z-index: 20;
+            max-height: 280px;
+            margin-top: 7px;
+            overflow-y: auto;
+            border: 1px solid #cfdce8;
+            border-radius: 10px;
+            background: #ffffff;
+            box-shadow: 0 10px 24px rgba(27, 61, 92, .13);
+        }
+
+        .student-suggestion-item {
+            width: 100%;
+            border: 0;
+            border-bottom: 1px solid #edf2f6;
+            padding: 11px 13px;
+            background: #ffffff;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .student-suggestion-item:hover,
+        .student-suggestion-item-active {
+            background: #edf6ff;
+        }
+
+        .student-suggestion-title {
+            display: block;
+            color: #17324d;
+            font-weight: 800;
+        }
+
+        .student-suggestion-detail,
+        .student-suggestion-empty {
+            display: block;
+            margin-top: 3px;
+            color: #66798b;
+            font-size: 12px;
+        }
+
+        .student-suggestion-empty {
+            padding: 12px 13px;
+        }
+
+        .selected-student-box {
+            margin-top: 8px;
+            border: 1px solid #b8ddc0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #eefaf0;
+            color: #1f5f2b;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 800px) {
+            .member-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .member-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .student-lookup-row {
+                grid-template-columns: 1fr;
+            }
+
+            .student-clear-button {
+                min-height: 42px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    ĐIỀU TRA PHỔ CẬP GIÁO DỤC MẦM NON
+                </p>
+
+                <h1>Đối tượng trong hộ gia đình</h1>
+
+                <p>
+                    Nhập từng người thuộc diện điều tra và
+                    liên kết với hồ sơ học sinh khi đã có dữ liệu.
+                </p>
+            </div>
+
+            <div
+                style="
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    flex-wrap: wrap;
+                "
+            >
+                <div style="text-align: right; line-height: 1.4;">
+                    <strong>{{ nguoi_dung.full_name }}</strong>
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                    </div>
+                </div>
+
+                <a
+                    class="button button-light"
+                    href="/dieu-tra/{{ batch.id }}/ho-dan"
+                >
+                    ← Danh sách hộ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="survey-page">
+        {% if thong_bao %}
+            <div class="alert alert-success">
+                {{ thong_bao }}
+            </div>
+        {% endif %}
+
+        {% if thong_bao_loi %}
+            <div class="alert alert-error">
+                {{ thong_bao_loi }}
+            </div>
+        {% endif %}
+
+        <section class="household-summary">
+            <article class="summary-item">
+                <p class="summary-label">Số phiếu</p>
+                <p class="summary-value">{{ survey_form.form_number }}</p>
+            </article>
+
+            <article class="summary-item">
+                <p class="summary-label">Mã hộ</p>
+                <p class="summary-value">{{ household.code }}</p>
+            </article>
+
+            <article class="summary-item">
+                <p class="summary-label">Chủ hộ</p>
+                <p class="summary-value">{{ household.head_name }}</p>
+            </article>
+
+            <article class="summary-item">
+                <p class="summary-label">Địa bàn</p>
+                <p class="summary-value">
+                    {{ household.hamlet_name or 'Chưa ghi thôn/xóm' }}<br>
+                    <span style="font-weight: 500; font-size: 13px;">
+                        {{ batch.commune.name }}
+                    </span>
+                </p>
+            </article>
+        </section>
+
+        <section class="member-metrics">
+            <article class="metric-card">
+                <span class="summary-label">Thành viên đang theo dõi</span>
+                <strong>{{ household_person_total }}</strong>
+            </article>
+            <article class="metric-card">
+                <span class="summary-label">Đã liên kết học sinh</span>
+                <strong>{{ linked_student_count }}</strong>
+            </article>
+            <article class="metric-card">
+                <span class="summary-label">Thiếu số định danh</span>
+                <strong>{{ missing_personal_id_count }}</strong>
+            </article>
+            <article class="metric-card">
+                <span class="summary-label">Thiếu dữ liệu năm {{ batch.school_year.code }}</span>
+                <strong>{{ missing_current_year_count }}</strong>
+            </article>
+        </section>
+
+        <section class="survey-layout" {% if not can_edit_data %}style="grid-template-columns:1fr;"{% endif %}>
+            {% if can_edit_data %}
+            <article class="panel sticky-panel">
+                <p class="panel-label">NHẬP DỮ LIỆU</p>
+                <h2 class="section-title">Thêm đối tượng mới</h2>
+
+                <form
+                    method="post"
+                    action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/them"
+                >
+                    <div class="form-grid">
+                        <div class="form-group form-full">
+                            <label>Mã đối tượng</label>
+                            <div class="code-preview">
+                                Phần mềm tự sinh sau khi lưu
+                            </div>
+                        </div>
+
+                        <div class="form-group form-full student-link-box">
+                            <label for="student_search">
+                                Tìm học sinh đã có để liên kết
+                            </label>
+
+                            <div class="student-lookup-row">
+                                <input
+                                    id="student_search"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Gõ ít nhất 2 ký tự: mã, họ tên hoặc số định danh"
+                                    autocomplete="off"
+                                    role="combobox"
+                                    aria-autocomplete="list"
+                                    aria-expanded="false"
+                                    aria-controls="student_suggestions"
+                                >
+                                <button
+                                    id="student_clear"
+                                    class="student-clear-button"
+                                    type="button"
+                                >
+                                    Xóa
+                                </button>
+                            </div>
+
+                            <input
+                                id="student_id"
+                                name="student_id"
+                                type="hidden"
+                                value="{{ form_data.student_id or '' }}"
+                            >
+
+                            <div
+                                id="student_suggestions"
+                                class="student-suggestions"
+                                role="listbox"
+                                hidden
+                            ></div>
+
+                            <div
+                                id="student_selected"
+                                class="selected-student-box"
+                                {% if not selected_student %}hidden{% endif %}
+                            >
+                                {% if selected_student %}
+                                    <strong>
+                                        Đã chọn: {{ selected_student.code }} – {{ selected_student.full_name }}
+                                    </strong>
+                                    <div>
+                                        {% if selected_student.date_of_birth %}
+                                            Sinh ngày {{ selected_student.date_of_birth.strftime('%d/%m/%Y') }}
+                                        {% endif %}
+                                        {% if selected_student.personal_id %}
+                                            · SĐD {{ selected_student.personal_id }}
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div id="student_lookup_note" class="form-note">
+                                Liên kết không bắt buộc. Kết quả tìm kiếm chỉ tải khi
+                                gõ từ 2 ký tự, không tải toàn bộ danh sách học sinh.
+                            </div>
+                        </div>
+
+                        <div class="form-group form-full">
+                            <label for="full_name">
+                                Họ và tên đối tượng
+                                <span class="required-mark">*</span>
+                            </label>
+
+                            <input
+                                id="full_name"
+                                name="full_name"
+                                type="text"
+                                maxlength="200"
+                                class="form-control"
+                                value="{{ form_data.full_name }}"
+                                placeholder="Nhập đầy đủ họ và tên"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date_of_birth">
+                                Ngày sinh
+                                <span class="required-mark">*</span>
+                            </label>
+                            <input
+                                id="date_of_birth"
+                                name="date_of_birth"
+                                type="date"
+                                class="form-control"
+                                value="{{ form_data.date_of_birth }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">
+                                Giới tính
+                                <span class="required-mark">*</span>
+                            </label>
+                            <select
+                                id="gender"
+                                name="gender"
+                                class="form-control"
+                                required
+                            >
+                                <option value="">-- Chưa xác định --</option>
+                                {% for item in ['Nam', 'Nữ', 'Khác'] %}
+                                    <option
+                                        value="{{ item }}"
+                                        {% if form_data.gender == item %}selected{% endif %}
+                                    >
+                                        {{ item }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ethnic_group">
+                                Dân tộc
+                                <span class="required-mark">*</span>
+                            </label>
+                            <input
+                                id="ethnic_group"
+                                name="ethnic_group"
+                                type="text"
+                                maxlength="100"
+                                class="form-control"
+                                value="{{ form_data.ethnic_group }}"
+                                placeholder="Ví dụ: Kinh"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="relationship_to_head">
+                                Quan hệ với chủ hộ
+                                <span class="required-mark">*</span>
+                            </label>
+                            <input
+                                id="relationship_to_head"
+                                name="relationship_to_head"
+                                type="text"
+                                maxlength="100"
+                                class="form-control"
+                                value="{{ form_data.relationship_to_head }}"
+                                placeholder="Ví dụ: Chủ hộ, vợ, chồng, con"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="personal_id">
+                                Số định danh cá nhân
+                            </label>
+                            <input
+                                id="personal_id"
+                                name="personal_id"
+                                type="text"
+                                maxlength="50"
+                                class="form-control"
+                                value="{{ form_data.personal_id }}"
+                                placeholder="Có thể để trống"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ministry_student_code">
+                                Mã Bộ GD&amp;ĐT
+                            </label>
+                            <input
+                                id="ministry_student_code"
+                                name="ministry_student_code"
+                                type="text"
+                                maxlength="50"
+                                class="form-control"
+                                value="{{ form_data.ministry_student_code }}"
+                                placeholder="Có thể bổ sung sau"
+                            >
+                            <div class="form-note">
+                                Không bắt buộc. Dùng để đồng bộ với CSDL Bộ.
+                            </div>
+                        </div>
+
+                        <div class="form-group form-full">
+                            <label for="residency_status">
+                                Trạng thái cư trú
+                            </label>
+                            <select
+                                id="residency_status"
+                                name="residency_status"
+                                class="form-control"
+                            >
+                                {% for code, label in residency_status_labels.items() %}
+                                    <option
+                                        value="{{ code }}"
+                                        {% if form_data.residency_status == code %}selected{% endif %}
+                                    >
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group form-full">
+                            <label for="permanent_address">
+                                Địa chỉ thường trú
+                            </label>
+                            <textarea
+                                id="permanent_address"
+                                name="permanent_address"
+                                class="form-control"
+                                placeholder="Nhập địa chỉ thường trú"
+                            >{{ form_data.permanent_address }}</textarea>
+                        </div>
+
+                        <div class="form-group form-full">
+                            <label for="current_address">
+                                Chỗ ở hiện nay
+                            </label>
+                            <textarea
+                                id="current_address"
+                                name="current_address"
+                                class="form-control"
+                                placeholder="Nhập chỗ ở hiện nay"
+                            >{{ form_data.current_address }}</textarea>
+                        </div>
+
+                        <div class="form-group form-full">
+                            <label for="special_circumstances">
+                                Hoàn cảnh đặc biệt
+                            </label>
+                            <textarea
+                                id="special_circumstances"
+                                name="special_circumstances"
+                                class="form-control"
+                                placeholder="Để trống nếu không có"
+                            >{{ form_data.special_circumstances }}</textarea>
+                        </div>
+
+                        <div class="form-group form-full">
+                            <label for="notes">Ghi chú</label>
+                            <textarea
+                                id="notes"
+                                name="notes"
+                                class="form-control"
+                                placeholder="Thông tin cần lưu ý"
+                            >{{ form_data.notes }}</textarea>
+                        </div>
+                    </div>
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                        style="width: 100%; margin-top: 18px;"
+                    >
+                        ＋ Thêm đối tượng
+                    </button>
+                </form>
+            </article>
+            {% endif %}
+
+            <article class="panel panel-wide">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-label">DỮ LIỆU HIỆN CÓ</p>
+                        <h2>Danh sách đối tượng trong hộ</h2>
+                    </div>
+
+                    <span class="count-badge">
+                        {{ total_records }} đối tượng
+                    </span>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;">
+                    <a
+                        class="button button-secondary"
+                        href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/nam-hoc"
+                    >
+                        Theo dõi năm học
+                    </a>
+                    <span
+                        class="button button-secondary button-disabled"
+                        title="Sẽ mở ở bài xuất Excel điều tra"
+                    >
+                        Xuất Excel đối tượng
+                    </span>
+                </div>
+
+                <form
+                    method="get"
+                    action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong"
+                >
+                    <div class="filter-grid">
+                        <div class="form-group">
+                            <label for="q">
+                                Tìm mã, họ tên, số định danh hoặc mã Bộ
+                            </label>
+                            <input
+                                id="q"
+                                name="q"
+                                type="text"
+                                maxlength="100"
+                                class="form-control"
+                                value="{{ q }}"
+                                placeholder="Nhập nội dung tìm kiếm"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter_residency_status">
+                                Trạng thái cư trú
+                            </label>
+                            <select
+                                id="filter_residency_status"
+                                name="residency_status"
+                                class="form-control"
+                            >
+                                <option value="">-- Tất cả trạng thái --</option>
+                                {% for code, label in residency_status_labels.items() %}
+                                    <option
+                                        value="{{ code }}"
+                                        {% if selected_residency_status == code %}selected{% endif %}
+                                    >
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button class="button button-primary" type="submit">
+                            Tìm kiếm / Lọc
+                        </button>
+                        <a
+                            class="button button-secondary"
+                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong"
+                        >
+                            Xóa bộ lọc
+                        </a>
+                    </div>
+                </form>
+
+                {% if people %}
+                    <div class="table-wrapper">
+                        <table class="data-table people-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã đối tượng</th>
+                                    <th>Họ và tên</th>
+                                    <th>Ngày sinh</th>
+                                    <th>Giới tính</th>
+                                    <th>Quan hệ chủ hộ</th>
+                                    <th>Cư trú</th>
+                                    <th>Mã Bộ GD&amp;ĐT</th>
+                                    <th>Liên kết học sinh</th>
+                                    <th>Năm học đã lưu</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for doi_tuong in people %}
+                                    <tr>
+                                        <td>
+                                            {{ (page - 1) * page_size + loop.index }}
+                                        </td>
+                                        <td class="code-cell">
+                                            {{ doi_tuong.code }}
+                                        </td>
+                                        <td class="name-cell">
+                                            <strong>{{ doi_tuong.full_name }}</strong>
+                                            {% if doi_tuong.personal_id %}
+                                                <div class="form-note">
+                                                    SĐD: {{ doi_tuong.personal_id }}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if doi_tuong.date_of_birth %}
+                                                {{ doi_tuong.date_of_birth.strftime('%d/%m/%Y') }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ doi_tuong.gender or '—' }}</td>
+                                        <td>{{ doi_tuong.relationship_to_head or '—' }}</td>
+                                        <td>
+                                            <span class="status-pill">
+                                                {{ residency_status_labels.get(doi_tuong.residency_status, doi_tuong.residency_status) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ doi_tuong.ministry_student_code or '—' }}</td>
+                                        <td>
+                                            {% if doi_tuong.student %}
+                                                <span class="linked-pill">
+                                                    {{ doi_tuong.student.code }}
+                                                </span>
+                                                <div class="form-note">
+                                                    {{ doi_tuong.student.full_name }}
+                                                </div>
+                                            {% else %}
+                                                <span class="linked-pill not-linked-pill">
+                                                    Chưa liên kết
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>{{ year_record_counts.get(doi_tuong.id, 0) }}</strong>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                {% if can_edit_data %}
+                                                <a class="button button-small button-primary" href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ doi_tuong.id }}/sua">Sửa</a>
+                                                {% endif %}
+                                                <a class="button button-small button-secondary" href="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ doi_tuong.id }}/nam-hoc">{% if can_edit_data %}Năm học{% else %}Xem năm học{% endif %}</a>
+                                                {% if can_edit_data %}
+                                                <form class="inline-form" method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ doi_tuong.id }}/ngung-theo-doi" onsubmit="return confirm('Ngừng theo dõi {{ doi_tuong.full_name }}? Dữ liệu năm học vẫn được giữ lại.');">
+                                                    <button class="button button-small button-danger" type="submit">Ngừng theo dõi</button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav class="pagination">
+                        {% if previous_url %}
+                            <a class="page-link" href="{{ previous_url }}">
+                                ← Trước
+                            </a>
+                        {% else %}
+                            <span class="page-link page-link-disabled">
+                                ← Trước
+                            </span>
+                        {% endif %}
+
+                        {% for item in page_links %}
+                            <a
+                                class="page-link {% if item.active %}page-link-active{% endif %}"
+                                href="{{ item.url }}"
+                            >
+                                {{ item.number }}
+                            </a>
+                        {% endfor %}
+
+                        {% if next_url %}
+                            <a class="page-link" href="{{ next_url }}">
+                                Sau →
+                            </a>
+                        {% else %}
+                            <span class="page-link page-link-disabled">
+                                Sau →
+                            </span>
+                        {% endif %}
+                    </nav>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">👨‍👩‍👧</div>
+                        <h3>Chưa có đối tượng điều tra</h3>
+                        <p>
+                            Hãy nhập người đầu tiên trong hộ bằng biểu mẫu bên trái.
+                        </p>
+                    </div>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+
+    {% if can_edit_data %}
+    <script>
+        const studentSearch = document.getElementById("student_search");
+        const studentIdInput = document.getElementById("student_id");
+        const studentSuggestions = document.getElementById("student_suggestions");
+        const studentSelected = document.getElementById("student_selected");
+        const studentClear = document.getElementById("student_clear");
+        const studentLookupNote = document.getElementById("student_lookup_note");
+
+        const fullNameInput = document.getElementById("full_name");
+        const birthInput = document.getElementById("date_of_birth");
+        const genderSelect = document.getElementById("gender");
+        const ethnicInput = document.getElementById("ethnic_group");
+        const personalIdInput = document.getElementById("personal_id");
+        const ministryCodeInput = document.getElementById("ministry_student_code");
+        const permanentAddressInput = document.getElementById("permanent_address");
+        const currentAddressInput = document.getElementById("current_address");
+
+        const studentLookupUrl =
+            "/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/tim-hoc-sinh";
+
+        let lookupTimer = null;
+        let activeStudentLabel = "";
+        let latestRequestNumber = 0;
+
+        function closeStudentSuggestions() {
+            studentSuggestions.hidden = true;
+            studentSearch.setAttribute("aria-expanded", "false");
+        }
+
+        function openStudentSuggestions() {
+            studentSuggestions.hidden = false;
+            studentSearch.setAttribute("aria-expanded", "true");
+        }
+
+        function renderStudentMessage(message) {
+            studentSuggestions.innerHTML = "";
+            const row = document.createElement("div");
+            row.className = "student-suggestion-empty";
+            row.textContent = message;
+            studentSuggestions.appendChild(row);
+            openStudentSuggestions();
+        }
+
+        function setValueWhenEmpty(input, value) {
+            if (input && !String(input.value || "").trim() && value) {
+                input.value = value;
+            }
+        }
+
+        function selectStudent(student) {
+            studentIdInput.value = student.id;
+            activeStudentLabel = `${student.code} – ${student.full_name}`;
+            studentSearch.value = activeStudentLabel;
+
+            studentSelected.innerHTML = "";
+            const title = document.createElement("strong");
+            title.textContent = `Đã chọn: ${activeStudentLabel}`;
+            studentSelected.appendChild(title);
+
+            const details = [];
+            if (student.date_of_birth) {
+                const [year, month, day] = student.date_of_birth.split("-");
+                details.push(`Sinh ngày ${day}/${month}/${year}`);
+            }
+            if (student.personal_id) {
+                details.push(`SĐD ${student.personal_id}`);
+            }
+            if (details.length) {
+                const detailLine = document.createElement("div");
+                detailLine.textContent = details.join(" · ");
+                studentSelected.appendChild(detailLine);
+            }
+            studentSelected.hidden = false;
+
+            setValueWhenEmpty(fullNameInput, student.full_name);
+            setValueWhenEmpty(birthInput, student.date_of_birth);
+            setValueWhenEmpty(genderSelect, student.gender);
+            setValueWhenEmpty(ethnicInput, student.ethnic_group);
+            setValueWhenEmpty(personalIdInput, student.personal_id);
+            setValueWhenEmpty(ministryCodeInput, student.code);
+            setValueWhenEmpty(
+                permanentAddressInput,
+                student.permanent_address
+            );
+            setValueWhenEmpty(
+                currentAddressInput,
+                student.current_address
+            );
+
+            studentLookupNote.textContent =
+                "Đã liên kết học sinh. Hãy kiểm tra lại thông tin trước khi lưu.";
+            closeStudentSuggestions();
+        }
+
+        function clearSelectedStudent({ keepSearchText = false } = {}) {
+            studentIdInput.value = "";
+            activeStudentLabel = "";
+            studentSelected.hidden = true;
+            studentSelected.innerHTML = "";
+            if (!keepSearchText) {
+                studentSearch.value = "";
+            }
+            studentLookupNote.textContent =
+                "Liên kết không bắt buộc. Kết quả tìm kiếm chỉ tải khi gõ từ 2 ký tự.";
+        }
+
+        function renderStudents(items, message) {
+            studentSuggestions.innerHTML = "";
+            if (!items.length) {
+                renderStudentMessage(
+                    message || "Không tìm thấy học sinh phù hợp."
+                );
+                return;
+            }
+
+            for (const student of items) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "student-suggestion-item";
+                button.setAttribute("role", "option");
+
+                const title = document.createElement("span");
+                title.className = "student-suggestion-title";
+                title.textContent = `${student.code} – ${student.full_name}`;
+                button.appendChild(title);
+
+                const details = [];
+                if (student.date_of_birth) {
+                    const [year, month, day] = student.date_of_birth.split("-");
+                    details.push(`Sinh ${day}/${month}/${year}`);
+                }
+                if (student.personal_id) {
+                    details.push(`SĐD ${student.personal_id}`);
+                }
+
+                const detail = document.createElement("span");
+                detail.className = "student-suggestion-detail";
+                detail.textContent = details.join(" · ") || "Chưa có thông tin định danh";
+                button.appendChild(detail);
+
+                button.addEventListener("mousedown", (event) => {
+                    event.preventDefault();
+                    selectStudent(student);
+                });
+                studentSuggestions.appendChild(button);
+            }
+
+            openStudentSuggestions();
+        }
+
+        async function searchStudents() {
+            const keyword = studentSearch.value.trim();
+            if (keyword.length < 2) {
+                closeStudentSuggestions();
+                studentLookupNote.textContent =
+                    "Nhập ít nhất 2 ký tự để tìm học sinh.";
+                return;
+            }
+
+            const requestNumber = ++latestRequestNumber;
+            studentLookupNote.textContent = "Đang tìm học sinh...";
+
+            try {
+                const query = new URLSearchParams({
+                    q: keyword,
+                    limit: "20",
+                });
+                const response = await fetch(
+                    `${studentLookupUrl}?${query.toString()}`,
+                    { headers: { "Accept": "application/json" } }
+                );
+                if (!response.ok) {
+                    throw new Error("Không tải được danh sách học sinh.");
+                }
+                const data = await response.json();
+                if (requestNumber !== latestRequestNumber) {
+                    return;
+                }
+                renderStudents(data.items || [], data.message || "");
+                studentLookupNote.textContent =
+                    (data.items || []).length
+                        ? `Tìm thấy ${(data.items || []).length} học sinh. Hãy bấm chọn đúng người.`
+                        : (data.message || "Không tìm thấy học sinh phù hợp.");
+            } catch (error) {
+                if (requestNumber !== latestRequestNumber) {
+                    return;
+                }
+                renderStudentMessage(
+                    "Không thể tìm học sinh lúc này. Anh/chị vẫn có thể nhập đối tượng không liên kết."
+                );
+                studentLookupNote.textContent =
+                    "Không tải được kết quả tìm kiếm.";
+            }
+        }
+
+        studentSearch.addEventListener("input", () => {
+            if (
+                studentIdInput.value &&
+                studentSearch.value.trim() !== activeStudentLabel
+            ) {
+                clearSelectedStudent({ keepSearchText: true });
+            }
+            clearTimeout(lookupTimer);
+            lookupTimer = setTimeout(searchStudents, 280);
+        });
+
+        studentSearch.addEventListener("focus", () => {
+            if (studentSearch.value.trim().length >= 2 && !studentIdInput.value) {
+                searchStudents();
+            }
+        });
+
+        studentClear.addEventListener("click", () => {
+            clearSelectedStudent();
+            closeStudentSuggestions();
+            studentSearch.focus();
+        });
+
+        studentSearch.addEventListener("keydown", (event) => {
+            const items = Array.from(
+                studentSuggestions.querySelectorAll(".student-suggestion-item")
+            );
+            if (!items.length || studentSuggestions.hidden) {
+                return;
+            }
+
+            let activeIndex = items.findIndex((item) =>
+                item.classList.contains("student-suggestion-item-active")
+            );
+
+            if (event.key === "ArrowDown") {
+                event.preventDefault();
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            } else if (event.key === "ArrowUp") {
+                event.preventDefault();
+                activeIndex = Math.max(activeIndex - 1, 0);
+            } else if (event.key === "Enter" && activeIndex >= 0) {
+                event.preventDefault();
+                items[activeIndex].dispatchEvent(
+                    new MouseEvent("mousedown", { bubbles: true })
+                );
+                return;
+            } else if (event.key === "Escape") {
+                closeStudentSuggestions();
+                return;
+            } else {
+                return;
+            }
+
+            items.forEach((item, index) => {
+                item.classList.toggle(
+                    "student-suggestion-item-active",
+                    index === activeIndex
+                );
+            });
+            items[activeIndex]?.scrollIntoView({ block: "nearest" });
+        });
+
+        document.addEventListener("mousedown", (event) => {
+            if (!event.target.closest(".student-link-box")) {
+                closeStudentSuggestions();
+            }
+        });
+
+        {% if selected_student %}
+        activeStudentLabel =
+            "{{ selected_student.code|e }} – {{ selected_student.full_name|e }}";
+        studentSearch.value = activeStudentLabel;
+        {% endif %}
+    </script>
+    {% endif %}
+</body>
+</html>

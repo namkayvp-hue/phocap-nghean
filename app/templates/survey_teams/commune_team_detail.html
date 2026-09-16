@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết tổ điều tra</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .wrap{width:min(1400px,96%);margin:24px auto 60px}
+        .panel{background:#fff;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 8px 24px rgba(30,70,110,.08)}
+        .members{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .member{border:1px solid #d8e4ef;border-radius:12px;padding:14px}
+        .table{width:100%;border-collapse:collapse;min-width:900px}
+        .table th,.table td{padding:10px;border-bottom:1px solid #e4ebf2;text-align:left;vertical-align:top}
+        .table th{background:#edf5fc}
+        .scroll{overflow-x:auto}
+        @media(max-width:800px){.members{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<main class="wrap">
+    <section class="panel">
+        <p class="admin-eyebrow">XEM TRƯỚC PHÂN CÔNG</p>
+        <h1>Tổ {{ team.team_number }}</h1>
+        <p>{{ team.school_year_code }} · {{ team.batch_name }} · Trạng thái: {{ team.status }}</p>
+        <a
+            class="button button-light"
+            href="/dieu-tra/phan-cong-to-dieu-tra/lap-to?batch_id={{ team.survey_batch_id }}"
+        >← Danh sách tổ</a>
+    </section>
+
+    <section class="panel">
+        <h2>Thành viên tổ</h2>
+        <div class="members">
+            {% for member in members %}
+            <div class="member">
+                <strong>{{ member.level_code }} · {{ member.full_name }}</strong><br>
+                {{ member.school_name }}<br>
+                <span class="muted">{{ member.username }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>{{ households|length }} hộ được phân dự thảo</h2>
+        <div class="scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Số phiếu</th>
+                        <th>Mã hộ</th>
+                        <th>Chủ hộ</th>
+                        <th>Thôn/xóm</th>
+                        <th>Địa chỉ</th>
+                        <th>Thành viên</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in households %}
+                    <tr>
+                        <td>{{ item.assignment_order }}</td>
+                        <td><strong>{{ item.form_number }}</strong></td>
+                        <td>{{ item.household_code }}</td>
+                        <td>{{ item.head_name }}</td>
+                        <td>{{ item.hamlet_name or '—' }}</td>
+                        <td>{{ item.address }}</td>
+                        <td>{{ item.people_count }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7">Tổ chưa có hộ.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

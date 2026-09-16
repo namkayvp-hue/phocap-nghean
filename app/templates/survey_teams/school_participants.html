@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giáo viên tham gia điều tra</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<style>
+.team-wrap{width:min(1380px,96%);margin:24px auto 60px}
+.team-panel{background:#fff;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 8px 24px rgba(30,70,110,.08)}
+.team-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.team-card{border:1px solid #d8e4ef;border-radius:12px;padding:13px}
+.team-table{width:100%;border-collapse:collapse}
+.team-table th,.team-table td{padding:11px;border-bottom:1px solid #e4ebf2;text-align:left}
+.team-table th{background:#edf5fc}
+.team-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.notice-ok{background:#eef9f0;border:1px solid #b7dfbd;color:#246b2c;padding:13px;border-radius:12px}
+.notice-warn{background:#fff7e6;border:1px solid #ebcf8f;color:#795600;padding:13px;border-radius:12px}
+select{padding:10px;border:1px solid #c9d6e2;border-radius:9px;min-width:280px}
+@media(max-width:850px){.team-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.team-grid{grid-template-columns:1fr}.team-table{min-width:720px}.table-scroll{overflow-x:auto}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="team-wrap">
+<section class="team-panel">
+<p class="admin-eyebrow">TỔ ĐIỀU TRA 3 CẤP · BƯỚC 1</p>
+<h1>Giáo viên tham gia điều tra phổ cập</h1>
+<p><strong>{{ school.name }}</strong> · {{ school.commune_name }}</p>
+{% if message %}<div class="notice-ok">{{ message }}</div>{% endif %}
+<form method="get" action="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia">
+<label><strong>Đợt điều tra</strong></label><br>
+<select name="batch_id" onchange="this.form.submit()">
+{% for item in batches %}
+<option value="{{ item.id }}" {% if batch and item.id == batch.id %}selected{% endif %}>
+{{ item.school_year_code }} · {{ item.name }}
+</option>
+{% endfor %}
+</select>
+</form>
+</section>
+
+{% if batch %}
+<section class="team-panel">
+<div class="team-grid">
+<div class="team-card"><strong>Cấp học</strong><div>{{ level_label }}</div></div>
+<div class="team-card"><strong>GV đang hoạt động</strong><div>{{ teachers|length }}</div></div>
+<div class="team-card"><strong>GV đã chọn</strong><div>{{ selected_ids|length }}</div></div>
+<div class="team-card"><strong>Trạng thái</strong><div>{% if submission %}{{ submission_labels.get(submission.status, submission.status) }}{% else %}Chưa đăng ký{% endif %}</div></div>
+</div>
+{% if level_code == 'KHAC' %}
+<div class="notice-warn" style="margin-top:14px">Chưa xác định được trường thuộc Mầm non, Tiểu học hay THCS. Chưa thể gửi danh sách về xã/phường.</div>
+{% endif %}
+{% if submission and submission.status == 'SENT' %}
+<div class="notice-ok" style="margin-top:14px"><strong>Đã gửi xã/phường.</strong> {% if submission.sent_at %}Thời gian: {{ submission.sent_at }}.{% endif %} {% if submission.sent_by_name %}Người gửi: {{ submission.sent_by_name }}.{% endif %}</div>
+{% endif %}
+</section>
+
+<section class="team-panel">
+<h2>Danh sách giáo viên của trường</h2>
+<p>Chọn giáo viên tham gia điều tra. Sang V2, xã/phường sẽ ghép tổ 1 MN + 1 TH + 1 THCS.</p>
+{% if staff_teacher_count > teachers|length and (not submission or submission.status != 'SENT') %}
+<div class="notice-warn" style="margin:14px 0">
+    <strong>Hồ sơ Đội ngũ đã có {{ staff_teacher_count }} giáo viên đang làm việc,
+    nhưng mới có {{ teachers|length }} tài khoản giáo viên hoạt động.</strong>
+    <div style="margin-top:6px">
+        Để giáo viên xuất hiện trong danh sách tích chọn và sau này đăng nhập điện thoại,
+        cần tạo tài khoản GIAO_VIEN cho các hồ sơ còn thiếu.
+    </div>
+    <form
+        method="post"
+        action="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia/dong-bo-tai-khoan"
+        target="_blank"
+        style="margin-top:12px"
+    >
+        <input type="hidden" name="batch_id" value="{{ batch.id }}">
+        <button
+            class="button button-primary"
+            type="submit"
+            onclick="return confirm('Tạo tài khoản giáo viên còn thiếu từ danh sách Đội ngũ và tải Excel mật khẩu tạm? Tài khoản đã có sẽ được giữ nguyên.');"
+        >
+            🔄 Tạo tài khoản GV còn thiếu + tải Excel mật khẩu
+        </button>
+        <a
+            class="button button-secondary"
+            href="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia?batch_id={{ batch.id }}"
+            style="margin-left:8px"
+        >
+            Làm mới danh sách sau khi đồng bộ
+        </a>
+    </form>
+</div>
+{% endif %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia/luu">
+<input type="hidden" name="batch_id" value="{{ batch.id }}">
+<div class="table-scroll">
+<table class="team-table">
+<thead><tr><th>Chọn</th><th>Họ tên</th><th>Tên đăng nhập</th><th>Cấp học</th></tr></thead>
+<tbody>
+{% for teacher in teachers %}
+<tr>
+<td><input type="checkbox" name="teacher_ids" value="{{ teacher.id }}" {% if teacher.id in selected_ids %}checked{% endif %} {% if submission and submission.status == 'SENT' %}disabled{% endif %}></td>
+<td><strong>{{ teacher.full_name }}</strong></td>
+<td>{{ teacher.username }}</td>
+<td>{{ level_label }}</td>
+</tr>
+{% else %}
+<tr><td colspan="4">Trường chưa có tài khoản giáo viên đang hoạt động.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% if not submission or submission.status != 'SENT' %}
+<div class="team-actions"><button class="button button-secondary" type="submit">Lưu bản nháp</button></div>
+{% endif %}
+</form>
+
+{% if not submission or submission.status != 'SENT' %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia/gui-xa">
+<input type="hidden" name="batch_id" value="{{ batch.id }}">
+<div class="team-actions">
+<button class="button button-primary" type="submit" {% if selected_ids|length == 0 or level_code == 'KHAC' %}disabled{% endif %} onclick="return confirm('Gửi danh sách {{ selected_ids|length }} giáo viên về xã/phường?');">Gửi danh sách về Xã/Phường</button>
+</div>
+</form>
+{% else %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia/thu-hoi">
+<input type="hidden" name="batch_id" value="{{ batch.id }}">
+<div class="team-actions"><button class="button button-secondary" type="submit" onclick="return confirm('Thu hồi danh sách đã gửi để chỉnh sửa?');">Thu hồi để chỉnh sửa</button></div>
+</form>
+{% endif %}
+</section>
+{% else %}
+<section class="team-panel">Chưa có đợt điều tra nào thuộc xã/phường của trường.</section>
+{% endif %}
+</main>
+</body>
+</html>

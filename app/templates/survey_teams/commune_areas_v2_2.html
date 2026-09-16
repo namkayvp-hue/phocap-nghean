@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danh mục địa bàn điều tra</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb;color:#24384b;font-family:"Segoe UI",Arial,sans-serif}
+.b1322-wrap{width:min(1500px,calc(100% - 28px));margin:22px auto 48px}
+.b1322-head{background:linear-gradient(135deg,#0b5fa9,#1579d3);color:#fff;border-radius:16px;padding:20px 22px;margin-bottom:18px}
+.b1322-head h1{margin:0 0 7px;font-size:27px}.b1322-head p{margin:0;line-height:1.5;opacity:.95}
+.b1322-note,.b1322-alert{padding:13px 15px;border-radius:11px;margin:14px 0;line-height:1.5}
+.b1322-note{background:#edf7ff;border:1px solid #b6d8f4;color:#28506f}
+.b1322-alert{background:#fff8e7;border:1px solid #ecd38b;color:#705618}
+.b1322-ok{background:#eef9f0;border-color:#a9d6b0;color:#286238}
+.b1322-panel{background:#fff;border:1px solid #dce6ef;border-radius:15px;padding:18px;margin-bottom:18px;box-shadow:0 7px 24px rgba(30,57,81,.06)}
+.b1322-panel h2{margin:0 0 14px;font-size:21px}
+.b1322-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.b1322-field{display:flex;flex-direction:column;gap:6px}
+.b1322-field.wide{grid-column:span 2}
+.b1322-field label{font-weight:800;font-size:13px;color:#34526e}
+.b1322-field input,.b1322-field select,.b1322-field textarea{width:100%;border:1px solid #cbd8e4;border-radius:9px;padding:10px 11px;font:inherit;background:#fff}
+.b1322-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.b1322-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 13px;border:0;border-radius:9px;text-decoration:none;font-weight:800;cursor:pointer;font-size:14px}
+.b1322-primary{background:#0b6dc6;color:#fff}.b1322-secondary{background:#eef3f7;color:#31506d}.b1322-danger{background:#fff0f0;color:#9b2020;border:1px solid #ecc3c3}
+.b1322-table-wrap{overflow:auto;border:1px solid #e0e8ef;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:900px;background:#fff}
+th,td{border-bottom:1px solid #e7edf2;padding:10px 9px;text-align:left;vertical-align:top}
+th{background:#f4f8fb;font-size:12px;text-transform:uppercase;color:#47627a;position:sticky;top:0;z-index:1}
+td.num,th.num{text-align:right}.muted{color:#758798;font-size:12px}.nowrap{white-space:nowrap}
+.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:800;background:#edf3f7}
+.badge.off{background:#f3f3f3;color:#777}.progress{height:7px;background:#e8eef4;border-radius:999px;overflow:hidden;margin-top:5px}.progress>span{display:block;height:100%;background:#0b6dc6}
+.assignment-input{width:82px!important;text-align:right;padding:8px!important}
+.team-head{min-width:150px}.team-members{font-size:11px;font-weight:500;line-height:1.35;text-transform:none;margin-top:4px;color:#687d90}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0}
+.stat{background:#f7fafc;border:1px solid #e0e9f0;border-radius:12px;padding:13px}.stat small{color:#6b7f91;font-weight:700}.stat strong{display:block;font-size:23px;margin-top:4px}
+@media(max-width:900px){.b1322-grid{grid-template-columns:1fr 1fr}.b1322-field.wide{grid-column:span 2}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.b1322-grid{grid-template-columns:1fr}.b1322-field.wide{grid-column:auto}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="b1322-wrap">
+<section class="b1322-head">
+  <h1>Danh mục thôn/xóm/khối/tổ/bản</h1>
+  <p>Xã/phường khai báo địa bàn và số hộ dự kiến. Xã không nhập hộ dân; tổ điều tra được giao địa bàn mới trực tiếp tạo hộ ngoài thực địa.</p>
+</section>
+
+{% if message %}
+<div class="b1322-alert {% if message_kind == 'ok' %}b1322-ok{% endif %}">{{ message }}</div>
+{% endif %}
+
+<!-- === BAI_13B_12_V2_3_AREA_OVER_UI === -->
+<section class="b1322-panel">
+<h2>1. Chọn năm học</h2>
+<form method="get" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban">
+<div class="b1322-grid">
+<div class="b1322-field">
+<label>Năm học</label>
+<select name="school_year_id" onchange="this.form.submit()">
+{% for year in years %}
+<option value="{{ year.id }}" {% if selected_year and year.id == selected_year.id %}selected{% endif %}>{{ year.code }}{% if year.is_active %} · đang hoạt động{% endif %}</option>
+{% endfor %}
+</select>
+</div>
+{% if batches %}
+<div class="b1322-field wide">
+<label>Đợt điều tra dùng để giao địa bàn cho tổ</label>
+<select name="batch_id" onchange="this.form.submit()">
+<option value="">-- Chọn đợt điều tra --</option>
+{% for b in batches %}
+<option value="{{ b.id }}" {% if selected_batch and b.id == selected_batch.id %}selected{% endif %}>{{ b.code }} · {{ b.name }}</option>
+{% endfor %}
+</select>
+</div>
+{% else %}
+<div class="b1322-field wide">
+<label>Đợt điều tra</label>
+<div class="b1322-note" style="margin:0">Năm học này chưa có đợt điều tra của xã/phường. Có thể khai báo danh mục địa bàn trước; sau khi Sở khởi tạo đợt, quay lại để giao địa bàn/chỉ tiêu cho tổ.</div>
+</div>
+{% endif %}
+</div>
+</form>
+</section>
+
+<section class="b1322-panel">
+<h2>2. Khai báo địa bàn và số hộ dự kiến</h2>
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/luu" id="area-form">
+<input type="hidden" name="school_year_id" value="{{ selected_year.id if selected_year else '' }}">
+<input type="hidden" name="batch_id" value="{{ selected_batch.id if selected_batch else '' }}">
+<input type="hidden" name="area_id" id="area_id" value="">
+<div class="b1322-grid">
+<div class="b1322-field">
+<label>Loại địa bàn *</label>
+<select name="area_type" id="area_type" required>
+<option value="THON">Thôn</option><option value="XOM">Xóm</option><option value="KHOI">Khối</option><option value="TO">Tổ</option><option value="BAN">Bản</option>
+</select>
+</div>
+<div class="b1322-field wide"><label>Tên địa bàn *</label><input name="name" id="area_name" maxlength="200" required placeholder="Ví dụ: Xóm 1"></div>
+<div class="b1322-field"><label>Số hộ dự kiến *</label><input name="expected_households" id="expected_households" type="number" min="0" step="1" required value="0"></div>
+<div class="b1322-field"><label>Ghi chú</label><input name="notes" id="area_notes" maxlength="500"></div>
+</div>
+<div class="b1322-actions">
+<button class="b1322-btn b1322-primary" type="submit">💾 Lưu địa bàn</button>
+<button class="b1322-btn b1322-secondary" type="button" onclick="b1322ResetArea()">Nhập địa bàn mới</button>
+</div>
+</form>
+
+<div class="stats">
+<div class="stat"><small>Số địa bàn đang dùng</small><strong>{{ area_summary.active_count }}</strong></div>
+<div class="stat"><small>Tổng hộ dự kiến</small><strong>{{ area_summary.expected_total }}</strong></div>
+<div class="stat"><small>Hộ đã nhập thực tế</small><strong>{{ area_summary.actual_total }}</strong></div>
+<div class="stat"><small>{% if area_summary.excess_total %}Vượt dự kiến{% else %}Còn thiếu{% endif %}</small><strong>{% if area_summary.excess_total %}+{{ area_summary.excess_total }}{% else %}{{ area_summary.remaining_total }}{% endif %}</strong></div>
+</div>
+
+<div class="b1322-table-wrap">
+<table>
+<thead><tr><th>Loại</th><th>Địa bàn</th><th class="num">Hộ dự kiến</th><th class="num">Đã nhập</th><th class="num">Còn thiếu / Vượt</th><th>Tiến độ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+<tbody>
+{% for a in areas %}
+<tr>
+<td><span class="badge">{{ a.area_type_label }}</span></td>
+<td><strong>{{ a.name }}</strong>{% if a.notes %}<div class="muted">{{ a.notes }}</div>{% endif %}</td>
+<td class="num">{{ a.expected_households }}</td>
+<td class="num">{{ a.actual_households }}</td>
+<td class="num">{% if a.excess_households %}<strong>Vượt {{ a.excess_households }}</strong>{% else %}{{ a.remaining_households }}{% endif %}</td>
+<td style="min-width:130px"><strong>{{ a.progress_percent }}%</strong><div class="progress"><span style="width:{{ a.progress_percent }}%"></span></div></td>
+<td>{% if a.is_active %}<span class="badge">Đang dùng</span>{% else %}<span class="badge off">Ngừng dùng</span>{% endif %}</td>
+<td class="nowrap">
+{% if a.is_active %}
+<button type="button" class="b1322-btn b1322-secondary"
+ onclick='b1322EditArea({{ a.id }}, {{ a.area_type|tojson }}, {{ a.name|tojson }}, {{ a.expected_households }}, {{ (a.notes or "")|tojson }})'>Sửa</button>
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/ngung-dung" style="display:inline">
+<input type="hidden" name="area_id" value="{{ a.id }}"><input type="hidden" name="school_year_id" value="{{ selected_year.id if selected_year else '' }}"><input type="hidden" name="batch_id" value="{{ selected_batch.id if selected_batch else '' }}">
+<button class="b1322-btn b1322-danger" type="submit">Ngừng dùng</button>
+</form>
+{% else %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/kich-hoat" style="display:inline">
+<input type="hidden" name="area_id" value="{{ a.id }}"><input type="hidden" name="school_year_id" value="{{ selected_year.id if selected_year else '' }}"><input type="hidden" name="batch_id" value="{{ selected_batch.id if selected_batch else '' }}">
+<button class="b1322-btn b1322-secondary" type="submit">Kích hoạt lại</button>
+</form>
+{% endif %}
+</td>
+</tr>
+{% else %}
+<tr><td colspan="8" class="muted">Chưa khai báo địa bàn nào.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="b1322-panel">
+<h2>3. Giao địa bàn và chỉ tiêu số hộ cho tổ điều tra</h2>
+{% if not selected_batch %}
+<div class="b1322-note">Chọn một đợt điều tra ở mục 1 để giao địa bàn/chỉ tiêu cho các tổ.</div>
+{% elif not teams %}
+<div class="b1322-note">Đợt này chưa có tổ điều tra. Hãy nhận danh sách giáo viên từ các trường và ghép tổ 3 cấp trước.</div>
+{% else %}
+{% if teams_locked %}
+<div class="b1322-alert">Các tổ của đợt này đã được chốt/gửi. Danh sách địa bàn và chỉ tiêu được khóa để bảo toàn nhiệm vụ đã giao.</div>
+{% else %}
+<div class="b1322-actions">
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/chia-deu">
+<input type="hidden" name="batch_id" value="{{ selected_batch.id }}">
+<input type="hidden" name="school_year_id" value="{{ selected_year.id }}">
+<button class="b1322-btn b1322-secondary" type="submit">⚖️ Chia đều tự động theo số hộ dự kiến</button>
+</form>
+</div>
+{% endif %}
+
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/phan-cong-luu">
+<input type="hidden" name="batch_id" value="{{ selected_batch.id }}">
+<input type="hidden" name="school_year_id" value="{{ selected_year.id }}">
+<div class="b1322-table-wrap" style="margin-top:12px">
+<table>
+<thead>
+<tr><th>Địa bàn</th><th class="num">Dự kiến</th><th class="num">Đã nhập</th><th class="num">Đã giao</th>
+{% for team in teams %}
+<th class="team-head">Tổ {{ team.team_number }}<div class="team-members">{{ team.members_text }}</div><div class="muted">Tổng giao: {{ team.assigned_quota }} · Đã nhập: {{ team.actual_count }}</div></th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for a in active_areas %}
+<tr>
+<td><strong>{{ a.area_type_label }} {{ a.name }}</strong></td>
+<td class="num">{{ a.expected_households }}</td>
+<td class="num">{{ a.actual_households }}</td>
+<td class="num">{{ a.assigned_quota_selected }}</td>
+{% for team in teams %}
+<td><input class="assignment-input" type="number" min="0" step="1"
+ name="quota__{{ team.id }}__{{ a.id }}"
+ value="{{ assignment_values.get((team.id|string) ~ ':' ~ (a.id|string), 0) }}"
+ {% if teams_locked %}disabled{% endif %}></td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% if not teams_locked %}
+<div class="b1322-actions"><button class="b1322-btn b1322-primary" type="submit">💾 Lưu giao địa bàn/chỉ tiêu</button></div>
+{% endif %}
+</form>
+<div class="b1322-note">
+<strong>Điều kiện để Chốt/Gửi tổ:</strong> mỗi tổ phải có chỉ tiêu lớn hơn 0 và tổng chỉ tiêu giao của từng địa bàn phải đúng bằng số hộ dự kiến của địa bàn đó. Sau khi chốt, tổ mới được tạo hộ ngoài thực địa.
+</div>
+{% endif %}
+</section>
+</main>
+<script>
+function b1322ResetArea(){
+ document.getElementById("area_id").value="";
+ document.getElementById("area_type").value="THON";
+ document.getElementById("area_name").value="";
+ document.getElementById("expected_households").value="0";
+ document.getElementById("area_notes").value="";
+ document.getElementById("area_name").focus();
+}
+function b1322EditArea(id,type,name,expected,notes){
+ document.getElementById("area_id").value=id;
+ document.getElementById("area_type").value=type;
+ document.getElementById("area_name").value=name;
+ document.getElementById("expected_households").value=expected;
+ document.getElementById("area_notes").value=notes||"";
+ document.getElementById("area-form").scrollIntoView({behavior:"smooth",block:"center"});
+}
+</script>
+</body>
+</html>

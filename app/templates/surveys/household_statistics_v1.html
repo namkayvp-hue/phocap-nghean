@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê hộ dân</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        *{box-sizing:border-box}body{margin:0;background:#eef4f9;color:#17324d;font-family:Arial,sans-serif}.hero{background:#0f5fa8;color:#fff;padding:25px 3vw}.wrap,.hero-inner{max-width:1400px;margin:auto}.wrap{padding:22px 3vw 48px}
+        .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card,.panel{background:#fff;border:1px solid #d8e4ef;border-radius:15px;padding:17px;box-shadow:0 6px 18px rgba(23,50,77,.05)}
+        .card span{display:block;font-size:12px;font-weight:800;color:#64798c}.card strong{display:block;font-size:28px;color:#0f5fa8;margin-top:7px}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:16px}.panel h2{margin-top:0}table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #e6edf3;text-align:left}th{background:#edf5fb}
+        .note{background:#fff7df;border:1px solid #efcf7d;border-radius:12px;padding:14px;margin-bottom:16px;line-height:1.5}.btn{display:inline-flex;padding:10px 15px;border-radius:9px;background:#fff;color:#17324d;text-decoration:none;font-weight:800}
+        @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}@media(max-width:520px){.cards{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<header class="hero"><div class="hero-inner">
+    <div style="font-size:13px;font-weight:800">THỐNG KÊ HỘ DÂN VÀ CÁC YẾU TỐ LIÊN QUAN</div>
+    <h1 style="margin:7px 0">{{ batch.name }}</h1>
+    <p>{{ batch.commune.name }} · {{ batch.school_year.code }} · {{ scope_label }}</p>
+    <a class="btn" href="/dieu-tra/cap-nhat-ho-dan?batch_id={{ batch.id }}">← Cập nhật dữ liệu hộ dân</a>
+</div></header>
+<main class="wrap">
+    <div class="note">
+        Tuổi tính tại {{ reference_date.strftime('%d/%m/%Y') }}. Phổ cập: 0–18 tuổi; Xóa mù chữ: 18–60 tuổi;
+        người 18 tuổi được tính ở cả hai nhóm. Cấp học được suy ra từ trường/lớp hiện có, không theo cấp của giáo viên.
+    </div>
+    <section class="cards">
+        <div class="card"><span>TỔNG HỘ</span><strong>{{ total_households }}</strong></div>
+        <div class="card"><span>TỔNG THÀNH VIÊN</span><strong>{{ total_people }}</strong></div>
+        <div class="card"><span>PHỔ CẬP 0–18</span><strong>{{ total_pcgd }}</strong></div>
+        <div class="card"><span>XMC 18–60</span><strong>{{ total_xmc }}</strong></div>
+        <div class="card"><span>ĐÚNG 18 TUỔI</span><strong>{{ total_age_18 }}</strong></div>
+        <div class="card"><span>THIẾU SỐ ĐỊNH DANH</span><strong>{{ missing_personal_id }}</strong></div>
+        <div class="card"><span>THIẾU CCCD</span><strong>{{ missing_citizen_id }}</strong></div>
+        <div class="card"><span>THIẾU DỮ LIỆU NĂM HỌC</span><strong>{{ missing_year_record }}</strong></div>
+    </section>
+    <section class="grid">
+        <article class="panel"><h2>Nhóm/cấp học</h2><table><thead><tr><th>Nhóm</th><th>Số người</th></tr></thead><tbody>
+        {% for code,label in level_labels.items() %}<tr><td>{{ label }}</td><td><strong>{{ level_counts.get(code,0) }}</strong></td></tr>{% endfor %}
+        </tbody></table></article>
+        <article class="panel"><h2>Trạng thái phiếu</h2><table><thead><tr><th>Trạng thái</th><th>Số phiếu</th></tr></thead><tbody>
+        {% for code,label in form_status_labels.items() %}<tr><td>{{ label }}</td><td><strong>{{ form_status_counts.get(code,0) }}</strong></td></tr>{% endfor %}
+        </tbody></table></article>
+        <article class="panel"><h2>Tình trạng học tập</h2><table><thead><tr><th>Tình trạng</th><th>Số người</th></tr></thead><tbody>
+        {% for code,label in learning_labels.items() %}<tr><td>{{ label }}</td><td><strong>{{ learning_counts.get(code,0) }}</strong></td></tr>{% endfor %}
+        </tbody></table></article>
+        <article class="panel"><h2>Cư trú</h2><table><thead><tr><th>Trạng thái</th><th>Số người</th></tr></thead><tbody>
+        {% for code,label in residency_labels.items() %}<tr><td>{{ label }}</td><td><strong>{{ residency_counts.get(code,0) }}</strong></td></tr>{% endfor %}
+        </tbody></table></article>
+    </section>
+</main>
+</body>
+</html>

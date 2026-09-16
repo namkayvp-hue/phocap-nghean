@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra chất lượng dữ liệu</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .page-container {
+            width: min(1440px, calc(100% - 32px));
+            margin: 28px auto 48px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .scope-banner {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #b9dfc2;
+            border-radius: 12px;
+            background: #eaf8ed;
+            color: #176d2c;
+            line-height: 1.55;
+        }
+
+        .locked-banner {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #f2b8b5;
+            border-radius: 12px;
+            background: #fff0f0;
+            color: #b3261e;
+            line-height: 1.55;
+        }
+
+        .locked-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #eef1f4;
+            color: #68798a;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 13px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            display: block;
+            min-height: 104px;
+            padding: 16px;
+            border: 1px solid #dce6ef;
+            border-radius: 13px;
+            background: #fff;
+            text-decoration: none;
+        }
+
+        .summary-card span {
+            display: block;
+            color: #657789;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.35;
+        }
+
+        .summary-card strong {
+            display: block;
+            margin-top: 9px;
+            color: #0d47a1;
+            font-size: 27px;
+        }
+
+        .summary-card.success strong {
+            color: #16813a;
+        }
+
+        .summary-card.warning strong {
+            color: #a65f00;
+        }
+
+        .summary-card.danger strong {
+            color: #c62828;
+        }
+
+        .filter-panel,
+        .report-panel {
+            margin-bottom: 22px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1.7fr 1fr 1fr 1.2fr .8fr;
+            gap: 13px;
+            align-items: end;
+        }
+
+        .filter-field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #18324a;
+            font-weight: 800;
+        }
+
+        .filter-field input,
+        .filter-field select {
+            width: 100%;
+            min-height: 46px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .report-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .report-description {
+            max-width: 830px;
+            margin: 7px 0 0;
+            color: #607487;
+            line-height: 1.55;
+        }
+
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: #eaf3ff;
+            color: #0d56a6;
+            font-size: 13px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .quality-table {
+            min-width: 1380px;
+        }
+
+        .quality-table th,
+        .quality-table td {
+            vertical-align: top;
+        }
+
+        .identity-cell {
+            min-width: 220px;
+        }
+
+        .household-cell {
+            min-width: 240px;
+        }
+
+        .issue-cell {
+            min-width: 400px;
+        }
+
+        .action-cell {
+            min-width: 210px;
+        }
+
+        .muted-line {
+            display: block;
+            margin-top: 4px;
+            color: #718497;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .status-pill,
+        .quality-pill,
+        .issue-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            font-weight: 800;
+        }
+
+        .status-pill {
+            padding: 7px 10px;
+            background: #eaf3ff;
+            color: #0d56a6;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .quality-pill {
+            padding: 8px 11px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .quality-pass {
+            background: #e6f6e9;
+            color: #187237;
+        }
+
+        .quality-ready {
+            background: #e7f2ff;
+            color: #0d56a6;
+        }
+
+        .quality-review {
+            background: #fff4d9;
+            color: #8a5600;
+        }
+
+        .quality-action {
+            background: #ffe8e8;
+            color: #b3261e;
+        }
+
+        .issue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .issue-item {
+            padding: 9px 11px;
+            border-radius: 10px;
+            line-height: 1.45;
+        }
+
+        .issue-item.error {
+            border: 1px solid #f1b7b7;
+            background: #fff1f1;
+            color: #9d1c1c;
+        }
+
+        .issue-item.warning {
+            border: 1px solid #efd59b;
+            background: #fff8e8;
+            color: #7c5200;
+        }
+
+        .issue-item strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .issue-ok {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #187237;
+            font-weight: 900;
+        }
+
+        .action-stack {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .action-stack .button {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .page-button {
+            display: inline-flex;
+            min-width: 42px;
+            min-height: 40px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d5e0ea;
+            border-radius: 9px;
+            background: #fff;
+            color: #1b4d7a;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .page-button.current {
+            border-color: #1976d2;
+            background: #1976d2;
+            color: #fff;
+        }
+
+        .page-button.disabled {
+            color: #9aa8b5;
+            pointer-events: none;
+            background: #f4f7fa;
+        }
+
+        .empty-state {
+            padding: 46px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 46px;
+        }
+
+        @media (max-width: 1180px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 680px) {
+            .page-container {
+                width: min(100% - 18px, 1440px);
+            }
+
+            .summary-grid,
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions,
+            .header-actions .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">KIỂM TRA DỮ LIỆU ĐIỀU TRA</p>
+            <h1>Bảng kiểm chất lượng dữ liệu</h1>
+            <p>{{ batch.commune.name }} · Năm học {{ batch.school_year.code }}</p>
+        </div>
+
+        <div class="header-actions">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">
+                ← Quản lý hộ
+            </a>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/tien-do">
+                📊 Xem tiến độ
+            </a>
+            <a
+                class="button button-light"
+                href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu/xuat-excel{% if query_string %}?{{ query_string }}{% endif %}"
+            >
+                📥 Xuất Excel kiểm tra
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="page-container">
+    <div class="scope-banner">
+        <strong>Phạm vi kiểm tra: {{ scope_label }}.</strong>
+        Hệ thống chỉ đọc và đối chiếu dữ liệu hiện có; không tự động thêm, sửa hoặc xóa dữ liệu.
+    </div>
+
+    {% if batch.is_locked %}
+        <div class="locked-banner">
+            <strong>🔒 Đợt điều tra đã khóa dữ liệu.</strong>
+            Bạn vẫn có thể xem, tìm kiếm, kiểm tra và xuất báo cáo; các chức năng nhập hoặc cập nhật dữ liệu đã bị vô hiệu hóa.
+        </div>
+    {% endif %}
+
+    <section class="summary-grid" aria-label="Tổng hợp kết quả kiểm tra">
+        <a class="summary-card" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu">
+            <span>Tổng số phiếu</span>
+            <strong>{{ summary.total_forms }}</strong>
+        </a>
+        <a class="summary-card success" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?issue=DAT_YEU_CAU">
+            <span>Đạt yêu cầu</span>
+            <strong>{{ summary.passed_forms }}</strong>
+        </a>
+        <a class="summary-card" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?issue=SAN_SANG_HOAN_THANH">
+            <span>Sẵn sàng hoàn thành</span>
+            <strong>{{ summary.ready_forms }}</strong>
+        </a>
+        <a class="summary-card warning" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?issue=CAN_KIEM_TRA">
+            <span>Cần kiểm tra</span>
+            <strong>{{ summary.need_review_forms }}</strong>
+        </a>
+        <a class="summary-card danger" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?issue=CAN_XU_LY">
+            <span>Cần xử lý</span>
+            <strong>{{ summary.need_action_forms }}</strong>
+        </a>
+        <a class="summary-card warning" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?issue=CHUA_PHAN_CONG">
+            <span>Chưa phân công</span>
+            <strong>{{ summary.unassigned_forms }}</strong>
+        </a>
+    </section>
+
+    <section class="panel filter-panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">TÌM VÀ LỌC KẾT QUẢ</p>
+                <h2>Chọn đúng nhóm dữ liệu cần kiểm tra</h2>
+            </div>
+        </div>
+
+        <form method="get" action="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu">
+            <div class="filter-grid">
+                <div class="filter-field">
+                    <label for="q">Tìm nhanh</label>
+                    <input
+                        id="q"
+                        name="q"
+                        type="text"
+                        value="{{ selected_q }}"
+                        placeholder="Số phiếu, mã hộ, chủ hộ, địa chỉ, đối tượng..."
+                    >
+                </div>
+
+                <div class="filter-field">
+                    <label for="hamlet">Thôn/xóm/khối/bản</label>
+                    <select id="hamlet" name="hamlet">
+                        <option value="">-- Tất cả địa bàn --</option>
+                        {% for item in hamlets %}
+                            <option value="{{ item }}" {% if selected_hamlet == item %}selected{% endif %}>
+                                {{ item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="form_status">Trạng thái phiếu</label>
+                    <select id="form_status" name="form_status">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        {% for code, label in form_status_labels.items() %}
+                            <option value="{{ code }}" {% if selected_form_status == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="issue">Kết quả / nội dung kiểm tra</label>
+                    <select id="issue" name="issue">
+                        {% for code, label in issue_filter_labels.items() %}
+                            <option value="{{ code }}" {% if selected_issue == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="page_size">Số dòng/trang</label>
+                    <select id="page_size" name="page_size">
+                        {% for size in [20, 50, 100] %}
+                            <option value="{{ size }}" {% if selected_page_size == size %}selected{% endif %}>
+                                {{ size }} dòng
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button class="button button-primary" type="submit">
+                    🔎 Tìm kiếm / Lọc
+                </button>
+                <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu">
+                    Xóa bộ lọc
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel panel-wide report-panel">
+        <div class="report-head">
+            <div>
+                <p class="panel-label">KẾT QUẢ KIỂM TRA CHI TIẾT</p>
+                <h2>Danh sách phiếu và nội dung cần xử lý</h2>
+                <p class="report-description">
+                    Đang hiển thị {{ start_record }}–{{ end_record }} trong tổng số
+                    {{ total_records }} phiếu phù hợp. Các cảnh báo màu vàng cần đối chiếu;
+                    các lỗi màu đỏ cần khắc phục trước khi chốt số liệu.
+                </p>
+            </div>
+            <span class="count-badge">{{ total_records }} phiếu</span>
+        </div>
+
+        {% if items %}
+            <div class="table-wrapper">
+                <table class="data-table quality-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Số phiếu / Mã hộ</th>
+                        <th>Chủ hộ / Địa bàn</th>
+                        <th>Trạng thái</th>
+                        <th>Đối tượng</th>
+                        <th>Nội dung phát hiện</th>
+                        <th>Kết quả</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>{{ start_record + loop.index0 }}</td>
+                            <td class="identity-cell">
+                                <strong>{{ item.form_number }}</strong>
+                                <span class="muted-line">{{ item.household_code }}</span>
+                                <span class="muted-line">
+                                    Cập nhật:
+                                    {% if item.updated_at %}
+                                        {{ item.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="household-cell">
+                                <strong>{{ item.head_name }}</strong>
+                                <span class="muted-line">
+                                    {{ item.hamlet_name or 'Chưa xác định địa bàn' }}
+                                </span>
+                                <span class="muted-line">{{ item.address }}</span>
+                                {% if item.phone %}
+                                    <span class="muted-line">Điện thoại: {{ item.phone }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-pill">{{ item.form_status_label }}</span>
+                                <span class="muted-line">
+                                    {{ item.assignment_count }} người được phân công
+                                </span>
+                            </td>
+                            <td>
+                                <strong>{{ item.active_people_count }}</strong> người
+                                <span class="muted-line">
+                                    Thiếu SĐD: {{ item.missing_personal_id_count }}
+                                </span>
+                                <span class="muted-line">
+                                    Thiếu dữ liệu năm: {{ item.missing_year_record_count }}
+                                </span>
+                                <span class="muted-line">
+                                    Thiếu thông tin năm học: {{ item.incomplete_year_record_count }}
+                                </span>
+                            </td>
+                            <td class="issue-cell">
+                                {% if item.issues %}
+                                    <div class="issue-list">
+                                        {% for issue_item in item.issues %}
+                                            <div class="issue-item {{ issue_item.severity }}">
+                                                <strong>{{ issue_item.label }}</strong>
+                                                {{ issue_item.detail }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span class="issue-ok">✓ Không phát hiện vấn đề</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.quality_code == 'DAT_YEU_CAU' %}
+                                    <span class="quality-pill quality-pass">{{ item.quality_label }}</span>
+                                {% elif item.quality_code == 'SAN_SANG_HOAN_THANH' %}
+                                    <span class="quality-pill quality-ready">{{ item.quality_label }}</span>
+                                {% elif item.quality_code == 'CAN_KIEM_TRA' %}
+                                    <span class="quality-pill quality-review">{{ item.quality_label }}</span>
+                                {% else %}
+                                    <span class="quality-pill quality-action">{{ item.quality_label }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="action-cell">
+                                <div class="action-stack">
+                                    {% if co_quyen_cap_nhat_du_lieu and not batch.is_locked %}
+                                        <a
+                                            class="button button-primary"
+                                            href="/dieu-tra/{{ batch.id }}/ho-dan/{{ item.household_id }}/nhap-nhanh"
+                                        >
+                                            Nhập nhanh
+                                        </a>
+                                    {% elif batch.is_locked %}
+                                        <span class="locked-action" title="Đợt điều tra đã khóa dữ liệu">
+                                            🔒 Đã khóa
+                                        </span>
+                                    {% endif %}
+                                    <a
+                                        class="button button-secondary"
+                                        href="/dieu-tra/{{ batch.id }}/ho-dan/{{ item.household_id }}/doi-tuong"
+                                    >
+                                        Xem hộ
+                                    </a>
+                                    <a
+                                        class="button button-secondary"
+                                        href="/dieu-tra/{{ batch.id }}/ho-dan/{{ item.household_id }}/phieu"
+                                    >
+                                        Xem phiếu
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <nav class="pagination-bar" aria-label="Phân trang">
+                {% if page > 1 %}
+                    <a
+                        class="page-button"
+                        href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?{% if query_string %}{{ query_string }}&{% endif %}page={{ page - 1 }}"
+                    >
+                        ← Trước
+                    </a>
+                {% else %}
+                    <span class="page-button disabled">← Trước</span>
+                {% endif %}
+
+                <span class="page-button current">{{ page }}</span>
+                <span class="page-button disabled">/ {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                    <a
+                        class="page-button"
+                        href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu?{% if query_string %}{{ query_string }}&{% endif %}page={{ page + 1 }}"
+                    >
+                        Sau →
+                    </a>
+                {% else %}
+                    <span class="page-button disabled">Sau →</span>
+                {% endif %}
+            </nav>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <h3>Không có phiếu phù hợp</h3>
+                <p>Hãy thay đổi bộ lọc hoặc quay lại toàn bộ kết quả kiểm tra.</p>
+            </div>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

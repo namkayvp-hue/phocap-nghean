@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mạng lưới năm học hiện hành</title>
+    <style>
+        body{font-family:Arial,sans-serif;margin:0;background:#f5f7fb;color:#1f2937}
+        .wrap{max-width:1320px;margin:0 auto;padding:18px}
+        .top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}
+        .top h1{font-size:24px;margin:0}
+        .card{background:#fff;border:1px solid #dbe2ea;border-radius:10px;padding:16px;margin-bottom:14px}
+        .grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}
+        label{display:block;font-weight:700;font-size:13px;margin-bottom:5px}
+        select,input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #b8c2cc;border-radius:6px}
+        button,.btn{display:inline-block;padding:9px 14px;border:0;border-radius:6px;background:#0f766e;color:#fff;text-decoration:none;cursor:pointer}
+        .btn.secondary{background:#475569}
+        .notice{padding:10px 12px;border-radius:6px;margin-bottom:12px}
+        .ok{background:#dcfce7}.warn{background:#fff7ed}.info{background:#e0f2fe}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th,td{border:1px solid #dbe2ea;padding:7px;vertical-align:top}
+        th{background:#eef2f7}
+        .ref{font-size:12px;margin:2px 0;color:#475569}
+        .missing{font-weight:700;color:#b45309}
+        .saved{font-weight:700;color:#047857}
+        .foot{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+        @media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+        @media(max-width:600px){.grid{grid-template-columns:1fr}.wrap{padding:10px}.top{display:block}}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1>MẠNG LƯỚI NĂM HỌC HIỆN HÀNH</h1>
+            <div>Năm học <strong>{{ year_label }}</strong> · tham chiếu {{ base_year_label }}</div>
+        </div>
+        <div><a class="btn secondary" href="/">Trang chủ</a></div>
+    </div>
+
+    {% if status == "saved" %}
+    <div class="notice ok">✓ Đã lưu dữ liệu mạng lưới hiện hành.</div>
+    {% elif status == "stale" %}
+    <div class="notice warn">Dữ liệu tham chiếu đã thay đổi. Hãy tải lại trang rồi lưu lại.</div>
+    {% elif status %}
+    <div class="notice warn">Trạng thái: {{ status }}</div>
+    {% endif %}
+
+    <div class="card">
+        <div class="notice info">
+            Còn <strong>{{ missing_count }}</strong> trường đích trong phạm vi tài khoản đang thiếu ít nhất một dòng mạng lưới năm {{ year_label }}.
+            Ba nguồn tách điểm manual không xuất hiện ở màn hình này.
+        </div>
+
+        <form method="get" action="/mang-luoi-hien-hanh">
+            <div class="grid">
+                {% if actor.scope == "PROVINCE" %}
+                <div>
+                    <label>Xã/phường</label>
+                    <select name="commune_id" onchange="this.form.submit()">
+                        <option value="">-- Tất cả --</option>
+                        {% for c in communes %}
+                        <option value="{{ c.id }}" {% if selected_commune_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div>
+                    <label>Tìm nhanh trường</label>
+                    <input id="schoolSearch" type="text" placeholder="Gõ từ đầu tên trường...">
+                </div>
+
+                <div>
+                    <label>Trường</label>
+                    <select id="schoolSelect" name="school_id">
+                        <option value="">-- Chọn trường --</option>
+                        {% for s in schools %}
+                        <option value="{{ s.id }}" data-name="{{ s.name|lower }}" {% if selected_school_id == s.id %}selected{% endif %}>
+                            {{ s.name }}{% if s.id in missing_target_ids %} — CHƯA CÓ {{ year_label }}{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label>Cấp học</label>
+                    <select name="level">
+                        <option value="">-- Chọn cấp --</option>
+                        {% for lv in levels %}
+                        <option value="{{ lv }}" {% if selected_level == lv %}selected{% endif %}>{{ level_labels.get(lv,lv) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="foot"><button type="submit">HIỂN THỊ</button></div>
+        </form>
+    </div>
+
+    {% if selected_school and selected_level %}
+    <form method="post" action="/mang-luoi-hien-hanh/luu">
+        <input type="hidden" name="school_id" value="{{ selected_school.id }}">
+        <input type="hidden" name="level" value="{{ selected_level }}">
+        <input type="hidden" name="state_hash" value="{{ state_hash }}">
+
+        <div class="card">
+            <div style="margin-bottom:10px">
+                <strong>{{ selected_school.name }}</strong> · {{ level_labels.get(selected_level,selected_level) }}
+                {% if current %}
+                <span class="saved">— Đã có dữ liệu {{ year_label }}, có thể cập nhật lại.</span>
+                {% else %}
+                <span class="missing">— Chưa có dữ liệu {{ year_label }}.</span>
+                {% endif %}
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:24%">Chỉ tiêu</th>
+                        <th style="width:30%">Tham chiếu {{ base_year_label }}</th>
+                        <th>Số liệu hiện hành {{ year_label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for f in fields %}
+                    <tr>
+                        <td>
+                            <strong>{{ f.label }}</strong>
+                            <div style="font-size:11px;color:#64748b">{{ f.key }}</div>
+                        </td>
+                        <td>
+                            {% for r in f.references %}
+                            <div class="ref">{{ r.school_name }}: <strong>{{ r.value if r.value is not none else "NULL" }}</strong></div>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <input type="text" name="field__{{ f.key }}" value="{{ f.current_value }}" placeholder="Nhập số liệu thực tế; để trống = NULL">
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="notice warn" style="margin-top:12px">
+                Không tự cộng số liệu trường cũ. Không coi NULL là 0.
+                Hãy nhập số liệu thực tế của trường sau sáp nhập. Với “đạt chuẩn quốc gia”, dùng 1 = Có, 0 = Không, để trống = Chưa xác định.
+            </div>
+
+            <div class="foot"><button type="submit">LƯU MẠNG LƯỚI {{ year_label }}</button></div>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+(function(){
+    const q = document.getElementById('schoolSearch');
+    const sel = document.getElementById('schoolSelect');
+    if(!q || !sel) return;
+    const original = Array.from(sel.options).map(o => ({
+        value:o.value, text:o.text, name:(o.dataset.name||o.text).toLowerCase()
+    }));
+    q.addEventListener('input', function(){
+        const term = q.value.trim().toLowerCase();
+        const current = sel.value;
+        sel.innerHTML = '';
+        original.forEach((o, idx) => {
+            if(idx === 0 || !term || o.name.startsWith(term) || o.name.includes(term)){
+                const n = document.createElement('option');
+                n.value = o.value;
+                n.text = o.text;
+                if(o.value === current) n.selected = true;
+                sel.appendChild(n);
+            }
+        });
+    });
+})();
+</script>
+</body>
+</html>

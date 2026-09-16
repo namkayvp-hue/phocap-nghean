@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Điều tra mới – Nhập hộ dân mới</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;font-family:"Segoe UI",Arial,sans-serif;color:#24384b}
+.wrap{width:min(860px,calc(100% - 24px));margin:18px auto 40px}.head{background:linear-gradient(135deg,#0b5fa9,#1579d3);color:#fff;border-radius:15px;padding:18px;margin-bottom:16px}.head h1{margin:0 0 7px;font-size:25px}.head p{margin:0;line-height:1.45}
+.card{background:#fff;border:1px solid #dbe5ed;border-radius:14px;padding:17px;margin-bottom:14px}.notice{background:#edf7ff;border:1px solid #b7d9f5;padding:12px 14px;border-radius:10px;color:#28506f;line-height:1.5}
+.team{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.member{background:#f7fafc;border:1px solid #e0e9f0;border-radius:10px;padding:10px}.member small{display:block;color:#738596}
+.area{display:block;border:1px solid #d7e3ed;border-radius:11px;padding:12px;margin:9px 0;cursor:pointer}.area:hover{border-color:#0b6dc6}.area input{margin-right:7px}.area strong{font-size:16px}.stats{font-size:12px;color:#667e92;margin-top:5px}
+.field{display:flex;flex-direction:column;gap:6px;margin:12px 0}.field label{font-weight:800}.field input,.field textarea{border:1px solid #cbd8e4;border-radius:9px;padding:11px;font:inherit;width:100%}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}.btn{border:0;border-radius:9px;min-height:43px;padding:0 15px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}.primary{background:#0b6dc6;color:#fff}.secondary{background:#edf2f6;color:#31506d}
+.alert{background:#fff4e8;border:1px solid #efc990;color:#785019;padding:12px 14px;border-radius:10px;margin-bottom:13px}
+@media(max-width:620px){.team{grid-template-columns:1fr}.head h1{font-size:21px}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="wrap">
+<!-- === BAI_13B_12_V2_3_NEW_HOUSE_UI === -->
+<section class="head">
+<h1>➕ Điều tra mới – Nhập hộ dân mới</h1>
+<p>{{ batch.name }} · Tổ {{ team.team_number }} · {{ batch.school_year.code }}</p>
+</section>
+{% if message %}<div class="alert">{{ message }}</div>{% endif %}
+<div class="notice"><strong>Dữ liệu thực tế mới:</strong> chỉ nhập hộ đang điều tra ngoài thực địa. Không lấy địa chỉ, trường/lớp hoặc tình trạng học tập năm 2025-2026 làm dữ liệu hiện tại. Sau khi tạo hộ, hệ thống chuyển thẳng sang Nhập nhanh để nhập toàn bộ thành viên và trình độ.</div>
+
+<section class="card">
+<h2 style="margin-top:0">Tổ điều tra 3 cấp</h2>
+<div class="team">
+{% for m in members %}
+<div class="member"><strong>{{ m.full_name }}</strong><small>{{ m.level_code }} · {{ m.school_name }}</small></div>
+{% endfor %}
+</div>
+</section>
+
+<section class="card">
+<h2 style="margin-top:0">Hộ dân mới</h2>
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/nhap-ho-moi/{{ batch.id }}/them" autocomplete="off">
+<label style="font-weight:800">Chọn địa bàn được giao *</label>
+{% for a in assignments %}
+<label class="area">
+<input type="radio" name="area_id" value="{{ a.area_id }}" {% if loop.first %}checked{% endif %} required>
+<strong>{{ a.area_type_label }} {{ a.area_name }}</strong>
+<div class="stats">Chỉ tiêu kế hoạch của tổ: {{ a.household_quota }} hộ · Đã nhập: {{ a.actual_count }}{% if a.excess_count %} · <strong>Vượt {{ a.excess_count }}</strong>{% elif a.remaining_count %} · Còn theo kế hoạch: {{ a.remaining_count }}{% else %} · Đã đạt kế hoạch; vẫn được nhập đủ hộ thực tế{% endif %}</div>
+</label>
+{% else %}
+<div class="alert">Tổ không còn địa bàn/chỉ tiêu để nhập hộ mới.</div>
+{% endfor %}
+
+<div class="field"><label>Họ và tên chủ hộ *</label><input name="head_name" maxlength="200" required autofocus></div>
+<div class="field"><label>Địa chỉ chi tiết hiện tại *</label><textarea name="address" rows="3" required placeholder="Số nhà/đường/ngõ hoặc mô tả vị trí thực tế"></textarea></div>
+<div class="field"><label>Điện thoại liên hệ</label><input name="phone" maxlength="30" inputmode="tel"></div>
+<div class="field"><label>Ghi chú</label><textarea name="notes" rows="2"></textarea></div>
+<div class="actions">
+{% if assignments %}
+<button class="btn primary" type="submit">Lưu hộ và bắt đầu nhập thành viên</button>
+{% endif %}
+<a class="btn secondary" href="/dieu-tra/{{ batch.id }}/ho-dan">Quay lại danh sách</a>
+</div>
+</form>
+</section>
+</main>
+</body>
+</html>

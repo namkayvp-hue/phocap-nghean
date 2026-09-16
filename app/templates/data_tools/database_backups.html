@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Quản lý Backup</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        .backup-manager-page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 24px 18px 50px;
+        }
+        .backup-manager-hero {
+            padding: 24px;
+            border-radius: 16px;
+            background: linear-gradient(135deg,#34495e,#607d9a);
+            color: #fff;
+        }
+        .backup-manager-hero h1 {
+            margin: 4px 0 8px;
+            font-size: 30px;
+        }
+        .backup-panel {
+            margin-top: 18px;
+            padding: 20px;
+            border: 1px solid #dfe8f1;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(24,54,84,.07);
+        }
+        .backup-panel h2 {
+            margin: 0 0 14px;
+            color: #20364d;
+        }
+        .backup-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .backup-card {
+            padding: 16px;
+            border: 1px solid #dfe8f1;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+        .backup-card span {
+            display: block;
+            color: #6b7e91;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .backup-card strong {
+            display: block;
+            margin-top: 7px;
+            color: #1f5f96;
+            font-size: 25px;
+        }
+        .backup-success {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border: 1px solid #bfe0c6;
+            border-radius: 10px;
+            background: #edf9ef;
+            color: #236533;
+            line-height: 1.55;
+        }
+        .backup-error {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border: 1px solid #efb6b0;
+            border-radius: 10px;
+            background: #fff0ef;
+            color: #a1261c;
+            line-height: 1.55;
+        }
+        .backup-warn {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 1px solid #efcf83;
+            border-radius: 10px;
+            background: #fff7df;
+            color: #755100;
+            line-height: 1.55;
+        }
+        .backup-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .backup-table {
+            width: 100%;
+            min-width: 860px;
+            border-collapse: collapse;
+        }
+        .backup-table th,
+        .backup-table td {
+            padding: 11px 12px;
+            border-bottom: 1px solid #e6edf4;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .backup-table th {
+            background: #f7f9fc;
+            color: #526b84;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .backup-newest {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: #e7f4ea;
+            color: #236533;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .backup-protected {
+            color: #236533;
+            font-weight: 800;
+        }
+        .backup-confirm {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin: 14px 0;
+            line-height: 1.5;
+        }
+        .backup-input {
+            width: 100%;
+            min-height: 46px;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #cbd8e6;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .backup-danger-button {
+            min-height: 48px;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: #b42318;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .backup-danger-button:disabled {
+            background: #cfd4da;
+            color: #717981;
+            cursor: not-allowed;
+        }
+        .backup-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .backup-link {
+            display: inline-flex;
+            min-height: 44px;
+            box-sizing: border-box;
+            align-items: center;
+            padding: 9px 14px;
+            border: 1px solid #cbd8e6;
+            border-radius: 8px;
+            color: #285a87;
+            text-decoration:none;
+            font-weight:700;
+            background:#fff;
+        }
+        code {
+            overflow-wrap:anywhere;
+        }
+        @media (max-width:760px) {
+            .backup-summary {
+                grid-template-columns:1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include "partials/dropdown_menu_v1.html" %}
+
+    <main class="backup-manager-page">
+        <!-- === BAI_13B_10_V3_21_BACKUP_MANAGER_PAGE === -->
+        <section class="backup-manager-hero">
+            <div style="font-size:12px;font-weight:800;letter-spacing:.6px;opacity:.9;">
+                DANH MỤC → CÔNG CỤ DỮ LIỆU
+            </div>
+            <h1>🗂 Quản lý các bản Backup</h1>
+            <p style="margin:0;line-height:1.55;">
+                Xem các bản backup database trong <strong>C:\PhoCap\exports</strong>,
+                theo dõi dung lượng và xóa các bản cũ khi không còn cần thiết.
+                Database hiện tại <strong>phocap.db không bị thay đổi</strong>
+                bởi chức năng quản lý này.
+            </p>
+        </section>
+
+        {% if manage_status == "deleted" %}
+        <div class="backup-success">
+            <strong>✓ Đã xóa bản Backup thành công.</strong><br>
+            Bản đã xóa: <code>{{ selected_backup_name }}</code>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="backup-error">
+            <strong>Không thể xóa bản Backup.</strong><br>
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <section class="backup-summary">
+            <div class="backup-card">
+                <span>Số bản Backup</span>
+                <strong>{{ backup_count }}</strong>
+            </div>
+            <div class="backup-card">
+                <span>Tổng dung lượng database</span>
+                <strong>{{ total_size }}</strong>
+            </div>
+            <div class="backup-card">
+                <span>Bản mới nhất</span>
+                <strong style="font-size:14px;line-height:1.4;">
+                    {% if newest_backup_name %}
+                        {{ newest_backup_name }}
+                    {% else %}
+                        Chưa có
+                    {% endif %}
+                </strong>
+            </div>
+        </section>
+
+        <section class="backup-panel">
+            <h2>1. Danh sách Backup</h2>
+
+            <div class="backup-warn" style="margin-top:0;">
+                <strong>Nguyên tắc an toàn:</strong>
+                bản Backup mới nhất luôn được bảo vệ và không thể xóa tại đây.
+                Hệ thống cũng luôn giữ lại ít nhất 1 bản Backup.
+                Muốn loại bỏ bản đang là mới nhất, hãy tạo một bản Backup mới trước.
+            </div>
+
+            {% if backups %}
+            <form
+                method="post"
+                action="/cong-cu-du-lieu/don-du-lieu-dieu-tra/backup-quan-ly/xoa"
+                onsubmit="return window.confirm('XÁC NHẬN XÓA VĨNH VIỄN bản Backup đã chọn?');"
+            >
+                <div class="backup-table-wrap" style="margin-top:14px;">
+                    <table class="backup-table">
+                        <thead>
+                            <tr>
+                                <th style="width:54px;">Chọn</th>
+                                <th>Thời gian</th>
+                                <th>Loại Backup</th>
+                                <th>Dung lượng</th>
+                                <th>Tên thư mục</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in backups %}
+                            <tr>
+                                <td>
+                                    <input
+                                        type="radio"
+                                        name="backup_name"
+                                        value="{{ item.name }}"
+                                        {% if item.name == newest_backup_name %}disabled{% endif %}
+                                        {% if selected_backup_name == item.name %}checked{% endif %}
+                                        required
+                                    >
+                                </td>
+                                <td>{{ item.created_at }}</td>
+                                <td>{{ item.type }}</td>
+                                <td>{{ item.size }}</td>
+                                <td><code>{{ item.name }}</code></td>
+                                <td>
+                                    {% if item.name == newest_backup_name %}
+                                        <span class="backup-protected">🔒 Bảo vệ</span>
+                                        <span class="backup-newest">Mới nhất</span>
+                                    {% else %}
+                                        Có thể xóa
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <section class="backup-panel" style="box-shadow:none;margin-top:18px;">
+                    <h2>2. Xác nhận xóa bản cũ</h2>
+
+                    <label class="backup-confirm">
+                        <input
+                            type="checkbox"
+                            name="confirm_scope"
+                            value="yes"
+                            {% if backup_count <= 1 %}disabled{% endif %}
+                            required
+                        >
+                        <span>
+                            Tôi xác nhận đã chọn đúng bản Backup cũ cần xóa.
+                            Tôi hiểu thao tác này xóa vĩnh viễn thư mục Backup đã chọn
+                            nhưng <strong>không xóa database hiện tại</strong>.
+                        </span>
+                    </label>
+
+                    <div style="margin:14px 0 7px;font-weight:700;">
+                        Nhập chính xác câu xác nhận:
+                    </div>
+                    <div style="margin-bottom:8px;font-weight:800;color:#a1261c;">
+                        {{ delete_confirm_phrase }}
+                    </div>
+                    <input
+                        class="backup-input"
+                        type="text"
+                        name="confirm_text"
+                        autocomplete="off"
+                        {% if backup_count <= 1 %}disabled{% endif %}
+                        required
+                    >
+
+                    <div class="backup-actions" style="margin-top:16px;">
+                        <button
+                            class="backup-danger-button"
+                            type="submit"
+                            {% if backup_count <= 1 %}disabled{% endif %}
+                        >
+                            🗑 XÓA BẢN BACKUP ĐÃ CHỌN
+                        </button>
+
+                        <a
+                            class="backup-link"
+                            href="/cong-cu-du-lieu/don-du-lieu-dieu-tra"
+                        >
+                            ← Quay lại Công cụ dữ liệu
+                        </a>
+
+                        <a
+                            class="backup-link"
+                            href="/cong-cu-du-lieu/don-du-lieu-dieu-tra/khoi-phuc"
+                        >
+                            ♻ Mở Khôi phục
+                        </a>
+                    </div>
+                </section>
+            </form>
+            {% else %}
+            <div class="backup-warn">
+                Chưa tìm thấy bản Backup hợp lệ có <code>phocap.db</code>.
+                Hãy quay lại và tạo Backup trước.
+            </div>
+
+            <div class="backup-actions" style="margin-top:16px;">
+                <a
+                    class="backup-link"
+                    href="/cong-cu-du-lieu/don-du-lieu-dieu-tra"
+                >
+                    ← Quay lại Công cụ dữ liệu
+                </a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

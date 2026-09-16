@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiểm tra dữ liệu nguồn sáp nhập – V4.3</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<style>
+.a-wrap{max-width:1500px;margin:0 auto;padding:24px 18px 60px}.card{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:20px;margin-bottom:18px}.card h1,.card h2{margin-top:0}.note{padding:12px 14px;border-radius:9px;margin:10px 0;line-height:1.5}.ok{background:#edf9f2;border:1px solid #a8dfbd;color:#155f3a}.warn{background:#fff8e6;border:1px solid #f0d184;color:#785700}.err{background:#fff0ef;border:1px solid #f0b4ae;color:#842029}.info{background:#eef6ff;border:1px solid #b9d8fa;color:#164e7a}.muted{font-size:13px;color:#667788}.grid{display:grid;grid-template-columns:repeat(3,minmax(190px,1fr));gap:12px}.field label{font-weight:700;display:block;margin-bottom:6px}.field select{width:100%;padding:10px;border:1px solid #c9d4df;border-radius:8px;background:#fff}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:700;border:0}.primary{background:#1f5f99;color:#fff}.mutedbtn{background:#e8eef4;color:#213547}.kpis{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}.kpi{padding:14px;border:1px solid #dce5ee;border-radius:12px;background:#fbfcfe}.kpi .n{font-size:27px;font-weight:800;color:#173f62}.kpi .t{font-size:13px;color:#5c6c7c}.table-wrap{overflow:auto;border:1px solid #e0e6ec;border-radius:10px}.table{width:100%;border-collapse:collapse;min-width:1180px}.table th,.table td{padding:9px 10px;border-bottom:1px solid #e7ecf1;text-align:left;vertical-align:top}.table th{background:#f7f9fb;font-size:13px}.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800}.badge.pass{background:#dff5e8;color:#17633e}.badge.block{background:#fde7e5;color:#8b2b23}.mono{font-family:Consolas,monospace;word-break:break-all}.num{text-align:right!important}@media(max-width:900px){.grid,.kpis{grid-template-columns:1fr}.a-wrap{padding:14px 10px 40px}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="a-wrap">
+<section class="card">
+<h1>Kiểm tra dữ liệu nguồn toàn tỉnh – Bài SÁP NHẬP V4.3</h1>
+<div class="note info"><strong>Nguyên tắc bắt buộc:</strong> mỗi trường nguồn và trường đích phải có dữ liệu nguồn đối chiếu; hệ thống kiểm tra đúng địa bàn + tên trường + mã trường DB + nhân sự đang làm việc/chuyển đến trong năm liền trước. Chưa có nguồn hoặc có sai lệch thì phương án bị khóa.</div>
+<div class="actions"><a class="btn mutedbtn" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an?school_year_id={{ selected_school_year_id or '' }}&commune_id={{ selected_commune_id or '' }}&level_code={{ selected_level_code }}">← Quay lại danh sách phương án</a></div>
+</section>
+{% if error_message %}<div class="note err">{{ error_message }}</div>{% endif %}
+<section class="card">
+<h2>1. Phạm vi kiểm tra</h2>
+<form method="get" action="/cong-cu-du-lieu/sap-nhap-truong/phuong-an/kiem-tra-nguon">
+<div class="grid">
+<div class="field"><label>Năm học hiệu lực</label><select name="school_year_id"><option value="">-- Tất cả --</option>{% for y in school_years %}<option value="{{ y.id }}" {% if y.id == selected_school_year_id %}selected{% endif %}>{{ y.code or y.name }}</option>{% endfor %}</select></div>
+<div class="field"><label>Xã/phường</label><select name="commune_id"><option value="">-- Toàn tỉnh --</option>{% for c in communes %}<option value="{{ c.id }}" {% if c.id == selected_commune_id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
+<div class="field"><label>Cấp học</label><select name="level_code">{% for code,label in level_choices %}<option value="{{ code }}" {% if code == selected_level_code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+</div>
+<div class="actions"><button class="btn primary" type="submit">CHẠY KIỂM TRA V4.3</button></div>
+</form>
+</section>
+<section class="card">
+<h2>2. Nguồn đối chiếu đã đăng ký</h2>
+{% set rs=audit.registry_summary %}
+<div class="kpis"><div class="kpi"><div class="n">{{ rs.dataset_count or 0 }}</div><div class="t">Bộ dữ liệu nguồn</div></div><div class="kpi"><div class="n">{{ rs.school_roster_count or 0 }}</div><div class="t">Trường có danh sách nguồn</div></div><div class="kpi"><div class="n">{{ rs.duplicate_identity_code_count or 0 }}</div><div class="t">Mã trùng khác nhân thân</div></div><div class="kpi"><div class="n">{{ rs.active_multi_school_code_count or 0 }}</div><div class="t">Mã đang hoạt động ở nhiều trường</div></div></div>
+{% if rs.datasets %}{% for d in rs.datasets %}<div class="note info"><strong>{{ d.level_code }} · {{ d.school_year_code }}</strong> — {{ d.source_file }} · {{ d.row_count }} dòng · {{ d.school_count }} trường<br><span class="muted">SHA256 nguồn: <span class="mono">{{ d.source_sha256 }}</span></span></div>{% endfor %}{% endif %}
+<div class="note warn"><strong>Quy tắc an toàn:</strong> hiện chỉ những trường có nguồn đã đăng ký mới có thể đạt. MN/THCS chưa có danh sách nguồn thì V4.3 sẽ báo CHẶN; hệ thống không tự suy đoán hoặc lấy số liệu từ trường khác.</div>
+</section>
+<section class="card">
+<h2>3. Kết quả kiểm tra phương án</h2>
+<div class="kpis"><div class="kpi"><div class="n">{{ audit.total }}</div><div class="t">Phương án được kiểm tra</div></div><div class="kpi"><div class="n">{{ audit.pass_count }}</div><div class="t">ĐẠT nguồn</div></div><div class="kpi"><div class="n">{{ audit.block_count }}</div><div class="t">BỊ CHẶN</div></div><div class="kpi"><div class="n">{{ audit.status_counts.NOT_APPLICABLE or 0 }}</div><div class="t">Không áp dụng</div></div></div>
+{% if audit.rows %}<div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Địa bàn / cấp</th><th>Phương án</th><th>Nguồn → đích</th><th>Kết quả V4.3</th><th>Chi tiết</th></tr></thead><tbody>
+{% for r in audit.rows %}{% set p=r.plan %}{% set a=r.audit %}<tr>
+<td><strong>{{ p.first_stt }}</strong>{% if p.last_stt != p.first_stt %}–{{ p.last_stt }}{% endif %}</td>
+<td><strong>{{ p.commune_excel }}</strong><br><span class="muted">{{ p.level_codes|join(' + ') }}</span></td>
+<td><strong>{{ p.plan_text }}</strong></td>
+<td>{% for s in p.source_schools %}<div>NGUỒN: {{ s.name or s.excel_name }}</div>{% endfor %}<div>ĐÍCH: <strong>{{ p.target_school.name or p.target_school.excel_name if p.target_school else 'Chưa xác định' }}</strong></div></td>
+<td>{% if a.pass %}<span class="badge pass">ĐẠT</span>{% else %}<span class="badge block">CHẶN</span>{% endif %}<br><span class="muted">{{ a.blockers|length }} lỗi chặn</span></td>
+<td><a class="btn primary" href="/cong-cu-du-lieu/sap-nhap-truong/phuong-an/xem-truoc/{{ p.id }}?school_year_id={{ p.school_year_id or '' }}&commune_id={{ p.commune_id or '' }}&level_code={{ p.level_codes|first }}">XEM CHI TIẾT</a></td>
+</tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="note warn">Không có phương án phù hợp phạm vi đã chọn.</div>{% endif %}
+</section>
+</main>
+</body>
+</html>

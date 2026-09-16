@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nhập dữ liệu MN-01-CSVC</title><link rel="stylesheet" href="/static/css/style.css">
+<style>
+:root{--blue:#0f5fa8;--bg:#eef4f9;--line:#d8e4ef;--text:#17324d;--green:#198f42}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.hero{background:linear-gradient(135deg,#0f5fa8,#1884d8);color:#fff;padding:27px 3vw}.hero-inner,.wrap{max-width:1220px;margin:auto}.hero h1{margin:6px 0}.wrap{padding:20px 3vw 50px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.field label{display:block;font-weight:800;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;min-height:45px;border:1px solid #bfd0df;border-radius:10px;padding:9px 11px;font:inherit}.field textarea{min-height:90px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tabs a{padding:10px 12px;border-radius:10px;background:#e3edf6;color:#17324d;text-decoration:none;font-weight:800}.tabs a.active{background:#0f5fa8;color:#fff}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border:0;border-radius:10px;text-decoration:none;font-weight:800;cursor:pointer}.primary{background:#1976d2;color:#fff}.success{background:var(--green);color:#fff}.secondary{background:#e7eef5;color:#17324d}.actions{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.notice{padding:12px 14px;border-radius:12px;margin-bottom:14px;font-weight:700}.ok{background:#eaf7ed;color:#176f32;border:1px solid #bce0c5}.warn{background:#fff7e6;color:#885800;border:1px solid #efd29a}.progress{height:14px;border-radius:999px;background:#e3edf5;overflow:hidden}.progress>span{display:block;height:100%;background:#1d8a44}.check-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.check-card{border:1px solid var(--line);border-radius:12px;padding:13px}.muted{color:#6d8295}.navline{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.navline a{color:#fff;text-decoration:none;font-weight:800;background:rgba(255,255,255,.15);padding:8px 10px;border-radius:9px}@media(max-width:900px){.grid,.check-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.grid,.check-grid{grid-template-columns:1fr}.wrap{padding:12px}.panel{padding:14px}.actions .btn{width:100%}}
+</style></head>
+<body>{% include 'partials/dropdown_menu_v1.html' %}
+<header class="hero"><div class="hero-inner"><strong>BÀI 13B-3 · CƠ SỞ VẬT CHẤT</strong><h1>{{ section_meta.number }}. {{ section_meta.title }}</h1><p>Nhập theo đúng các nhóm chỉ tiêu của biểu MN-01-CSVC; dữ liệu lưu theo trường và năm học.</p><div class="navline"><a href="/bao-cao?report_type=PCGD_MN_01_CSVC_2025">Mở báo cáo MN-01-CSVC</a><a href="/">Trang chủ</a></div></div></header>
+<main class="wrap">
+{% if status == 'saved' %}<div class="notice ok">✓ Đã lưu dữ liệu cơ sở vật chất.</div>{% endif %}
+<section class="panel"><form method="get" action="/csvc/{{ section }}"><div class="grid"><div class="field"><label>Năm học</label><select name="school_year_id">{% for y in school_years %}<option value="{{ y.id }}" {% if y.id==selected_year_id %}selected{% endif %}>{{ y.code }}</option>{% endfor %}</select></div><div class="field"><label>Xã/phường</label><select name="commune_id"><option value="">-- Chọn xã --</option>{% for c in communes %}<option value="{{ c.id }}" {% if c.id==selected_commune_id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div><div class="field"><label>Trường</label><select name="school_id"><option value="">-- Chọn trường --</option>{% for s in schools %}<option value="{{ s.id }}" {% if s.id==selected_school_id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></div><div class="actions"><button class="btn primary">Mở dữ liệu</button></div></div></form></section>
+<div class="tabs">{% for code,meta in sections.items() %}<a class="{% if code==section %}active{% endif %}" href="/csvc/{{ code }}?school_year_id={{ selected_year_id or '' }}{% if selected_commune_id %}&commune_id={{ selected_commune_id }}{% endif %}{% if selected_school_id %}&school_id={{ selected_school_id }}{% endif %}">{{ meta.number }} {{ meta.title }}</a>{% endfor %}</div>
+{% if selected_school_id %}
+<section class="panel"><div style="display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap"><div><strong>Mức hoàn thiện dữ liệu: {{ completion.percent }}%</strong><div class="muted">{{ completion.filled }}/{{ completion.total }} nhóm trường dữ liệu đã có giá trị.</div></div><div style="min-width:260px;flex:1;max-width:500px"><div class="progress"><span style="width:{{ completion.percent }}%"></span></div></div></div>{% if completion.warnings %}<div class="notice warn" style="margin-top:14px">{% for w in completion.warnings %}<div>• {{ w }}</div>{% endfor %}</div>{% endif %}</section>
+{% if section != 'kiem-tra' %}
+<form method="post" action="/csvc/{{ section }}"><input type="hidden" name="school_year_id" value="{{ selected_year_id }}"><input type="hidden" name="school_id" value="{{ selected_school_id }}"><section class="panel"><h2>{{ section_meta.title }}</h2><div class="grid">
+{% if section == 'co-so' %}<div class="field"><label>Số trường/cơ sở</label><input type="number" min="0" name="facility_count" value="{{ record.facility_count if record else 1 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Số điểm trường lẻ</label><input type="number" min="0" name="satellite_site_count" value="{{ (record.satellite_site_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div>
+{% elif section == 'nhom-lop' %}<div class="field"><label>Số nhóm nhà trẻ</label><input type="number" min="0" name="nursery_group_count" value="{{ (record.nursery_group_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Lớp mẫu giáo 3–4 tuổi</label><input type="number" min="0" name="preschool_class_3_4_count" value="{{ (record.preschool_class_3_4_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Lớp mẫu giáo 5 tuổi</label><input type="number" min="0" name="preschool_class_5_count" value="{{ (record.preschool_class_5_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Tổng số phòng học toàn trường</label><input type="number" min="0" name="total_classroom_count" value="{{ (record.total_classroom_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Phòng học nhà trẻ</label><input type="number" min="0" name="nursery_classroom_count" value="{{ (record.nursery_classroom_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Phòng MG kiên cố</label><input type="number" min="0" name="permanent_preschool_room_count" value="{{ (record.permanent_preschool_room_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Phòng MG bán kiên cố</label><input type="number" min="0" name="semi_permanent_preschool_room_count" value="{{ (record.semi_permanent_preschool_room_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Phòng MG tạm/nhờ</label><input type="number" min="0" name="temporary_preschool_room_count" value="{{ (record.temporary_preschool_room_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div>
+{% elif section == 'cong-trinh' %}<div class="field"><label>Lớp đủ TBDH, đồ dùng, đồ chơi</label><input type="number" min="0" name="equipped_preschool_class_count" value="{{ (record.equipped_preschool_class_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Số phòng/khu vệ sinh</label><input type="number" min="0" name="toilet_count" value="{{ (record.toilet_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Vệ sinh đạt chuẩn</label><input type="number" min="0" name="standard_toilet_count" value="{{ (record.standard_toilet_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Số công trình nước sạch</label><input type="number" min="0" name="clean_water_count" value="{{ (record.clean_water_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Nước sạch đạt chuẩn</label><input type="number" min="0" name="standard_clean_water_count" value="{{ (record.standard_clean_water_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div>
+{% elif section == 'bep-san' %}<div class="field"><label>Số bếp ăn</label><input type="number" min="0" name="kitchen_count" value="{{ (record.kitchen_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Bếp ăn đạt chuẩn</label><input type="number" min="0" name="standard_kitchen_count" value="{{ (record.standard_kitchen_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Số sân chơi</label><input type="number" min="0" name="playground_count" value="{{ (record.playground_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div><div class="field"><label>Trong đó sân có đồ chơi</label><input type="number" min="0" name="playground_with_toys_count" value="{{ (record.playground_with_toys_count or 0) if record else 0 }}" {% if not can_edit %}readonly{% endif %}></div>{% endif %}
+</div><div class="field" style="margin-top:12px"><label>Ghi chú chung</label><textarea name="notes" {% if not can_edit %}readonly{% endif %}>{{ record.notes if record and record.notes else '' }}</textarea></div>{% if can_edit %}<div class="actions" style="margin-top:14px"><button class="btn success" type="submit">✓ Lưu {{ section_meta.title }}</button></div>{% endif %}</section></form>
+{% else %}<section class="panel"><h2>Kiểm tra dữ liệu MN-01-CSVC</h2><div class="check-grid"><div class="check-card"><strong>Cơ sở/điểm trường</strong><p>Số cơ sở: {{ (record.facility_count or 0) if record else 0 }}<br>Điểm lẻ: {{ (record.satellite_site_count or 0) if record else 0 }}</p></div><div class="check-card"><strong>Nhóm/lớp</strong><p>Nhà trẻ: {{ (record.nursery_group_count or 0) if record else 0 }}<br>MG 3–4: {{ (record.preschool_class_3_4_count or 0) if record else 0 }}<br>MG 5: {{ (record.preschool_class_5_count or 0) if record else 0 }}</p></div><div class="check-card"><strong>Phòng học</strong><p>Tổng: {{ (record.total_classroom_count or 0) if record else 0 }}<br>Kiên cố MG: {{ (record.permanent_preschool_room_count or 0) if record else 0 }}</p></div><div class="check-card"><strong>Vệ sinh</strong><p>Tổng: {{ (record.toilet_count or 0) if record else 0 }}<br>Đạt chuẩn: {{ (record.standard_toilet_count or 0) if record else 0 }}</p></div><div class="check-card"><strong>Nước sạch</strong><p>Tổng: {{ (record.clean_water_count or 0) if record else 0 }}<br>Đạt chuẩn: {{ (record.standard_clean_water_count or 0) if record else 0 }}</p></div><div class="check-card"><strong>Bếp/sân</strong><p>Bếp đạt chuẩn: {{ (record.standard_kitchen_count or 0) if record else 0 }}<br>Sân có đồ chơi: {{ (record.playground_with_toys_count or 0) if record else 0 }}</p></div></div><div class="actions" style="margin-top:16px"><a class="btn primary" href="/bao-cao?report_type=PCGD_MN_01_CSVC_2025&school_year_id={{ selected_year_id }}&school_id={{ selected_school_id }}">Lập báo cáo MN-01-CSVC</a></div></section>{% endif %}
+{% endif %}</main>
+<!-- === BAI_13B_4_V1_CASCADE_CSVC_START === -->
+<style>
+    .b134-disabled {
+        opacity: .55 !important;
+        cursor: not-allowed !important;
+    }
+</style>
+<script>
+(function () {
+    const form = document.querySelector('form[method="get"][action^="/csvc/"]');
+    if (!form) return;
+
+    const year = form.querySelector('select[name="school_year_id"]');
+    const commune = form.querySelector('select[name="commune_id"]');
+    const school = form.querySelector('select[name="school_id"]');
+    const openButton = form.querySelector('button');
+
+    function syncOpenButton() {
+        if (!openButton || !school) return;
+        const disabled = !school.value;
+        openButton.disabled = disabled;
+        openButton.classList.toggle('b134-disabled', disabled);
+        openButton.title = disabled ? 'Hãy chọn trường trước' : 'Mở dữ liệu của trường đã chọn';
+    }
+
+    // === BAI_13B_6_V1_1_SAFE_SCOPE_SUBMIT ===
+    function safeScopeSubmit() {
+        const params = new URLSearchParams();
+
+        if (year && year.value) {
+            params.set('school_year_id', year.value);
+        }
+
+        if (commune && commune.value) {
+            params.set('commune_id', commune.value);
+        }
+
+        if (school && school.value) {
+            params.set('school_id', school.value);
+        }
+
+        const query = params.toString();
+        window.location.href = form.action + (query ? '?' + query : '');
+    }
+
+    function reloadSchools() {
+        if (school) school.value = '';
+        safeScopeSubmit();
+    }
+
+    if (commune) {
+        commune.addEventListener('change', reloadSchools);
+    }
+
+    if (year) {
+        year.addEventListener('change', function () {
+            if (school) school.value = '';
+            safeScopeSubmit();
+        });
+    }
+
+    if (school) {
+        school.addEventListener('change', syncOpenButton);
+    }
+
+    form.addEventListener('submit', function (event) {
+        if ((school && !school.value) || (commune && !commune.value)) {
+            event.preventDefault();
+            safeScopeSubmit();
+        }
+    });
+
+    syncOpenButton();
+})();
+</script>
+<!-- === BAI_13B_4_V1_CASCADE_CSVC_END === -->
+
+</body></html>

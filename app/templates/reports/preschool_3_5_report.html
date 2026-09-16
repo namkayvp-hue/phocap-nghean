@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo trẻ 3-5 tuổi theo Nghị định 277</title>
+    <style>
+        :root{
+            --blue-900:#0e4e9b;--blue-700:#1477d4;--blue-100:#eaf4ff;
+            --ink:#17324f;--muted:#6c8298;--line:#dbe6f0;--surface:#fff;
+            --page:#eef5fb;--green:#138a43;--green-soft:#e9f8ef;
+            --amber:#ae7200;--amber-soft:#fff3d9;--red:#bd2d36;--red-soft:#ffe9eb;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--page);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+        .header{background:linear-gradient(120deg,var(--blue-900),var(--blue-700));color:#fff;padding:34px 3.2vw}
+        .header-inner{max-width:1500px;margin:auto;display:flex;justify-content:space-between;gap:24px;align-items:center}
+        .eyebrow,.section-label{font-size:13px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
+        .eyebrow{margin:0 0 8px}.section-label{color:var(--blue-700);margin:0 0 8px}
+        h1{font-size:34px;line-height:1.15;margin:0 0 10px}h2{font-size:25px;margin:0 0 10px}h3{margin:0 0 9px}
+        p{line-height:1.55}.header p{margin:0}.user{text-align:right;line-height:1.45}
+        .nav,.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}
+        .button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:12px 16px;font-weight:800;text-decoration:none;cursor:pointer;font-size:15px}
+        .button-light{background:#fff;color:var(--blue-900)}.button-primary{background:var(--blue-700);color:#fff}
+        .button-success{background:var(--green);color:#fff}.button-secondary{background:#e7eef5;color:var(--ink)}
+        .container{max-width:1500px;margin:0 auto;padding:26px 20px 64px}
+        .panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 7px 22px rgba(24,64,105,.06);margin-bottom:20px}
+        .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.muted{color:var(--muted)}
+        .filters{display:grid;grid-template-columns:1fr 1.25fr 1.35fr 1.15fr 1.45fr 1.3fr .85fr;gap:12px;align-items:end;margin-top:20px}
+        label{display:block;font-weight:800;margin-bottom:8px;font-size:14px}
+        input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:#fff;color:var(--ink);font-size:15px;min-height:45px}
+        .scope-line{margin-top:16px;padding:13px 15px;background:var(--blue-100);border-radius:11px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+        .notice{border-radius:15px;padding:18px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+        .notice.draft{background:var(--amber-soft);border:1px solid #efd18d}.notice.official{background:var(--green-soft);border:1px solid #b9e1c8}
+        .legal{background:#f7fbff;border-left:5px solid var(--blue-700);padding:17px 20px;border-radius:14px;margin-bottom:20px;line-height:1.6}
+        .status-pill,.badge{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;font-weight:900;font-size:13px;white-space:nowrap}
+        .status-pill.draft{background:#fff8e7;color:var(--amber)}.status-pill.official{background:#e0f5e8;color:var(--green)}
+        .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin-bottom:20px}
+        .stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;min-height:116px;box-shadow:0 5px 17px rgba(24,64,105,.05)}
+        .stat span{display:block;color:var(--muted);font-size:13px;font-weight:800;line-height:1.35;min-height:35px}.stat strong{display:block;font-size:31px;color:var(--blue-900);margin-top:7px}
+        .stat.green strong{color:var(--green)}.stat.amber strong{color:var(--amber)}.stat.red strong{color:var(--red)}
+        .rates{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+        .rate{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}.rate-line{height:10px;background:#e5edf4;border-radius:999px;overflow:hidden;margin-top:13px}.rate-line span{display:block;height:100%;background:var(--green);border-radius:999px}
+        .rate-value{font-size:30px;font-weight:900;color:var(--green)}
+        .age-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.age-card{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fbfdff}.age-card h3{font-size:18px}.age-card ul{list-style:none;margin:0;padding:0}.age-card li{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)}.age-card li:last-child{border:0}
+        .split{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mini-list{list-style:none;padding:0;margin:0}.mini-list li{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:10px 0}.mini-list li:last-child{border:0}
+        .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px;margin-top:16px}table{width:100%;border-collapse:collapse;min-width:1350px}
+        th{background:#eaf2fa;color:#24435f;font-size:13px;text-align:center;padding:12px 10px;position:sticky;top:0;z-index:1}td{padding:13px 10px;border-top:1px solid var(--line);vertical-align:top;font-size:14px}tbody tr:nth-child(even){background:#f8fbfe}
+        .number{font-weight:900;color:var(--blue-900)}.sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}.nowrap{white-space:nowrap}
+        .badge.good,.badge.green{background:var(--green-soft);color:var(--green)}.badge.danger,.badge.red{background:var(--red-soft);color:var(--red)}.badge.warn,.badge.amber{background:var(--amber-soft);color:var(--amber)}.badge.blue{background:var(--blue-100);color:var(--blue-900)}.badge.neutral{background:#edf1f5;color:#5a6d7f}
+        .issue-list{display:flex;flex-wrap:wrap;gap:5px;max-width:390px}.issue{font-size:11px;font-weight:800;background:var(--red-soft);color:var(--red);padding:5px 7px;border-radius:7px}
+        .empty{text-align:center;padding:40px;color:var(--muted)}.pagination{display:flex;justify-content:center;gap:7px;margin-top:18px;align-items:center}.page-link{padding:9px 12px;border-radius:8px;background:#e7eef5;color:var(--ink);text-decoration:none;font-weight:800}.page-link.current{background:var(--blue-700);color:#fff}.page-link.disabled{opacity:.45;pointer-events:none}
+        @media(max-width:1250px){.filters{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(4,1fr)}.age-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:760px){.header-inner,.panel-head,.scope-line{display:block}.user{text-align:left;margin-top:20px}.nav,.actions{justify-content:flex-start}.filters,.stats,.rates,.split,.age-grid{grid-template-columns:1fr}.container{padding:15px}.header{padding:26px 18px}h1{font-size:28px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">BÀI 13A-3 V2</p>
+            <h1>Báo cáo phổ cập GDMN cho trẻ em từ 3 đến 5 tuổi</h1>
+            <p>Tổng hợp chỉ tiêu trẻ em theo Nghị định 277/2025/NĐ-CP và cấu trúc biểu mẫu MN-01 TE, MN-02.</p>
+        </div>
+        <div class="user">
+            <strong>{{ nguoi_dung.full_name }}</strong><br>
+            <span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span>
+            <div class="nav">
+                <a class="button button-light" href="/bao-cao?report_type=PCMN_3_5_TUOI&school_year_id={{ selected_year_id or '' }}&commune_id={{ selected_commune_id or '' }}&school_id={{ selected_school_id or '' }}">← Trung tâm báo cáo</a>
+                <a class="button button-light" href="/">Trang chủ</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Điều kiện lập báo cáo</p>
+                <h2>Chọn phạm vi và nguồn dữ liệu</h2>
+                <p class="muted">Trẻ 3-5 tuổi được xác định tại ngày tham chiếu {{ reference_date.strftime('%d/%m/%Y') }}. Báo cáo chỉ đọc dữ liệu trong quyền tài khoản.</p>
+            </div>
+            <a class="button button-success" href="{{ export_url }}">📊 Xuất Excel theo NĐ 277</a>
+        </div>
+        <form method="get" action="/bao-cao/pho-cap-3-5-tuoi">
+            <div class="filters">
+                <div><label>Năm học</label><select name="school_year_id">{% for year in school_years %}<option value="{{ year.id }}" {% if year.id == selected_year_id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div>
+                <div><label>Xã/phường</label><select name="commune_id">{% if province_reader %}<option value="">-- Toàn tỉnh --</option>{% endif %}{% for commune in communes %}<option value="{{ commune.id }}" {% if commune.id == selected_commune_id %}selected{% endif %}>{{ commune.name }}</option>{% endfor %}</select></div>
+                <div><label>Trường</label><select name="school_id"><option value="">-- Tất cả trường trong phạm vi --</option>{% for school in schools %}<option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}</option>{% endfor %}</select></div>
+                <div><label>Trạng thái dữ liệu</label><select name="data_state">{% for code, label in data_state_labels.items() %}<option value="{{ code }}" {% if code == data_state %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+                <div><label>Nhóm cần xem</label><select name="issue_group">{% for code, label in issue_group_labels.items() %}<option value="{{ code }}" {% if code == issue_group %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+                <div><label>Tìm xã/phường hoặc mã đợt</label><input name="q" value="{{ q }}" placeholder="Ví dụ: Cửa Lò, 16732, DT-..."></div>
+                <div><label>Số trẻ/trang</label><select name="page_size">{% for size in page_size_options %}<option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }} dòng</option>{% endfor %}</select></div>
+            </div>
+            <div class="scope-line">
+                <div><strong>Phạm vi:</strong> {{ scope_label }} · Năm học {{ selected_year.code if selected_year else 'Chưa xác định' }} · Tham chiếu tuổi {{ reference_date.strftime('%d/%m/%Y') }}</div>
+                <div class="actions"><button class="button button-primary" type="submit">🔎 Lập báo cáo</button><a class="button button-secondary" href="/bao-cao/pho-cap-3-5-tuoi">Xóa lọc</a></div>
+            </div>
+        </form>
+    </section>
+
+    <section class="legal">
+        <strong>Ngưỡng chỉ tiêu trẻ em theo Điều 12 Nghị định 277:</strong>
+        địa bàn thông thường huy động tối thiểu 90%, hoàn thành Chương trình GDMN theo độ tuổi tối thiểu 85%; địa bàn KTXH đặc biệt khó khăn tương ứng 85% và 80%.
+        <div class="muted">Kết quả “Đạt chỉ tiêu trẻ em” chưa phải kết luận xã đạt chuẩn toàn diện vì còn phải kiểm tra chương trình giáo dục, đội ngũ và điều kiện bảo đảm.</div>
+    </section>
+
+    <section class="notice {{ 'official' if is_official else 'draft' }}">
+        <div><h3>{{ 'Báo cáo chính thức' if is_official else 'Báo cáo đang ở chế độ dự thảo' }}</h3><div class="muted">{{ 'Tất cả đợt trong phạm vi đã khóa số liệu.' if is_official else 'Còn đợt đang mở hoặc phạm vi chưa có đợt phù hợp; tệp Excel vẫn xuất được nhưng được đánh dấu DỰ THẢO.' }}</div></div>
+        <span class="status-pill {{ 'official' if is_official else 'draft' }}">{{ '✅ CHÍNH THỨC' if is_official else '⚠️ DỰ THẢO' }}</span>
+    </section>
+
+    <section class="stats">
+        <article class="stat"><span>Tổng trẻ 3-5 tuổi</span><strong>{{ summary.total_3_5 }}</strong></article>
+        <article class="stat"><span>Số trẻ phải huy động</span><strong>{{ summary.must_mobilize }}</strong></article>
+        <article class="stat green"><span>Đã đến lớp</span><strong>{{ summary.attending }}</strong></article>
+        <article class="stat red"><span>Chưa ra lớp</span><strong>{{ summary.not_in_school }}</strong></article>
+        <article class="stat green"><span>Hoàn thành theo độ tuổi</span><strong>{{ summary.completed }}</strong></article>
+        <article class="stat amber"><span>Chưa xác nhận hoàn thành</span><strong>{{ summary.completion_unknown }}</strong></article>
+        <article class="stat"><span>Trẻ 3 / 4 / 5 tuổi</span><strong>{{ summary.age_rows[3].total }} / {{ summary.age_rows[4].total }} / {{ summary.age_rows[5].total }}</strong></article>
+        <article class="stat"><span>Trong / ngoài địa bàn</span><strong>{{ summary.in_area }} / {{ summary.outside_area }}</strong></article>
+        <article class="stat"><span>Khuyết tật / hòa nhập</span><strong>{{ summary.disability }} / {{ summary.inclusive }}</strong></article>
+        <article class="stat red"><span>Thiếu số định danh</span><strong>{{ summary.missing_personal_id }}</strong></article>
+        <article class="stat red"><span>Thiếu dữ liệu năm học</span><strong>{{ summary.missing_year_record }}</strong></article>
+        <article class="stat red"><span>Cần kiểm tra</span><strong>{{ summary.needs_attention }}</strong></article>
+    </section>
+
+    <section class="rates">
+        <article class="rate"><p class="section-label">Tỷ lệ huy động 3-5 tuổi</p><div class="rate-value">{{ '%.2f'|format(summary.mobilization_rate) }}%</div><div class="muted">Trẻ đến lớp / trẻ phải huy động.</div><div class="rate-line"><span style="width:{{ summary.mobilization_rate if summary.mobilization_rate <= 100 else 100 }}%"></span></div></article>
+        <article class="rate"><p class="section-label">Tỷ lệ hoàn thành theo độ tuổi</p><div class="rate-value">{{ '%.2f'|format(summary.completion_rate) }}%</div><div class="muted">Trẻ hoàn thành / trẻ đã đến lớp.</div><div class="rate-line"><span style="width:{{ summary.completion_rate if summary.completion_rate <= 100 else 100 }}%"></span></div></article>
+        <article class="rate"><p class="section-label">Tỷ lệ học hòa nhập</p><div class="rate-value">{{ '%.2f'|format(summary.inclusive_rate) }}%</div><div class="muted">Trẻ học hòa nhập / trẻ khuyết tật 3-5 tuổi.</div><div class="rate-line"><span style="width:{{ summary.inclusive_rate if summary.inclusive_rate <= 100 else 100 }}%"></span></div></article>
+    </section>
+
+    <section class="panel">
+        <p class="section-label">Phân tích theo độ tuổi</p><h2>Trẻ 3 tuổi, 4 tuổi, 5 tuổi và nhóm 3-4 tuổi</h2>
+        <div class="age-grid">
+            {% for age in [3,4,5] %}{% set row = summary.age_rows[age] %}
+            <article class="age-card"><h3>{{ row.label }}</h3><ul><li><span>Tổng số</span><strong>{{ row.total }}</strong></li><li><span>Phải huy động</span><strong>{{ row.must_mobilize }}</strong></li><li><span>Đến lớp</span><strong>{{ row.attending }}</strong></li><li><span>Tỷ lệ huy động</span><strong>{{ '%.2f'|format(row.mobilization_rate) }}%</strong></li><li><span>Hoàn thành</span><strong>{{ row.completed }}</strong></li><li><span>Tỷ lệ hoàn thành</span><strong>{{ '%.2f'|format(row.completion_rate) }}%</strong></li></ul></article>
+            {% endfor %}
+            {% set row = summary.group_3_4 %}<article class="age-card"><h3>Nhóm 3-4 tuổi (MN-02)</h3><ul><li><span>Tổng số</span><strong>{{ row.total }}</strong></li><li><span>Phải huy động</span><strong>{{ row.must_mobilize }}</strong></li><li><span>Đến lớp</span><strong>{{ row.attending }}</strong></li><li><span>Tỷ lệ huy động</span><strong>{{ '%.2f'|format(row.mobilization_rate) }}%</strong></li><li><span>Hoàn thành</span><strong>{{ row.completed }}</strong></li><li><span>Tỷ lệ hoàn thành</span><strong>{{ '%.2f'|format(row.completion_rate) }}%</strong></li></ul></article>
+        </div>
+    </section>
+
+    <section class="panel split">
+        <div><p class="section-label">Cơ cấu giới tính</p><h2>Trẻ 3-5 tuổi theo giới tính</h2><ul class="mini-list">{% for row in gender_rows %}<li><span>{{ row.label }}</span><strong>{{ row.total }}</strong></li>{% endfor %}</ul></div>
+        <div><p class="section-label">Tình trạng cư trú</p><h2>Trẻ 3-5 tuổi theo cư trú</h2><ul class="mini-list">{% for row in residency_rows %}<li><span>{{ row.label }}</span><strong>{{ row.total }}</strong></li>{% endfor %}{% if not residency_rows %}<li><span>Chưa có dữ liệu</span><strong>0</strong></li>{% endif %}</ul></div>
+    </section>
+
+    <section class="panel">
+        <p class="section-label">Tổng hợp địa bàn</p><h2>Theo xã/phường</h2><p class="muted">Có {{ commune_rows|length }} xã/phường. Cần đánh dấu đúng loại địa bàn tại Danh mục xã để áp dụng ngưỡng 90/85 hoặc 85/80.</p>
+        <div class="table-wrap"><table><thead><tr><th>STT</th><th>Xã/phường</th><th>Loại địa bàn</th><th>Trẻ 3-5</th><th>Phải huy động</th><th>Đến lớp</th><th>Tỷ lệ huy động</th><th>Hoàn thành</th><th>Tỷ lệ hoàn thành</th><th>Ngưỡng áp dụng</th><th>Khuyết tật / hòa nhập</th><th>Thiếu dữ liệu</th><th>Kết quả chỉ tiêu trẻ em</th></tr></thead><tbody>
+            {% for row in commune_rows %}<tr><td>{{ loop.index }}</td><td><strong>{{ row.commune_name }}</strong><div class="sub">{{ row.commune_code }} · {{ row.batch_total }} đợt · {{ row.locked_batch_total }} đã khóa</div></td><td>{{ row.area_type_label }}</td><td class="number">{{ row.total_3_5 }}<div class="sub">3t {{ row.age_rows[3].total }} · 4t {{ row.age_rows[4].total }} · 5t {{ row.age_rows[5].total }}</div></td><td>{{ row.must_mobilize }}</td><td>{{ row.attending }}<div class="sub">Chưa ra lớp {{ row.not_in_school }}</div></td><td><span class="badge blue">{{ '%.2f'|format(row.mobilization_rate) }}%</span></td><td>{{ row.completed }}<div class="sub">Chưa xác nhận {{ row.completion_unknown }}</div></td><td><span class="badge blue">{{ '%.2f'|format(row.completion_rate) }}%</span></td><td>HĐ ≥ {{ '%.0f'|format(row.mobilization_threshold) }}%<div class="sub">HT ≥ {{ '%.0f'|format(row.completion_threshold) }}%</div></td><td>{{ row.disability }} / {{ row.inclusive }}</td><td>SĐD {{ row.missing_personal_id }} · Năm {{ row.missing_year_record }}<div class="sub">Cần kiểm tra {{ row.needs_attention }}</div></td><td><span class="badge {{ row.child_indicator_class }}">{{ row.child_indicator_label }}</span></td></tr>{% endfor %}
+            {% if not commune_rows %}<tr><td colspan="13" class="empty">Không có địa bàn phù hợp.</td></tr>{% endif %}
+        </tbody></table></div>
+    </section>
+
+    <section class="panel">
+        <p class="section-label">Tổng hợp cơ sở giáo dục</p><h2>Theo trường trẻ đang học</h2><p class="muted">Chỉ hiển thị trường có trẻ 3-5 tuổi đang học trong phạm vi báo cáo.</p>
+        <div class="table-wrap"><table style="min-width:1150px"><thead><tr><th>STT</th><th>Trường</th><th>Địa bàn trường</th><th>Địa bàn cư trú</th><th>3 tuổi</th><th>4 tuổi</th><th>5 tuổi</th><th>Tổng 3-5</th><th>Hoàn thành</th><th>Chưa xác nhận</th><th>Tỷ lệ hoàn thành</th><th>Khuyết tật / hòa nhập</th></tr></thead><tbody>
+            {% for row in school_rows %}<tr><td>{{ loop.index }}</td><td><strong>{{ row.school_name }}</strong><div class="sub">{{ row.school_code }}</div></td><td>{{ row.school_commune_name or 'Chưa xác định' }}</td><td>{{ row.home_communes }}</td><td>{{ row.age_3 }}</td><td>{{ row.age_4 }}</td><td>{{ row.age_5 }}</td><td class="number">{{ row.total_3_5 }}</td><td>{{ row.completed }}</td><td>{{ row.completion_unknown }}</td><td><span class="badge blue">{{ '%.2f'|format(row.completion_rate) }}%</span></td><td>{{ row.disability }} / {{ row.inclusive }}</td></tr>{% endfor %}
+            {% if not school_rows %}<tr><td colspan="12" class="empty">Chưa có trường có trẻ 3-5 tuổi đang học trong phạm vi.</td></tr>{% endif %}
+        </tbody></table></div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head"><div><p class="section-label">Danh sách chi tiết</p><h2>Trẻ từ 3 đến 5 tuổi</h2><p class="muted">Đang hiển thị {{ person_rows|length }} trong tổng số {{ total_person_rows }} kết quả phù hợp.</p></div><div class="muted">Lập lúc {{ generated_at }}</div></div>
+        <div class="table-wrap"><table><thead><tr><th>STT</th><th>Đối tượng</th><th>Tuổi / giới tính</th><th>Phiếu / hộ</th><th>Cư trú</th><th>Tình trạng học tập</th><th>Trường / lớp</th><th>Huy động</th><th>Hoàn thành theo tuổi</th><th>Khuyết tật / hòa nhập</th><th>Nội dung cần kiểm tra</th></tr></thead><tbody>
+            {% for row in person_rows %}<tr><td>{{ (page - 1) * page_size + loop.index }}</td><td><strong>{{ row.full_name }}</strong><div class="sub">{{ row.person_code }} · {{ row.date_of_birth_display }} · SĐD {{ row.personal_id or '—' }}</div><div class="sub">{{ row.commune_name }}</div></td><td>{{ row.age_label }} · {{ row.gender_label }}</td><td>{{ row.form_number }}<div class="sub">{{ row.household_code }} · {{ row.head_name }}</div></td><td>{{ row.residency_status_label }}</td><td>{{ row.learning_status_label }}</td><td>{{ row.school_display or '—' }}<div class="sub">{{ row.class_display or '—' }} · {{ row.school_commune_name or 'Chưa rõ địa bàn' }}</div></td><td><span class="badge {{ 'good' if row.attending else 'danger' if row.must_mobilize else 'neutral' }}">{{ 'Đến lớp' if row.attending else 'Chưa ra lớp' if row.must_mobilize else 'Không thuộc diện' }}</span></td><td><span class="badge {{ 'good' if row.completed else 'danger' if row.not_completed else 'warn' }}">{{ 'Có' if row.completed else 'Không' if row.not_completed else 'Chưa xác định' }}</span></td><td>{{ row.disability_status_label }}<div class="sub">Hòa nhập: {{ 'Có' if row.inclusive else 'Không/Chưa xác định' }}</div></td><td>{% if row.issue_flags %}<div class="issue-list">{% for code in row.issue_flags %}<span class="issue">{{ issue_group_labels.get(code, code) }}</span>{% endfor %}</div>{% else %}<span class="badge good">Đủ thông tin</span>{% endif %}</td></tr>{% endfor %}
+            {% if not person_rows %}<tr><td colspan="11" class="empty">Không có trẻ phù hợp với bộ lọc.</td></tr>{% endif %}
+        </tbody></table></div>
+        <div class="pagination"><a class="page-link {{ 'disabled' if not previous_url else '' }}" href="{{ previous_url or '#' }}">← Trước</a>{% for item in page_links %}<a class="page-link {{ 'current' if item.number == page else '' }}" href="{{ item.url }}">{{ item.number }}</a>{% endfor %}<a class="page-link {{ 'disabled' if not next_url else '' }}" href="{{ next_url or '#' }}">Sau →</a></div>
+    </section>
+</main>
+</body>
+</html>

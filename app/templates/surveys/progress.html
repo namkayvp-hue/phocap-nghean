@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiến độ điều tra</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .page-container {
+            width: min(1360px, calc(100% - 32px));
+            margin: 28px auto 48px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 13px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            padding: 16px;
+            min-height: 92px;
+            background: white;
+            border: 1px solid #dce6ef;
+            border-radius: 13px;
+        }
+
+        .summary-card span {
+            color: #657789;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .summary-card strong {
+            display: block;
+            margin-top: 7px;
+            color: #0d47a1;
+            font-size: 25px;
+        }
+
+        .summary-card.warning strong {
+            color: #ad6200;
+        }
+
+        .progress-panel {
+            margin-bottom: 22px;
+        }
+
+        .progress-panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .progress-number {
+            color: #0d47a1;
+            font-size: 38px;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .progress-bar {
+            height: 16px;
+            border-radius: 999px;
+            background: #e7eef5;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            background: linear-gradient(90deg, #1976d2, #45b965);
+            border-radius: 999px;
+        }
+
+        .progress-note {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 8px 0 0;
+            color: #52687b;
+            font-weight: 800;
+        }
+
+        .report-panel {
+            margin-bottom: 22px;
+        }
+
+        .report-panel .panel-header {
+            align-items: flex-start;
+        }
+
+        .report-description {
+            max-width: 760px;
+            margin: 7px 0 0;
+            color: #607487;
+            line-height: 1.55;
+        }
+
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 78px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: #eaf3ff;
+            color: #0d56a6;
+            font-size: 13px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .progress-table {
+            min-width: 1040px;
+        }
+
+        .progress-table.investigator-table {
+            min-width: 1280px;
+        }
+
+        .number-cell {
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .name-cell {
+            min-width: 210px;
+            font-weight: 800;
+        }
+
+        .school-cell {
+            min-width: 250px;
+        }
+
+        .muted-line {
+            display: block;
+            margin-top: 3px;
+            color: #718497;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .mini-progress {
+            min-width: 110px;
+        }
+
+        .mini-progress strong {
+            color: #0d47a1;
+        }
+
+        .mini-progress .progress-bar {
+            height: 9px;
+            margin-top: 6px;
+        }
+
+        .report-note {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 1px solid #d7e5f2;
+            border-radius: 10px;
+            background: #f5f9fd;
+            color: #536b80;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1180px) {
+            .summary-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 820px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .page-container {
+                width: min(100% - 18px, 1360px);
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions,
+            .header-actions .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">ĐIỀU TRA PHỔ CẬP GIÁO DỤC</p>
+            <h1>Tiến độ điều tra</h1>
+            <p>{{ batch.commune.name }} · Năm học {{ batch.school_year.code }}</p>
+        </div>
+
+        <div class="header-actions">
+            <div style="text-align:right;line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">
+                ← Quản lý hộ
+            </a>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/kiem-tra-du-lieu">
+                ✅ Kiểm tra dữ liệu
+            </a>
+            <a class="button button-light" href="/dieu-tra/{{ batch.id }}/tien-do/xuat-excel">
+                📥 Xuất Excel tiến độ
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="page-container">
+    <section class="summary-grid">
+        <article class="summary-card">
+            <span>Tổng số phiếu</span>
+            <strong>{{ total_forms }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Tổng đối tượng</span>
+            <strong>{{ total_people }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Chưa điều tra</span>
+            <strong>{{ status_counts.get('CHUA_DIEU_TRA', 0) }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Đang điều tra</span>
+            <strong>{{ status_counts.get('DANG_DIEU_TRA', 0) }}</strong>
+        </article>
+        <article class="summary-card">
+            <span>Đã hoàn thành</span>
+            <strong>{{ status_counts.get('DA_HOAN_THANH', 0) }}</strong>
+        </article>
+        <article class="summary-card warning">
+            <span>Cần bổ sung</span>
+            <strong>{{ status_counts.get('CAN_BO_SUNG', 0) }}</strong>
+        </article>
+        <article class="summary-card warning">
+            <span>Chưa phân công</span>
+            <strong>{{ unassigned_forms }}</strong>
+        </article>
+    </section>
+
+    <section class="panel progress-panel">
+        <div class="progress-panel-head">
+            <div>
+                <p class="panel-label">TIẾN ĐỘ {{ progress_scope_label }}</p>
+                <h2>{{ progress_percent }}% phiếu đã hoàn thành</h2>
+            </div>
+            <div class="progress-number">{{ progress_percent }}%</div>
+        </div>
+        <div class="progress-bar" style="margin-top:18px;">
+            <div class="progress-value" style="width:{{ progress_percent }}%;"></div>
+        </div>
+        <div class="progress-note">
+            <span>0%</span>
+            <span>{{ completed_forms if completed_forms is defined else status_counts.get('DA_HOAN_THANH', 0) }}/{{ total_forms }} phiếu</span>
+            <span>100%</span>
+        </div>
+    </section>
+
+    <section class="panel panel-wide report-panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">CHI TIẾT THEO ĐỊA BÀN</p>
+                <h2>Tiến độ theo thôn/xóm/khối/bản</h2>
+                <p class="report-description">
+                    Giúp xã/phường nhận biết địa bàn nào đang chậm, còn phiếu chưa điều tra
+                    hoặc cần bổ sung để tập trung chỉ đạo.
+                </p>
+            </div>
+            <span class="count-badge">{{ hamlet_progress|length }} địa bàn</span>
+        </div>
+
+        {% if hamlet_progress %}
+            <div class="table-wrapper">
+                <table class="data-table progress-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Thôn/xóm</th>
+                        <th>Tổng phiếu</th>
+                        <th>Chưa điều tra</th>
+                        <th>Đang điều tra</th>
+                        <th>Đã hoàn thành</th>
+                        <th>Cần bổ sung</th>
+                        <th>Tiến độ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in hamlet_progress %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td class="name-cell">{{ item.hamlet_name }}</td>
+                            <td class="number-cell">{{ item.total }}</td>
+                            <td class="number-cell">{{ item.counts.get('CHUA_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DANG_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DA_HOAN_THANH', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('CAN_BO_SUNG', 0) }}</td>
+                            <td class="mini-progress">
+                                <strong>{{ item.progress_percent }}%</strong>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width:{{ item.progress_percent }}%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <h3>Chưa có phiếu điều tra</h3>
+                <p>Hãy tạo hộ và phiếu trước khi xem tiến độ.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="panel panel-wide report-panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">CHI TIẾT THEO ĐƠN VỊ</p>
+                <h2>Tiến độ theo trường</h2>
+                <p class="report-description">
+                    Mỗi trường được tính theo các phiếu đã giao cho cán bộ quản lý hoặc giáo viên
+                    thuộc trường đó. Một phiếu chỉ được tính một lần trong cùng một trường.
+                </p>
+            </div>
+            <span class="count-badge">{{ school_progress|length }} trường</span>
+        </div>
+
+        {% if school_progress %}
+            <div class="table-wrapper">
+                <table class="data-table progress-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã trường</th>
+                        <th>Trường</th>
+                        <th>Tổng phiếu</th>
+                        <th>Chưa điều tra</th>
+                        <th>Đang điều tra</th>
+                        <th>Đã hoàn thành</th>
+                        <th>Cần bổ sung</th>
+                        <th>Tiến độ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in school_progress %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item.school_code }}</td>
+                            <td class="school-cell"><strong>{{ item.school_name }}</strong></td>
+                            <td class="number-cell">{{ item.total }}</td>
+                            <td class="number-cell">{{ item.counts.get('CHUA_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DANG_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DA_HOAN_THANH', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('CAN_BO_SUNG', 0) }}</td>
+                            <td class="mini-progress">
+                                <strong>{{ item.progress_percent }}%</strong>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width:{{ item.progress_percent }}%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🏫</div>
+                <h3>Chưa có phiếu được giao cho trường</h3>
+                <p>Phân công phiếu cho cán bộ quản lý hoặc giáo viên để có số liệu theo trường.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="panel panel-wide report-panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">CHI TIẾT THEO NGƯỜI THỰC HIỆN</p>
+                <h2>Khối lượng và tiến độ của người điều tra</h2>
+                <p class="report-description">
+                    Theo dõi số phiếu đã giao, số phiếu phụ trách chính và mức hoàn thành của từng tài khoản.
+                </p>
+            </div>
+            <span class="count-badge">{{ investigator_progress|length }} người</span>
+        </div>
+
+        {% if investigator_progress %}
+            <div class="table-wrapper">
+                <table class="data-table progress-table investigator-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Người điều tra</th>
+                        <th>Trường</th>
+                        <th>Tổng phiếu được giao</th>
+                        <th>Phụ trách chính</th>
+                        <th>Chưa điều tra</th>
+                        <th>Đang điều tra</th>
+                        <th>Đã hoàn thành</th>
+                        <th>Cần bổ sung</th>
+                        <th>Tiến độ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in investigator_progress %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td class="name-cell">
+                                {{ item.full_name }}
+                                <span class="muted-line">{{ item.username }}</span>
+                            </td>
+                            <td class="school-cell">
+                                {{ item.school_name }}
+                                {% if item.school_code %}
+                                    <span class="muted-line">Mã {{ item.school_code }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="number-cell">{{ item.total }}</td>
+                            <td class="number-cell">{{ item.primary_count }}</td>
+                            <td class="number-cell">{{ item.counts.get('CHUA_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DANG_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DA_HOAN_THANH', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('CAN_BO_SUNG', 0) }}</td>
+                            <td class="mini-progress">
+                                <strong>{{ item.progress_percent }}%</strong>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width:{{ item.progress_percent }}%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="report-note">
+                <strong>Lưu ý:</strong> Một phiếu có thể được phân công cho nhiều người, vì vậy tổng số phiếu
+                của các cá nhân có thể lớn hơn tổng số phiếu của đợt điều tra.
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <h3>Chưa có người điều tra được phân công</h3>
+                <p>Hãy phân công phiếu để theo dõi khối lượng và tiến độ cá nhân.</p>
+            </div>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

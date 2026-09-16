@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo tổng hợp điều tra</title>
+    <style>
+        :root {
+            --blue: #1266c5;
+            --blue-dark: #154e9c;
+            --blue-soft: #eaf4ff;
+            --green: #16833d;
+            --green-soft: #eaf8ee;
+            --red: #c72d35;
+            --orange: #b87300;
+            --ink: #142c49;
+            --muted: #687e98;
+            --line: #d8e3ee;
+            --surface: #ffffff;
+            --background: #eef4fa;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--background);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+        .hero {
+            padding: 28px 46px;
+            color: white;
+            background: linear-gradient(120deg, #174e9d, #1974d2);
+        }
+        .hero-inner {
+            max-width: 1420px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+        .eyebrow, .section-label {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .hero h1 { margin: 0; font-size: 32px; line-height: 1.2; }
+        .hero p { margin: 10px 0 0; font-size: 16px; }
+        .account { text-align: right; font-size: 14px; }
+        .account strong { display: block; font-size: 17px; }
+        .hero-actions { margin-top: 12px; display: flex; gap: 10px; justify-content: flex-end; }
+        .container { max-width: 1420px; margin: 0 auto; padding: 24px 28px 50px; }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 10px 28px rgba(20, 61, 105, .06);
+        }
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+        h2 { margin: 0 0 7px; font-size: 24px; }
+        h3 { margin: 0 0 10px; font-size: 18px; }
+        .section-label { color: var(--blue); }
+        .muted { color: var(--muted); }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 10px;
+            font: inherit;
+            font-weight: 750;
+            text-decoration: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .button-primary { color: white; background: var(--blue); }
+        .button-success { color: white; background: var(--green); }
+        .button-secondary { color: var(--ink); background: #e8eef5; }
+        .button-white { color: #174e9d; background: white; }
+        .filters {
+            display: grid;
+            grid-template-columns: 1fr 1.35fr 1.35fr 1.15fr 1.7fr .85fr;
+            gap: 12px;
+            align-items: end;
+        }
+        label { display: block; margin: 0 0 7px; font-size: 14px; font-weight: 750; }
+        select, input {
+            width: 100%;
+            height: 44px;
+            padding: 0 12px;
+            border: 1px solid #ccd9e7;
+            border-radius: 10px;
+            background: white;
+            color: var(--ink);
+            font: inherit;
+        }
+        .filter-footer {
+            margin-top: 14px;
+            padding: 13px 15px;
+            border-radius: 12px;
+            background: var(--blue-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+        }
+        .filter-actions { display: flex; gap: 9px; }
+        .status-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 20px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+        }
+        .status-banner.official { background: var(--green-soft); border: 1px solid #b9dfc4; }
+        .status-banner.draft { background: #fff7e7; border: 1px solid #ecd39d; }
+        .status-banner strong { font-size: 20px; }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 13px;
+            border-radius: 999px;
+            font-weight: 800;
+        }
+        .official .status-pill { color: var(--green); background: white; }
+        .draft .status-pill { color: var(--orange); background: white; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .stat {
+            min-height: 115px;
+            padding: 17px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 8px 22px rgba(20, 61, 105, .05);
+        }
+        .stat span { display: block; min-height: 34px; color: var(--muted); font-size: 13px; font-weight: 700; }
+        .stat strong { display: block; margin-top: 7px; color: #0c55ad; font-size: 30px; }
+        .stat.green strong { color: var(--green); }
+        .stat.red strong { color: var(--red); }
+        .stat.orange strong { color: var(--orange); }
+        .composition {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .mini-card { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fbfdff; }
+        .mini-list { margin: 0; padding: 0; list-style: none; }
+        .mini-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #dce5ee;
+        }
+        .mini-list li:last-child { border-bottom: 0; }
+        .mini-list b { color: #0d57af; }
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+        th {
+            padding: 12px 10px;
+            color: #27445f;
+            background: #e8f1fa;
+            text-align: left;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        td { padding: 12px 10px; border-top: 1px solid #e5edf5; vertical-align: top; font-size: 13px; }
+        tbody tr:hover { background: #f8fbff; }
+        .number { font-weight: 800; color: #0c55ad; }
+        .sub { margin-top: 4px; color: var(--muted); font-size: 12px; }
+        .badge {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #e8eef5;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .badge.good { color: var(--green); background: var(--green-soft); }
+        .badge.warn { color: var(--orange); background: #fff2d5; }
+        .badge.danger { color: var(--red); background: #fde9eb; }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .table-note { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+        .pagination { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
+        .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 39px;
+            height: 39px;
+            padding: 0 11px;
+            border-radius: 9px;
+            background: #e7eef5;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 750;
+        }
+        .page-link.current { color: white; background: var(--blue); }
+        .page-link.disabled { opacity: .45; pointer-events: none; }
+        .empty { padding: 36px; text-align: center; color: var(--muted); }
+        @media (max-width: 1100px) {
+            .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .composition { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 720px) {
+            .hero { padding: 24px 18px; }
+            .hero-inner, .panel-head, .filter-footer { flex-direction: column; align-items: stretch; }
+            .account { text-align: left; }
+            .hero-actions { justify-content: flex-start; flex-wrap: wrap; }
+            .container { padding: 16px 12px 36px; }
+            .filters, .stats, .composition, .two-column { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <p class="eyebrow">Bài 13A-2</p>
+            <h1>Báo cáo tổng hợp kết quả điều tra</h1>
+            <p>Tổng hợp theo toàn tỉnh, xã/phường, trường và danh sách đối tượng; xuất Excel có trạng thái dự thảo hoặc chính thức.</p>
+        </div>
+        <div class="account">
+            <strong>{{ nguoi_dung.full_name }}</strong>
+            <span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span>
+            <div class="hero-actions">
+                <a class="button button-white" href="/bao-cao">← Trung tâm báo cáo</a>
+                <a class="button button-white" href="/">Trang chủ</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Điều kiện lập báo cáo</p>
+                <h2>Chọn phạm vi và nguồn dữ liệu</h2>
+                <p class="muted">Báo cáo chỉ đọc dữ liệu trong quyền tài khoản. Chọn trường sẽ tổng hợp các hồ sơ năm học ghi nhận tại trường đó.</p>
+            </div>
+            <a class="button button-success" href="{{ export_url }}">📊 Xuất Excel báo cáo</a>
+        </div>
+        <form method="get" action="/bao-cao/tong-hop-dieu-tra">
+            <div class="filters">
+                <div>
+                    <label>Năm học</label>
+                    <select name="school_year_id">
+                        {% for year in school_years %}
+                        <option value="{{ year.id }}" {% if year.id == selected_year_id %}selected{% endif %}>{{ year.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Xã/phường</label>
+                    <select name="commune_id">
+                        {% if province_reader %}<option value="">-- Toàn tỉnh --</option>{% endif %}
+                        {% for commune in communes %}
+                        <option value="{{ commune.id }}" {% if commune.id == selected_commune_id %}selected{% endif %}>{{ commune.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Trường</label>
+                    <select name="school_id">
+                        <option value="">-- Tất cả trường trong phạm vi --</option>
+                        {% for school in schools %}
+                        <option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Trạng thái dữ liệu</label>
+                    <select name="data_state">
+                        {% for code, label in data_state_labels.items() %}
+                        <option value="{{ code }}" {% if code == data_state %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Tìm xã/phường hoặc mã đợt</label>
+                    <input name="q" value="{{ q }}" placeholder="Ví dụ: Cửa Lò, 16732, DT-...">
+                </div>
+                <div>
+                    <label>Số đối tượng/trang</label>
+                    <select name="page_size">
+                        {% for size in page_size_options %}
+                        <option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }} dòng</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="filter-footer">
+                <div><strong>Phạm vi:</strong> {{ scope_label }}{% if selected_year %} · Năm học {{ selected_year.code }}{% endif %} · Tham chiếu tuổi {{ reference_date.strftime('%d/%m/%Y') }}</div>
+                <div class="filter-actions">
+                    <button type="submit" class="button button-primary">🔎 Lập báo cáo</button>
+                    <a class="button button-secondary" href="/bao-cao/tong-hop-dieu-tra">Xóa lọc</a>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="status-banner {% if is_official %}official{% else %}draft{% endif %}">
+        <div>
+            <strong>{% if is_official %}Báo cáo đủ điều kiện chính thức{% else %}Báo cáo đang ở chế độ dự thảo{% endif %}</strong>
+            <div class="muted">{% if is_official %}Tất cả đợt trong phạm vi đã khóa số liệu.{% else %}Còn đợt đang mở hoặc chưa có đợt phù hợp. Tệp Excel vẫn xuất được nhưng được đánh dấu DỰ THẢO.{% endif %}</div>
+        </div>
+        <span class="status-pill">{% if is_official %}✅ CHÍNH THỨC{% else %}⚠️ DỰ THẢO{% endif %}</span>
+    </section>
+
+    <section class="stats">
+        <article class="stat"><span>Số đợt trong phạm vi</span><strong>{{ summary.batches }}</strong></article>
+        <article class="stat"><span>Đợt đã có dữ liệu</span><strong>{{ summary.with_data }}</strong></article>
+        <article class="stat green"><span>Đợt đã khóa</span><strong>{{ summary.locked }}</strong></article>
+        <article class="stat"><span>Tổng số phiếu</span><strong>{{ summary.forms }}</strong></article>
+        <article class="stat"><span>Tổng số hộ</span><strong>{{ summary.households }}</strong></article>
+        <article class="stat"><span>Tổng số đối tượng</span><strong>{{ summary.people }}</strong></article>
+        <article class="stat green"><span>Đang học</span><strong>{{ summary.studying }}</strong></article>
+        <article class="stat orange"><span>Chưa đi học</span><strong>{{ summary.not_started }}</strong></article>
+        <article class="stat red"><span>Bỏ hoặc thôi học</span><strong>{{ summary.dropout }}</strong></article>
+        <article class="stat"><span>Trẻ 5 tuổi</span><strong>{{ summary.age_5 }}</strong></article>
+        <article class="stat green"><span>Hoàn thành MN 5 tuổi</span><strong>{{ summary.completed_preschool_5 }}</strong></article>
+        <article class="stat red"><span>Thiếu số định danh</span><strong>{{ summary.missing_personal_id }}</strong></article>
+        <article class="stat"><span>Có hồ sơ năm học</span><strong>{{ summary.year_records }}</strong></article>
+        <article class="stat red"><span>Thiếu hồ sơ năm học</span><strong>{{ summary.missing_year_records }}</strong></article>
+        <article class="stat"><span>Trẻ có khuyết tật</span><strong>{{ summary.disability }}</strong></article>
+        <article class="stat green"><span>Trẻ học hòa nhập</span><strong>{{ summary.inclusive }}</strong></article>
+        <article class="stat"><span>Thường trú</span><strong>{{ summary.permanent }}</strong></article>
+        <article class="stat"><span>Tạm trú</span><strong>{{ summary.temporary }}</strong></article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Cơ cấu dữ liệu</p>
+                <h2>Độ tuổi, giới tính, cư trú và tình trạng học tập</h2>
+            </div>
+            <span class="muted">Cập nhật lúc {{ generated_at }}</span>
+        </div>
+        <div class="composition">
+            <article class="mini-card">
+                <h3>Theo độ tuổi</h3>
+                <ul class="mini-list">
+                    {% for row in age_rows %}<li><span>{{ row.age_group }} tuổi</span><b>{{ row.total }}</b></li>{% endfor %}
+                </ul>
+            </article>
+            <article class="mini-card">
+                <h3>Theo giới tính</h3>
+                <ul class="mini-list">
+                    {% for row in gender_rows %}<li><span>{{ row.label }}</span><b>{{ row.total }}</b></li>{% endfor %}
+                </ul>
+            </article>
+            <article class="mini-card">
+                <h3>Theo cư trú</h3>
+                <ul class="mini-list">
+                    {% for row in residency_rows %}<li><span>{{ row.label }}</span><b>{{ row.total }}</b></li>{% endfor %}
+                </ul>
+            </article>
+            <article class="mini-card">
+                <h3>Theo học tập</h3>
+                <ul class="mini-list">
+                    {% for row in learning_rows %}<li><span>{{ row.label }}</span><b>{{ row.total }}</b></li>{% else %}<li><span>Chưa có dữ liệu</span><b>0</b></li>{% endfor %}
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Tổng hợp địa bàn</p>
+                <h2>Theo xã/phường</h2>
+                <p class="muted">Có {{ commune_rows|length }} xã/phường phù hợp với phạm vi và bộ lọc.</p>
+            </div>
+        </div>
+        {% if commune_rows %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th>STT</th><th>Xã/phường</th><th>Đợt / khóa</th><th>Phiếu / hộ</th><th>Đối tượng</th>
+                    <th>Trẻ 5 tuổi</th><th>Đang học</th><th>Chưa đi học</th><th>Bỏ/thôi học</th>
+                    <th>Khuyết tật / hòa nhập</th><th>Thiếu thông tin</th>
+                </tr></thead>
+                <tbody>
+                {% for row in commune_rows %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ row.commune_name }}</strong><div class="sub">{{ row.commune_code }}</div></td>
+                        <td><span class="number">{{ row.batch_total }}</span> đợt<div class="sub">{{ row.locked_batch_total }} đã khóa</div></td>
+                        <td><span class="number">{{ row.forms }}</span> phiếu<div class="sub">{{ row.households }} hộ</div></td>
+                        <td><span class="number">{{ row.people }}</span><div class="sub">Nam {{ row.male }} · Nữ {{ row.female }}</div></td>
+                        <td>{{ row.age_5 }}</td><td>{{ row.studying }}</td><td>{{ row.not_started }}</td><td>{{ row.dropout }}</td>
+                        <td>{{ row.disability }} / {{ row.inclusive }}</td>
+                        <td><span class="badge {% if row.missing_personal_id or row.missing_year_record %}danger{% else %}good{% endif %}">SĐD {{ row.missing_personal_id }} · Năm học {{ row.missing_year_record }}</span></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}<div class="empty">Không có xã/phường phù hợp.</div>{% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Tổng hợp cơ sở giáo dục</p>
+                <h2>Theo trường</h2>
+                <p class="muted">Có {{ school_rows|length }} trường hoặc tên trường được ghi nhận. Excel xuất toàn bộ danh sách.</p>
+            </div>
+        </div>
+        {% if school_rows %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th>STT</th><th>Trường</th><th>Xã/phường</th><th>Phiếu / hộ</th><th>Đối tượng</th>
+                    <th>Trẻ 5 tuổi</th><th>Đang học</th><th>Hoàn thành MN 5 tuổi</th>
+                    <th>Khuyết tật / hòa nhập</th><th>Thiếu số định danh</th>
+                </tr></thead>
+                <tbody>
+                {% for row in school_rows[:100] %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ row.school_name }}</strong><div class="sub">{{ row.school_code or 'Tên trường ghi nhận' }}</div></td>
+                        <td>{{ row.commune_name }}</td>
+                        <td>{{ row.forms }} / {{ row.households }}</td>
+                        <td><span class="number">{{ row.people }}</span><div class="sub">Nam {{ row.male }} · Nữ {{ row.female }}</div></td>
+                        <td>{{ row.age_5 }}</td><td>{{ row.studying }}</td><td>{{ row.completed_preschool_5 }}</td>
+                        <td>{{ row.disability }} / {{ row.inclusive }}</td><td>{{ row.missing_personal_id }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if school_rows|length > 100 %}<p class="table-note">Giao diện hiển thị 100 trường đầu tiên; tệp Excel chứa đầy đủ {{ school_rows|length }} trường.</p>{% endif %}
+        {% else %}<div class="empty">Chưa có thông tin trường trong phạm vi này.</div>{% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Danh sách chi tiết</p>
+                <h2>Đối tượng trong phạm vi báo cáo</h2>
+                <p class="muted">Đang hiển thị {{ person_rows|length }} trong tổng số {{ total_person_rows }} đối tượng.</p>
+            </div>
+        </div>
+        {% if person_rows %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th>STT</th><th>Đối tượng</th><th>Nhận diện</th><th>Phiếu / hộ</th><th>Cư trú</th>
+                    <th>Tình trạng học tập</th><th>Trường / lớp</th><th>Khuyết tật</th><th>Rà soát</th>
+                </tr></thead>
+                <tbody>
+                {% for row in person_rows %}
+                    <tr>
+                        <td>{{ (page - 1) * page_size + loop.index }}</td>
+                        <td><strong>{{ row.full_name }}</strong><div class="sub">{{ row.person_code }} · {{ row.date_of_birth_display }} · {{ row.gender_label }}{% if row.age is not none %} · {{ row.age }} tuổi{% endif %}</div></td>
+                        <td><strong>SĐD:</strong> {{ row.personal_id or '—' }}<div class="sub">Mã HS phiếu: {{ row.ministry_student_code or '—' }}</div></td>
+                        <td>{{ row.form_number }}<div class="sub">{{ row.household_code }} · {{ row.head_name }}</div></td>
+                        <td>{{ row.residency_status_label }}<div class="sub">{{ row.commune_name }}{% if row.hamlet_name %} · {{ row.hamlet_name }}{% endif %}</div></td>
+                        <td><span class="badge {% if row.learning_status_code == 'DANG_HOC' %}good{% elif row.learning_status_code in ['BO_HOC','THOI_HOC'] %}danger{% else %}warn{% endif %}">{{ row.learning_status_label }}</span></td>
+                        <td>{{ row.school_display or '—' }}<div class="sub">Lớp: {{ row.class_display or '—' }}</div></td>
+                        <td>{{ row.disability_status_label }}{% if row.disability_type_label %}<div class="sub">{{ row.disability_type_label }} · {{ row.disability_level_label }}</div>{% endif %}</td>
+                        <td>{% if row.year_record_id is none %}<span class="badge danger">Thiếu hồ sơ năm học</span>{% elif row.is_reviewed %}<span class="badge good">Đã rà soát</span>{% else %}<span class="badge warn">Chưa rà soát</span>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            <a class="page-link {% if not previous_url %}disabled{% endif %}" href="{{ previous_url or '#' }}">← Trước</a>
+            {% for item in page_links %}<a class="page-link {% if item.number == page %}current{% endif %}" href="{{ item.url }}">{{ item.number }}</a>{% endfor %}
+            <span class="page-link">/ {{ total_pages }}</span>
+            <a class="page-link {% if not next_url %}disabled{% endif %}" href="{{ next_url or '#' }}">Sau →</a>
+        </div>
+        {% else %}<div class="empty">Chưa có đối tượng phù hợp với phạm vi và bộ lọc.</div>{% endif %}
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xu hướng phổ cập qua nhiều năm học</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        :root {
+            --blue: #1565c0;
+            --blue-dark: #0d47a1;
+            --blue-soft: #eaf4ff;
+            --ink: #17324d;
+            --muted: #65798d;
+            --line: #dce6ef;
+            --green: #198754;
+            --amber: #a66100;
+            --red: #c62828;
+        }
+
+        body {
+            background: #eef4f9;
+            color: var(--ink);
+        }
+
+        .trend-header {
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            color: #fff;
+        }
+
+        .trend-header-inner {
+            width: min(1460px, 96%);
+            margin: 0 auto;
+            padding: 28px 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .trend-eyebrow {
+            margin: 0 0 7px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .trend-header h1 {
+            margin: 0;
+            font-size: clamp(28px, 4vw, 42px);
+        }
+
+        .trend-header p {
+            margin: 9px 0 0;
+            opacity: .94;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .page-wrap {
+            width: min(1460px, 96%);
+            margin: 24px auto 50px;
+        }
+
+        .notice {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border: 1px solid #b9dbbe;
+            border-radius: 12px;
+            background: #edf9ef;
+            color: #1f6d2c;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .notice-warning {
+            border-color: #eed39d;
+            background: #fff7e6;
+            color: #835500;
+        }
+
+        .target-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 20px 22px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .target-card h2 {
+            margin: 4px 0 8px;
+            font-size: 25px;
+        }
+
+        .target-meta {
+            margin: 3px 0;
+            color: var(--muted);
+        }
+
+        .lock-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 999px;
+            background: #edf9ef;
+            color: #1d6b2a;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .lock-pill.open {
+            background: #fff4dc;
+            color: #8b5800;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 13px 15px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: #fff;
+        }
+
+        .toolbar-note {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 13px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            padding: 17px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .metric-label {
+            margin: 0 0 7px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .metric-value {
+            margin: 0;
+            color: var(--blue-dark);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .metric-sub {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .delta-positive {
+            color: var(--green);
+            font-weight: 800;
+        }
+
+        .delta-negative {
+            color: var(--red);
+            font-weight: 800;
+        }
+
+        .delta-neutral {
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .panel-label {
+            margin: 0 0 5px;
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .panel h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .panel-description {
+            margin: 7px 0 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .count-badge {
+            display: inline-flex;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: var(--blue-soft);
+            color: var(--blue-dark);
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #e1e9f0;
+            border-radius: 12px;
+        }
+
+        .trend-table {
+            width: 100%;
+            min-width: 1280px;
+            border-collapse: collapse;
+        }
+
+        .trend-table th,
+        .trend-table td {
+            padding: 12px 11px;
+            border-bottom: 1px solid #e5edf3;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .trend-table th {
+            background: #f0f5fa;
+            color: #344d65;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .trend-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .year-chip,
+        .status-chip,
+        .review-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .year-chip {
+            background: #e5f1ff;
+            color: #0d4d91;
+        }
+
+        .status-chip {
+            background: #eaf7ed;
+            color: #1c6d29;
+        }
+
+        .status-chip.open {
+            background: #fff2d9;
+            color: #895500;
+        }
+
+        .review-chip {
+            background: #fdeaea;
+            color: #a61c1c;
+        }
+
+        .ok-chip {
+            background: #eaf7ed;
+            color: #1c6d29;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .matrix-table {
+            width: 100%;
+            min-width: 620px;
+            border-collapse: collapse;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            padding: 11px 10px;
+            border-bottom: 1px solid #e5edf3;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .matrix-table th:first-child,
+        .matrix-table td:first-child {
+            text-align: left;
+        }
+
+        .matrix-table th {
+            background: #f0f5fa;
+            color: #344d65;
+            font-size: 13px;
+        }
+
+        .indicator-cell {
+            min-width: 115px;
+            line-height: 1.45;
+        }
+
+        .indicator-cell strong {
+            color: var(--green);
+        }
+
+        .indicator-cell span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .person-table {
+            min-width: 1320px;
+        }
+
+        .person-name {
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .muted {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .empty-state {
+            padding: 34px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-state strong {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--ink);
+            font-size: 18px;
+        }
+
+        @media (max-width: 1180px) {
+            .metric-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .trend-header-inner,
+            .target-card,
+            .toolbar,
+            .panel-header {
+                display: block;
+            }
+
+            .header-actions,
+            .toolbar .button,
+            .target-card .lock-pill,
+            .panel-header .count-badge {
+                margin-top: 13px;
+            }
+
+            .metric-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="trend-header">
+    <div class="trend-header-inner">
+        <div>
+            <p class="trend-eyebrow">2.4.3 · DASHBOARD LỘ TRÌNH VÀ XU HƯỚNG</p>
+            
+
+<h1>Dashboard lộ trình PCGDMN 2026–2030</h1>
+            <p>Mô phỏng xu hướng theo năm đăng ký trong lộ trình 2026–2030; dữ liệu điều tra hiện có được giữ làm phần tham chiếu phía dưới.</p>
+        </div>
+
+        <div>
+            <div style="text-align:right;line-height:1.45;margin-bottom:10px;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px;opacity:.9;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <a class="button button-light" href="/dieu-tra/{{ target_batch.id }}/bao-cao-tong-hop">
+                    ← Báo cáo năm đích
+                </a>
+                <a class="button button-light" href="/dieu-tra">
+                    Danh sách đợt
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="page-wrap">
+<!-- === BAI_13B_12_V2_4_4_6_2_ROADMAP_SIM_START === -->
+<section id="pcgd-recognition-dashboard" class="pcgd-db">
+  <div class="pcgd-db-head">
+    <div>
+      <span class="pcgd-simulation-badge">MÔ PHỎNG THEO LỘ TRÌNH · KHÔNG PHẢI KẾT QUẢ CÔNG NHẬN</span>
+      <div class="pcgd-db-kicker">2.4.3 · DASHBOARD LỘ TRÌNH VÀ XU HƯỚNG</div>
+      <h1>Dashboard mô phỏng lộ trình PCGDMN 2026–2030</h1>
+      <p>
+        Mô phỏng xu hướng theo năm đăng ký trong lộ trình PCGDMN 2026–2030; dữ liệu điều tra hiện có chỉ dùng làm thông tin tham chiếu, không thay thế kết luận công nhận thực tế.
+      </p>
+    </div>
+    <div class="pcgd-db-tabs">
+      <button type="button" class="pcgd-tab active" data-tab="roadmap">
+        Trẻ 3–5 tuổi · Lộ trình
+      </button>
+      <button type="button" class="pcgd-tab" data-tab="five">
+        Trẻ 5 tuổi · NĐ20
+      </button>
+    </div>
+  </div>
+
+  <div id="pcgd-db-warning" class="pcgd-db-warning" hidden></div>
+
+  <div class="pcgd-db-cards">
+    <article><span>Tổng xã/phường</span><strong id="db-total">–</strong></article>
+    <article><span>Đăng ký theo lộ trình năm nay</span><strong id="db-due">–</strong></article>
+    <article><span>Điều tra hoàn thành</span><strong id="db-complete">–</strong></article>
+    <article><span>Đủ 2 chỉ tiêu trẻ 5 tuổi</span><strong id="db-five-pass">–</strong></article>
+    <article><span>Xã ĐBKK</span><strong id="db-special">–</strong></article>
+  </div>
+
+  <div class="pcgd-db-grid">
+    <section class="pcgd-panel">
+      <div class="pcgd-panel-head">
+        <div>
+          <small>MÔ PHỎNG KẾ HOẠCH 2026–2030</small>
+          <h2>Phân bố xã/phường theo năm đăng ký</h2>
+        </div>
+        <span id="db-roadmap-loaded" class="pcgd-pill">–</span>
+      </div>
+      <div id="db-roadmap-bars" class="pcgd-bars"></div>
+    </section>
+
+    <section class="pcgd-panel">
+      <div class="pcgd-panel-head">
+        <div>
+          <small>BỘ LỌC</small>
+          <h2>Danh sách xã/phường</h2>
+        </div>
+      </div>
+      <div class="pcgd-filter-row">
+        <input id="db-search" type="search" placeholder="Tìm xã/phường...">
+        <select id="db-year-filter">
+          <option value="">Tất cả năm lộ trình</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+          <option value="2030">2030</option>
+          <option value="NONE">Chưa có lộ trình</option>
+        </select>
+        <select id="db-status-filter">
+          <option value="">Tất cả trạng thái</option>
+          <option value="DUE">Năm đăng ký</option>
+          <option value="LATE">Quá năm đăng ký</option>
+          <option value="ON_TRACK">Chưa đến năm đăng ký</option>
+          <option value="PASS">5 tuổi đạt 2 chỉ tiêu</option>
+          <option value="FAIL">5 tuổi chưa đạt 2 chỉ tiêu</option>
+          <option value="DATA">Chưa đủ dữ liệu</option>
+        </select>
+      </div>
+    </section>
+  </div>
+
+  <section class="pcgd-panel pcgd-table-panel">
+    <div class="pcgd-panel-head">
+      <div>
+        <small>THEO DÕI CHI TIẾT</small>
+        <h2 id="db-table-title">Lộ trình 3–5 tuổi và mức sẵn sàng dữ liệu</h2>
+      </div>
+      <span id="db-row-count" class="pcgd-pill">0 xã/phường</span>
+    </div>
+
+    <div class="pcgd-table-wrap">
+      <table class="pcgd-table">
+        <thead id="db-table-head"></thead>
+        <tbody id="db-table-body">
+          <tr><td>Đang tải dashboard...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="pcgd-db-notes">
+    <strong>Lưu ý nghiệp vụ:</strong>
+    <span>
+      Đây là xu hướng giả lập theo lộ trình 2026–2030, không phải kết quả công nhận đạt chuẩn thực tế. Kết quả trẻ 5 tuổi chỉ phản ánh các chỉ tiêu trẻ em có nguồn dữ liệu trực tiếp.
+    </span>
+  </div>
+</section>
+
+<style>
+.pcgd-db{margin:0 0 28px;padding:24px;border:1px solid #d9e7f5;border-radius:20px;background:#f7fbff;color:#17324d;box-shadow:0 10px 30px rgba(23,50,77,.08)}
+.pcgd-db *{box-sizing:border-box}
+.pcgd-db-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
+.pcgd-db-kicker,.pcgd-panel-head small{font-size:12px;font-weight:900;letter-spacing:.08em;color:#0b6dc6}
+.pcgd-db-head h1{margin:4px 0 6px;font-size:30px}
+.pcgd-db-head p{margin:0;color:#64778a;max-width:760px;line-height:1.5}
+.pcgd-simulation-badge{display:inline-flex;margin-bottom:8px;padding:7px 10px;border-radius:999px;background:#fff0c7;color:#7a5700;border:1px solid #efd48c;font-size:11px;font-weight:900;letter-spacing:.03em}
+.pcgd-db-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.pcgd-tab{border:1px solid #c9dceb;background:#fff;color:#24506f;padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer}
+.pcgd-tab.active{background:#0b6dc6;color:#fff;border-color:#0b6dc6}
+.pcgd-db-warning{padding:10px 12px;margin:0 0 14px;border:1px solid #f1c56d;background:#fff8e8;border-radius:10px;color:#835e12}
+.pcgd-db-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:16px 0}
+.pcgd-db-cards article{background:#fff;border:1px solid #dce9f4;border-radius:14px;padding:14px}
+.pcgd-db-cards span{display:block;font-size:12px;color:#6c7e8e;font-weight:700}
+.pcgd-db-cards strong{display:block;margin-top:5px;font-size:28px;color:#0757a3}
+.pcgd-db-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:14px;margin:14px 0}
+.pcgd-panel{background:#fff;border:1px solid #dce9f4;border-radius:16px;padding:16px}
+.pcgd-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.pcgd-panel-head h2{margin:3px 0 0;font-size:19px}
+.pcgd-pill{display:inline-flex;padding:6px 10px;border-radius:999px;background:#edf6ff;color:#0b5ca8;font-size:12px;font-weight:900}
+.pcgd-bars{display:grid;gap:9px}
+.pcgd-bar-row{display:grid;grid-template-columns:54px 1fr 45px;align-items:center;gap:9px;font-size:13px}
+.pcgd-bar-track{height:11px;border-radius:999px;background:#e8eef5;overflow:hidden}
+.pcgd-bar-fill{height:100%;background:linear-gradient(90deg,#0b6dc6,#5aa9ef);border-radius:999px}
+.pcgd-filter-row{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px}
+.pcgd-filter-row input,.pcgd-filter-row select{width:100%;height:42px;border:1px solid #cbd9e5;border-radius:10px;padding:0 11px;background:#fff}
+.pcgd-table-panel{margin-top:14px}
+.pcgd-table-wrap{overflow:auto;border:1px solid #e1eaf2;border-radius:12px}
+.pcgd-table{width:100%;border-collapse:collapse;min-width:1050px;font-size:13px}
+.pcgd-table th{position:sticky;top:0;background:#edf5fc;color:#25445f;text-align:left;padding:11px;border-bottom:1px solid #d7e3ed;white-space:nowrap}
+.pcgd-table td{padding:11px;border-bottom:1px solid #edf1f5;vertical-align:top}
+.pcgd-table tbody tr:hover{background:#f8fbfe}
+.pcgd-status{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:900;white-space:nowrap}
+.pcgd-s-DUE{background:#fff0c7;color:#8a6000}.pcgd-s-LATE,.pcgd-s-FAIL{background:#ffe7e5;color:#a61c12}.pcgd-s-ON_TRACK,.pcgd-s-PASS{background:#e3f7e9;color:#18743b}.pcgd-s-DATA,.pcgd-s-EMPTY,.pcgd-s-NONE{background:#edf1f5;color:#5c6b78}
+.pcgd-metric{font-weight:900}.pcgd-muted{color:#7a8b99;font-size:12px}.pcgd-db-notes{margin-top:14px;padding:12px 14px;border-radius:12px;background:#eef7ff;color:#355c7b;line-height:1.5}
+@media(max-width:1000px){.pcgd-db-cards{grid-template-columns:repeat(2,1fr)}.pcgd-db-grid{grid-template-columns:1fr}.pcgd-db-head{flex-direction:column}.pcgd-filter-row{grid-template-columns:1fr}}
+@media(max-width:600px){.pcgd-db{padding:14px}.pcgd-db-cards{grid-template-columns:1fr}.pcgd-db-head h1{font-size:24px}}
+</style>
+
+<script>
+(function(){
+  const root=document.getElementById('pcgd-recognition-dashboard');
+  if(!root) return;
+
+  let DATA=null;
+  let TAB='roadmap';
+
+  const el=id=>document.getElementById(id);
+  const fmt=v=>(v===null||v===undefined)?'—':String(v);
+  const pct=v=>(v===null||v===undefined)?'—':Number(v).toFixed(2)+'%';
+  const badge=(text,code)=>`<span class="pcgd-status pcgd-s-${code||'DATA'}">${text}</span>`;
+
+  function endpoint(){
+    return window.location.pathname
+      .replace(/\/xu-huong-lien-nam\/?$/,'/dashboard-dat-chuan-data');
+  }
+
+  function renderCards(){
+    const s=DATA.summary||{};
+    el('db-total').textContent=fmt(s.total_communes);
+    el('db-due').textContent=fmt(s.roadmap_current_year);
+    el('db-complete').textContent=fmt(s.survey_complete);
+    el('db-five-pass').textContent=fmt(s.five_child_indicator_pass);
+    el('db-special').textContent=fmt(s.special_difficulty);
+    el('db-roadmap-loaded').textContent=`Lộ trình ${fmt(DATA.roadmap_loaded)}/${fmt(s.total_communes)}`;
+  }
+
+  function renderBars(){
+    const wrap=el('db-roadmap-bars');
+    const counts=DATA.target_counts||{};
+    const years=['2026','2027','2028','2029','2030'];
+    const max=Math.max(1,...years.map(y=>Number(counts[y]||0)));
+    wrap.innerHTML=years.map(y=>{
+      const n=Number(counts[y]||0);
+      const width=Math.round(n*100/max);
+      return `<div class="pcgd-bar-row"><strong>${y}</strong><div class="pcgd-bar-track"><div class="pcgd-bar-fill" style="width:${width}%"></div></div><span>${n} xã</span></div>`;
+    }).join('');
+  }
+
+  function filteredRows(){
+    const q=el('db-search').value.trim().toLowerCase();
+    const year=el('db-year-filter').value;
+    const status=el('db-status-filter').value;
+
+    return (DATA.rows||[]).filter(r=>{
+      if(q && !(`${r.name} ${r.code}`.toLowerCase().includes(q))) return false;
+
+      if(year){
+        if(year==='NONE'){
+          if(r.target_year_3_5!==null) return false;
+        }else if(String(r.target_year_3_5)!==year){
+          return false;
+        }
+      }
+
+      if(status){
+        const codes=[r.roadmap_code,r.five_status_code];
+        if(!codes.includes(status)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderTable(){
+    const rows=filteredRows();
+    el('db-row-count').textContent=`${rows.length} xã/phường`;
+
+    if(TAB==='roadmap'){
+      el('db-table-title').textContent='Lộ trình 3–5 tuổi và mức sẵn sàng dữ liệu';
+      el('db-table-head').innerHTML=`<tr>
+        <th>Xã/phường</th><th>Năm đăng ký</th><th>Trạng thái lộ trình</th>
+        <th>Tiến độ điều tra</th><th>Trẻ 3–5 trong dữ liệu</th>
+        <th>Đang học</th><th>Tỷ lệ huy động dữ liệu</th><th>Ghi chú</th>
+      </tr>`;
+      el('db-table-body').innerHTML=rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong><div class="pcgd-muted">${r.code}${r.is_special?' · ĐBKK':''}</div></td>
+        <td class="pcgd-metric">${fmt(r.target_year_3_5)}</td>
+        <td>${badge(r.roadmap_status,r.roadmap_code)}</td>
+        <td><strong>${r.completed_forms}/${r.forms}</strong><div class="pcgd-muted">${r.survey_complete?'Hoàn thành':'Chưa hoàn thành'}</div></td>
+        <td>${r.age_3_5_total}</td>
+        <td>${r.age_3_5_attending}</td>
+        <td class="pcgd-metric">${pct(r.rate_3_5_attending)}</td>
+        <td class="pcgd-muted">Chỉ báo trẻ em; chưa thay kết luận chuẩn toàn diện.</td>
+      </tr>`).join('') || '<tr><td colspan="8">Không có dữ liệu phù hợp.</td></tr>';
+    }else{
+      el('db-table-title').textContent='Trẻ 5 tuổi – so sánh 2 chỉ tiêu trẻ em theo NĐ20';
+      el('db-table-head').innerHTML=`<tr>
+        <th>Xã/phường</th><th>Nhóm ngưỡng</th><th>Trẻ 5 tuổi</th>
+        <th>Đến lớp</th><th>Ngưỡng đến lớp</th>
+        <th>Hoàn thành CTGDMN</th><th>Ngưỡng hoàn thành</th><th>Đánh giá</th>
+      </tr>`;
+      el('db-table-body').innerHTML=rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong><div class="pcgd-muted">${r.code}</div></td>
+        <td>${r.is_special?badge('ĐBKK','DUE'):badge('Thông thường','DATA')}</td>
+        <td>${r.age_5_total}</td>
+        <td class="pcgd-metric">${r.age_5_attending} · ${pct(r.rate_5_attending)}</td>
+        <td>≥ ${r.attend_threshold}%</td>
+        <td class="pcgd-metric">${r.age_5_completed} · ${pct(r.rate_5_completed)}</td>
+        <td>≥ ${r.complete_threshold}%</td>
+        <td>${badge(r.five_status,r.five_status_code)}</td>
+      </tr>`).join('') || '<tr><td colspan="8">Không có dữ liệu phù hợp.</td></tr>';
+    }
+  }
+
+  function render(){
+    renderCards();
+    renderBars();
+    renderTable();
+    if(DATA.roadmap_warning){
+      const w=el('pcgd-db-warning');
+      w.hidden=false;
+      w.textContent=DATA.roadmap_warning;
+    }
+  }
+
+  root.querySelectorAll('.pcgd-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      root.querySelectorAll('.pcgd-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      TAB=btn.dataset.tab;
+      renderTable();
+    });
+  });
+
+  ['db-search','db-year-filter','db-status-filter'].forEach(id=>{
+    el(id).addEventListener('input',renderTable);
+    el(id).addEventListener('change',renderTable);
+  });
+
+  fetch(endpoint(),{headers:{'Accept':'application/json'},cache:'no-store'})
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data.ok) throw new Error(data.message||'Không tải được dashboard.');
+      DATA=data;
+      render();
+    })
+    .catch(err=>{
+      el('db-table-body').innerHTML=`<tr><td>Lỗi tải dashboard: ${String(err.message||err)}</td></tr>`;
+    });
+})();
+</script>
+<!-- === BAI_13B_12_V2_4_4_6_2_ROADMAP_SIM_END === -->
+
+
+
+    {% if trend.summary.year_total > 1 %}
+        <div class="notice">
+            Đã tạo chuỗi theo dõi từ năm học <strong>{{ trend.summary.first_year }}</strong>
+            đến <strong>{{ trend.summary.latest_year }}</strong>. Mỗi năm học sử dụng một
+            đợt đại diện; hệ thống ưu tiên đợt đã khóa và mới nhất.
+        </div>
+    {% else %}
+        <div class="notice notice-warning">
+            Hiện mới có một năm học phù hợp trong cùng xã/phường. Báo cáo vẫn
+            hiển thị số liệu hiện tại; xu hướng sẽ rõ hơn sau khi có thêm dữ liệu năm sau.
+        </div>
+    {% endif %}
+
+    <section class="target-card">
+        <div>
+            <p class="panel-label">ĐỢT ĐÍCH · {{ target_batch.code }}</p>
+            <h2>{{ target_batch.name }}</h2>
+            <p class="target-meta">
+                Năm học {{ target_batch.school_year.code }} · {{ target_batch.commune.name }}
+            </p>
+            <p class="target-meta">Phạm vi tài khoản: {{ scope_label }}</p>
+        </div>
+
+        <span class="lock-pill {% if not target_batch.is_locked %}open{% endif %}">
+            {% if target_batch.is_locked %}
+                🔒 ĐÃ KHÓA DỮ LIỆU
+            {% else %}
+                🔓 ĐANG MỞ CẬP NHẬT
+            {% endif %}
+        </span>
+    </section>
+
+    <section class="toolbar">
+        <div class="toolbar-note">
+            Báo cáo này chỉ đọc dữ liệu hiện có, không thêm, sửa hoặc khóa bất kỳ đợt điều tra nào.
+        </div>
+        <a
+            class="button button-primary"
+            href="/dieu-tra/{{ target_batch.id }}/xu-huong-lien-nam/xuat-excel"
+        >
+            📈 Xuất Excel xu hướng liên năm
+        </a>
+    </section>
+
+    <section class="metric-grid">
+        <article class="metric-card">
+            <p class="metric-label">Số năm học trong chuỗi</p>
+            <p class="metric-value">{{ trend.summary.year_total }}</p>
+            <p class="metric-sub">{{ trend.summary.first_year }} → {{ trend.summary.latest_year }}</p>
+        </article>
+
+        <article class="metric-card">
+            <p class="metric-label">Hộ năm mới nhất</p>
+            <p class="metric-value">{{ trend.summary.latest_households }}</p>
+            <p class="metric-sub">
+                Biến động đầu-cuối:
+                <span class="{% if trend.summary.household_change > 0 %}delta-positive{% elif trend.summary.household_change < 0 %}delta-negative{% else %}delta-neutral{% endif %}">
+                    {% if trend.summary.household_change > 0 %}+{% endif %}{{ trend.summary.household_change }}
+                </span>
+            </p>
+        </article>
+
+        <article class="metric-card">
+            <p class="metric-label">Đối tượng năm mới nhất</p>
+            <p class="metric-value">{{ trend.summary.latest_people }}</p>
+            <p class="metric-sub">
+                Biến động đầu-cuối:
+                <span class="{% if trend.summary.people_change > 0 %}delta-positive{% elif trend.summary.people_change < 0 %}delta-negative{% else %}delta-neutral{% endif %}">
+                    {% if trend.summary.people_change > 0 %}+{% endif %}{{ trend.summary.people_change }}
+                </span>
+            </p>
+        </article>
+
+        <article class="metric-card">
+            <p class="metric-label">Đang học năm mới nhất</p>
+            <p class="metric-value">{{ trend.summary.latest_attending }}</p>
+            <p class="metric-sub">Theo hồ sơ năm {{ trend.summary.latest_year }}</p>
+        </article>
+
+        <article class="metric-card">
+            <p class="metric-label">Cần rà soát năm mới nhất</p>
+            <p class="metric-value" style="color:{% if trend.summary.latest_review %}#c62828{% else %}#198754{% endif %};">
+                {{ trend.summary.latest_review }}
+            </p>
+            <p class="metric-sub">Thiếu trạng thái, trường hoặc chỉ báo</p>
+        </article>
+
+        <article class="metric-card">
+            <p class="metric-label">Năm đích đang xem</p>
+            <p class="metric-value" style="font-size:22px;">{{ target_batch.school_year.code }}</p>
+            <p class="metric-sub">{{ target_batch.commune.name }}</p>
+        </article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">TỔNG HỢP THEO NĂM</p>
+                <h2>Quy mô và chất lượng dữ liệu</h2>
+                <p class="panel-description">
+                    Mỗi dòng là một đợt đại diện của năm học tương ứng trong cùng xã/phường.
+                </p>
+            </div>
+            <span class="count-badge">{{ trend.year_rows|length }} năm học</span>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="trend-table">
+                <thead>
+                    <tr>
+                        <th>Năm học / đợt</th>
+                        <th>Trạng thái</th>
+                        <th>Hộ</th>
+                        <th>Phiếu</th>
+                        <th>Hoàn thành</th>
+                        <th>Đối tượng</th>
+                        <th>Biến động ĐT</th>
+                        <th>Đã xác định học tập</th>
+                        <th>Đang học</th>
+                        <th>Hoàn thành CTGDMN theo độ tuổi</th>
+                        <th>Nhập chỉ báo cần theo dõi</th>
+                        <th>Cần rà soát</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in trend.year_rows %}
+                        <tr>
+                            <td>
+                                <span class="year-chip">{{ row.year_code }}</span>
+                                <div class="muted"><strong>{{ row.batch.code }}</strong></div>
+                                <div class="muted">{{ row.batch.name }}</div>
+                            </td>
+                            <td>
+                                <span class="status-chip {% if not row.is_locked %}open{% endif %}">
+                                    {{ row.status_label }}
+                                </span>
+                            </td>
+                            <td><strong>{{ row.households_total }}</strong></td>
+                            <td>{{ row.forms_total }}</td>
+                            <td>{{ row.completed_forms }}/{{ row.forms_total }}</td>
+                            <td><strong>{{ row.people_total }}</strong></td>
+                            <td>
+                                {% if row.delta_people is none %}
+                                    <span class="delta-neutral">—</span>
+                                {% else %}
+                                    <span class="{% if row.delta_people > 0 %}delta-positive{% elif row.delta_people < 0 %}delta-negative{% else %}delta-neutral{% endif %}">
+                                        {% if row.delta_people > 0 %}+{% endif %}{{ row.delta_people }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ row.learning_known }}/{{ row.people_total }}</td>
+                            <td>{{ row.attending_total }}</td>
+                            <td>{{ row.preschool_completed }}</td>
+                            <td><strong>{{ row.indicator_completion_percent }}%</strong></td>
+                            <td>
+                                {% if row.review_total %}
+                                    <span class="review-chip">{{ row.review_total }}</span>
+                                {% else %}
+                                    <span class="review-chip ok-chip">0</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="two-column">
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">TRẠNG THÁI HỌC TẬP</p>
+                    <h2>Phân bố qua từng năm</h2>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Trạng thái</th>
+                            {% for year_code in trend.year_codes %}
+                                <th>{{ year_code }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in trend.learning_rows %}
+                            <tr>
+                                <td><strong>{{ row.label }}</strong></td>
+                                {% for value in row["values"] %}
+                                    <td>{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">CHỈ BÁO NĂM HỌC</p>
+                    <h2>Kết quả Có / Không / Chưa xác định</h2>
+                    <!-- === BAI_13B_12_V2_4_4_6_6_TREND_UI === -->
+                    <p class="panel-description">Chỉ hiển thị chỉ báo còn theo dõi; chỉ báo không áp dụng cho đối tượng không tính vào “Chưa xác định”.</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Chỉ báo</th>
+                            {% for year_code in trend.year_codes %}
+                                <th>{{ year_code }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in trend.indicator_rows %}
+                            <tr>
+                                <td><strong>{{ row.label }}</strong></td>
+                                {% for value in row.years %}
+                                    <td class="indicator-cell">
+                                        <strong>Có {{ value.yes }}</strong><br>
+                                        <span>Không {{ value.no }} · Chưa rõ {{ value.unknown }}</span>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">LỊCH SỬ ĐỐI TƯỢNG</p>
+                <h2>Theo dõi liên tục qua các năm học</h2>
+                <p class="panel-description">
+                    Trạng thái mới nhất được lấy từ năm đích {{ target_batch.school_year.code }}.
+                </p>
+            </div>
+            <span class="count-badge">{{ trend.person_rows|length }} đối tượng</span>
+        </div>
+
+        {% if trend.person_rows %}
+            <div class="table-wrapper">
+                <table class="trend-table person-table">
+                    <thead>
+                        <tr>
+                            <th>Đối tượng / hộ</th>
+                            <th>Số năm theo dõi</th>
+                            <th>Diễn biến trạng thái</th>
+                            <th>Trạng thái mới nhất</th>
+                            <th>Trường / lớp mới nhất</th>
+                            <th>Chỉ báo mới nhất</th>
+                            <th>Kết quả rà soát</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for person in trend.person_rows %}
+                            <tr>
+                                <td>
+                                    <div class="person-name">{{ person.full_name }}</div>
+                                    <div class="muted">{{ person.person_code }}</div>
+                                    <div class="muted">
+                                        {{ person.household_code }} · Chủ hộ {{ person.head_name }}
+                                    </div>
+                                </td>
+                                <td><strong>{{ person.years_tracked }}</strong></td>
+                                <td>{{ person.status_path }}</td>
+                                <td><strong>{{ person.latest_learning }}</strong></td>
+                                <td>
+                                    {{ person.latest_school }}
+                                    <div class="muted">Lớp: {{ person.latest_classroom }}</div>
+                                </td>
+                                <td>
+                                    <strong>{{ person.latest_answered }}/{{ person.latest_indicator_total }}</strong>
+                                </td>
+                                <td>
+                                    {% if person.latest_needs_review %}
+                                        <span class="review-chip">Cần rà soát</span>
+                                    {% else %}
+                                        <span class="review-chip ok-chip">Đạt yêu cầu</span>
+                                    {% endif %}
+                                    <div class="muted">{{ person.latest_review_text }}</div>
+                                </td>
+                                <td>
+                                    {% if person.latest_household_id %}
+                                        <a
+                                            class="button button-small button-secondary"
+                                            href="/dieu-tra/{{ target_batch.id }}/ho-dan/{{ person.latest_household_id }}/doi-tuong/{{ person.person_id }}/nam-hoc?school_year_id={{ target_batch.school_year.id }}"
+                                        >
+                                            Xem hồ sơ năm đích
+                                        </a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <strong>Chưa có lịch sử đối tượng</strong>
+                Chưa tìm thấy hồ sơ năm học trong phạm vi tài khoản.
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">ƯU TIÊN XỬ LÝ</p>
+                <h2>Hồ sơ năm mới nhất cần rà soát</h2>
+            </div>
+            <span class="count-badge">{{ trend.latest_review_rows|length }} hồ sơ</span>
+        </div>
+
+        {% if trend.latest_review_rows %}
+            <div class="table-wrapper">
+                <table class="trend-table" style="min-width:1000px;">
+                    <thead>
+                        <tr>
+                            <th>Đối tượng</th>
+                            <th>Hộ gia đình</th>
+                            <th>Trạng thái</th>
+                            <th>Trường / lớp</th>
+                            <th>Chỉ báo</th>
+                            <th>Nội dung cần rà soát</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for person in trend.latest_review_rows %}
+                            <tr>
+                                <td>
+                                    <strong>{{ person.full_name }}</strong>
+                                    <div class="muted">{{ person.person_code }}</div>
+                                </td>
+                                <td>
+                                    {{ person.household_code }}
+                                    <div class="muted">{{ person.head_name }}</div>
+                                </td>
+                                <td>{{ person.latest_learning }}</td>
+                                <td>
+                                    {{ person.latest_school }}
+                                    <div class="muted">{{ person.latest_classroom }}</div>
+                                </td>
+                                <td>{{ person.latest_answered }}/{{ person.latest_indicator_total }}</td>
+                                <td>{{ person.latest_review_text }}</td>
+                                <td>
+                                    {% if person.latest_household_id %}
+                                        <a
+                                            class="button button-small button-primary"
+                                            href="/dieu-tra/{{ target_batch.id }}/ho-dan/{{ person.latest_household_id }}/doi-tuong/{{ person.person_id }}/nam-hoc?school_year_id={{ target_batch.school_year.id }}"
+                                        >
+                                            Mở hồ sơ
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <strong>Dữ liệu năm mới nhất đã đầy đủ</strong>
+                Không có hồ sơ nào thiếu trạng thái học tập, trường hoặc chỉ báo.
+            </div>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

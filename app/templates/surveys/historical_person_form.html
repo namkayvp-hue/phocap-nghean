@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if person %}Sửa đối tượng lịch sử{% else %}Thêm đối tượng lịch sử{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .form-card {max-width:1100px;margin:0 auto;}
+        .form-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+        .form-grid .wide {grid-column:1/-1;}
+        .form-grid .span-2 {grid-column:span 2;}
+        .control {width:100%;padding:11px 12px;border:1px solid #c9d5e2;border-radius:9px;background:#fff;font:inherit;}
+        .indicator-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+        .indicator-card {border:1px solid #dfe7ef;border-radius:11px;padding:13px;background:#fbfdff;}
+        .muted {color:#65788c;font-size:13px;line-height:1.55;}
+        @media(max-width:950px){.form-grid{grid-template-columns:1fr 1fr}.indicator-grid{grid-template-columns:1fr 1fr}.form-grid .span-2{grid-column:span 2;}}
+        @media(max-width:650px){.form-grid,.indicator-grid{grid-template-columns:1fr}.form-grid .wide,.form-grid .span-2{grid-column:auto;}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">BÀI 12D-14A · ĐỐI TƯỢNG LỊCH SỬ</p>
+            <h1>{% if person %}Sửa thông tin đối tượng{% else %}Thêm đối tượng vào hộ{% endif %}</h1>
+            <p>{{ household.household_code }} · Chủ hộ {{ household.head_name }} · {{ dataset.school_year.code }}</p>
+        </div>
+        <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}">← Quay lại bộ dữ liệu</a>
+    </div>
+</header>
+<main class="admin-container">
+    <section class="panel form-card">
+        {% if error_message %}<div class="alert alert-error">{{ error_message }}</div>{% endif %}
+        <div class="panel-header"><div><p class="panel-label">THÔNG TIN CÁ NHÂN</p><h2>{% if person %}Cập nhật {{ person.full_name }}{% else %}Đối tượng mới{% endif %}</h2></div></div>
+        <p class="muted">Mã đối tượng, số định danh và mã học sinh Bộ GD&amp;ĐT sẽ được dùng để đối chiếu với dữ liệu học sinh ở Bài 12D-14B.</p>
+        <form method="post" action="{% if person %}/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/doi-tuong/{{ person.id }}/sua{% else %}/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/ho/{{ household.id }}/doi-tuong/them{% endif %}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="person_code">Mã đối tượng {% if not person %}<span class="muted">(để trống để tự sinh)</span>{% endif %}</label>
+                    <input id="person_code" name="person_code" class="control" value="{{ person.person_code if person else '' }}" {% if person %}required{% endif %} maxlength="80">
+                </div>
+                <div class="form-group span-2">
+                    <label for="full_name">Họ và tên</label>
+                    <input id="full_name" name="full_name" class="control" value="{{ person.full_name if person else '' }}" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="date_of_birth">Ngày sinh</label>
+                    <input id="date_of_birth" name="date_of_birth" type="date" class="control" value="{{ person.date_of_birth.isoformat() if person and person.date_of_birth else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Giới tính</label>
+                    <select id="gender" name="gender" class="control">
+                        <option value="">-- Chưa xác định --</option>
+                        {% for value in ['Nam','Nữ','Khác'] %}<option value="{{ value }}" {% if person and person.gender == value %}selected{% endif %}>{{ value }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ethnic_group">Dân tộc</label>
+                    <input id="ethnic_group" name="ethnic_group" class="control" value="{{ person.ethnic_group if person and person.ethnic_group else '' }}" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="birth_place">Nơi sinh</label>
+                    <input id="birth_place" name="birth_place" class="control" value="{{ person.birth_place if person and person.birth_place else '' }}" maxlength="500">
+                </div>
+                <div class="form-group">
+                    <label for="father_name">Họ tên cha</label>
+                    <input id="father_name" name="father_name" class="control" value="{{ person.father_name if person and person.father_name else '' }}" maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="mother_name">Họ tên mẹ</label>
+                    <input id="mother_name" name="mother_name" class="control" value="{{ person.mother_name if person and person.mother_name else '' }}" maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="contact_phone">Điện thoại liên hệ đối tượng</label>
+                    <input id="contact_phone" name="contact_phone" class="control" value="{{ person.contact_phone if person and person.contact_phone else '' }}" maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label for="relationship_to_head">Quan hệ với chủ hộ</label>
+                    <input id="relationship_to_head" name="relationship_to_head" class="control" value="{{ person.relationship_to_head if person and person.relationship_to_head else '' }}" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="personal_id">Số định danh cá nhân/CCCD</label>
+                    <input id="personal_id" name="personal_id" class="control" value="{{ person.personal_id if person and person.personal_id else '' }}" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="ministry_student_code">Mã học sinh Bộ GD&amp;ĐT</label>
+                    <input id="ministry_student_code" name="ministry_student_code" class="control" value="{{ person.ministry_student_code if person and person.ministry_student_code else '' }}" maxlength="50">
+                </div>
+                <div class="form-group span-2">
+                    <label for="permanent_address">Địa chỉ thường trú</label>
+                    <textarea id="permanent_address" name="permanent_address" class="control" rows="2">{{ person.permanent_address if person and person.permanent_address else '' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="residency_status">Trạng thái cư trú</label>
+                    <select id="residency_status" name="residency_status" class="control">
+                        {% for code,label in residency_labels.items() %}<option value="{{ code }}" {% if person and person.residency_status == code %}selected{% elif not person and code == 'CHUA_XAC_DINH' %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group span-2">
+                    <label for="current_address">Địa chỉ hiện tại</label>
+                    <textarea id="current_address" name="current_address" class="control" rows="2">{{ person.current_address if person and person.current_address else '' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="learning_status">Trạng thái học tập</label>
+                    <select id="learning_status" name="learning_status" class="control">
+                        {% for code,label in learning_labels.items() %}<option value="{{ code }}" {% if person and person.learning_status == code %}selected{% elif not person and code == 'CHUA_XAC_DINH' %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="school_name_reported">Trường gần nhất</label>
+                    <input id="school_name_reported" name="school_name_reported" class="control" value="{{ person.school_name_reported if person and person.school_name_reported else '' }}" maxlength="300">
+                </div>
+                <div class="form-group">
+                    <label for="class_name_reported">Lớp gần nhất</label>
+                    <input id="class_name_reported" name="class_name_reported" class="control" value="{{ person.class_name_reported if person and person.class_name_reported else '' }}" maxlength="200">
+                </div>
+            </div>
+
+            <div class="panel-header" style="margin-top:24px;"><div><p class="panel-label">CHỈ BÁO NĂM HỌC</p><h2>Thông tin tham khảo của năm lịch sử</h2></div></div>
+            <div class="indicator-grid">
+                {% set indicators = [
+                    ('completed_preschool_5','Hoàn thành CT mầm non 5 tuổi'),
+                    ('attends_required_days','Đi học đủ ngày'),
+                    ('attends_regularly','Đi học chuyên cần'),
+                    ('prepared_vietnamese','Được chuẩn bị tiếng Việt'),
+                    ('weight_monitored','Được theo dõi cân nặng'),
+                    ('underweight','Suy dinh dưỡng nhẹ cân'),
+                    ('height_monitored','Được theo dõi chiều cao'),
+                    ('stunted','Suy dinh dưỡng thấp còi')
+                ] %}
+                {% for field,label in indicators %}
+                    <div class="indicator-card">
+                        <label for="{{ field }}">{{ label }}</label>
+                        <select id="{{ field }}" name="{{ field }}" class="control">
+                            <option value="" {% if not person or person[field] is none %}selected{% endif %}>Chưa xác định</option>
+                            <option value="1" {% if person and person[field] is sameas true %}selected{% endif %}>Có</option>
+                            <option value="0" {% if person and person[field] is sameas false %}selected{% endif %}>Không</option>
+                        </select>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-grid" style="margin-top:18px;">
+                <div class="form-group wide">
+                    <label for="special_circumstances">Hoàn cảnh đặc biệt</label>
+                    <textarea id="special_circumstances" name="special_circumstances" class="control" rows="3">{{ person.special_circumstances if person and person.special_circumstances else '' }}</textarea>
+                </div>
+                <div class="form-group wide">
+                    <label for="notes">Ghi chú đối tượng</label>
+                    <textarea id="notes" name="notes" class="control" rows="3">{{ person.notes if person and person.notes else '' }}</textarea>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
+                <button class="button button-primary" type="submit">💾 {% if person %}Lưu thay đổi{% else %}Thêm đối tượng{% endif %}</button>
+                <a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}">Hủy</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

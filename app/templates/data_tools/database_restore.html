@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Khôi phục dữ liệu</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        .restore-page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 24px 18px 50px;
+        }
+        .restore-hero {
+            padding: 24px;
+            border-radius: 16px;
+            background: linear-gradient(135deg,#8a5200,#d58b16);
+            color: #fff;
+        }
+        .restore-hero h1 {
+            margin: 4px 0 8px;
+            font-size: 30px;
+        }
+        .restore-panel {
+            margin-top: 18px;
+            padding: 20px;
+            border: 1px solid #dfe8f1;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(24,54,84,.07);
+        }
+        .restore-panel h2 {
+            margin: 0 0 14px;
+            color: #20364d;
+        }
+        .restore-warn {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border: 1px solid #efcf83;
+            border-radius: 10px;
+            background: #fff7df;
+            color: #755100;
+            line-height: 1.55;
+        }
+        .restore-success {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border: 1px solid #bfe0c6;
+            border-radius: 10px;
+            background: #edf9ef;
+            color: #236533;
+            line-height: 1.55;
+        }
+        .restore-error {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border: 1px solid #efb6b0;
+            border-radius: 10px;
+            background: #fff0ef;
+            color: #a1261c;
+            line-height: 1.55;
+        }
+        .restore-select,
+        .restore-input {
+            width: 100%;
+            min-height: 46px;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #cbd8e6;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .restore-backup-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+        .restore-backup-table th,
+        .restore-backup-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e6edf4;
+            text-align: left;
+            vertical-align: top;
+        }
+        .restore-backup-table th {
+            background: #f7f9fc;
+            color: #526b84;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .restore-confirm {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin: 14px 0;
+            line-height: 1.5;
+        }
+        .restore-danger-button {
+            min-height: 48px;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: #b42318;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .restore-danger-button:disabled {
+            background: #cfd4da;
+            color: #717981;
+            cursor: not-allowed;
+        }
+        .restore-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .restore-back-link {
+            display: inline-flex;
+            min-height: 44px;
+            box-sizing: border-box;
+            align-items: center;
+            padding: 9px 14px;
+            border: 1px solid #cbd8e6;
+            border-radius: 8px;
+            color: #285a87;
+            text-decoration: none;
+            font-weight: 700;
+            background: #fff;
+        }
+        .restore-path {
+            overflow-wrap: anywhere;
+        }
+        @media (max-width: 760px) {
+            .restore-backup-table thead {
+                display: none;
+            }
+            .restore-backup-table,
+            .restore-backup-table tbody,
+            .restore-backup-table tr,
+            .restore-backup-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .restore-backup-table tr {
+                padding: 8px 0;
+                border-bottom: 1px solid #e6edf4;
+            }
+            .restore-backup-table td {
+                border-bottom: 0;
+                padding: 5px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include "partials/dropdown_menu_v1.html" %}
+
+    <main class="restore-page">
+        <!-- === BAI_13B_10_V3_20_RESTORE_PAGE === -->
+        <section class="restore-hero">
+            <div style="font-size:12px;font-weight:800;letter-spacing:.6px;opacity:.9;">
+                DANH MỤC → CÔNG CỤ DỮ LIỆU
+            </div>
+            <h1>♻ Khôi phục dữ liệu</h1>
+            <p style="margin:0;line-height:1.55;">
+                Khôi phục toàn bộ <strong>phocap.db</strong> từ một bản Backup đã có.
+                Trước khi ghi dữ liệu, hệ thống sẽ tự tạo thêm một
+                <strong>backup an toàn của database hiện tại</strong>.
+            </p>
+        </section>
+
+        {% if restore_status == "success" %}
+        <div class="restore-success">
+            <strong>✓ Khôi phục dữ liệu thành công.</strong><br>
+            Đã khôi phục từ:
+            <code class="restore-path">C:\PhoCap\exports\{{ selected_backup_name }}\phocap.db</code><br>
+            Backup an toàn trước khi khôi phục:
+            <code class="restore-path">C:\PhoCap\exports\{{ safety_backup_name }}\phocap.db</code><br><br>
+            <strong>Hãy khởi động lại Uvicorn</strong> rồi đăng nhập kiểm tra dữ liệu.
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="restore-error">
+            <strong>Không thể khôi phục dữ liệu.</strong><br>
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <div class="restore-warn">
+            <strong>⚠ Đây là thao tác thay toàn bộ database hiện tại.</strong>
+            Chỉ thực hiện khi đã chọn đúng bản Backup và đã dừng việc nhập/sửa dữ liệu
+            trên các máy khác. Bản Backup được chọn sẽ được kiểm tra
+            <code>integrity_check</code> và <code>foreign_key_check</code>
+            trước khi khôi phục.
+        </div>
+
+        <form
+            method="post"
+            action="/cong-cu-du-lieu/don-du-lieu-dieu-tra/khoi-phuc/thuc-hien"
+            onsubmit="return window.confirm('XÁC NHẬN KHÔI PHỤC TOÀN BỘ DATABASE từ bản Backup đã chọn?');"
+        >
+            <section class="restore-panel">
+                <h2>1. Chọn bản Backup</h2>
+
+                {% if backups %}
+                <select
+                    class="restore-select"
+                    name="backup_name"
+                    required
+                >
+                    <option value="">-- Chọn bản Backup cần khôi phục --</option>
+                    {% for item in backups %}
+                    <option
+                        value="{{ item.name }}"
+                        {% if selected_backup_name == item.name %}selected{% endif %}
+                    >
+                        {{ item.created_at }} · {{ item.type }} · {{ item.size }} · {{ item.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <table class="restore-backup-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Loại backup</th>
+                            <th>Dung lượng</th>
+                            <th>Tên thư mục</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in backups %}
+                        <tr>
+                            <td>{{ item.created_at }}</td>
+                            <td>{{ item.type }}</td>
+                            <td>{{ item.size }}</td>
+                            <td><code>{{ item.name }}</code></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="restore-warn" style="margin-top:0;">
+                    Chưa tìm thấy bản Backup có <code>phocap.db</code> trong
+                    <code>C:\PhoCap\exports</code>.
+                    Hãy quay lại và bấm <strong>BACKUP NGAY</strong> trước.
+                </div>
+                {% endif %}
+            </section>
+
+            <section class="restore-panel">
+                <h2>2. Xác nhận an toàn</h2>
+
+                <label class="restore-confirm">
+                    <input
+                        type="checkbox"
+                        name="confirm_scope"
+                        value="yes"
+                        {% if not backups %}disabled{% endif %}
+                        required
+                    >
+                    <span>
+                        Tôi xác nhận đã chọn đúng bản Backup, hiểu rằng dữ liệu hiện tại
+                        sẽ được thay bằng dữ liệu trong bản Backup, và đã dừng nhập/sửa
+                        dữ liệu trên các máy khác trước khi khôi phục.
+                    </span>
+                </label>
+
+                <div style="margin:14px 0 7px;font-weight:700;">
+                    Nhập chính xác câu xác nhận:
+                </div>
+                <div style="margin-bottom:8px;font-weight:800;color:#a1261c;">
+                    {{ restore_confirm_phrase }}
+                </div>
+                <input
+                    class="restore-input"
+                    type="text"
+                    name="confirm_text"
+                    autocomplete="off"
+                    {% if not backups %}disabled{% endif %}
+                    required
+                >
+
+                <div class="restore-actions" style="margin-top:16px;">
+                    <button
+                        class="restore-danger-button"
+                        type="submit"
+                        {% if not backups %}disabled{% endif %}
+                    >
+                        ♻ KHÔI PHỤC DỮ LIỆU
+                    </button>
+
+                    <a
+                        class="restore-back-link"
+                        href="/cong-cu-du-lieu/don-du-lieu-dieu-tra"
+                    >
+                        ← Quay lại
+                    </a>
+                </div>
+            </section>
+        </form>
+    </main>
+</body>
+</html>

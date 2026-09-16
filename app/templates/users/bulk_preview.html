@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xem trước cấp tài khoản đồng loạt</title>
+    <style>
+        :root {
+            --blue: #176fc1;
+            --blue-dark: #124f8e;
+            --navy: #17365d;
+            --green: #17843b;
+            --orange: #c97a00;
+            --red: #bd2d2d;
+            --line: #d6e2ee;
+            --muted: #607086;
+            --page: #eef4fa;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #172b45;
+            background: var(--page);
+        }
+
+        .hero {
+            background: linear-gradient(120deg, #1454a0, #1976d2);
+            color: #fff;
+            padding: 30px 28px;
+        }
+
+        .hero-inner {
+            max-width: 1220px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+            font-size: 13px;
+        }
+
+        h1 { margin: 0; font-size: 34px; }
+        .hero p { margin: 10px 0 0; line-height: 1.55; }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            text-decoration: none;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .button-light { background: #fff; color: #154f8d; }
+        .button-primary { background: var(--blue); color: #fff; }
+        .button-success { background: var(--green); color: #fff; }
+        .button-secondary { background: #e8eff6; color: #213d5d; }
+
+        main {
+            max-width: 1220px;
+            margin: 28px auto 60px;
+            padding: 0 22px;
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(31, 78, 121, 0.08);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .panel-label {
+            margin: 0;
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .panel h2 { margin: 7px 0 10px; font-size: 25px; }
+        .muted { color: var(--muted); line-height: 1.6; }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            font-weight: 700;
+        }
+        .alert-error { color: #9d1c1c; background: #ffe8e8; border: 1px solid #ffc7c7; }
+
+        .scope-box {
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #eaf3fd;
+            border-left: 5px solid var(--blue);
+            font-weight: 800;
+            color: #174f85;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .stat {
+            padding: 17px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #f9fbfd;
+        }
+        .stat span { display: block; color: var(--muted); font-weight: 700; font-size: 14px; }
+        .stat strong { display: block; margin-top: 8px; font-size: 30px; color: var(--navy); }
+        .stat.good strong { color: var(--green); }
+        .stat.warn strong { color: var(--orange); }
+
+        .actions-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+        table { width: 100%; border-collapse: collapse; min-width: 850px; }
+        th, td { padding: 12px 13px; border-bottom: 1px solid #e5edf5; text-align: left; vertical-align: top; }
+        th { background: #e7f0f9; color: #274764; font-size: 13px; }
+        tbody tr:nth-child(even) { background: #f9fbfd; }
+        .sub { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+        .status { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: #fff0ce; color: #8a5b00; font-weight: 900; font-size: 12px; }
+
+        .warning-box {
+            background: #fff7df;
+            border: 1px solid #f3d891;
+            color: #765000;
+            padding: 16px 18px;
+            border-radius: 14px;
+            line-height: 1.6;
+        }
+
+        .confirm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-weight: 900; }
+        .form-group input[type="text"] {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 10px;
+            border: 1px solid #bfcfdf;
+            padding: 10px 13px;
+            font: inherit;
+        }
+
+        .check-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px;
+            border: 1px solid #c9d9e8;
+            border-radius: 12px;
+            background: #f7fafc;
+            line-height: 1.5;
+        }
+        .check-row input { margin-top: 4px; transform: scale(1.2); }
+
+        .submit-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .submit-row small { color: var(--muted); line-height: 1.5; }
+
+        @media (max-width: 900px) {
+            .hero-inner { align-items: flex-start; flex-direction: column; }
+            .stats, .confirm-grid { grid-template-columns: 1fr 1fr; }
+            .submit-row { align-items: stretch; flex-direction: column; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 27px; }
+            .stats, .confirm-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <p class="eyebrow">BÀI 13B-3 · CẤP TÀI KHOẢN HÀNG LOẠT</p>
+            <h1>Xem trước trước khi cấp đồng loạt</h1>
+            <p>Kiểm tra phạm vi, số lượng và danh sách đơn vị. Hệ thống chỉ tạo tài khoản cho đơn vị chưa có.</p>
+        </div>
+        <a class="button button-light" href="{{ url_quay_lai }}">← Quay lại danh sách</a>
+    </div>
+</header>
+
+<main>
+    {% if thong_bao %}
+        <div class="alert alert-error">{{ thong_bao }}</div>
+    {% endif %}
+
+    <section class="panel">
+        <p class="panel-label">PHẠM VI THAO TÁC</p>
+        <h2>{{ ten_loai_don_vi }}</h2>
+        <div class="scope-box">{{ mo_ta_pham_vi }}</div>
+
+        <div class="stats">
+            <div class="stat">
+                <span>Tổng đơn vị trong phạm vi</span>
+                <strong>{{ tong_don_vi }}</strong>
+            </div>
+            <div class="stat good">
+                <span>Đã có tài khoản</span>
+                <strong>{{ da_co_tai_khoan }}</strong>
+            </div>
+            <div class="stat warn">
+                <span>Chưa có tài khoản</span>
+                <strong>{{ chua_co_tai_khoan }}</strong>
+            </div>
+            <div class="stat good">
+                <span>Đủ điều kiện tạo mới</span>
+                <strong>{{ du_dieu_kien }}</strong>
+            </div>
+        </div>
+
+        <div class="actions-row">
+            <a class="button button-success" href="{{ url_xuat_chua_cap }}">📊 Xuất danh sách chưa cấp</a>
+            <a class="button button-secondary" href="{{ url_quay_lai }}">Thay đổi bộ lọc</a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <p class="panel-label">DANH SÁCH XEM TRƯỚC</p>
+        <h2>Các đơn vị sẽ được tạo tài khoản</h2>
+        <p class="muted">
+            Hiển thị tối đa 100 dòng đầu. {% if so_dong_an > 0 %}Còn {{ so_dong_an }} đơn vị khác sẽ được xử lý trong cùng đợt.{% endif %}
+        </p>
+
+        {% if danh_sach_xem_truoc %}
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã xã/phường</th>
+                        <th>Xã/phường</th>
+                        <th>Mã trường</th>
+                        <th>Tên đơn vị</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for dong in danh_sach_xem_truoc %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ dong.xa.code if dong.xa else '' }}</td>
+                            <td>{{ dong.xa.name if dong.xa else '' }}</td>
+                            <td>{{ dong.truong.code if dong.truong else '' }}</td>
+                            <td>
+                                <strong>{{ dong.don_vi.name }}</strong>
+                                <span class="sub">Mã đơn vị: {{ dong.don_vi.code }}</span>
+                            </td>
+                            <td><span class="status">Chưa cấp tài khoản</span></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="warning-box">Không còn đơn vị nào trong phạm vi này cần cấp tài khoản.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <p class="panel-label">XÁC NHẬN AN TOÀN</p>
+        <h2>Tạo tài khoản và tải file Excel bàn giao</h2>
+        <div class="warning-box">
+            <strong>Nguyên tắc:</strong> tài khoản đã có được giữ nguyên; không đặt lại mật khẩu; không sửa tài khoản cán bộ quản lý hoặc giáo viên.
+            Mật khẩu ban đầu chỉ xuất trong file Excel tải xuống sau thao tác và không được lưu dạng đọc được trong cơ sở dữ liệu.
+        </div>
+
+        <form method="post" action="/tai-khoan/cap-dong-loat" id="bulk-create-form">
+            <input type="hidden" name="muc" value="{{ muc_hien_tai }}">
+            <input type="hidden" name="pham_vi" value="{{ pham_vi }}">
+            <input type="hidden" name="q" value="{{ tu_khoa }}">
+            <input type="hidden" name="xa_id" value="{{ xa_da_chon or '' }}">
+            <input type="hidden" name="truong_id" value="{{ truong_da_chon or '' }}">
+
+            <div class="confirm-grid">
+                <label class="check-row">
+                    <input type="checkbox" name="xac_nhan" value="yes" required>
+                    <span>Tôi đã kiểm tra phạm vi và xác nhận tạo mới <strong>{{ du_dieu_kien }}</strong> tài khoản.</span>
+                </label>
+
+                <div class="form-group">
+                    <label for="confirm-phrase">Nhập chính xác: {{ cum_xac_nhan }}</label>
+                    <input id="confirm-phrase" name="cum_xac_nhan" type="text" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="submit-row">
+                <small>
+                    Sau khi xác nhận, phần mềm chuyển sang trang tiến độ. Có thể tải lại trang hoặc chuyển sang thẻ khác; không dừng Terminal cho đến khi hoàn thành.
+                </small>
+                <button class="button button-primary" type="submit" {% if du_dieu_kien == 0 %}disabled{% endif %}>
+                    ✅ Bắt đầu cấp {{ du_dieu_kien }} tài khoản
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script>
+(function () {
+    const form = document.getElementById("bulk-create-form");
+    if (!form) return;
+    form.addEventListener("submit", function (event) {
+        const count = {{ du_dieu_kien }};
+        const confirmed = window.confirm(
+            "Xác nhận tạo mới " + count + " tài khoản? Tài khoản đã có sẽ không bị thay đổi."
+        );
+        if (!confirmed) {
+            event.preventDefault();
+            return;
+        }
+        const button = form.querySelector('button[type="submit"]');
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Đang mở trang theo dõi tiến độ...";
+        }
+    });
+})();
+</script>
+</body>
+</html>
+
+<!-- === BAI_13B_11_11_2_6_UI_START === -->
+<script>
+(function () {
+    function applyTeacherSearchUi() {
+        var params = new URLSearchParams(window.location.search || "");
+        var bodyText = String(document.body ? document.body.innerText : "");
+        var muc = String(params.get("muc") || "").trim().toLowerCase();
+
+        var isTeacherPage =
+            muc === "giao_vien" ||
+            bodyText.indexOf("Quản lý giáo viên") !== -1 ||
+            bodyText.indexOf("Giáo viên của trường") !== -1;
+
+        if (!isTeacherPage) return;
+
+        var input = document.querySelector('input[name="q"]');
+        if (!input) return;
+
+        input.placeholder = "Nhập họ và tên giáo viên";
+        input.title = "Chỉ tìm theo toàn bộ hoặc một phần họ và tên giáo viên";
+
+        var label = null;
+        if (input.id) {
+            label = document.querySelector('label[for="' + input.id + '"]');
+        }
+        if (!label && input.parentElement) {
+            label = input.parentElement.querySelector("label");
+        }
+        if (label) {
+            label.textContent = "Tìm tên giáo viên";
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyTeacherSearchUi);
+    } else {
+        applyTeacherSearchUi();
+    }
+})();
+</script>
+<!-- === BAI_13B_11_11_2_6_UI_END === -->

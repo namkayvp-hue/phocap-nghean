@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biến động và đối tượng cần theo dõi</title>
+    <style>
+        :root{--blue-900:#0e4e9b;--blue-700:#1477d4;--blue-100:#eaf4ff;--ink:#17324f;--muted:#6c8298;--line:#dbe6f0;--surface:#fff;--page:#eef5fb;--green:#138a43;--green-soft:#e9f8ef;--amber:#ae7200;--amber-soft:#fff3d9;--red:#bd2d36;--red-soft:#ffe9eb}
+        *{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.header{background:linear-gradient(120deg,var(--blue-900),var(--blue-700));color:#fff;padding:32px 4vw}.header-inner{max-width:1420px;margin:auto;display:flex;justify-content:space-between;gap:24px;align-items:center}.eyebrow{font-size:14px;font-weight:800;letter-spacing:1px;margin:0 0 8px}h1{font-size:34px;line-height:1.15;margin:0 0 10px}.header p{margin:0;line-height:1.6}.user{text-align:right;line-height:1.45}.nav{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:12px 16px;font-weight:800;text-decoration:none;cursor:pointer;font-size:15px}.button-light{background:#fff;color:var(--blue-900)}.button-primary{background:var(--blue-700);color:#fff}.button-success{background:var(--green);color:#fff}.button-secondary{background:#e7eef5;color:var(--ink)}.button-small{padding:8px 11px;font-size:13px;border-radius:8px}.container{max-width:1420px;margin:0 auto;padding:26px 24px 60px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 7px 22px rgba(24,64,105,.06);margin-bottom:20px}.section-label{color:var(--blue-700);font-weight:900;font-size:13px;letter-spacing:.7px;text-transform:uppercase;margin:0 0 8px}.panel h2{font-size:25px;margin:0 0 8px}.muted{color:var(--muted);line-height:1.55}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:18px}.filters{display:grid;grid-template-columns:1fr 1.2fr 1.45fr 1.35fr 1.5fr .8fr;gap:12px;align-items:end;margin-top:18px}label{display:block;font-size:13px;font-weight:900;margin-bottom:7px}select,input{width:100%;height:45px;border:1px solid #cfddea;border-radius:10px;padding:0 12px;background:#fff;color:var(--ink);font-size:14px}.scope-line{display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--blue-100);border-radius:12px;padding:13px 15px;margin-top:16px;flex-wrap:wrap}.filter-actions{display:flex;gap:8px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(8,1fr);gap:12px;margin:20px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;min-height:108px}.stat span{display:block;color:var(--muted);font-weight:700;font-size:13px;line-height:1.35;min-height:36px}.stat strong{font-size:30px;color:var(--blue-900)}.stat.green strong{color:var(--green)}.stat.red strong{color:var(--red)}.stat.amber strong{color:var(--amber)}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px}table{border-collapse:collapse;width:100%;min-width:1450px}th{background:#e9f2fa;color:#294967;text-align:left;font-size:13px;padding:13px 10px;border-bottom:1px solid var(--line)}td{font-size:13px;padding:13px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}tr:last-child td{border-bottom:0}.strong{font-weight:900}.sub{font-size:12px;color:var(--muted);margin-top:3px}.pill{display:inline-flex;padding:6px 9px;border-radius:999px;font-weight:900;font-size:12px;margin:0 4px 4px 0}.pill.CHUYEN_DEN{background:var(--green-soft);color:var(--green)}.pill.CHUYEN_DI,.pill.BO_HOC,.pill.THOI_HOC{background:var(--red-soft);color:var(--red)}.pill.CHUA_DI_HOC,.pill.TAM_NGHI,.pill.THIEU_DU_LIEU_NAM_HOC{background:var(--amber-soft);color:var(--amber)}.pill.THIEU_SO_DINH_DANH{background:var(--blue-100);color:var(--blue-900)}.empty{text-align:center;padding:45px 20px;color:var(--muted)}.pagination{display:flex;justify-content:center;gap:7px;margin-top:18px;align-items:center}.page-link{padding:9px 12px;border-radius:8px;background:#e7eef5;color:var(--ink);text-decoration:none;font-weight:800}.page-link.current{background:var(--blue-700);color:#fff}.page-link.disabled{opacity:.5;pointer-events:none}@media(max-width:1200px){.filters{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(4,1fr)}}@media(max-width:760px){.header-inner,.panel-head{display:block}.user{text-align:left;margin-top:20px}.nav{justify-content:flex-start}.filters,.stats{grid-template-columns:1fr}.container{padding:16px}.header{padding:26px 18px}h1{font-size:28px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">BÀI 13A-4</p>
+            <h1>Biến động và đối tượng cần theo dõi</h1>
+            <p>Theo dõi chuyển đến, chuyển đi, chưa đi học, bỏ học và các hồ sơ còn thiếu thông tin theo đúng phạm vi tài khoản.</p>
+        </div>
+        <div class="user">
+            <strong>{{ nguoi_dung.full_name }}</strong><br>
+            <span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span>
+            <div class="nav">
+                <a class="button button-light" href="/bao-cao?school_year_id={{ selected_year_id or '' }}&report_type=BIEN_DONG_THEO_DOI{% if selected_commune_id %}&commune_id={{ selected_commune_id }}{% endif %}{% if selected_school_id %}&school_id={{ selected_school_id }}{% endif %}">← Trung tâm báo cáo</a>
+                <a class="button button-light" href="/">Trang chủ</a>
+            </div>
+        </div>
+    </div>
+</header>
+<main class="container">
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <p class="section-label">Điều kiện theo dõi</p>
+                <h2>Chọn phạm vi và nhóm biến động</h2>
+                <p class="muted">Dữ liệu chỉ được đọc trong phạm vi Sở, xã/phường, trường hoặc các phiếu được giao trực tiếp cho giáo viên.</p>
+            </div>
+            <a class="button button-success" href="{{ export_url }}">📊 Xuất Excel biến động</a>
+        </div>
+        <form method="get" action="/bao-cao/bien-dong-theo-doi">
+            <div class="filters">
+                <div><label>Năm học</label><select name="school_year_id">{% for year in school_years %}<option value="{{ year.id }}" {% if year.id == selected_year_id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div>
+                <div><label>Xã/phường</label><select name="commune_id">{% if province_reader %}<option value="">-- Toàn tỉnh --</option>{% endif %}{% for commune in communes %}<option value="{{ commune.id }}" {% if commune.id == selected_commune_id %}selected{% endif %}>{{ commune.name }}</option>{% endfor %}</select></div>
+                <div><label>Trường</label><select name="school_id"><option value="">-- Tất cả trường trong phạm vi --</option>{% for school in schools %}<option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}</option>{% endfor %}</select></div>
+                <div><label>Nhóm theo dõi</label><select name="group">{% for code,label in group_labels.items() %}<option value="{{ code }}" {% if code == selected_group %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+                <div><label>Tìm nhanh</label><input name="q" value="{{ q }}" placeholder="Họ tên, số phiếu, mã hộ, số định danh..."></div>
+                <div><label>Số dòng/trang</label><select name="page_size">{% for size in page_size_options %}<option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }} dòng</option>{% endfor %}</select></div>
+            </div>
+            {% if selected_batch_id %}<input type="hidden" name="batch_id" value="{{ selected_batch_id }}">{% endif %}
+            <div class="scope-line"><div><strong>Phạm vi đang xem:</strong> {{ scope_label }}{% if selected_year %} · Năm học {{ selected_year.code }}{% endif %}{% if selected_batch_id %} · Theo một đợt đã chọn{% endif %}</div><div class="filter-actions"><button class="button button-primary" type="submit">🔎 Lập danh sách</button><a class="button button-secondary" href="/bao-cao/bien-dong-theo-doi">Xóa lọc</a></div></div>
+        </form>
+    </section>
+
+    <section class="stats">
+        <article class="stat"><span>Tổng đối tượng cần theo dõi</span><strong>{{ summary.total }}</strong></article>
+        <article class="stat green"><span>Chuyển đến</span><strong>{{ summary.CHUYEN_DEN }}</strong></article>
+        <article class="stat red"><span>Chuyển đi</span><strong>{{ summary.CHUYEN_DI }}</strong></article>
+        <article class="stat amber"><span>Chưa đi học</span><strong>{{ summary.CHUA_DI_HOC }}</strong></article>
+        <article class="stat red"><span>Bỏ học / thôi học</span><strong>{{ summary.BO_HOC + summary.THOI_HOC }}</strong></article>
+        <article class="stat amber"><span>Tạm nghỉ</span><strong>{{ summary.TAM_NGHI }}</strong></article>
+        <article class="stat red"><span>Thiếu số định danh</span><strong>{{ summary.THIEU_SO_DINH_DANH }}</strong></article>
+        <article class="stat amber"><span>Thiếu dữ liệu năm học</span><strong>{{ summary.THIEU_DU_LIEU_NAM_HOC }}</strong></article>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head"><div><p class="section-label">Danh sách chi tiết</p><h2>Đối tượng cần xử lý và theo dõi</h2><p class="muted">Đang hiển thị {{ rows|length }} trong tổng số {{ total_records }} kết quả. Thời điểm xem: {{ generated_at }}.</p></div></div>
+        {% if rows %}
+        <div class="table-wrap"><table><thead><tr><th>STT</th><th>Đợt / phiếu</th><th>Hộ gia đình</th><th>Đối tượng</th><th>Nhóm theo dõi</th><th>Cư trú / học tập</th><th>Trường / lớp</th><th>Cập nhật gần nhất</th><th>Ghi chú</th><th>Thao tác</th></tr></thead><tbody>
+        {% for row in rows %}<tr>
+            <td>{{ (page-1)*page_size + loop.index }}</td>
+            <td><div class="strong">{{ row.batch.code }}</div><div>{{ row.form.form_number }}</div><div class="sub">{{ row.batch.commune.name }} · {{ row.batch.school_year.code }}</div></td>
+            <td><div class="strong">{{ row.household.head_name }}</div><div>{{ row.household.code }}</div><div class="sub">{{ row.household.hamlet_name or row.form.hamlet_name_snapshot or '' }}</div></td>
+            <td><div class="strong">{{ row.person.full_name }}</div><div>{{ row.person.code }}</div><div class="sub">{% if row.person.date_of_birth %}{{ row.person.date_of_birth.strftime('%d/%m/%Y') }}{% endif %}{% if row.person.personal_id %} · SĐD {{ row.person.personal_id }}{% else %} · Chưa có SĐD{% endif %}</div></td>
+            <td>{% for code in row.categories %}<span class="pill {{ code }}">{{ group_labels[code] }}</span>{% endfor %}</td>
+            <td><div><strong>Cư trú:</strong> {{ row.residency_label }}</div><div><strong>Học tập:</strong> {{ row.learning_label }}</div></td>
+            <td><div class="strong">{{ row.school_name or 'Chưa cập nhật trường' }}</div><div class="sub">{{ row.class_name or 'Chưa cập nhật lớp' }}</div></td>
+            <td>{{ row.updated_at_label }}</td>
+            <td>{{ row.notes or '—' }}</td>
+            <td><a class="button button-primary button-small" href="{{ row.open_url }}">Mở hồ sơ năm học</a></td>
+        </tr>{% endfor %}
+        </tbody></table></div>
+        <div class="pagination"><a class="page-link {% if not previous_url %}disabled{% endif %}" href="{{ previous_url or '#' }}">← Trước</a>{% for item in page_links %}<a class="page-link {% if item.number == page %}current{% endif %}" href="{{ item.url }}">{{ item.number }}</a>{% endfor %}<span class="page-link">/ {{ total_pages }}</span><a class="page-link {% if not next_url %}disabled{% endif %}" href="{{ next_url or '#' }}">Sau →</a></div>
+        {% else %}<div class="empty">Không có đối tượng cần theo dõi phù hợp với bộ lọc và phạm vi tài khoản.</div>{% endif %}
+    </section>
+</main>
+</body>
+</html>

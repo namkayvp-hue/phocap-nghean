@@ -1,0 +1,799 @@
+{
+  "version": "13B-11.15.2.4.4",
+  "source_file": "Lộ trình công nhận phổ cập.xlsx",
+  "program_code": "PCGDMN_3_5",
+  "scope": "Nghệ An",
+  "note": "Tên màu đỏ trong file người dùng cung cấp được lưu là is_difficult_area_from_roadmap=true. Không tự động đồng nhất cờ này với khái niệm 'xã có điều kiện kinh tế - xã hội đặc biệt khó khăn' trong Nghị định 20/2014/NĐ-CP và 277/2025/NĐ-CP.",
+  "counts": {
+    "total": 130,
+    "by_year": {
+      "2026": 15,
+      "2027": 26,
+      "2028": 61,
+      "2029": 28
+    },
+    "difficult_area_from_roadmap": 79
+  },
+  "records": [
+    {
+      "target_year": 2026,
+      "order": 1,
+      "commune_name": "Phường Thành Vinh",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 2,
+      "commune_name": "Phường Trường Vinh",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 3,
+      "commune_name": "Phường Vinh Phú",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 4,
+      "commune_name": "Xã Hải Lộc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 5,
+      "commune_name": "Xã Hùng Chân",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2026,
+      "order": 6,
+      "commune_name": "Xã Nghi Lộc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 7,
+      "commune_name": "Xã Nhân Hòa",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2026,
+      "order": 8,
+      "commune_name": "Xã Phúc Lộc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 9,
+      "commune_name": "Xã Quỳnh Phú",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 10,
+      "commune_name": "Xã Tân An",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2026,
+      "order": 11,
+      "commune_name": "Xã Tân Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 12,
+      "commune_name": "Xã Tiên Đồng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2026,
+      "order": 13,
+      "commune_name": "Xã Trung Lộc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2026,
+      "order": 14,
+      "commune_name": "Xã Tương Dương",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2026,
+      "order": 15,
+      "commune_name": "Xã Văn Hiến",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 1,
+      "commune_name": "Phường Tây Hiếu",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 2,
+      "commune_name": "Phường Thái Hòa",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 3,
+      "commune_name": "Phường Vinh Hưng",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 4,
+      "commune_name": "Phường Vinh Lộc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 5,
+      "commune_name": "Xã Anh Sơn",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 6,
+      "commune_name": "Xã Bạch Hà",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 7,
+      "commune_name": "Xã Bình Minh",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 8,
+      "commune_name": "Xã Cam Phục",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 9,
+      "commune_name": "Xã Diễn Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 10,
+      "commune_name": "Xã Đông Hiếu",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 11,
+      "commune_name": "Xã Đông Lộc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 12,
+      "commune_name": "Xã Đức Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 13,
+      "commune_name": "Xã Hải Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 14,
+      "commune_name": "Xã Kim Liên",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 15,
+      "commune_name": "Xã Mậu Thạch",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 16,
+      "commune_name": "Xã Nghĩa Đồng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 17,
+      "commune_name": "Xã Nghĩa Lâm",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 18,
+      "commune_name": "Xã Nghĩa Mai",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 19,
+      "commune_name": "Xã Quan Thành",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 20,
+      "commune_name": "Xã Quảng Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 21,
+      "commune_name": "Xã Quỳnh Anh",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 22,
+      "commune_name": "Xã Quỳnh Lưu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 23,
+      "commune_name": "Xã Quỳnh Văn",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2027,
+      "order": 24,
+      "commune_name": "Xã Tân Kỳ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 25,
+      "commune_name": "Xã Vân Du",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2027,
+      "order": 26,
+      "commune_name": "Xã Yên Thành",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 1,
+      "commune_name": "Phường Cửa Lò",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 2,
+      "commune_name": "Phường Hoàng Mai",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 3,
+      "commune_name": "Phường Quỳnh Mai",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 4,
+      "commune_name": "Phường Tân Mai",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 5,
+      "commune_name": "Xã An Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 6,
+      "commune_name": "Xã Anh Sơn Đông",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 7,
+      "commune_name": "Xã Bắc Lý",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 8,
+      "commune_name": "Xã Bạch Ngọc",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 9,
+      "commune_name": "Xã Bích Hào",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 10,
+      "commune_name": "Xã Cát Ngạn",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 11,
+      "commune_name": "Xã Châu Bình",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 12,
+      "commune_name": "Xã Châu Khê",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 13,
+      "commune_name": "Xã Châu Tiến",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 14,
+      "commune_name": "Xã Con Cuông",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 15,
+      "commune_name": "Xã Đại Đồng",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 16,
+      "commune_name": "Xã Đại Huệ",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 17,
+      "commune_name": "Xã Đô Lương",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 18,
+      "commune_name": "Xã Đông Thành",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 19,
+      "commune_name": "Xã Giai Lạc",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 20,
+      "commune_name": "Xã Hạnh Lâm",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 21,
+      "commune_name": "Xã Hoa Quân",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 22,
+      "commune_name": "Xã Hợp Minh",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 23,
+      "commune_name": "Xã Hưng Nguyên",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 24,
+      "commune_name": "Xã Hưng Nguyên Nam",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 25,
+      "commune_name": "Xã Huồi Tụ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 26,
+      "commune_name": "Xã Keng Đu",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 27,
+      "commune_name": "Xã Lam Thành",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 28,
+      "commune_name": "Xã Lương Sơn",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 29,
+      "commune_name": "Xã Minh Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 30,
+      "commune_name": "Xã Minh Hợp",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 31,
+      "commune_name": "Xã Môn Sơn",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 32,
+      "commune_name": "Xã Mường Lống",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 33,
+      "commune_name": "Xã Mường Quàng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 34,
+      "commune_name": "Xã Mường Típ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 35,
+      "commune_name": "Xã Na Loi",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 36,
+      "commune_name": "Xã Na Ngoi",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 37,
+      "commune_name": "Xã Nam Đàn",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 38,
+      "commune_name": "Xã Nghĩa Khánh",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 39,
+      "commune_name": "Xã Nghĩa Thọ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 40,
+      "commune_name": "Xã Nhôn Mai",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 41,
+      "commune_name": "Xã Quang Đồng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 42,
+      "commune_name": "Xã Quế Phong",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 43,
+      "commune_name": "Xã Quỳ Châu",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 44,
+      "commune_name": "Xã Quỳ Hợp",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 45,
+      "commune_name": "Xã Quỳnh Sơn",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 46,
+      "commune_name": "Xã Quỳnh Tam",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 47,
+      "commune_name": "Xã Quỳnh Thắng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 48,
+      "commune_name": "Xã Tam Đồng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 49,
+      "commune_name": "Xã Tam Hợp",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 50,
+      "commune_name": "Xã Tam Quang",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 51,
+      "commune_name": "Xã Tam Thái",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 52,
+      "commune_name": "Xã Thành Bình Thọ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 53,
+      "commune_name": "Xã Thiên Nhẫn",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 54,
+      "commune_name": "Xã Thông Thụ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 55,
+      "commune_name": "Xã Vạn An",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 56,
+      "commune_name": "Xã Văn Kiều",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 57,
+      "commune_name": "Xã Vân Tụ",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2028,
+      "order": 58,
+      "commune_name": "Xã Vĩnh Tường",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 59,
+      "commune_name": "Xã Xuân Lâm",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 60,
+      "commune_name": "Xã Yên Hòa",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2028,
+      "order": 61,
+      "commune_name": "Xã Yên Xuân",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 1,
+      "commune_name": "Xã Bình Chuẩn",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 2,
+      "commune_name": "Xã Châu Hồng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 3,
+      "commune_name": "Xã Châu Lộc",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 4,
+      "commune_name": "Xã Chiêu Lưu",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 5,
+      "commune_name": "Xã Giai Xuân",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 6,
+      "commune_name": "Xã Hùng Châu",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2029,
+      "order": 7,
+      "commune_name": "Xã Hữu Khuông",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 8,
+      "commune_name": "Xã Hữu Kiệm",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 9,
+      "commune_name": "Xã Kim Bảng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 10,
+      "commune_name": "Xã Lượng Minh",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 11,
+      "commune_name": "Xã Mường Chọng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 12,
+      "commune_name": "Xã Mường Ham",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 13,
+      "commune_name": "Xã Mường Xén",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 14,
+      "commune_name": "Xã Mỹ Lý",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 15,
+      "commune_name": "Xã Nậm Cắn",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 16,
+      "commune_name": "Xã Nga My",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 17,
+      "commune_name": "Xã Nghĩa Đàn",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 18,
+      "commune_name": "Xã Nghĩa Hành",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 19,
+      "commune_name": "Xã Nghĩa Hưng",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 20,
+      "commune_name": "Xã Nghĩa Lộc",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 21,
+      "commune_name": "Xã Sơn Lâm",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 22,
+      "commune_name": "Xã Tân Phú",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 23,
+      "commune_name": "Xã Thần Lĩnh",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2029,
+      "order": 24,
+      "commune_name": "Xã Thuần Trung",
+      "is_difficult_area_from_roadmap": false
+    },
+    {
+      "target_year": 2029,
+      "order": 25,
+      "commune_name": "Xã Tiền Phong",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 26,
+      "commune_name": "Xã Tri Lễ",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 27,
+      "commune_name": "Xã Yên Na",
+      "is_difficult_area_from_roadmap": true
+    },
+    {
+      "target_year": 2029,
+      "order": 28,
+      "commune_name": "Xã Yên Trung",
+      "is_difficult_area_from_roadmap": false
+    }
+  ]
+}

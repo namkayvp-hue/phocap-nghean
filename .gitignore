@@ -1,0 +1,34 @@
+﻿.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Database - TUYET DOI KHONG DAY LEN GITHUB
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Backups va du lieu van hanh
+backups/
+backup/
+exports/
+uploads/
+logs/
+
+# File tam
+*.log
+*.tmp
+
+# IDE
+.idea/
+.vscode/
+
+# File he thong
+Thumbs.db
+.DS_Store
+
+# Ban sao truoc khi sua
+*.before_github
+
+# Ban sao ma nguon cu cuc bo
+app/routers/surveys_truoc_sua_assigned_at_20260715_112012.py

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khởi tạo đợt điều tra toàn tỉnh</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<style>
+.b1311-page{max-width:1380px;margin:0 auto;padding:22px 18px 48px}.b1311-hero{border-radius:16px;padding:24px;margin-bottom:20px;background:linear-gradient(135deg,#0d5fb8,#2385d7);color:#fff}.b1311-hero h1{margin:4px 0 8px;font-size:30px}.b1311-hero p{margin:0;opacity:.95}.b1311-grid{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(0,1.7fr);gap:18px;align-items:start}.b1311-card{background:#fff;border:1px solid #dce6ef;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 4px 16px rgba(14,55,92,.05)}.b1311-card h2{margin:0 0 14px}.b1311-field{margin-bottom:13px}.b1311-field label{display:block;margin-bottom:6px;font-weight:700}.b1311-control{width:100%;padding:11px 12px;border:1px solid #c9d7e4;border-radius:9px;font:inherit;background:#fff;box-sizing:border-box}textarea.b1311-control{min-height:90px;resize:vertical}.b1311-summary{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;margin-bottom:16px}.b1311-stat{padding:14px;border:1px solid #dbe7f0;border-radius:12px;background:#f8fbfe}.b1311-stat span{display:block;color:#60758a;font-size:12px;font-weight:700;text-transform:uppercase}.b1311-stat strong{display:block;margin-top:6px;font-size:25px;color:#0d5fb8}.b1311-notice{padding:13px 14px;border-radius:10px;margin-bottom:14px;line-height:1.5}.b1311-ok{background:#eaf7ed;border:1px solid #b9dfc1;color:#17652c}.b1311-error{background:#fff1f0;border:1px solid #efc1bc;color:#a1261c}.b1311-warn{background:#fff8e5;border:1px solid #f2d78b;color:#6f5300}.b1311-table-wrap{overflow-x:auto}.b1311-table{width:100%;min-width:1050px;border-collapse:collapse}.b1311-table th,.b1311-table td{padding:10px 9px;border-bottom:1px solid #e4ebf1;text-align:left;vertical-align:top}.b1311-table th{background:#f3f7fb;font-size:13px}.b1311-pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}.b1311-ready{background:#eaf7ed;color:#17652c}.b1311-missing{background:#fff3df;color:#7b5000}.b1311-danger{background:#ffebee;color:#8b1b1b}.b1311-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.b1311-delete-form{display:grid;gap:7px;min-width:260px}.b1311-delete-form input[type=text]{width:100%;padding:8px 9px;border:1px solid #d0d9e2;border-radius:7px;box-sizing:border-box}.b1311-danger-button{border:1px solid #b42318;background:#b42318;color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:700}.b1311-confirm{padding:12px;background:#f7fbff;border:1px dashed #9cc6e8;border-radius:10px;margin-bottom:13px}.b1311-code{font-family:Consolas,monospace;font-size:13px;overflow-wrap:anywhere}@media(max-width:1000px){.b1311-grid{grid-template-columns:1fr}.b1311-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.b1311-summary{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="b1311-page">
+<section class="b1311-hero"><div style="font-size:13px;font-weight:800;letter-spacing:.08em">BÀI 13B-11 · QUẢN LÝ ĐỢT ĐIỀU TRA CẤP TỈNH</div><h1>Khởi tạo toàn tỉnh + Xóa đợt tạo nhầm an toàn</h1><p>Sở tạo một lần cho toàn bộ xã/phường đang hoạt động. Hệ thống không tạo trùng xã đã có đợt và không tự xóa dữ liệu hiện có.</p></section>
+{% if message %}<div class="b1311-notice b1311-ok">{{ message }}</div>{% endif %}
+{% if error %}<div class="b1311-notice b1311-error">{{ error }}</div>{% endif %}
+<section class="b1311-card"><form method="get" action="/dieu-tra/quan-ly-dot-toan-tinh"><div class="b1311-actions"><div style="min-width:260px;flex:1"><label for="school_year_filter"><strong>Năm học đang quản lý</strong></label><select id="school_year_filter" name="school_year_id" class="b1311-control" onchange="this.form.submit()">{% for year in school_years %}<option value="{{ year.id }}" {% if selected_year_id == year.id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div><a class="button button-secondary" href="/dieu-tra">← Danh sách đợt điều tra</a></div></form></section>
+{% if selected_year %}
+<section class="b1311-summary"><div class="b1311-stat"><span>Xã/phường hoạt động</span><strong>{{ active_commune_total }}</strong></div><div class="b1311-stat"><span>Đã có đợt</span><strong>{{ commune_with_batch_total }}</strong></div><div class="b1311-stat"><span>Còn thiếu</span><strong>{{ missing_commune_total }}</strong></div><div class="b1311-stat"><span>Tổng bản ghi đợt</span><strong>{{ batch_total }}</strong></div><div class="b1311-stat"><span>Đợt trùng địa bàn/năm</span><strong>{{ duplicate_batch_total }}</strong></div></section>
+<div class="b1311-grid"><div><section class="b1311-card"><h2>1. Khởi tạo đợt cho toàn tỉnh</h2><div class="b1311-notice b1311-warn">Chỉ tạo cho các xã/phường <strong>chưa có bất kỳ đợt nào</strong> trong năm học {{ selected_year.code }}. Xã đã có đợt được bỏ qua để bảo toàn dữ liệu.</div><form method="post" action="/dieu-tra/quan-ly-dot-toan-tinh/khoi-tao" onsubmit="return confirm('Khởi tạo đợt cho tất cả xã/phường còn thiếu của năm học này?');"><input type="hidden" name="school_year_id" value="{{ selected_year.id }}"><div class="b1311-field"><label>Tên đợt điều tra</label><input class="b1311-control" type="text" name="name" maxlength="300" value="Điều tra phổ cập giáo dục đầu năm học {{ selected_year.code }}" required></div><div class="b1311-field"><label>Ngày bắt đầu</label><input class="b1311-control" type="date" name="start_date" value="{{ today }}" required></div><div class="b1311-field"><label>Ngày kết thúc dự kiến</label><input class="b1311-control" type="date" name="end_date"></div><div class="b1311-field"><label>Ghi chú</label><textarea class="b1311-control" name="notes" placeholder="Nội dung chung áp dụng cho toàn tỉnh"></textarea></div><div class="b1311-confirm"><strong>Xác nhận:</strong> nhập chính xác <span class="b1311-code">{{ create_confirm_text }}</span> để khởi tạo {{ missing_commune_total }} xã/phường còn thiếu.</div><div class="b1311-field"><input class="b1311-control" type="text" name="confirm_text" autocomplete="off" placeholder="{{ create_confirm_text }}" required></div><button class="button button-primary" type="submit" {% if missing_commune_total == 0 %}disabled{% endif %}>🌐 Khởi tạo các đợt còn thiếu toàn tỉnh</button></form></section></div>
+<div><section class="b1311-card"><h2>2. Kiểm tra phạm vi trước khi tạo</h2><div class="b1311-table-wrap"><table class="b1311-table" style="min-width:720px"><thead><tr><th>STT</th><th>Xã/phường</th><th>Tình trạng {{ selected_year.code }}</th><th>Số đợt</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ loop.index }}</td><td><strong>{{ row.commune.name }}</strong><div class="b1311-code">{{ row.commune.code }}</div></td><td>{% if row.has_batch %}<span class="b1311-pill b1311-ready">Đã có đợt</span>{% for batch in row.batches %}<div style="margin-top:5px"><span class="b1311-code">{{ batch.code }}</span> · {{ status_labels.get(batch.status, batch.status) }}</div>{% endfor %}{% else %}<span class="b1311-pill b1311-missing">Sẽ được tạo</span>{% endif %}</td><td>{{ row.batch_total }}</td></tr>{% endfor %}</tbody></table></div></section></div></div>
+<section class="b1311-card"><h2>3. Xóa đợt tạo nhầm — kiểm soát nghiêm ngặt</h2>
+
+
+            {# === BAI_13B_11_1_SELECT_ALL_TOOLBAR_START === #}
+            <div
+                class="b1311-actions"
+                style="
+                    margin: 0 0 14px;
+                    padding: 12px 14px;
+                    border: 1px solid #d9e6f1;
+                    border-radius: 10px;
+                    background: #f8fbfe;
+                "
+            >
+                <label
+                    for="b1311-select-all-checkbox"
+                    style="
+                        display:inline-flex;
+                        align-items:center;
+                        gap:8px;
+                        font-weight:700;
+                        cursor:pointer;
+                        user-select:none;
+                    "
+                >
+                    <input
+                        id="b1311-select-all-checkbox"
+                        type="checkbox"
+                        style="width:18px;height:18px;cursor:pointer;"
+                    >
+                    <span>Chọn toàn bộ đợt đủ điều kiện</span>
+                </label>
+
+                <span
+                    id="b1311-select-all-status"
+                    style="color:#5e7184;font-size:13px;"
+                >
+                    Đã chọn 0/0 đợt đủ điều kiện xóa.
+                </span>
+            </div>
+            {# === BAI_13B_11_1_SELECT_ALL_TOOLBAR_END === #}
+
+            {# === BAI_13B_11_3_BULK_PANEL_START === #}
+            <form
+                id="b1311-bulk-delete-form"
+                method="post"
+                action="/dieu-tra/quan-ly-dot-toan-tinh/xoa-hang-loat"
+                style="
+                    margin: 0 0 14px;
+                    padding: 14px;
+                    border: 1px solid #efb7b2;
+                    border-radius: 10px;
+                    background: #fff6f5;
+                "
+            >
+                <input
+                    type="hidden"
+                    name="school_year_id"
+                    value="{{ selected_year_id or '' }}"
+                >
+
+                <div id="b1311-bulk-id-container"></div>
+
+                <div
+                    style="
+                        display: grid;
+                        grid-template-columns: minmax(260px, 1fr) auto;
+                        gap: 10px;
+                        align-items: end;
+                    "
+                >
+                    <div>
+                        <label
+                            for="b1311-bulk-confirm-phrase"
+                            style="
+                                display:block;
+                                margin-bottom:6px;
+                                font-weight:700;
+                            "
+                        >
+                            Xác nhận xóa toàn bộ các đợt đã chọn
+                        </label>
+                        <input
+                            id="b1311-bulk-confirm-phrase"
+                            class="b1311-control"
+                            type="text"
+                            name="confirm_phrase"
+                            autocomplete="off"
+                            placeholder="XOA TOAN BO DA CHON"
+                            required
+                        >
+                        <div
+                            id="b1311-bulk-delete-help"
+                            style="
+                                margin-top:6px;
+                                color:#7a4a45;
+                                font-size:13px;
+                                line-height:1.5;
+                            "
+                        >
+                            Chưa chọn đợt nào.
+                            Hệ thống chỉ xóa khi toàn bộ đợt được chọn đều
+                            vượt qua kiểm tra an toàn.
+                        </div>
+                    </div>
+
+                    <button
+                        id="b1311-bulk-delete-button"
+                        class="b1311-danger-button"
+                        type="submit"
+                        disabled
+                        style="
+                            min-height:46px;
+                            padding-left:18px;
+                            padding-right:18px;
+                        "
+                    >
+                        🗑 Xóa toàn bộ đã chọn
+                    </button>
+                </div>
+            </form>
+            {# === BAI_13B_11_3_BULK_PANEL_END === #}<div class="b1311-notice b1311-warn">Chỉ xóa đợt còn <strong>Chuẩn bị</strong>, chưa khóa và không có phiếu, phân công, nhật ký hay bất kỳ bản ghi tham chiếu nào. Ngay trước DELETE, hệ thống tạo <strong>backup SQLite + integrity_check + foreign_key_check</strong> và kiểm tra lại lần thứ hai trong giao dịch ghi.</div>{% if batch_rows %}<div class="b1311-table-wrap"><table class="b1311-table"><thead><tr><th>Đợt</th><th>Xã/phường</th><th>Trạng thái</th><th>Phiếu</th><th>Đánh giá sơ bộ</th><th>Xóa an toàn</th></tr></thead><tbody>{% for row in batch_rows %}<tr><td><strong class="b1311-code">{{ row.batch.code }}</strong><div>{{ row.batch.name }}</div></td><td>{{ row.batch.commune.name }}</td><td>{{ status_labels.get(row.batch.status, row.batch.status) }}{% if row.is_locked %}<div class="b1311-pill b1311-danger">Đã khóa</div>{% endif %}</td><td>{{ row.form_total }}</td><td>{% if row.prelim_deletable %}<span class="b1311-pill b1311-ready">Có thể kiểm tra xóa</span>{% else %}<span class="b1311-pill b1311-danger">Không đủ điều kiện</span>{% endif %}</td><td>{% if row.prelim_deletable %}<form class="b1311-delete-form" method="post" action="/dieu-tra/quan-ly-dot-toan-tinh/{{ row.batch.id }}/xoa" onsubmit="return confirm('Xóa đợt {{ row.batch.code }}? Hệ thống sẽ backup database trước khi xóa.');"><label style="font-size:13px"><input type="checkbox" name="confirm_checked"
+                                            data-batch-id="{{ row.batch.id }}" value="1" required> Tôi xác nhận đợt này được tạo nhầm</label><input type="text" name="confirm_phrase" autocomplete="off" placeholder="{{ row.delete_phrase }}" required><button class="b1311-danger-button" type="submit">🗑 Xóa đợt trống</button></form>{% else %}<span style="color:#718096">Không cho xóa</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="b1311-notice b1311-ok">Năm học này chưa có đợt điều tra nào.</div>{% endif %}</section>
+{% else %}<section class="b1311-card"><div class="b1311-notice b1311-error">Chưa có năm học đang hoạt động để quản lý.</div></section>{% endif %}
+</main>
+    {# === BAI_13B_11_1_SELECT_ALL_SCRIPT_START === #}
+    <script>
+    (function () {
+        const button = document.getElementById("b1311-select-all-toggle");
+        const status = document.getElementById("b1311-select-all-status");
+
+        if (!button) {
+            return;
+        }
+
+        function eligibleBoxes() {
+            return Array.from(
+                document.querySelectorAll(
+                    '.b1311-delete-form input[name="confirm_checked"]'
+                )
+            ).filter(function (box) {
+                return !box.disabled;
+            });
+        }
+
+        function refresh() {
+            const boxes = eligibleBoxes();
+            const checked = boxes.filter(function (box) {
+                return box.checked;
+            }).length;
+
+            const allChecked =
+                boxes.length > 0 &&
+                checked === boxes.length;
+
+            button.textContent = allChecked
+                ? "☐ Bỏ chọn toàn bộ"
+                : "☑ Chọn toàn bộ";
+
+            if (status) {
+                status.textContent =
+                    "Đã chọn " + checked + "/" + boxes.length +
+                    " đợt đủ điều kiện xóa.";
+            }
+        }
+
+        button.addEventListener("click", function () {
+            const boxes = eligibleBoxes();
+
+            if (!boxes.length) {
+                refresh();
+                return;
+            }
+
+            const allChecked = boxes.every(function (box) {
+                return box.checked;
+            });
+
+            boxes.forEach(function (box) {
+                box.checked = !allChecked;
+                box.dispatchEvent(
+                    new Event("change", { bubbles: true })
+                );
+            });
+
+            refresh();
+        });
+
+        document.addEventListener("change", function (event) {
+            if (
+                event.target &&
+                event.target.matches &&
+                event.target.matches(
+                    '.b1311-delete-form input[name="confirm_checked"]'
+                )
+            ) {
+                refresh();
+            }
+        });
+
+        refresh();
+    })();
+    </script>
+    {# === BAI_13B_11_1_SELECT_ALL_SCRIPT_END === #}
+
+    {# === BAI_13B_11_3_BULK_SCRIPT_START === #}
+    <script>
+    (function () {
+        const bulkForm =
+            document.getElementById("b1311-bulk-delete-form");
+        const bulkButton =
+            document.getElementById("b1311-bulk-delete-button");
+        const bulkHelp =
+            document.getElementById("b1311-bulk-delete-help");
+        const idContainer =
+            document.getElementById("b1311-bulk-id-container");
+
+        if (!bulkForm || !bulkButton || !idContainer) {
+            return;
+        }
+
+        function selectedBoxes() {
+            return Array.from(
+                document.querySelectorAll(
+                    '.b1311-delete-form ' +
+                    'input[name="confirm_checked"]:checked'
+                )
+            ).filter(function (box) {
+                return !box.disabled;
+            });
+        }
+
+        function selectedIds() {
+            const ids = [];
+
+            selectedBoxes().forEach(function (box) {
+                let value = box.getAttribute("data-batch-id");
+
+                if (!value) {
+                    const ownForm = box.closest("form");
+                    const action = ownForm
+                        ? String(ownForm.getAttribute("action") || "")
+                        : "";
+                    const match = action.match(/\/(\d+)\/xoa$/);
+                    if (match) {
+                        value = match[1];
+                    }
+                }
+
+                const numberValue = Number(value);
+                if (
+                    Number.isInteger(numberValue) &&
+                    numberValue > 0 &&
+                    !ids.includes(numberValue)
+                ) {
+                    ids.push(numberValue);
+                }
+            });
+
+            ids.sort(function (a, b) {
+                return a - b;
+            });
+
+            return ids;
+        }
+
+        function refreshBulkDelete() {
+            const ids = selectedIds();
+            const total = ids.length;
+
+            bulkButton.disabled = total === 0;
+            bulkButton.textContent = total > 0
+                ? "🗑 Xóa toàn bộ đã chọn (" + total + ")"
+                : "🗑 Xóa toàn bộ đã chọn";
+
+            if (bulkHelp) {
+                bulkHelp.textContent = total > 0
+                    ? (
+                        "Đã chọn " + total +
+                        " đợt. Khi bấm xóa: hệ thống tạo 1 backup chung, " +
+                        "kiểm tra lại toàn bộ và chỉ xóa nếu tất cả đều an toàn."
+                    )
+                    : (
+                        "Chưa chọn đợt nào. Hệ thống chỉ xóa khi toàn bộ " +
+                        "đợt được chọn đều vượt qua kiểm tra an toàn."
+                    );
+            }
+        }
+
+        document.addEventListener("change", function (event) {
+            if (
+                event.target &&
+                event.target.matches &&
+                event.target.matches(
+                    '.b1311-delete-form ' +
+                    'input[name="confirm_checked"]'
+                )
+            ) {
+                refreshBulkDelete();
+            }
+        });
+
+        bulkForm.addEventListener("submit", function (event) {
+            const ids = selectedIds();
+
+            if (!ids.length) {
+                event.preventDefault();
+                alert("Hãy chọn ít nhất một đợt để xóa.");
+                return;
+            }
+
+            const phraseInput =
+                document.getElementById(
+                    "b1311-bulk-confirm-phrase"
+                );
+
+            if (
+                !phraseInput ||
+                String(phraseInput.value || "").trim()
+                    !== "XOA TOAN BO DA CHON"
+            ) {
+                event.preventDefault();
+                alert(
+                    'Phải nhập chính xác: "XOA TOAN BO DA CHON".'
+                );
+                return;
+            }
+
+            idContainer.innerHTML = "";
+
+            ids.forEach(function (id) {
+                const hidden = document.createElement("input");
+                hidden.type = "hidden";
+                hidden.name = "batch_ids";
+                hidden.value = String(id);
+                idContainer.appendChild(hidden);
+            });
+
+            const ok = window.confirm(
+                "Xóa " + ids.length + " đợt trống đã chọn?\\n\\n" +
+                "Hệ thống sẽ tạo MỘT backup database đầy đủ trước khi xóa.\\n" +
+                "Nếu chỉ một đợt không còn đủ điều kiện, toàn bộ thao tác sẽ dừng."
+            );
+
+            if (!ok) {
+                event.preventDefault();
+            }
+        });
+
+        refreshBulkDelete();
+    })();
+    </script>
+    {# === BAI_13B_11_3_BULK_SCRIPT_END === #}
+
+    {# === BAI_13B_11_3_1_SELECT_ALL_FIX_START === #}
+    <script>
+    (function () {
+        function initSelectAllFix() {
+            const master =
+                document.getElementById("b1311-select-all-checkbox");
+            const status =
+                document.getElementById("b1311-select-all-status");
+            const bulkButton =
+                document.getElementById("b1311-bulk-delete-button");
+            const bulkHelp =
+                document.getElementById("b1311-bulk-delete-help");
+
+            if (!master) {
+                return;
+            }
+
+            function boxes() {
+                return Array.from(
+                    document.querySelectorAll(
+                        '.b1311-delete-form ' +
+                        'input[name="confirm_checked"]'
+                    )
+                ).filter(function (box) {
+                    return !box.disabled;
+                });
+            }
+
+            function checkedBoxes() {
+                return boxes().filter(function (box) {
+                    return box.checked;
+                });
+            }
+
+            function refresh() {
+                const all = boxes();
+                const checked = checkedBoxes();
+                const total = all.length;
+                const selected = checked.length;
+
+                master.checked =
+                    total > 0 && selected === total;
+                master.indeterminate =
+                    selected > 0 && selected < total;
+
+                if (status) {
+                    status.textContent =
+                        "Đã chọn " + selected + "/" + total +
+                        " đợt đủ điều kiện xóa.";
+                }
+
+                if (bulkButton) {
+                    bulkButton.disabled = selected === 0;
+                    bulkButton.textContent =
+                        selected > 0
+                            ? (
+                                "🗑 Xóa toàn bộ đã chọn (" +
+                                selected +
+                                ")"
+                            )
+                            : "🗑 Xóa toàn bộ đã chọn";
+                }
+
+                if (bulkHelp) {
+                    bulkHelp.textContent =
+                        selected > 0
+                            ? (
+                                "Đã chọn " + selected +
+                                " đợt. Hệ thống sẽ tạo 1 backup chung, " +
+                                "kiểm tra lại toàn bộ và chỉ xóa nếu " +
+                                "tất cả đều an toàn."
+                            )
+                            : (
+                                "Chưa chọn đợt nào. Hệ thống chỉ xóa " +
+                                "khi toàn bộ đợt được chọn đều vượt qua " +
+                                "kiểm tra an toàn."
+                            );
+                }
+            }
+
+            master.addEventListener("change", function () {
+                const targetState = master.checked;
+
+                boxes().forEach(function (box) {
+                    box.checked = targetState;
+                    box.dispatchEvent(
+                        new Event("change", { bubbles: true })
+                    );
+                });
+
+                refresh();
+            });
+
+            document.addEventListener(
+                "change",
+                function (event) {
+                    if (
+                        event.target &&
+                        event.target.matches &&
+                        event.target.matches(
+                            '.b1311-delete-form ' +
+                            'input[name="confirm_checked"]'
+                        )
+                    ) {
+                        refresh();
+                    }
+                }
+            );
+
+            refresh();
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener(
+                "DOMContentLoaded",
+                initSelectAllFix
+            );
+        } else {
+            initSelectAllFix();
+        }
+    })();
+    </script>
+    {# === BAI_13B_11_3_1_SELECT_ALL_FIX_END === #}
+</body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cập nhật tài khoản</title><link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}"></head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header"><div class="admin-header-inner"><div><p class="admin-eyebrow">PHẦN MỀM PHỔ CẬP GIÁO DỤC</p><h1>Cập nhật tài khoản</h1><p>{% if la_cap_truong %}Chỉ cập nhật giáo viên thuộc trường của bạn.{% else %}Chỉnh sửa thông tin, vai trò và đơn vị sử dụng.{% endif %}</p></div><a class="button button-light" href="/tai-khoan">← Danh sách tài khoản</a></div></header>
+<main class="form-page"><section class="panel edit-panel">
+<div class="panel-header"><div><p class="panel-label">THÔNG TIN ĐANG LƯU</p><h2>{{ tai_khoan.full_name }}</h2></div>{% if tai_khoan.is_active %}<span class="status-badge status-active">Đang hoạt động</span>{% else %}<span class="status-badge status-locked">Đã khóa</span>{% endif %}</div>
+{% if thong_bao %}<div class="alert alert-error">{{ thong_bao }}</div>{% endif %}
+<form class="data-form" method="post" action="/tai-khoan/{{ tai_khoan.id }}/sua">
+<div class="form-group"><label for="ten_dang_nhap">Tên đăng nhập</label><input id="ten_dang_nhap" name="ten_dang_nhap" type="text" maxlength="100" value="{{ tai_khoan.username }}" required></div>
+<div class="form-group"><label for="ho_ten">Họ và tên</label><input id="ho_ten" name="ho_ten" type="text" maxlength="200" value="{{ tai_khoan.full_name }}" required></div>
+<div class="form-group"><label for="mat_khau_moi">Mật khẩu mới</label><input id="mat_khau_moi" name="mat_khau_moi" type="password" minlength="8" placeholder="Để trống nếu không đổi" autocomplete="new-password"></div>
+<div class="form-group"><label for="role_id">Vai trò</label><select id="role_id" name="role_id" required style="width:100%;padding:12px 13px;border:1px solid #c8d3df;border-radius:9px;background:white;font:inherit;">{% for vai_tro in danh_sach_vai_tro %}<option value="{{ vai_tro.id }}" data-code="{{ vai_tro.code }}" {% if vai_tro.id == tai_khoan.role_id %}selected{% endif %}>{{ vai_tro.name }}</option>{% endfor %}</select></div>
+{% if la_quan_tri %}
+<div class="form-group" id="commune-group"><label for="commune_id">Xã được quản lý</label><select id="commune_id" name="commune_id" style="width:100%;padding:12px 13px;border:1px solid #c8d3df;border-radius:9px;background:white;font:inherit;"><option value="">-- Chọn xã --</option>{% for xa in danh_sach_xa %}<option value="{{ xa.id }}" {% if xa.id == tai_khoan.commune_id %}selected{% endif %}>{{ xa.name }}{% if not xa.is_active %} (Đã khóa){% endif %}</option>{% endfor %}</select></div>
+<div class="form-group" id="school-group"><label for="school_id">Trường được quản lý</label><select id="school_id" name="school_id" style="width:100%;padding:12px 13px;border:1px solid #c8d3df;border-radius:9px;background:white;font:inherit;"><option value="">-- Chọn trường --</option>{% for truong in danh_sach_truong %}<option value="{{ truong.id }}" {% if truong.id == tai_khoan.school_id %}selected{% endif %}>{{ truong.name }} – {{ truong.commune.name }}{% if not truong.is_active %} (Đã khóa){% endif %}</option>{% endfor %}</select></div>
+{% else %}
+<input type="hidden" name="school_id" value="{{ nguoi_dung.school_id }}"><div class="form-group"><label>Trường</label><div style="padding:12px 13px;border:1px solid #c8d3df;border-radius:9px;background:#f4f7fa;"><strong>{{ nguoi_dung.unit_name }}</strong></div></div>
+{% endif %}
+<div class="form-actions"><a class="button button-secondary" href="/tai-khoan">Hủy</a><button class="button button-primary" type="submit">Lưu thay đổi</button></div>
+</form></section></main>
+<script>
+const roleSelect=document.getElementById('role_id');const communeGroup=document.getElementById('commune-group');const schoolGroup=document.getElementById('school-group');const communeSelect=document.getElementById('commune_id');const schoolSelect=document.getElementById('school_id');
+function updateScope(){if(!roleSelect||!communeGroup||!schoolGroup){return;}const option=roleSelect.options[roleSelect.selectedIndex];const code=(option&&option.dataset.code)||'';communeGroup.hidden=true;schoolGroup.hidden=true;communeSelect.required=false;schoolSelect.required=false;if(code==='XA'){communeGroup.hidden=false;communeSelect.required=true;}if(code==='TRUONG'||code==='GIAO_VIEN'){schoolGroup.hidden=false;schoolSelect.required=true;}}
+if(roleSelect){roleSelect.addEventListener('change',updateScope);updateScope();}
+</script>
+</body></html>

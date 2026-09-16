@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ job.job_code }} · Kết quả nhận file</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        *{box-sizing:border-box}body{margin:0;background:#eef4f9;color:#17324d;font-family:Arial,sans-serif}
+        .hero{background:#0f5fa8;color:#fff;padding:25px 3vw}.wrap,.hero-inner{max-width:1250px;margin:auto}.wrap{padding:22px 3vw 48px}
+        .panel{background:#fff;border:1px solid #d8e4ef;border-radius:16px;padding:20px;margin-bottom:16px}
+        .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 24px}.item{padding:9px 0;border-bottom:1px solid #edf1f5}
+        .pill{display:inline-block;padding:7px 11px;border-radius:999px;font-weight:800}.pill.info{background:#dceeff;color:#0b5cab}.pill.success{background:#dcf6e5;color:#146b35}.pill.warning{background:#fff0c9;color:#835500}.pill.danger{background:#ffe2df;color:#a52a22}
+        table{width:100%;border-collapse:collapse}th,td{padding:10px;border:1px solid #dce5ed;text-align:left;vertical-align:top}th{background:#edf5fb}
+        .btn{display:inline-flex;padding:10px 15px;border-radius:9px;background:#e9f0f6;color:#17324d;text-decoration:none;font-weight:800}
+        .notice{padding:14px;border-radius:12px;background:#fff7df;border:1px solid #efcf7d;line-height:1.5}
+        @media(max-width:700px){.grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<header class="hero">
+    <div class="hero-inner">
+        <div style="font-size:13px;font-weight:800">KẾT QUẢ TIẾP NHẬN FILE</div>
+        <h1 style="margin:7px 0">{{ job.job_code }}</h1>
+        <span class="pill {{ status_class }}">{{ status_label }}</span>
+    </div>
+</header>
+<main class="wrap">
+    <section class="panel">
+        <div class="notice">
+            <strong>V1B:</strong> trạng thái <b>Đã cập nhật thành công</b> mới có nghĩa dữ liệu đã được ghi vào danh sách hộ.
+            Nếu trạng thái là lỗi/xung đột thì toàn bộ file chưa được ghi hoặc đã rollback; hãy xem bảng lỗi bên dưới.
+        </div>
+    </section>
+    <section class="panel">
+        <h2 style="margin-top:0">Thông tin lần gửi</h2>
+        <div class="grid">
+            <div class="item"><strong>File:</strong> {{ job.original_file_name }}</div>
+            <div class="item"><strong>Thời gian nhận:</strong> {{ job.received_at.strftime('%d/%m/%Y %H:%M:%S') if job.received_at else '' }}</div>
+            <div class="item"><strong>Người gửi:</strong> {{ job.actor_name_snapshot or '' }}</div>
+            <div class="item"><strong>Đơn vị:</strong> {{ job.actor_unit_snapshot or '' }}</div>
+            <div class="item"><strong>Năm học:</strong> {{ batch.school_year.code if batch else '' }}</div>
+            <div class="item"><strong>Xã/phường:</strong> {{ batch.commune.name if batch else '' }}</div>
+            <div class="item"><strong>Kích thước:</strong> {{ '%.1f'|format(job.file_size / 1024) }} KB</div>
+            <div class="item"><strong>SHA256:</strong> <span style="word-break:break-all">{{ job.sha256 or '' }}</span></div>
+            <div class="item"><strong>Macro/VBA:</strong> {{ 'Có dấu hiệu' if job.has_macro else 'Không phát hiện' }}</div>
+            <div class="item"><strong>File trùng với:</strong> {{ job.duplicate_of_job_code or 'Không' }}</div>
+        </div>
+        <p><strong>Thông báo:</strong> {{ job.message or '' }}</p>
+        <div class="grid">
+            <div class="item"><strong>Dòng dữ liệu:</strong> {{ job.rows_total }} · Hợp lệ {{ job.rows_valid }} · Lỗi {{ job.rows_error }}</div>
+            <div class="item"><strong>Xung đột:</strong> {{ job.conflict_count }}</div>
+            <div class="item"><strong>Hộ mới:</strong> {{ job.households_created or 0 }}</div>
+            <div class="item"><strong>Hộ cập nhật:</strong> {{ job.households_updated or 0 }}</div>
+            <div class="item"><strong>Thành viên mới:</strong> {{ job.people_created or 0 }}</div>
+            <div class="item"><strong>Thành viên cập nhật:</strong> {{ job.people_updated or 0 }}</div>
+        </div>
+        {% if job.status == 'DA_CAP_NHAT' %}
+        <p><a class="btn" style="background:#1976d2;color:#fff" href="/dieu-tra/{{ job.survey_batch_id }}/ho-dan">Xem dữ liệu đã cập nhật →</a></p>
+        {% elif job.file_ext == '.xlsx' and job.status in ['DA_KIEM_TRA_CAU_TRUC','LOI_DU_LIEU','CO_XUNG_DOT','LOI_CAP_NHAT'] %}
+        <form method="post" action="/dieu-tra/cap-nhat-ho-dan/lan-gui/{{ job.job_code }}/xu-ly" style="margin-top:12px">
+            <button class="btn" type="submit">Kiểm tra / xử lý lại file đã lưu</button>
+        </form>
+        {% endif %}
+
+        <!-- === BAI_13B_9_V1B_1_DELETE_DETAIL_START === -->
+        {% if can_delete %}
+        <form
+            method="post"
+            action="/dieu-tra/cap-nhat-ho-dan/lan-gui/{{ job.job_code }}/xoa"
+            style="margin-top:14px"
+            onsubmit="return confirm('Bạn chắc chắn muốn xóa lần gửi {{ job.job_code }}? Lịch sử lỗi và file lưu tạm sẽ bị xóa. Thao tác này không xóa dữ liệu hộ dân đã cập nhật thành công.');"
+        >
+            <button
+                class="btn"
+                type="submit"
+                style="background:#c62828;color:#fff;border-color:#c62828"
+            >🗑 Xóa lần gửi / file lỗi</button>
+        </form>
+        {% endif %}
+        <!-- === BAI_13B_9_V1B_1_DELETE_DETAIL_END === -->
+
+        {% if sheet_names %}
+        <p><strong>Sheet phát hiện:</strong> {{ sheet_names|join(', ') }}</p>
+        {% endif %}
+    </section>
+    <section class="panel">
+        <h2 style="margin-top:0">Lỗi / khuyến cáo</h2>
+        <table>
+            <thead><tr><th>Mức</th><th>Sheet</th><th>Dòng</th><th>Cột</th><th>Mã lỗi</th><th>Nội dung</th></tr></thead>
+            <tbody>
+            {% for item in errors %}
+                <tr>
+                    <td>{{ item.severity }}</td><td>{{ item.sheet_name or '—' }}</td><td>{{ item.row_number or '—' }}</td>
+                    <td>{{ item.column_name or '—' }}</td><td>{{ item.error_code or '—' }}</td><td>{{ item.message }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6">Không có lỗi/khuyến cáo được ghi nhận ở bước kiểm tra hiện tại.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    <a class="btn" href="/dieu-tra/cap-nhat-ho-dan?batch_id={{ job.survey_batch_id }}">← Quay về Cập nhật dữ liệu hộ dân</a>
+</main>
+</body>
+</html>

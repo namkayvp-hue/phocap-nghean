@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Danh sách học sinh</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+
+    <style>
+        .student-toolbar {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .student-toolbar-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .student-filter-panel {
+            margin-bottom: 24px;
+        }
+
+        .student-filter-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(210px, 1.6fr)
+                minmax(150px, 0.8fr)
+                minmax(190px, 1fr)
+                minmax(220px, 1.2fr)
+                minmax(150px, 0.8fr);
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: white;
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .filter-select:focus {
+            border-color: #1976d2;
+            box-shadow:
+                0 0 0 3px
+                rgba(25, 118, 210, 0.12);
+        }
+
+        .filter-select:disabled {
+            background: #f1f4f7;
+            color: #8a98a6;
+            cursor: not-allowed;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .student-summary {
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .summary-card {
+            padding: 18px 20px;
+            background: white;
+            border: 1px solid #e0e8f0;
+            border-radius: 14px;
+            box-shadow:
+                0 4px 14px
+                rgba(30, 60, 90, 0.07);
+        }
+
+        .summary-label {
+            margin: 0 0 4px;
+            color: #657789;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .summary-value {
+            margin: 0;
+            color: #0d47a1;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .student-table {
+            min-width: 1250px;
+        }
+
+        .student-name {
+            min-width: 190px;
+        }
+
+        .school-name {
+            min-width: 230px;
+        }
+
+        .student-code {
+            white-space: nowrap;
+        }
+
+        .pagination {
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            min-width: 39px;
+            height: 39px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            border: 1px solid #cbd7e3;
+            border-radius: 8px;
+            background: white;
+            color: #0d47a1;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .page-link:hover {
+            background: #eef6ff;
+        }
+
+        .page-link-active {
+            background: #1976d2;
+            border-color: #1976d2;
+            color: white;
+        }
+
+        .page-link-disabled {
+            color: #9aa7b4;
+            background: #f3f5f7;
+            pointer-events: none;
+        }
+
+        .student-status {
+            display: inline-block;
+            padding: 5px 9px;
+            background: #e8f5e9;
+            color: #1b5e20;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .loading-note {
+            margin-top: 7px;
+            color: #0d47a1;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1250px) {
+            .student-filter-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .student-filter-grid,
+            .student-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .student-toolbar-buttons,
+            .filter-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .student-toolbar-buttons .button,
+            .filter-actions .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">
+                    PHẦN MỀM PHỔ CẬP GIÁO DỤC
+                </p>
+
+                <h1>Danh sách học sinh</h1>
+
+                <p>
+                    Tìm kiếm theo năm học, xã, trường,
+                    lớp, mã học sinh hoặc họ tên.
+                </p>
+            </div>
+
+            <div
+                style="
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    flex-wrap: wrap;
+                "
+            >
+                <div
+                    style="
+                        text-align: right;
+                        line-height: 1.4;
+                    "
+                >
+                    <strong>
+                        {{ nguoi_dung.full_name }}
+                    </strong>
+
+                    <div
+                        style="
+                            font-size: 13px;
+                            opacity: 0.9;
+                        "
+                    >
+                        {{ nguoi_dung.role_name }}
+                        – {{ nguoi_dung.unit_name }}
+                    </div>
+                </div>
+
+                <a
+                    class="button button-light"
+                    href="/"
+                >
+                    ← Trang chủ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        {% if thong_bao %}
+            <div class="alert alert-success">
+                {{ thong_bao }}
+            </div>
+        {% endif %}
+
+        <section class="student-toolbar">
+            <div>
+                <p class="panel-label">
+                    CHỨC NĂNG HỌC SINH
+                </p>
+
+                <h2 style="margin: 0;">
+                    Quản lý hồ sơ
+                </h2>
+            </div>
+
+            <div class="student-toolbar-buttons">
+                <a
+                    class="button button-primary"
+                    href="{{ create_url }}"
+                >
+                    ＋ Thêm học sinh mới
+                </a>
+
+                <span
+                    class="
+                        button
+                        button-secondary
+                        button-disabled
+                    "
+                    title="Sẽ xây dựng ở bài tiếp theo"
+                >
+                    Xuất Excel cập nhật
+                </span>
+
+                <span
+                    class="
+                        button
+                        button-secondary
+                        button-disabled
+                    "
+                    title="Sẽ xây dựng ở bài tiếp theo"
+                >
+                    Nhập Excel cập nhật
+                </span>
+            </div>
+        </section>
+
+        <section
+            class="
+                panel
+                student-filter-panel
+            "
+        >
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">
+                        TÌM KIẾM VÀ LỌC
+                    </p>
+
+                    <h2>Điều kiện hiển thị</h2>
+                </div>
+            </div>
+
+            <form
+                method="get"
+                action="/hoc-sinh"
+            >
+                <div class="student-filter-grid">
+                    <div class="form-group">
+                        <label for="q">
+                            Mã, họ tên, điện thoại
+                        </label>
+
+                        <input
+                            id="q"
+                            name="q"
+                            type="text"
+                            maxlength="100"
+                            value="{{ q }}"
+                            placeholder="Nhập nội dung tìm kiếm"
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="school_year_id">
+                            Năm học
+                        </label>
+
+                        <select
+                            id="school_year_id"
+                            name="school_year_id"
+                            class="filter-select"
+                        >
+                            {% for nam_hoc in school_years %}
+                                <option
+                                    value="{{ nam_hoc.id }}"
+                                    {% if
+                                        nam_hoc.id
+                                        == selected_school_year_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ nam_hoc.code }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commune_id">
+                            Xã
+                        </label>
+
+                        <select
+                            id="commune_id"
+                            name="commune_id"
+                            class="filter-select"
+                        >
+                            <option value="">
+                                -- Tất cả xã --
+                            </option>
+
+                            {% for xa in communes %}
+                                <option
+                                    value="{{ xa.id }}"
+                                    {% if
+                                        xa.id
+                                        == selected_commune_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ xa.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="school_id">
+                            Trường
+                        </label>
+
+                        <select
+                            id="school_id"
+                            name="school_id"
+                            class="filter-select"
+                            {% if not selected_commune_id %}
+                                disabled
+                            {% endif %}
+                        >
+                            <option value="">
+                                {% if selected_commune_id %}
+                                    -- Tất cả trường --
+                                {% else %}
+                                    -- Chọn xã trước --
+                                {% endif %}
+                            </option>
+
+                            {% for truong in schools %}
+                                <option
+                                    value="{{ truong.id }}"
+                                    {% if
+                                        truong.id
+                                        == selected_school_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ truong.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div
+                            id="school-loading"
+                            class="loading-note"
+                            hidden
+                        >
+                            Đang tải trường...
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="class_id">
+                            Lớp
+                        </label>
+
+                        <select
+                            id="class_id"
+                            name="class_id"
+                            class="filter-select"
+                            {% if not selected_school_id %}
+                                disabled
+                            {% endif %}
+                        >
+                            <option value="">
+                                {% if selected_school_id %}
+                                    -- Tất cả lớp --
+                                {% else %}
+                                    -- Chọn trường trước --
+                                {% endif %}
+                            </option>
+
+                            {% for lop in classrooms %}
+                                <option
+                                    value="{{ lop.id }}"
+                                    {% if
+                                        lop.id
+                                        == selected_class_id
+                                    %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ lop.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div
+                            id="class-loading"
+                            class="loading-note"
+                            hidden
+                        >
+                            Đang tải lớp...
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="filter-actions"
+                    style="margin-top: 20px;"
+                >
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Tìm kiếm / Lọc
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="/hoc-sinh"
+                    >
+                        Xóa bộ lọc
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <section class="student-summary">
+            <article class="summary-card">
+                <p class="summary-label">
+                    TỔNG KẾT QUẢ
+                </p>
+
+                <p class="summary-value">
+                    {{ total_records }}
+                </p>
+            </article>
+
+            <article class="summary-card">
+                <p class="summary-label">
+                    TRANG HIỆN TẠI
+                </p>
+
+                <p class="summary-value">
+                    {{ page }}/{{ total_pages }}
+                </p>
+            </article>
+
+            <article class="summary-card">
+                <p class="summary-label">
+                    SỐ DÒNG MỖI TRANG
+                </p>
+
+                <p class="summary-value">
+                    {{ page_size }}
+                </p>
+            </article>
+        </section>
+
+        <section class="panel panel-wide">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">
+                        DỮ LIỆU HỌC SINH
+                    </p>
+
+                    <h2>Danh sách kết quả</h2>
+                </div>
+
+                <span class="count-badge">
+                    {{ total_records }} học sinh
+                </span>
+            </div>
+
+            {% if enrollments %}
+                <div class="table-wrapper">
+                    <table
+                        class="
+                            data-table
+                            student-table
+                        "
+                    >
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã học sinh</th>
+                                <th>Họ và tên</th>
+                                <th>Ngày sinh</th>
+                                <th>Giới tính</th>
+                                <th>Xã</th>
+                                <th>Trường</th>
+                                <th>Lớp</th>
+                                <th>Điện thoại</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for ho_so in enrollments %}
+                                <tr>
+                                    <td>
+                                        {{
+                                            (page - 1)
+                                            * page_size
+                                            + loop.index
+                                        }}
+                                    </td>
+
+                                    <td class="student-code">
+                                        <strong>
+                                            {{ ho_so.student.code }}
+                                        </strong>
+                                    </td>
+
+                                    <td class="student-name">
+                                        {{ ho_so.student.full_name }}
+                                    </td>
+
+                                    <td>
+                                        {% if
+                                            ho_so.student.date_of_birth
+                                        %}
+                                            {{
+                                                ho_so.student
+                                                .date_of_birth
+                                                .strftime('%d/%m/%Y')
+                                            }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{
+                                            ho_so.student.gender
+                                            or '—'
+                                        }}
+                                    </td>
+
+                                    <td>
+                                        {{
+                                            ho_so.school.commune.name
+                                        }}
+                                    </td>
+
+                                    <td class="school-name">
+                                        {{ ho_so.school.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ ho_so.classroom.name }}
+                                    </td>
+
+                                    <td>
+                                        {{
+                                            ho_so.student.contact_phone
+                                            or '—'
+                                        }}
+                                    </td>
+
+                                    <td>
+                                        <span class="student-status">
+                                            {{
+                                                status_labels.get(
+                                                    ho_so.status,
+                                                    ho_so.status
+                                                )
+                                            }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="pagination">
+                    {% if previous_url %}
+                        <a
+                            class="page-link"
+                            href="{{ previous_url }}"
+                        >
+                            ← Trước
+                        </a>
+                    {% else %}
+                        <span
+                            class="
+                                page-link
+                                page-link-disabled
+                            "
+                        >
+                            ← Trước
+                        </span>
+                    {% endif %}
+
+                    {% for item in page_links %}
+                        <a
+                            class="
+                                page-link
+                                {% if item.active %}
+                                    page-link-active
+                                {% endif %}
+                            "
+                            href="{{ item.url }}"
+                        >
+                            {{ item.number }}
+                        </a>
+                    {% endfor %}
+
+                    {% if next_url %}
+                        <a
+                            class="page-link"
+                            href="{{ next_url }}"
+                        >
+                            Sau →
+                        </a>
+                    {% else %}
+                        <span
+                            class="
+                                page-link
+                                page-link-disabled
+                            "
+                        >
+                            Sau →
+                        </span>
+                    {% endif %}
+                </nav>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        👧
+                    </div>
+
+                    <h3>
+                        Không tìm thấy học sinh
+                    </h3>
+
+                    <p>
+                        Hãy thay đổi từ khóa hoặc
+                        các điều kiện lọc.
+                    </p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        const schoolYearSelect =
+            document.getElementById("school_year_id");
+
+        const communeSelect =
+            document.getElementById("commune_id");
+
+        const schoolSelect =
+            document.getElementById("school_id");
+
+        const classSelect =
+            document.getElementById("class_id");
+
+        const schoolLoading =
+            document.getElementById("school-loading");
+
+        const classLoading =
+            document.getElementById("class-loading");
+
+        function datLuaChonMacDinh(
+            selectElement,
+            label
+        ) {
+            selectElement.innerHTML = "";
+
+            const option =
+                document.createElement("option");
+
+            option.value = "";
+            option.textContent = label;
+
+            selectElement.appendChild(option);
+        }
+
+        async function taiDanhSachTruong() {
+            const communeId = communeSelect.value;
+
+            datLuaChonMacDinh(
+                schoolSelect,
+                communeId
+                    ? "-- Tất cả trường --"
+                    : "-- Chọn xã trước --"
+            );
+
+            datLuaChonMacDinh(
+                classSelect,
+                "-- Chọn trường trước --"
+            );
+
+            schoolSelect.disabled = true;
+            classSelect.disabled = true;
+
+            if (!communeId) {
+                return;
+            }
+
+            schoolLoading.hidden = false;
+
+            try {
+                const response = await fetch(
+                    `/hoc-sinh/api/truong?commune_id=${encodeURIComponent(communeId)}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Không tải được danh sách trường."
+                    );
+                }
+
+                const schools = await response.json();
+
+                for (const school of schools) {
+                    const option =
+                        document.createElement("option");
+
+                    option.value = school.id;
+                    option.textContent = school.name;
+
+                    schoolSelect.appendChild(option);
+                }
+
+                schoolSelect.disabled = false;
+            } catch (error) {
+                datLuaChonMacDinh(
+                    schoolSelect,
+                    "Không tải được danh sách trường"
+                );
+            } finally {
+                schoolLoading.hidden = true;
+            }
+        }
+
+        async function taiDanhSachLop() {
+            const yearId = schoolYearSelect.value;
+            const schoolId = schoolSelect.value;
+
+            datLuaChonMacDinh(
+                classSelect,
+                schoolId
+                    ? "-- Tất cả lớp --"
+                    : "-- Chọn trường trước --"
+            );
+
+            classSelect.disabled = true;
+
+            if (!yearId || !schoolId) {
+                return;
+            }
+
+            classLoading.hidden = false;
+
+            try {
+                const query = new URLSearchParams({
+                    school_year_id: yearId,
+                    school_id: schoolId,
+                });
+
+                const response = await fetch(
+                    `/hoc-sinh/api/lop?${query.toString()}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Không tải được danh sách lớp."
+                    );
+                }
+
+                const classrooms = await response.json();
+
+                for (const classroom of classrooms) {
+                    const option =
+                        document.createElement("option");
+
+                    option.value = classroom.id;
+                    option.textContent = classroom.name;
+
+                    classSelect.appendChild(option);
+                }
+
+                classSelect.disabled = false;
+            } catch (error) {
+                datLuaChonMacDinh(
+                    classSelect,
+                    "Không tải được danh sách lớp"
+                );
+            } finally {
+                classLoading.hidden = true;
+            }
+        }
+
+        communeSelect.addEventListener(
+            "change",
+            taiDanhSachTruong
+        );
+
+        schoolSelect.addEventListener(
+            "change",
+            taiDanhSachLop
+        );
+
+        schoolYearSelect.addEventListener(
+            "change",
+            taiDanhSachLop
+        );
+
+        schoolSelect.disabled = !communeSelect.value;
+        classSelect.disabled = !schoolSelect.value;
+    </script>
+
+<!-- === BAI_13B_10_V3_17_QUICK_SELECT_START === -->
+<style>
+.pc-quick-select-source {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+}
+.pc-quick-select { position: relative; width: 100%; }
+.pc-quick-select-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 38px 10px 12px;
+    border: 1px solid #cbd8e6;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f3349;
+    font: inherit;
+    box-sizing: border-box;
+}
+.pc-quick-select-input:focus {
+    outline: none;
+    border-color: #1d75cf;
+    box-shadow: 0 0 0 3px rgba(29,117,207,.12);
+}
+.pc-quick-select-input:disabled {
+    background: #f3f5f7;
+    color: #8492a2;
+    cursor: not-allowed;
+}
+.pc-quick-select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    pointer-events: none;
+    color: #60758b;
+    font-size: 14px;
+}
+.pc-quick-select-list {
+    position: absolute;
+    z-index: 5000;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 5px;
+    margin: 0;
+    border: 1px solid #cbd8e6;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(24,48,73,.18);
+}
+.pc-quick-select-list[hidden] { display: none !important; }
+.pc-quick-select-option {
+    display: block;
+    width: 100%;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #23384d;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+.pc-quick-select-option:hover,
+.pc-quick-select-option.is-active {
+    background: #eaf3ff;
+    color: #075ea8;
+}
+.pc-quick-select-empty {
+    padding: 10px;
+    color: #7a8795;
+    font-size: 13px;
+}
+.pc-quick-select-hint {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #718197;
+}
+@media (max-width: 700px) {
+    .pc-quick-select-input { min-height: 48px; font-size: 16px; }
+    .pc-quick-select-list { max-height: 240px; }
+    .pc-quick-select-option { min-height: 44px; padding: 11px 10px; }
+}
+</style>
+
+<script>
+(function () {
+    "use strict";
+
+    const TARGETS = [
+        {
+            id: "commune_id",
+            placeholder: "Gõ tên xã/phường để tìm...",
+            stripWords: ["xã", "phường", "thị trấn"]
+        },
+        {
+            id: "school_id",
+            placeholder: "Gõ tên trường để tìm...",
+            stripWords: ["trường", "mầm non", "tiểu học", "thcs", "thpt", "mn", "th"]
+        },
+        {
+            id: "class_id",
+            placeholder: "Gõ tên lớp để tìm...",
+            stripWords: ["lớp", "khối"]
+        }
+    ];
+
+    function normalize(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/đ/g, "d")
+            .replace(/[–—\-_/.,;:()[\]{}]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function stripCommonPrefix(text, words) {
+        let result = normalize(text);
+        for (const word of words || []) {
+            const w = normalize(word);
+            if (result === w) return "";
+            if (result.startsWith(w + " ")) {
+                return result.slice(w.length + 1).trim();
+            }
+        }
+        return result;
+    }
+
+    function scoreOption(option, query, config) {
+        const q = normalize(query);
+        if (!q) return 100;
+
+        const full = normalize(option.textContent || "");
+        const stripped = stripCommonPrefix(option.textContent || "", config.stripWords);
+
+        if (stripped === q) return 0;
+        if (stripped.startsWith(q)) return 1;
+        if (full.startsWith(q)) return 2;
+
+        const words = stripped.split(" ");
+        if (words.some(function (word) { return word.startsWith(q); })) return 3;
+        if (stripped.includes(q)) return 4;
+        if (full.includes(q)) return 5;
+
+        return 999;
+    }
+
+    function realOptions(select) {
+        return Array.from(select.options).filter(function (option) {
+            return String(option.value || "").trim() !== "";
+        });
+    }
+
+    function selectedLabel(select) {
+        const option = select.options[select.selectedIndex];
+        if (!option || !option.value) return "";
+        return String(option.textContent || "").trim();
+    }
+
+    function createQuickSelect(select, config) {
+        if (!select || select.dataset.pcQuickSelect === "1") return;
+
+        select.dataset.pcQuickSelect = "1";
+        select.classList.add("pc-quick-select-source");
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "pc-quick-select";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "pc-quick-select-input";
+        input.placeholder = config.placeholder;
+        input.autocomplete = "off";
+        input.spellcheck = false;
+
+        const arrow = document.createElement("span");
+        arrow.className = "pc-quick-select-arrow";
+        arrow.textContent = "▼";
+
+        const list = document.createElement("div");
+        list.className = "pc-quick-select-list";
+        list.hidden = true;
+
+        const hint = document.createElement("div");
+        hint.className = "pc-quick-select-hint";
+        hint.textContent = "Gõ từ đầu tiên của tên để lọc nhanh.";
+
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(input);
+        wrapper.appendChild(arrow);
+        wrapper.appendChild(list);
+        wrapper.appendChild(hint);
+        wrapper.appendChild(select);
+
+        let activeIndex = -1;
+        let visibleOptions = [];
+
+        function syncDisabled() {
+            input.disabled = !!select.disabled;
+            if (select.disabled) list.hidden = true;
+        }
+
+        function syncValue() {
+            input.value = selectedLabel(select);
+            input.dataset.selectedValue = String(select.value || "");
+        }
+
+        function closeList() {
+            list.hidden = true;
+            activeIndex = -1;
+        }
+
+        function choose(option) {
+            if (!option) return;
+            const oldValue = String(select.value || "");
+            select.value = String(option.value || "");
+            input.value = String(option.textContent || "").trim();
+            input.dataset.selectedValue = String(select.value || "");
+            closeList();
+
+            if (String(select.value || "") !== oldValue) {
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        }
+
+        function render(query) {
+            visibleOptions = realOptions(select)
+                .map(function (option) {
+                    return { option: option, score: scoreOption(option, query, config) };
+                })
+                .filter(function (item) { return item.score < 999; })
+                .sort(function (a, b) {
+                    if (a.score !== b.score) return a.score - b.score;
+                    return String(a.option.textContent || "")
+                        .localeCompare(String(b.option.textContent || ""), "vi");
+                })
+                .slice(0, 30)
+                .map(function (item) { return item.option; });
+
+            list.innerHTML = "";
+            activeIndex = visibleOptions.length ? 0 : -1;
+
+            if (!visibleOptions.length) {
+                const empty = document.createElement("div");
+                empty.className = "pc-quick-select-empty";
+                empty.textContent = "Không tìm thấy kết quả phù hợp.";
+                list.appendChild(empty);
+                list.hidden = false;
+                return;
+            }
+
+            visibleOptions.forEach(function (option, index) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "pc-quick-select-option";
+                if (index === activeIndex) button.classList.add("is-active");
+                button.textContent = String(option.textContent || "").trim();
+
+                button.addEventListener("mousedown", function (event) {
+                    event.preventDefault();
+                    choose(option);
+                });
+
+                list.appendChild(button);
+            });
+
+            list.hidden = false;
+        }
+
+        function updateActive() {
+            const items = list.querySelectorAll(".pc-quick-select-option");
+            items.forEach(function (item, index) {
+                item.classList.toggle("is-active", index === activeIndex);
+            });
+            const current = items[activeIndex];
+            if (current && current.scrollIntoView) {
+                current.scrollIntoView({ block: "nearest" });
+            }
+        }
+
+        input.addEventListener("focus", function () {
+            input.select();
+            render("");
+        });
+
+        input.addEventListener("input", function () {
+            input.dataset.selectedValue = "";
+            render(input.value);
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowDown") {
+                event.preventDefault();
+                if (list.hidden) render(input.value);
+                if (visibleOptions.length) {
+                    activeIndex = Math.min(activeIndex + 1, visibleOptions.length - 1);
+                    updateActive();
+                }
+                return;
+            }
+
+            if (event.key === "ArrowUp") {
+                event.preventDefault();
+                if (visibleOptions.length) {
+                    activeIndex = Math.max(activeIndex - 1, 0);
+                    updateActive();
+                }
+                return;
+            }
+
+            if (event.key === "Enter") {
+                if (!list.hidden && visibleOptions.length) {
+                    event.preventDefault();
+                    choose(visibleOptions[activeIndex >= 0 ? activeIndex : 0]);
+                }
+                return;
+            }
+
+            if (event.key === "Escape") {
+                closeList();
+                syncValue();
+            }
+        });
+
+        input.addEventListener("blur", function () {
+            window.setTimeout(function () {
+                closeList();
+                if (
+                    String(input.dataset.selectedValue || "") !==
+                    String(select.value || "")
+                ) {
+                    syncValue();
+                }
+            }, 120);
+        });
+
+        select.addEventListener("change", syncValue);
+
+        const observer = new MutationObserver(function () {
+            syncDisabled();
+            syncValue();
+        });
+
+        observer.observe(select, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["disabled"]
+        });
+
+        syncDisabled();
+        syncValue();
+    }
+
+    function install() {
+        TARGETS.forEach(function (config) {
+            const select = document.getElementById(config.id);
+            if (select) createQuickSelect(select, config);
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", install);
+    } else {
+        install();
+    }
+})();
+</script>
+<!-- === BAI_13B_10_V3_17_QUICK_SELECT_END === -->
+
+</body>
+</html>

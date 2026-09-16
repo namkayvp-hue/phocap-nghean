@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung tâm dữ liệu lịch sử</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .history-summary {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(145px, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .summary-card {
+            background: #fff;
+            border: 1px solid #dfe7ef;
+            border-radius: 14px;
+            padding: 17px;
+            min-height: 108px;
+        }
+        .summary-card span {
+            display: block;
+            color: #66798d;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .summary-card strong {
+            display: block;
+            margin-top: 9px;
+            color: #5a2580;
+            font-size: 29px;
+        }
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+        .history-create-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.25fr 1.45fr;
+            gap: 14px;
+            align-items: end;
+        }
+        .commune-quick-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.25fr 1.5fr;
+            gap: 14px;
+            align-items: end;
+        }
+        .commune-action-bar {
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-top:15px;
+            align-items:center;
+        }
+        .commune-help {
+            margin-top:10px;
+            padding:11px 13px;
+            border-radius:9px;
+            background:#f3f7fb;
+            color:#52687c;
+            font-size:13px;
+            line-height:1.55;
+        }
+        .history-control {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #c9d5e2;
+            border-radius: 9px;
+            background: #fff;
+            font: inherit;
+        }
+        .history-table { min-width: 1180px; }
+        .history-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .status-editing { background:#e3f2fd; color:#0d47a1; }
+        .status-review { background:#fff3e0; color:#9a5700; }
+        .status-locked { background:#e8f5e9; color:#176b32; }
+        .province-tools {
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:16px;
+        }
+        .tool-card {
+            border:1px solid #dfe7ef;
+            border-radius:12px;
+            padding:17px;
+            background:#fbfdff;
+        }
+        .muted { color:#65788c; font-size:13px; line-height:1.55; }
+        .action-stack { display:flex; flex-direction:column; gap:7px; min-width:150px; }
+        @media (max-width: 1150px) {
+            .history-summary { grid-template-columns: repeat(3, 1fr); }
+            .history-grid, .history-create-grid, .commune-quick-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 720px) {
+            .history-summary, .history-grid, .history-create-grid, .commune-quick-grid, .province-tools { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">BÀI 12D-14A</p>
+            <h1>Trung tâm dữ liệu lịch sử</h1>
+            <p>Cập nhật dữ liệu hộ và đối tượng từ năm học 2020-2021 đến 2025-2026 để làm nguồn đối chiếu và tạo dữ liệu nền.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            <div style="text-align:right; line-height:1.4;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size:13px; opacity:.9;">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            </div>
+            <a class="button button-light" href="/dieu-tra">← Danh sách đợt</a>
+        </div>
+    </div>
+</header>
+
+<main class="admin-container">
+    {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+    {% if error_message %}<div class="alert alert-error">{{ error_message }}</div>{% endif %}
+
+    {% if created_total is not none %}
+        <div class="alert alert-success">Số bộ dữ liệu vừa tạo: <strong>{{ created_total }}</strong>.</div>
+    {% endif %}
+    {% if imported_datasets is not none %}
+        <div class="alert alert-success">
+            Đã nhập <strong>{{ imported_datasets }}</strong> xã/phường, tạo mới
+            <strong>{{ imported_households or 0 }}</strong> hộ và <strong>{{ imported_people or 0 }}</strong> đối tượng.
+        </div>
+    {% endif %}
+
+    <section class="panel" style="margin-bottom:22px; border-left:5px solid #7b1fa2;">
+        <p class="panel-label">NGUYÊN TẮC DỮ LIỆU NỀN</p>
+        <h2 style="margin-bottom:8px;">Dữ liệu lịch sử được quản lý độc lập theo từng năm học và xã/phường</h2>
+        <p class="muted" style="margin:0;">
+            Xã/phường được nhập và sửa dữ liệu trong phạm vi của mình, sau đó gửi Sở kiểm tra.
+            Sở khóa bộ dữ liệu đạt yêu cầu để dùng làm nguồn. Bước đối chiếu với dữ liệu học sinh sẽ được thực hiện ở Bài 12D-14B; dữ liệu học sinh không tự động ghi đè dữ liệu hộ.
+        </p>
+    </section>
+
+    <section class="history-summary">
+        <div class="summary-card"><span>Bộ dữ liệu trong phạm vi</span><strong>{{ summary.dataset_total }}</strong></div>
+        <div class="summary-card"><span>Đang cập nhật</span><strong style="color:#0d47a1;">{{ summary.editing_total }}</strong></div>
+        <div class="summary-card"><span>Đã gửi kiểm tra</span><strong style="color:#a35f00;">{{ summary.review_total }}</strong></div>
+        <div class="summary-card"><span>Đã khóa làm nền</span><strong style="color:#176b32;">{{ summary.locked_total }}</strong></div>
+        <div class="summary-card"><span>Tổng số hộ lịch sử</span><strong>{{ summary.household_total }}</strong></div>
+        <div class="summary-card"><span>Tổng số đối tượng lịch sử</span><strong>{{ summary.person_total }}</strong></div>
+    </section>
+
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="panel-header">
+            <div><p class="panel-label">TÌM KIẾM</p><h2>Lọc bộ dữ liệu lịch sử</h2></div>
+        </div>
+        <form method="get" action="/dieu-tra/du-lieu-lich-su">
+            <div class="history-grid">
+                <div class="form-group" style="margin:0;">
+                    <label for="school_year_id_filter">Năm học</label>
+                    <select id="school_year_id_filter" name="school_year_id" class="history-control">
+                        <option value="">-- Tất cả năm học --</option>
+                        {% for year in school_years %}
+                            <option value="{{ year.id }}" {% if selected_year_id == year.id and request.query_params.get('school_year_id') %}selected{% endif %}>{{ year.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if not is_commune %}
+                <div class="form-group" style="margin:0;">
+                    <label for="commune_id_filter">Xã/phường</label>
+                    <select id="commune_id_filter" name="commune_id" class="history-control">
+                        <option value="">-- Tất cả xã/phường --</option>
+                        {% for commune in communes %}
+                            <option value="{{ commune.id }}" {% if selected_commune_id == commune.id and request.query_params.get('commune_id') %}selected{% endif %}>{{ commune.code }} – {{ commune.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="form-group" style="margin:0;">
+                    <label for="status_filter">Trạng thái</label>
+                    <select id="status_filter" name="status_filter" class="history-control">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        {% for code, label in status_labels.items() %}
+                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label for="q">Tên xã, mã xã hoặc năm học</label>
+                    <input id="q" name="q" class="history-control" value="{{ q }}" placeholder="Ví dụ: Cửa Lò, 16732, 2023-2024">
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
+                <button class="button button-primary" type="submit">🔎 Lọc danh sách</button>
+                <a class="button button-light" href="/dieu-tra/du-lieu-lich-su">Xóa bộ lọc</a>
+            </div>
+        </form>
+    </section>
+
+    {% if can_update %}
+    <section class="panel" style="margin-bottom:22px; border-left:5px solid #1565c0;">
+        <div class="panel-header">
+            <div>
+                <p class="panel-label">CẬP NHẬT TỪNG XÃ/PHƯỜNG</p>
+                <h2>Tìm xã, tải mẫu và nhập Excel riêng của địa phương</h2>
+            </div>
+        </div>
+        <form id="commune_quick_form" method="post" action="/dieu-tra/du-lieu-lich-su/tao" enctype="multipart/form-data">
+            <div class="commune-quick-grid">
+                <div class="form-group" style="margin:0;">
+                    <label for="school_year_id_quick">1. Chọn năm học dữ liệu</label>
+                    <select id="school_year_id_quick" name="school_year_id" class="history-control" required>
+                        {% for year in school_years %}
+                            <option value="{{ year.id }}" {% if selected_year_id == year.id %}selected{% endif %}>{{ year.code }} – {{ year.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin:0;">
+                    {% if is_commune %}
+                        <label>Xã/phường được phép cập nhật</label>
+                        {% for commune in communes %}
+                            <input id="commune_id_quick" type="hidden" name="commune_id" value="{{ commune.id }}">
+                            <input class="history-control" value="{{ commune.code }} – {{ commune.name }}" disabled>
+                        {% endfor %}
+                    {% else %}
+                        <label for="commune_search_quick">2. Tìm xã/phường theo tên hoặc mã</label>
+                        <input id="commune_search_quick" class="history-control" placeholder="Ví dụ: Thành Vinh, Cửa Lò hoặc 16681" autocomplete="off">
+                        <select id="commune_id_quick" name="commune_id" class="history-control" required style="margin-top:8px;">
+                            {% for commune in communes %}
+                                <option value="{{ commune.id }}" data-search="{{ commune.code }} {{ commune.name }}" {% if selected_commune_id == commune.id %}selected{% endif %}>{{ commune.code }} – {{ commune.name }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="margin:0;">
+                    <label for="excel_file_quick">3. Chọn Excel của xã để nhập</label>
+                    <input id="excel_file_quick" name="excel_file" type="file" class="history-control" accept=".xlsx">
+                </div>
+            </div>
+
+            <div class="history-create-grid" style="margin-top:14px;">
+                <div class="form-group" style="margin:0; grid-column:span 2;">
+                    <label for="notes_quick">Ghi chú nguồn dữ liệu</label>
+                    <input id="notes_quick" name="notes" class="history-control" placeholder="Ví dụ: File xã gửi ngày 20/8/2026; dữ liệu tổng hợp từ năm học cũ">
+                </div>
+            </div>
+
+            <div class="commune-action-bar">
+                <button class="button button-primary" type="submit" formaction="/dieu-tra/du-lieu-lich-su/tao">➕ Mở hoặc tạo dữ liệu xã</button>
+                <a id="commune_template_link" class="button button-light" href="#">📥 Tải mẫu Excel của xã</a>
+                <button id="commune_import_button" class="button button-primary" type="submit" formaction="/dieu-tra/du-lieu-lich-su/nhap-excel-xa">📤 Nhập Excel của xã</button>
+            </div>
+            <div class="commune-help">
+                <strong>Quy trình từng xã:</strong> tìm và chọn xã/phường → chọn năm học → tải mẫu riêng của xã → gửi địa phương cập nhật → chọn lại đúng xã và nhập tệp Excel gửi về.
+                Hệ thống tự tạo bộ dữ liệu nếu xã chưa có, đồng thời chặn mọi dòng có mã xã hoặc năm học không đúng lựa chọn.
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
+    {% if can_manage_province %}
+    <section class="panel" style="margin-bottom:22px;">
+        <div class="panel-header">
+            <div><p class="panel-label">CÔNG CỤ CẤP SỞ</p><h2>Khởi tạo và nhập dữ liệu toàn tỉnh</h2></div>
+        </div>
+        <div class="province-tools">
+            <div class="tool-card">
+                <h3 style="margin-top:0;">Tạo đủ bộ dữ liệu cho 130 xã/phường</h3>
+                <p class="muted">Chỉ tạo những xã chưa có bộ dữ liệu của năm học đã chọn, không làm trùng dữ liệu.</p>
+                <form method="post" action="/dieu-tra/du-lieu-lich-su/tao-toan-tinh" onsubmit="return confirm('Tạo các bộ dữ liệu lịch sử còn thiếu cho toàn tỉnh?');">
+                    <select name="school_year_id" class="history-control" required>
+                        {% for year in school_years %}<option value="{{ year.id }}" {% if selected_year_id == year.id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}
+                    </select>
+                    <button class="button button-primary" type="submit" style="margin-top:12px;">🏛️ Tạo bộ dữ liệu toàn tỉnh</button>
+                </form>
+            </div>
+            <div class="tool-card">
+                <h3 style="margin-top:0;">Nhập Excel dữ liệu lịch sử toàn tỉnh</h3>
+                <p class="muted">Tệp phải có mã xã/phường và năm học đúng danh mục. Hệ thống sao lưu cơ sở dữ liệu trước khi nhập.</p>
+                <form method="post" action="/dieu-tra/du-lieu-lich-su/nhap-excel-toan-tinh" enctype="multipart/form-data">
+                    <select id="province_year" name="school_year_id" class="history-control" required>
+                        {% for year in school_years %}<option value="{{ year.id }}" data-code="{{ year.code }}" {% if selected_year_id == year.id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}
+                    </select>
+                    <input type="file" name="excel_file" class="history-control" accept=".xlsx" required style="margin-top:10px;">
+                    <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                        <button class="button button-primary" type="submit" onclick="return confirm('Nhập dữ liệu lịch sử toàn tỉnh từ tệp Excel đã chọn?');">📤 Kiểm tra và nhập</button>
+                        <a id="province_template_link" class="button button-light" href="/dieu-tra/du-lieu-lich-su/mau-excel-toan-tinh?school_year_id={{ selected_year_id }}">📥 Tải mẫu toàn tỉnh</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="panel">
+        <div class="panel-header">
+            <div><p class="panel-label">DANH SÁCH</p><h2>Các bộ dữ liệu lịch sử</h2></div>
+            <span class="muted">Hiển thị {{ rows|length }} bộ dữ liệu theo bộ lọc hiện tại</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table history-table">
+                <thead>
+                    <tr>
+                        <th>Năm học</th>
+                        <th>Xã/phường</th>
+                        <th>Trạng thái</th>
+                        <th>Số hộ</th>
+                        <th>Số đối tượng</th>
+                        <th>Tệp nguồn gần nhất</th>
+                        <th>Cập nhật gần nhất</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in rows %}
+                    {% set dataset = row.dataset %}
+                    <tr>
+                        <td><strong>{{ dataset.school_year.code }}</strong></td>
+                        <td><strong>{{ dataset.commune.name }}</strong><div class="muted">{{ dataset.commune.code }}</div></td>
+                        <td><span class="history-status {{ status_classes.get(dataset.status, '') }}">{{ status_labels.get(dataset.status, dataset.status) }}</span></td>
+                        <td>{{ row.household_total }}</td>
+                        <td>{{ row.person_total }}</td>
+                        <td>{{ dataset.source_file_name or 'Chưa nhập Excel' }}</td>
+                        <td>{{ dataset.updated_at.strftime('%d/%m/%Y %H:%M') if dataset.updated_at else '' }}</td>
+                        <td><div class="action-stack"><a class="button button-primary" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}">Mở dữ liệu</a><a class="button button-light" href="/dieu-tra/du-lieu-lich-su/{{ dataset.id }}/xuat-excel">Xuất Excel</a></div></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8" style="text-align:center; padding:34px; color:#65788c;">Chưa có bộ dữ liệu phù hợp. Hãy tạo bộ dữ liệu hoặc thay đổi bộ lọc.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+(function () {
+    const provinceYear = document.getElementById('province_year');
+    const provinceLink = document.getElementById('province_template_link');
+    if (provinceYear && provinceLink) {
+        function updateProvinceLink() {
+            provinceLink.href = '/dieu-tra/du-lieu-lich-su/mau-excel-toan-tinh?school_year_id=' + encodeURIComponent(provinceYear.value);
+        }
+        provinceYear.addEventListener('change', updateProvinceLink);
+        updateProvinceLink();
+    }
+
+    const communeSearch = document.getElementById('commune_search_quick');
+    const communeSelect = document.getElementById('commune_id_quick');
+    const communeYear = document.getElementById('school_year_id_quick');
+    const communeTemplateLink = document.getElementById('commune_template_link');
+    const communeImportButton = document.getElementById('commune_import_button');
+    const communeFile = document.getElementById('excel_file_quick');
+
+    function normalizeVietnamese(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D')
+            .toLowerCase()
+            .trim();
+    }
+
+    function updateCommuneTemplateLink() {
+        if (!communeTemplateLink || !communeSelect || !communeYear) return;
+        communeTemplateLink.href = '/dieu-tra/du-lieu-lich-su/mau-excel-xa?school_year_id='
+            + encodeURIComponent(communeYear.value)
+            + '&commune_id=' + encodeURIComponent(communeSelect.value);
+    }
+
+    if (communeSearch && communeSelect) {
+        const options = Array.from(communeSelect.options).map(function (option) {
+            return {
+                value: option.value,
+                label: option.textContent,
+                search: normalizeVietnamese(option.dataset.search || option.textContent)
+            };
+        });
+
+        communeSearch.addEventListener('input', function () {
+            const keyword = normalizeVietnamese(communeSearch.value);
+            const currentValue = communeSelect.value;
+            communeSelect.innerHTML = '';
+            const matches = options.filter(function (item) {
+                return !keyword || item.search.includes(keyword);
+            });
+            matches.forEach(function (item) {
+                const option = document.createElement('option');
+                option.value = item.value;
+                option.textContent = item.label;
+                communeSelect.appendChild(option);
+            });
+            if (matches.some(function (item) { return item.value === currentValue; })) {
+                communeSelect.value = currentValue;
+            }
+            updateCommuneTemplateLink();
+        });
+    }
+
+    if (communeSelect) communeSelect.addEventListener('change', updateCommuneTemplateLink);
+    if (communeYear) communeYear.addEventListener('change', updateCommuneTemplateLink);
+    updateCommuneTemplateLink();
+
+    if (communeImportButton) {
+        communeImportButton.addEventListener('click', function (event) {
+            if (!communeFile || !communeFile.files || communeFile.files.length === 0) {
+                event.preventDefault();
+                alert('Hãy chọn tệp Excel của xã/phường trước khi nhập.');
+                return;
+            }
+            if (!confirm('Kiểm tra và cập nhật dữ liệu lịch sử của đúng xã/phường đã chọn?')) {
+                event.preventDefault();
+            }
+        });
+    }
+})();
+</script>
+</body>
+</html>

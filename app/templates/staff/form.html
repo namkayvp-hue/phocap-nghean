@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{% if record %}Sửa{% else %}Thêm{% endif %} hồ sơ đội ngũ</title><link rel="stylesheet" href="/static/css/style.css">
+<style>
+body{margin:0;background:#eef4fb;color:#18324f;font-family:Arial,sans-serif}.hero{background:linear-gradient(135deg,#1453a2,#1883d7);color:white;padding:32px 48px}.hero-inner{max-width:1250px;margin:auto;display:flex;justify-content:space-between;gap:20px;align-items:center}.hero h1{font-size:34px;margin:5px 0}.eyebrow,.section-label{font-weight:800;letter-spacing:.08em;text-transform:uppercase}.nav{display:flex;gap:10px}.button{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;padding:11px 16px;font-weight:800;text-decoration:none;cursor:pointer}.button-light{background:white;color:#1453a2}.button-primary{background:#1676d2;color:white}.button-secondary{background:#e7eef6;color:#18324f}.container{max-width:1250px;margin:24px auto;padding:0 22px 50px}.panel{background:white;border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 10px 28px rgba(34,76,120,.08)}.panel h2{margin:5px 0 8px}.muted{color:#71879f;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.field label{display:block;font-weight:700;margin-bottom:7px}.field input,.field select,.field textarea{box-sizing:border-box;width:100%;padding:11px;border:1px solid #ccdaea;border-radius:10px;background:white}.field textarea{min-height:90px}.wide{grid-column:span 2}.full{grid-column:1/-1}.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}.notice{padding:14px;border-radius:12px;background:#fff0f0;border:1px solid #efb7b7;color:#9b2020;margin-bottom:16px}.checkbox{display:flex;align-items:center;gap:10px;padding-top:28px}.checkbox input{width:auto}@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.hero-inner{align-items:flex-start;flex-direction:column}}@media(max-width:600px){.grid{grid-template-columns:1fr}.wide,.full{grid-column:auto}.hero{padding:26px 18px}.container{padding:0 12px}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero"><div class="hero-inner"><div><p class="eyebrow">BÀI 13B-1</p><h1>{% if record %}Cập nhật hồ sơ đội ngũ{% else %}Thêm hồ sơ đội ngũ{% endif %}</h1><p>Mỗi người có một hồ sơ gốc và một bản ghi công tác theo từng năm học.</p></div><div class="nav"><a class="button button-light" href="/doi-ngu?school_year_id={{ selected_year_id }}{% if selected_school_id %}&school_id={{ selected_school_id }}{% endif %}">← Danh sách đội ngũ</a></div></div></header>
+<main class="container">
+{% if status %}<div class="notice">{% if status == 'duplicate_code' %}Mã định danh cán bộ đã được dùng cho người khác.{% else %}Người này đã có bản ghi trong năm học đã chọn.{% endif %}</div>{% endif %}
+<form method="post" action="{% if record %}/doi-ngu/{{ record.id }}/sua{% else %}/doi-ngu/them{% endif %}">
+<section class="panel"><p class="section-label">1. Thông tin nhận diện</p><h2>Hồ sơ cán bộ, giáo viên hoặc nhân viên</h2><div class="grid">
+<div class="field"><label>Mã định danh Bộ GD&amp;ĐT</label><input name="ministry_staff_code" value="{{ member.ministry_staff_code if member else '' }}" placeholder="Ví dụ: 4001144545"></div>
+<div class="field wide"><label>Họ và tên *</label><input name="full_name" required value="{{ member.full_name if member else '' }}"></div>
+<div class="field"><label>Ngày sinh</label><input type="date" name="date_of_birth" value="{{ member.date_of_birth.isoformat() if member and member.date_of_birth else '' }}"></div>
+<div class="field"><label>Giới tính</label><select name="gender"><option value="">-- Chưa xác định --</option><option value="Nam" {% if member and member.gender == 'Nam' %}selected{% endif %}>Nam</option><option value="Nữ" {% if member and member.gender == 'Nữ' %}selected{% endif %}>Nữ</option></select></div>
+<div class="field"><label>Dân tộc</label><input name="ethnic_group" value="{{ member.ethnic_group if member and member.ethnic_group else '' }}" placeholder="Kinh, Thái, Mông..."></div>
+<div class="field"><label>Số định danh cá nhân</label><input name="personal_id" value="{{ member.personal_id if member else '' }}"></div>
+<div class="field"><label>Điện thoại</label><input name="phone" value="{{ member.phone if member else '' }}"></div>
+<div class="field"><label>Email</label><input type="email" name="email" value="{{ member.email if member else '' }}"></div>
+</div></section>
+<section class="panel"><p class="section-label">2. Thông tin công tác theo năm học</p><h2>Đơn vị, vị trí và chế độ</h2><div class="grid">
+<div class="field"><label>Năm học *</label><select name="school_year_id" required>{% for year in school_years %}<option value="{{ year.id }}" {% if year.id == selected_year_id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div>
+<div class="field wide"><label>Trường/cơ sở GDMN *</label><select name="school_id" required><option value="">-- Chọn trường --</option>{% for school in schools %}<option value="{{ school.id }}" {% if school.id == selected_school_id %}selected{% endif %}>{{ school.name }}</option>{% endfor %}</select></div>
+<div class="field"><label>Trạng thái làm việc</label><select name="status_code">{% for code,label in status_labels.items() %}<option value="{{ code }}" {% if record and record.status_code == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label>Nhóm vị trí</label><select name="position_group">{% for code,label in position_labels.items() %}<option value="{{ code }}" {% if (record and record.position_group == code) or (not record and code == 'GIAO_VIEN') %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label>Chức danh cụ thể</label><input name="position_title" value="{{ record.position_title if record else '' }}" placeholder="Hiệu trưởng, giáo viên, kế toán..."></div>
+<div class="field"><label>Loại tuyển dụng/hợp đồng</label><select name="employment_type">{% for code,label in employment_labels.items() %}<option value="{{ code }}" {% if record and record.employment_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label>Ngày tuyển dụng</label><input type="date" name="recruitment_date" value="{{ record.recruitment_date.isoformat() if record and record.recruitment_date else '' }}"></div>
+<div class="field"><label>Cấp học đang dạy</label><select name="teaching_level">{% for code,label in teaching_level_labels.items() %}<option value="{{ code }}" {% if record and record.teaching_level == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label>Môn dạy</label><input name="teaching_subject" value="{{ record.teaching_subject if record and record.teaching_subject else '' }}" placeholder="Toán, Ngữ văn, Tiểu học, Tiếng Anh..."></div>
+<div class="field"><label>Chuyên ngành chính</label><input name="main_specialty" value="{{ record.main_specialty if record and record.main_specialty else '' }}" placeholder="Giáo dục Tiểu học, Sư phạm Tiếng Anh..."></div>
+<div class="field"><label>Đánh giá viên chức</label><input name="staff_evaluation" value="{{ record.staff_evaluation if record and record.staff_evaluation else '' }}" placeholder="Xuất sắc, Hoàn thành tốt..."></div>
+<div class="field"><label>Độ tuổi/lớp mẫu giáo phụ trách</label><select name="teaching_age_group">{% for code,label in teaching_age_labels.items() %}<option value="{{ code }}" {% if record and record.teaching_age_group == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field checkbox"><input id="receives_policy" type="checkbox" name="receives_policy" value="1" {% if record and record.receives_policy %}checked{% endif %}><label for="receives_policy">Được hưởng chế độ, chính sách theo quy định</label></div>
+</div></section>
+<section class="panel"><p class="section-label">3. Trình độ và chuẩn nghề nghiệp</p><h2>Dữ liệu dùng cho biểu MN-01 GV</h2><div class="grid">
+<div class="field"><label>Trình độ đào tạo</label><select name="qualification_level">{% for code,label in qualification_level_labels.items() %}<option value="{{ code }}" {% if record and record.qualification_level == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label>Mức chuẩn trình độ</label><select name="qualification_standard">{% for code,label in qualification_standard_labels.items() %}<option value="{{ code }}" {% if record and record.qualification_standard == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label>Chuẩn nghề nghiệp</label><select name="professional_standard">{% for code,label in professional_standard_labels.items() %}<option value="{{ code }}" {% if record and record.professional_standard == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field full"><label>Ghi chú</label><textarea name="notes">{{ record.notes if record else '' }}</textarea></div>
+</div><div class="actions"><a class="button button-secondary" href="/doi-ngu?school_year_id={{ selected_year_id }}{% if selected_school_id %}&school_id={{ selected_school_id }}{% endif %}">Hủy</a><button class="button button-primary" type="submit">{% if record %}Lưu thay đổi{% else %}Thêm hồ sơ{% endif %}</button></div></section>
+</form></main></body></html>

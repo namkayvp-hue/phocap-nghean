@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nguồn học sinh đối chiếu theo xã/phường</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        body{margin:0;background:#eef4fa;color:#17324d;font-family:Arial,Helvetica,sans-serif}.wrap{max-width:1400px;margin:0 auto;padding:24px}.hero,.panel,.card{background:#fff;border:1px solid #dbe5ef;border-radius:14px;box-shadow:0 7px 20px rgba(27,58,91,.06)}.hero{padding:22px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:28px}.muted{color:#657b8f;line-height:1.55}.panel{padding:20px;margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:14px;align-items:end}.field label{display:block;margin-bottom:6px;font-weight:700}.field select,.field input[type=file]{width:100%;padding:10px;border:1px solid #c8d6e3;border-radius:8px;background:#fff}.button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:10px 15px;border:0;border-radius:8px;font-weight:800;cursor:pointer;text-decoration:none}.primary{background:#1565c0;color:#fff}.success{background:#1b7e3b;color:#fff}.warning{background:#a86500;color:#fff}.secondary{background:#e4edf5;color:#17324d}.notice{padding:13px 15px;margin-bottom:16px;border-radius:9px;background:#e8f3ff;border:1px solid #b8d8fa}.notice.success{background:#e8f6ec;border-color:#b6dfc1;color:#176d31}.notice.warning{background:#fff5dc;border-color:#efd18a;color:#7b5200}.stats{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;margin:14px 0}.card{padding:14px}.card strong{display:block;font-size:24px;color:#0d47a1;margin-top:5px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:900px}.table th,.table td{padding:9px 10px;border-bottom:1px solid #e4ebf2;text-align:left;vertical-align:top}.table th{background:#f5f8fb}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-weight:800;font-size:12px}.loaded{background:#e8f6ec;color:#176d31}.locked{background:#fff0e5;color:#9b4100}.draft{background:#eef3f7;color:#52697d}.actions{display:flex;gap:8px;flex-wrap:wrap}.small{font-size:12px}.error{color:#a32222}.warn{color:#8a5b00}@media(max-width:900px){.grid,.stats{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid,.stats{grid-template-columns:1fr}.wrap{padding:12px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<div class="wrap">
+    <section class="hero">
+        <h1>Nạp dữ liệu học sinh đối chiếu theo xã/phường</h1>
+        <div class="muted">Nguồn năm trước được giữ nguyên trường/lớp lịch sử; dùng để đối chiếu với điều tra của năm hiện tại. Dữ liệu không tự đổi tên trường sau sáp nhập.</div>
+    </section>
+
+    {% if status_message %}<div class="notice {{ status_message.kind }}">{{ status_message.text }}</div>{% endif %}
+
+    <section class="panel">
+        <form method="get" action="/dieu-tra/nguon-hoc-sinh-doi-chieu">
+            <div class="grid">
+                <div class="field">
+                    <label>Năm học đối chiếu</label>
+                    <select name="target_school_year_id" required>
+                        {% for y in years %}<option value="{{ y.id }}" {% if y.id == target_year_id %}selected{% endif %}>{{ y.code }} – {{ y.name }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Năm nguồn</label>
+                    <input value="{% if source_year %}{{ source_year.code }}{% else %}Không xác định{% endif %}" disabled>
+                </div>
+                <div class="field">
+                    <label>Xã/phường</label>
+                    <select name="commune_id" required data-quick-search="true" data-quick-search-placeholder="Gõ tên xã/phường để tìm nhanh..." {% if not can_unlock and communes|length == 1 %}disabled{% endif %}>
+                        <option value="">-- Chọn xã/phường --</option>
+                        {% for c in communes %}<option value="{{ c.id }}" {% if c.id == commune_id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+                    </select>
+                    {% if not can_unlock and communes|length == 1 %}<input type="hidden" name="commune_id" value="{{ communes[0].id }}">{% endif %}
+                </div>
+                <div><button class="button secondary" type="submit">Hiển thị</button></div>
+            </div>
+        </form>
+    </section>
+
+    {% if selected_commune and target_year %}
+    <section class="panel">
+        <h2 style="margin-top:0">Trạng thái nguồn</h2>
+        <div class="muted"><strong>{{ selected_commune.name }}</strong> · Đối chiếu {{ target_year.code }} · Nguồn {% if source_year %}{{ source_year.code }}{% else %}chưa xác định{% endif %}</div>
+        {% if state %}
+            <div class="stats">
+                <div class="card">Trạng thái<strong><span class="badge {% if state.status == 'LOCKED' %}locked{% elif state.status == 'LOADED' %}loaded{% else %}draft{% endif %}">{{ state.status }}</span></strong></div>
+                <div class="card">Học sinh<strong>{{ state.student_count or 0 }}</strong></div>
+                <div class="card">Enrollment<strong>{{ state.enrollment_count or 0 }}</strong></div>
+                <div class="card">Lớp<strong>{{ state.class_count or 0 }}</strong></div>
+                <div class="card">Số lần nạp<strong>{{ state.import_count or 0 }}</strong></div>
+            </div>
+            <div class="muted small">File gần nhất: {{ state.file_name or '—' }} · Nạp lúc: {{ state.last_imported_at or '—' }}</div>
+            <div class="actions" style="margin-top:12px">
+                {% if state.status == 'LOADED' %}
+                <form method="post" action="/dieu-tra/nguon-hoc-sinh-doi-chieu/khoa"><input type="hidden" name="target_school_year_id" value="{{ target_year.id }}"><input type="hidden" name="commune_id" value="{{ selected_commune.id }}"><button class="button warning" type="submit">Khóa nguồn của xã/phường</button></form>
+                {% endif %}
+                {% if can_unlock and state.status == 'LOCKED' %}
+                <form method="post" action="/dieu-tra/nguon-hoc-sinh-doi-chieu/mo-khoa"><input type="hidden" name="target_school_year_id" value="{{ target_year.id }}"><input type="hidden" name="commune_id" value="{{ selected_commune.id }}"><button class="button secondary" type="submit">Mở khóa để nạp lại</button></form>
+                {% endif %}
+            </div>
+        {% else %}<div class="notice warning" style="margin-top:12px">Xã/phường chưa nạp nguồn học sinh đối chiếu.</div>{% endif %}
+    </section>
+
+    {% if not state or state.status != 'LOCKED' %}
+    <section class="panel">
+        <h2 style="margin-top:0">1. Chọn file và xem trước</h2>
+        <form method="post" enctype="multipart/form-data" action="/dieu-tra/nguon-hoc-sinh-doi-chieu/xem-truoc">
+            <input type="hidden" name="target_school_year_id" value="{{ target_year.id }}">
+            <input type="hidden" name="commune_id" value="{{ selected_commune.id }}">
+            <div class="grid" style="grid-template-columns:2fr 1fr">
+                <div class="field"><label>File Excel nguồn (.xlsx)</label><input type="file" name="source_file" accept=".xlsx" required></div>
+                <div><button class="button primary" type="submit">Kiểm tra trước</button></div>
+            </div>
+            <p class="muted small">Có thể nạp file MN, TH, THCS, THPT riêng hoặc file tổng hợp, miễn có các cột Trường – Lớp – Mã định danh Bộ GD&ĐT – Họ tên – Ngày sinh. Các file được cộng dồn theo trường; nạp lại một file chỉ thay dữ liệu của các trường có trong file đó, không xóa dữ liệu các cấp/trường đã nạp trước.</p>
+        </form>
+    </section>
+    {% endif %}
+    {% endif %}
+
+    {% if preview %}
+    <section class="panel">
+        <h2 style="margin-top:0">2. Kết quả kiểm tra trước</h2>
+        <div class="stats">
+            <div class="card">Dòng hợp lệ<strong>{{ preview.total_rows or 0 }}</strong></div>
+            <div class="card">Học sinh<strong>{{ preview.student_count or 0 }}</strong></div>
+            <div class="card">Trường<strong>{{ preview.school_counts|length }}</strong></div>
+            <div class="card">Lớp<strong>{{ preview.class_count or 0 }}</strong></div>
+            <div class="card">Mã chuyển trường<strong>{{ preview.transfer_code_count or 0 }}</strong></div>
+        </div>
+        <div class="notice {% if preview.errors %}warning{% else %}success{% endif %}">Lỗi: <strong>{{ preview.errors|length }}</strong> · Cảnh báo: <strong>{{ preview.warnings|length }}</strong> · Enrollment ngoài V12: <strong>{{ preview.existing_external_enrollments or 0 }}</strong></div>
+
+        <h3>Theo trường</h3>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Trường</th><th>Số dòng</th></tr></thead><tbody>{% for s in preview.school_counts %}<tr><td>{{ s.school_name }}</td><td>{{ s.rows }}</td></tr>{% endfor %}</tbody></table></div>
+
+        {% if preview.issues %}
+        <h3>Lỗi / cảnh báo đầu tiên</h3>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Mức</th><th>Sheet</th><th>Dòng</th><th>Mã HS</th><th>Họ tên</th><th>Nội dung</th></tr></thead><tbody>{% for x in preview.issues %}<tr><td class="{% if x.level == 'LỖI' %}error{% else %}warn{% endif %}">{{ x.level }}</td><td>{{ x.sheet }}</td><td>{{ x.row }}</td><td>{{ x.student_code }}</td><td>{{ x.full_name }}</td><td>{{ x.message }}</td></tr>{% endfor %}</tbody></table></div>
+        {% endif %}
+
+        {% if preview.can_import %}
+        <div class="notice success" style="margin-top:16px">File đạt điều kiện kỹ thuật. Bấm nút dưới để nạp chính thức; thao tác chạy trong một transaction và rollback nếu lỗi.</div>
+        <form method="post" action="/dieu-tra/nguon-hoc-sinh-doi-chieu/nap"><input type="hidden" name="preview_token" value="{{ preview.token }}"><button class="button success" type="submit">NẠP DỮ LIỆU ĐỐI CHIẾU</button></form>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
+
+<script src="/static/js/quick_select_v1.js"></script>
+</body>
+</html>

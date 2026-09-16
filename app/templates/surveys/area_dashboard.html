@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng điều hành theo xã/phường</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
+
+    <style>
+        .dashboard-container {
+            width: min(1540px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 24px 0 42px;
+        }
+
+        .dashboard-toolbar,
+        .dashboard-filter {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dashboard-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(210px, 1fr)) auto;
+            gap: 12px;
+            align-items: end;
+            width: 100%;
+        }
+
+        .dashboard-control {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #c8d3df;
+            border-radius: 9px;
+            background: #fff;
+            font: inherit;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(150px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .summary-card {
+            min-height: 118px;
+            padding: 18px;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(27, 74, 116, 0.08);
+            border: 1px solid #dce6ef;
+        }
+
+        .summary-label {
+            color: #617589;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .summary-value {
+            display: block;
+            margin-top: 12px;
+            color: #0d4c91;
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .summary-note {
+            display: block;
+            margin-top: 8px;
+            color: #708397;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .dashboard-table {
+            min-width: 1460px;
+        }
+
+        .state-pill {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .state-missing,
+        .state-empty {
+            background: #fff4e5;
+            color: #9a5a00;
+        }
+
+        .state-attention {
+            background: #ffebee;
+            color: #aa1f1f;
+        }
+
+        .state-ready {
+            background: #e8f5e9;
+            color: #1d6f33;
+        }
+
+        .state-locked {
+            background: #e8eefc;
+            color: #284f9e;
+        }
+
+        .metric-number {
+            font-weight: 800;
+            color: #163b62;
+        }
+
+        .progress-track {
+            width: 130px;
+            height: 9px;
+            margin-top: 7px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #e7edf3;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #1976d2, #2e9c62);
+        }
+
+        .attention-text {
+            max-width: 320px;
+            color: #7e3d19;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .muted {
+            color: #728499;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .action-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 150px;
+        }
+
+        .priority-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .priority-item {
+            display: grid;
+            grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr) auto;
+            gap: 14px;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 11px;
+            background: #fff8f0;
+            border: 1px solid #f1d6b6;
+        }
+
+        @media (max-width: 1250px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 820px) {
+            .dashboard-filter-grid,
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .priority-item {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <p class="admin-eyebrow">BÀI 12D-10</p>
+                <h1>Bảng điều hành tổng hợp theo xã/phường</h1>
+                <p>
+                    Theo dõi tiến độ, chất lượng dữ liệu và các địa bàn cần
+                    ưu tiên xử lý trong cùng một năm học.
+                </p>
+            </div>
+
+            <div style="text-align: right;">
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div style="font-size: 13px; opacity: 0.9; margin: 4px 0 12px;">
+                    {{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}
+                </div>
+                <div style="display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-end;">
+                    <a class="button button-light" href="/dieu-tra/{{ target_batch.id }}/bao-cao-tong-hop">
+                        ← Báo cáo đợt đang chọn
+                    </a>
+                    <a class="button button-light" href="/dieu-tra">
+                        Danh sách đợt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="alert alert-success">
+            <strong>Báo cáo chỉ đọc.</strong>
+            Dữ liệu được tổng hợp theo {{ scope_label }}; mỗi xã/phường dùng
+            một đợt đại diện trong năm học, ưu tiên đợt đã khóa và mới nhất.
+        </div>
+
+        <section class="panel" style="margin-top: 18px;">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">BỘ LỌC ĐIỀU HÀNH</p>
+                    <h2>Năm học {{ selected_year.code }}</h2>
+                </div>
+                <a
+                    class="button button-primary"
+                    href="/dieu-tra/{{ target_batch.id }}/bang-dieu-hanh-dia-ban/xuat-excel?school_year_id={{ selected_year.id }}"
+                >
+                    📊 Xuất Excel bảng điều hành
+                </a>
+            </div>
+
+            <form method="get" action="/dieu-tra/{{ target_batch.id }}/bang-dieu-hanh-dia-ban">
+                <div class="dashboard-filter-grid">
+                    <div class="form-group">
+                        <label for="school_year_id">Năm học</label>
+                        <select id="school_year_id" name="school_year_id" class="dashboard-control">
+                            {% for year in school_years %}
+                                <option value="{{ year.id }}" {% if year.id == selected_year.id %}selected{% endif %}>
+                                    {{ year.code }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="view">Nhóm cần xem</label>
+                        <select id="view" name="view" class="dashboard-control">
+                            {% for code, label in view_labels.items() %}
+                                <option value="{{ code }}" {% if code == selected_view %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="q">Tìm xã/phường hoặc mã đợt</label>
+                        <input
+                            id="q"
+                            name="q"
+                            type="text"
+                            class="dashboard-control"
+                            value="{{ keyword }}"
+                            placeholder="Tên xã, mã xã, mã đợt..."
+                        >
+                    </div>
+
+                    <button class="button button-primary" type="submit">
+                        🔎 Lọc bảng điều hành
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="summary-grid">
+            <article class="summary-card">
+                <span class="summary-label">Xã/phường trong phạm vi</span>
+                <strong class="summary-value">{{ dashboard.summary.communes_total }}</strong>
+                <span class="summary-note">Đã có đợt: {{ dashboard.summary.with_batch }}</span>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-label">Chưa tạo đợt</span>
+                <strong class="summary-value" style="color: #b56400;">{{ dashboard.summary.missing }}</strong>
+                <span class="summary-note">Cần tổ chức đợt điều tra</span>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-label">Phiếu hoàn thành</span>
+                <strong class="summary-value">{{ dashboard.summary.completed_forms }}/{{ dashboard.summary.forms_total }}</strong>
+                <span class="summary-note">Tỷ lệ {{ '%.1f'|format(dashboard.summary.completion_percent) }}%</span>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-label">Đối tượng đang theo dõi</span>
+                <strong class="summary-value">{{ dashboard.summary.people_total }}</strong>
+                <span class="summary-note">Đang học: {{ dashboard.summary.attending_total }}</span>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-label">Địa bàn cần xử lý</span>
+                <strong class="summary-value" style="color: #bd2525;">{{ dashboard.summary.attention }}</strong>
+                <span class="summary-note">Hồ sơ cần rà soát: {{ dashboard.summary.review_total }}</span>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-label">Đợt đã khóa</span>
+                <strong class="summary-value">{{ dashboard.summary.locked }}</strong>
+                <span class="summary-note">Sẵn sàng: {{ dashboard.summary.ready }}</span>
+            </article>
+        </section>
+
+        {% if dashboard.attention_rows %}
+            <section class="panel" style="margin-bottom: 18px;">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-label">ƯU TIÊN XỬ LÝ</p>
+                        <h2>Các địa bàn đang có việc cần làm</h2>
+                    </div>
+                    <span class="count-badge">{{ dashboard.attention_rows | length }} địa bàn</span>
+                </div>
+
+                <div class="priority-list">
+                    {% for row in dashboard.attention_rows[:8] %}
+                        <div class="priority-item">
+                            <div>
+                                <strong>{{ row.commune.name }}</strong>
+                                <div class="muted">Mã {{ row.commune.code }}</div>
+                            </div>
+                            <div class="attention-text">{{ row.attention_text }}</div>
+                            {% if row.batch %}
+                                <a class="button button-small button-secondary" href="/dieu-tra/{{ row.batch.id }}/kiem-tra-du-lieu">
+                                    Mở kiểm tra dữ liệu
+                                </a>
+                            {% else %}
+                                <span class="state-pill state-missing">Chưa có đợt</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-label">TỔNG HỢP THEO ĐỊA BÀN</p>
+                    <h2>Danh sách xã/phường năm học {{ selected_year.code }}</h2>
+                    <p class="muted" style="margin-top: 7px;">
+                        Đang hiển thị {{ dashboard.filtered_rows | length }}/{{ dashboard.rows | length }} địa bàn.
+                    </p>
+                </div>
+            </div>
+
+            {% if dashboard.filtered_rows %}
+                <div class="table-wrapper">
+                    <table class="data-table dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Xã/phường</th>
+                                <th>Đợt đại diện</th>
+                                <th>Nhóm điều hành</th>
+                                <th>Tiến độ phiếu</th>
+                                <th>Phân công</th>
+                                <th>Đối tượng</th>
+                                <th>Chỉ báo</th>
+                                <th>Cần rà soát</th>
+                                <th>Nội dung cần xử lý</th>
+                                <th>Cập nhật gần nhất</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in dashboard.filtered_rows %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <strong>{{ row.commune.name }}</strong>
+                                        <div class="muted">Mã {{ row.commune.code }}</div>
+                                    </td>
+                                    <td>
+                                        {% if row.batch %}
+                                            <strong>{{ row.batch.code }}</strong>
+                                            <div class="muted">{{ row.batch.name }}</div>
+                                            <div class="muted" style="margin-top: 4px;">
+                                                {% if row.batch.is_locked %}
+                                                    Đã khóa dữ liệu
+                                                {% else %}
+                                                    {{ batch_status_labels.get(row.batch.status, row.batch.status) }}
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="muted">Chưa có đợt</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="state-pill state-{{ row.state }}">
+                                            {{ row.state_label }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="metric-number">{{ row.completed_forms }}/{{ row.forms_total }}</span>
+                                        <div class="muted">{{ '%.1f'|format(row.completion_percent) }}%</div>
+                                        <div class="progress-track">
+                                            <div class="progress-fill" style="width: {{ row.completion_percent }}%;"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="metric-number">{{ row.unassigned_forms }}</span>
+                                        <div class="muted">phiếu chưa phân công</div>
+                                    </td>
+                                    <td>
+                                        <span class="metric-number">{{ row.people_total }}</span>
+                                        <div class="muted">Đang học: {{ row.attending_total }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="metric-number">{{ '%.1f'|format(row.indicator_completion_percent) }}%</span>
+                                        <div class="muted">mức độ nhập đủ</div>
+                                    </td>
+                                    <td>
+                                        <span class="metric-number">{{ row.review_total }}</span>
+                                        <div class="muted">hồ sơ</div>
+                                    </td>
+                                    <td class="attention-text">{{ row.attention_text }}</td>
+                                    <td>{{ row.last_updated_label }}</td>
+                                    <td>
+                                        {% if row.batch %}
+                                            <div class="action-stack">
+                                                <a class="button button-small button-primary" href="/dieu-tra/{{ row.batch.id }}/tien-do">
+                                                    Xem tiến độ
+                                                </a>
+                                                <a class="button button-small button-secondary" href="/dieu-tra/{{ row.batch.id }}/kiem-tra-du-lieu">
+                                                    Kiểm tra dữ liệu
+                                                </a>
+                                                <a class="button button-small button-secondary" href="/dieu-tra/{{ row.batch.id }}/bao-cao-tong-hop">
+                                                    Báo cáo kết quả
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            <span class="muted">Tạo đợt tại trang danh sách đợt</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>Không có địa bàn phù hợp bộ lọc</h3>
+                    <p>Hãy đổi nhóm cần xem hoặc xóa từ khóa tìm kiếm.</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

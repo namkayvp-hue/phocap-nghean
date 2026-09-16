@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đối chiếu, xử lý và chốt kết quả học sinh</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17324d;
+            background: #eef4fa;
+        }
+        a { color: inherit; text-decoration: none; }
+        .header {
+            color: white;
+            background: linear-gradient(120deg, #0d47a1, #1976d2);
+            padding: 28px 24px;
+        }
+        .header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.1px;
+        }
+        h1 { margin: 0; font-size: 32px; }
+        .description { margin: 10px 0 0; line-height: 1.55; }
+        .user-box { min-width: 280px; text-align: right; }
+        .user-box strong { font-size: 17px; }
+        .user-detail { margin-top: 5px; font-size: 13px; opacity: .92; }
+        .header-actions {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .container { max-width: 1440px; margin: 0 auto; padding: 24px; }
+        .button {
+            min-height: 40px;
+            padding: 10px 15px;
+            border: 0;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .button-light { background: white; color: #0d47a1; }
+        .button-primary { background: #1565c0; color: white; }
+        .button-secondary { background: #e4edf5; color: #17324d; }
+        .button-success { background: #1b7e3b; color: white; }
+        .panel, .stat-card, .hero {
+            background: white;
+            border: 1px solid #dbe5ef;
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(26, 62, 96, .06);
+        }
+        .hero {
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .batch-code {
+            margin: 0 0 7px;
+            color: #1976d2;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .6px;
+        }
+        .hero h2 { margin: 0; font-size: 25px; }
+        .meta { margin: 10px 0 0; color: #637a90; line-height: 1.55; }
+        .read-only {
+            padding: 11px 16px;
+            border-radius: 999px;
+            background: #e8f6ec;
+            border: 1px solid #b6dfc1;
+            color: #176d31;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .notice {
+            margin-bottom: 16px;
+            padding: 15px 17px;
+            border-radius: 11px;
+            background: #e8f3ff;
+            border: 1px solid #b8d8fa;
+            color: #164f86;
+            line-height: 1.55;
+        }
+        .notice-warning {
+            background: #fff5dc;
+            border-color: #efd18a;
+            color: #7b5200;
+        }
+        .notice-success {
+            background: #e8f6ec;
+            border-color: #b6dfc1;
+            color: #176d31;
+        }
+        .stats-grid {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(170px, 1fr));
+            gap: 12px;
+        }
+        .stat-card { padding: 17px; }
+        .stat-label { color: #657d92; font-size: 13px; font-weight: 700; line-height: 1.4; }
+        .stat-value { margin-top: 8px; font-size: 28px; font-weight: 900; color: #0d47a1; }
+        .stat-good .stat-value { color: #18783a; }
+        .stat-warning .stat-value { color: #a56800; }
+        .stat-danger .stat-value { color: #bd252d; }
+        .panel { margin-top: 16px; padding: 22px; }
+        .panel-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .panel-kicker {
+            margin: 0 0 7px;
+            color: #1976d2;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .8px;
+        }
+        .panel h2 { margin: 0; font-size: 23px; }
+        .panel-description { margin: 8px 0 0; color: #657d92; line-height: 1.5; }
+        .filters {
+            display: grid;
+            grid-template-columns: 1.05fr .9fr .95fr 1.35fr .6fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #cbd8e5;
+            border-radius: 9px;
+            background: white;
+            color: #17324d;
+            font-size: 14px;
+        }
+        .filter-actions { display: flex; gap: 8px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; min-width: 1540px; border-collapse: collapse; }
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2ebf3;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.45;
+            font-size: 13px;
+        }
+        th { background: #eef4fa; color: #294761; font-size: 12px; }
+        tbody tr:hover { background: #f8fbfe; }
+        .person-name { font-weight: 800; font-size: 14px; }
+        .muted { color: #71879b; font-size: 12px; }
+        .pill {
+            display: inline-flex;
+            padding: 6px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+        .pill-good { background: #e7f5eb; color: #18783a; }
+        .pill-warning { background: #fff1d5; color: #955f00; }
+        .pill-danger { background: #fde8e9; color: #b4232c; }
+        .pill-neutral { background: #e8eef4; color: #425b72; }
+        .resolution-note { margin-top: 7px; color: #506b82; font-size: 12px; line-height: 1.45; }
+        .row-actions { display: flex; flex-direction: column; gap: 7px; }
+        .small-button {
+            padding: 7px 9px;
+            border-radius: 8px;
+            background: #e4edf5;
+            color: #17324d;
+            font-weight: 800;
+            font-size: 12px;
+            text-align: center;
+        }
+        .small-button-primary { background: #1976d2; color: white; }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+        .page-link {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 11px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #cbd8e5;
+            border-radius: 8px;
+            background: white;
+            font-weight: 800;
+        }
+        .page-link-active { background: #1976d2; border-color: #1976d2; color: white; }
+        .page-link-disabled { color: #9aa8b5; background: #f0f3f6; pointer-events: none; }
+        .empty { padding: 35px; text-align: center; color: #6d8296; }
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .filters { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 720px) {
+            .header-inner, .hero, .panel-header { flex-direction: column; align-items: stretch; }
+            .user-box { min-width: 0; text-align: left; }
+            .header-actions { justify-content: flex-start; }
+            .container { padding: 14px; }
+            h1 { font-size: 25px; }
+            .stats-grid, .filters { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">BÀI 12D-17</p>
+            <h1>Đối chiếu, xử lý và chốt kết quả học sinh</h1>
+            <p class="description">
+                Phát hiện sai khác, xử lý có nhật ký và lập biên bản xác nhận kết quả đối chiếu.
+            </p>
+        </div>
+        <div class="user-box">
+            {% if nguoi_dung %}
+                <strong>{{ nguoi_dung.full_name }}</strong>
+                <div class="user-detail">{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</div>
+            {% endif %}
+            <div class="header-actions">
+                {% if batch %}
+                    <a class="button button-light" href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh">Tổng hợp toàn tỉnh</a>
+                    <a class="button button-light" href="/dieu-tra/{{ batch.id }}/bao-cao-tong-hop">← Báo cáo kết quả</a>
+                    <a class="button button-light" href="/dieu-tra/{{ batch.id }}/ho-dan">Danh sách hộ</a>
+                {% else %}
+                    <a class="button button-light" href="/dieu-tra">Danh sách đợt</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if error_message %}
+        <div class="notice notice-warning">{{ error_message }}</div>
+    {% else %}
+        {% if status_message %}
+            <div class="notice {% if status_message.kind == 'success' %}notice-success{% else %}notice-warning{% endif %}">
+                {{ status_message.text }}
+            </div>
+        {% endif %}
+        <div class="notice">
+            <strong>Đối chiếu có kiểm soát.</strong> Hệ thống không tự động ghi đè dữ liệu.
+            {% if baseline_ready %}
+                <br><strong>Nguồn học sinh:</strong> năm {{ baseline_source_year_code }} (năm trước), đối chiếu với điều tra {{ batch.school_year.code }}.
+            {% else %}
+                <br><strong>Chưa có nguồn học sinh đối chiếu đã khóa cho xã/phường này.</strong> Hãy nạp tại mục 2.5.0 trước khi chốt kết quả.
+            {% endif %}
+            {% if comparison_signed %}
+                Kết quả hiện đã được <strong>chốt</strong>; các thao tác liên kết và ghi nhận xử lý đang ở chế độ chỉ đọc cho đến khi được mở lại.
+            {% elif can_resolve %}
+                Nút <strong>Xử lý</strong> cho phép liên kết thủ công hoặc ghi nhận kết quả rà soát; mọi thao tác đều được lưu nhật ký.
+            {% else %}
+                Tài khoản hiện tại được xem và xuất báo cáo, không được thay đổi liên kết.
+            {% endif %}
+        </div>
+
+        <section class="hero">
+            <div>
+                <p class="batch-code">{{ batch.code }}</p>
+                <h2>{{ batch.name }}</h2>
+                <p class="meta">
+                    Năm học {{ batch.school_year.code }} · {{ batch.commune.name }} · {{ scope_label }}
+                </p>
+            </div>
+            <span class="read-only">
+                {% if comparison_signed %}
+                    ✅ ĐÃ CHỐT KẾT QUẢ ĐỐI CHIẾU
+                {% elif can_resolve %}
+                    🧩 XỬ LÝ THỦ CÔNG – CÓ NHẬT KÝ
+                {% else %}
+                    🔎 CHỈ XEM – KHÔNG TỰ SỬA
+                {% endif %}
+            </span>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <div class="stat-label">Tổng số dòng đối chiếu</div>
+                <div class="stat-value">{{ stats.TOTAL }}</div>
+            </article>
+            <article class="stat-card stat-good">
+                <div class="stat-label">Khớp hoàn toàn</div>
+                <div class="stat-value">{{ stats.KHOP_HOAN_TOAN }}</div>
+            </article>
+            <article class="stat-card stat-danger">
+                <div class="stat-label">Tổng cần xử lý</div>
+                <div class="stat-value">{{ stats.CAN_XU_LY }}</div>
+            </article>
+            <article class="stat-card stat-good">
+                <div class="stat-label">Đã ghi nhận xử lý</div>
+                <div class="stat-value">{{ stats.DA_GHI_NHAN_XU_LY }}</div>
+            </article>
+            <article class="stat-card stat-warning">
+                <div class="stat-label">Còn chờ xử lý</div>
+                <div class="stat-value">{{ stats.CON_CHO_XU_LY }}</div>
+            </article>
+            <article class="stat-card stat-danger">
+                <div class="stat-label">Điều tra chưa có hồ sơ học sinh</div>
+                <div class="stat-value">{{ stats.DIEU_TRA_CHUA_CO_HOC_SINH }}</div>
+            </article>
+            <article class="stat-card stat-danger">
+                <div class="stat-label">Học sinh chưa có trong điều tra</div>
+                <div class="stat-value">{{ stats.HOC_SINH_CHUA_CO_DIEU_TRA }}</div>
+            </article>
+            <article class="stat-card stat-warning">
+                <div class="stat-label">Sai trường hoặc lớp</div>
+                <div class="stat-value">{{ stats.SAI_KHAC_TRUONG_LOP }}</div>
+            </article>
+            <article class="stat-card stat-warning">
+                <div class="stat-label">Sai trạng thái học tập</div>
+                <div class="stat-value">{{ stats.SAI_KHAC_TRANG_THAI }}</div>
+            </article>
+            <article class="stat-card stat-danger">
+                <div class="stat-label">Nghi trùng / thiếu nhận diện</div>
+                <div class="stat-value">{{ stats.NGHI_TRUNG + stats.THIEU_THONG_TIN }}</div>
+            </article>
+        </section>
+
+        <section class="panel" style="border-left: 5px solid {% if comparison_signed %}#2e7d32{% elif stats.CON_CHO_XU_LY == 0 %}#1976d2{% else %}#c17a00{% endif %};">
+            <div class="panel-header" style="margin-bottom: 0;">
+                <div>
+                    <p class="panel-kicker">CHỐT VÀ LẬP BIÊN BẢN</p>
+                    <h2>
+                        {% if comparison_signed %}
+                            Kết quả đối chiếu đã được xác nhận
+                        {% elif stats.CON_CHO_XU_LY == 0 %}
+                            Đã đủ điều kiện trình chốt
+                        {% else %}
+                            Còn {{ stats.CON_CHO_XU_LY }} dòng phải xử lý trước khi chốt
+                        {% endif %}
+                    </h2>
+                    <p class="panel-description">
+                        {% if latest_signoff %}
+                            Lần thao tác gần nhất: {{ signoff_action_labels.get(latest_signoff.action_code, latest_signoff.action_code) }}
+                            bởi {{ latest_signoff.actor_name_snapshot }} lúc {{ latest_signoff.created_at.strftime('%d/%m/%Y %H:%M') }}.
+                        {% else %}
+                            Chưa có lịch sử chốt hoặc mở lại kết quả đối chiếu.
+                        {% endif %}
+                    </p>
+                </div>
+                <a class="button {% if comparison_signed %}button-success{% else %}button-primary{% endif %}" href="{{ signoff_url }}">
+                    {% if comparison_signed %}📄 Xem biên bản đã chốt{% else %}✅ Kiểm tra điều kiện chốt{% endif %}
+                </a>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">TÌM VÀ LỌC</p>
+                    <h2>Chọn đúng nhóm cần kiểm tra</h2>
+                    <p class="panel-description">Có thể tìm theo họ tên, mã đối tượng, số định danh, mã học sinh, số phiếu hoặc mã hộ.</p>
+                </div>
+                <a class="button button-success" href="{{ export_url }}">📊 Xuất Excel đối chiếu</a>
+            </div>
+
+            <form class="filters" method="get" action="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh">
+                <div>
+                    <label for="result_group">Nhóm kết quả</label>
+                    <select id="result_group" name="result_group">
+                        <option value="">-- Tất cả kết quả --</option>
+                        {% for code, label in result_labels.items() %}
+                            <option value="{{ code }}" {% if result_group == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="school_id">Trường</label>
+                    <select id="school_id" name="school_id">
+                        <option value="">-- Tất cả trường --</option>
+                        {% for school in schools %}
+                            <option value="{{ school.id }}" {% if school_id == school.id %}selected{% endif %}>{{ school.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="resolution_state">Trạng thái xử lý</label>
+                    <select id="resolution_state" name="resolution_state">
+                        {% for code, label in resolution_state_labels.items() %}
+                            <option value="{{ code }}" {% if resolution_state == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="q">Tìm nhanh</label>
+                    <input id="q" name="q" value="{{ q }}" placeholder="Họ tên, mã đối tượng, số định danh, mã học sinh...">
+                </div>
+                <div>
+                    <label for="page_size">Số dòng/trang</label>
+                    <select id="page_size" name="page_size">
+                        {% for option in page_size_options %}
+                            <option value="{{ option }}" {% if page_size == option %}selected{% endif %}>{{ option }} dòng</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="button button-primary" type="submit">🔎 Lọc</button>
+                    <a class="button button-secondary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh">Xóa lọc</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">KẾT QUẢ CHI TIẾT</p>
+                    <h2>Đối chiếu từng đối tượng</h2>
+                    <p class="panel-description">Đang hiển thị {{ rows|length }} trong tổng số {{ total_records }} kết quả phù hợp.</p>
+                </div>
+                <strong>{{ total_records }} kết quả</strong>
+            </div>
+
+            {% if rows %}
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Đối tượng điều tra</th>
+                            <th>Nhận diện</th>
+                            <th>Phiếu / hộ</th>
+                            <th>Trạng thái điều tra</th>
+                            <th>Trường / lớp điều tra</th>
+                            <th>Học sinh khớp</th>
+                            <th>Trạng thái học sinh</th>
+                            <th>Trường / lớp học sinh</th>
+                            <th>Kết quả</th>
+                            <th>Nội dung phát hiện</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in rows %}
+                            <tr>
+                                <td>{{ loop.index + (page - 1) * page_size }}</td>
+                                <td>
+                                    {% if row.person %}
+                                        <div class="person-name">{{ row.person.full_name }}</div>
+                                        <div class="muted">{{ row.person.code }}</div>
+                                        <div class="muted">
+                                            {% if row.person.date_of_birth %}{{ row.person.date_of_birth.strftime('%d/%m/%Y') }}{% else %}Chưa có ngày sinh{% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="muted">Không có trong điều tra</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.person %}
+                                        <strong>SĐD:</strong> {{ row.person.personal_id or '—' }}<br>
+                                        <strong>Mã HS phiếu:</strong> {{ row.person.ministry_student_code or '—' }}
+                                    {% else %}—{% endif %}
+                                    <div class="muted">{{ row.match_basis_label }}</div>
+                                </td>
+                                <td>
+                                    {% if row.form and row.household %}
+                                        <strong>{{ row.form.form_number }}</strong><br>
+                                        <span class="muted">{{ row.household.code }} · {{ row.household.head_name }}</span>
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>{{ row.survey_status_label }}</td>
+                                <td>
+                                    {{ row.survey_school_name }}<br>
+                                    <span class="muted">Lớp: {{ row.survey_class_name }}</span>
+                                </td>
+                                <td>
+                                    {% if row.student %}
+                                        <div class="person-name">{{ row.student.full_name }}</div>
+                                        <div class="muted">{{ row.student.code }}</div>
+                                        <div class="muted">SĐD: {{ row.student.personal_id or '—' }}</div>
+                                    {% else %}
+                                        <span class="muted">Chưa tìm thấy</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ row.student_status_label }}</td>
+                                <td>
+                                    {{ row.student_school_name }}<br>
+                                    <span class="muted">Lớp: {{ row.student_class_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="pill pill-{{ row.result_class }}">{{ row.result_label }}</span>
+                                    {% if row.resolution %}
+                                        <div class="resolution-note">
+                                            <span class="pill {% if row.resolution_done %}pill-good{% else %}pill-neutral{% endif %}">{{ row.resolution_action_label }}</span><br>
+                                            {{ row.resolution_actor_name }} · {{ row.resolution_created_at_text }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ row.detail }}
+                                    {% if row.resolution_note %}
+                                        <div class="resolution-note"><strong>Ghi nhận:</strong> {{ row.resolution_note }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="row-actions">
+                                        {% if row.result_code != 'KHOP_HOAN_TOAN' %}
+                                            {% if row.person %}
+                                                <a class="small-button small-button-primary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/doi-tuong/{{ row.person.id }}">{% if can_resolve %}🧩 Xử lý{% else %}Xem xử lý{% endif %}</a>
+                                            {% elif row.student %}
+                                                <a class="small-button small-button-primary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh/xu-ly/hoc-sinh/{{ row.student.id }}">{% if can_resolve %}🧩 Xử lý{% else %}Xem xử lý{% endif %}</a>
+                                            {% endif %}
+                                        {% endif %}
+                                        {% if row.person and row.household %}
+                                            <a class="small-button" href="/dieu-tra/{{ batch.id }}/ho-dan/{{ row.household.id }}/doi-tuong/{{ row.person.id }}/nam-hoc?school_year_id={{ batch.school_year_id }}">Mở hồ sơ điều tra</a>
+                                        {% endif %}
+                                        {% if row.student and can_open_students %}
+                                            <a class="small-button" href="/hoc-sinh?q={{ row.student.code }}&school_year_id={{ baseline_source_year_id or batch.school_year_id }}">Xem học sinh</a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="pagination">
+                    {% if previous_url %}
+                        <a class="page-link" href="{{ previous_url }}">← Trước</a>
+                    {% else %}
+                        <span class="page-link page-link-disabled">← Trước</span>
+                    {% endif %}
+                    {% for item in page_links %}
+                        <a class="page-link {% if item.number == page %}page-link-active{% endif %}" href="{{ item.url }}">{{ item.number }}</a>
+                    {% endfor %}
+                    <span class="page-link page-link-disabled">/ {{ total_pages }}</span>
+                    {% if next_url %}
+                        <a class="page-link" href="{{ next_url }}">Sau →</a>
+                    {% else %}
+                        <span class="page-link page-link-disabled">Sau →</span>
+                    {% endif %}
+                </nav>
+            {% else %}
+                <div class="empty">Không có kết quả phù hợp với bộ lọc đang chọn.</div>
+            {% endif %}
+        </section>
+    {% endif %}
+</main>
+</body>
+</html>

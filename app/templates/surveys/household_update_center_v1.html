@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập nhật dữ liệu hộ dân</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root{--blue:#0f5fa8;--blue2:#1976d2;--bg:#eef4f9;--line:#d8e4ef;--text:#17324d}
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+        .hero{background:linear-gradient(135deg,#0f5fa8,#1682d6);color:#fff;padding:26px 3vw}
+        .hero-inner,.wrap{max-width:1500px;margin:auto}
+        .hero h1{margin:6px 0 8px;font-size:30px}
+        .hero p{margin:0;opacity:.94}
+        .wrap{padding:22px 3vw 48px}
+        .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 7px 20px rgba(23,50,77,.05)}
+        .notice{border-radius:13px;padding:15px 17px;line-height:1.55;margin-bottom:14px}
+        .notice.info{background:#eaf5ff;border:1px solid #a9d2f5}
+        .notice.warn{background:#fff7df;border:1px solid #efcf7d}
+        .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .field label{display:block;font-weight:800;margin-bottom:7px}
+        .control{width:100%;min-height:45px;border:1px solid #bfd0df;border-radius:10px;padding:9px 11px;background:#fff;font:inherit}
+        .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:10px;padding:10px 15px;text-decoration:none;font-weight:800;cursor:pointer}
+        .primary{background:var(--blue2);color:#fff}.secondary{background:#e9f0f6;color:var(--text)}.warning{background:#fff0ca;color:#855200}
+        .upload-row{display:grid;grid-template-columns:1fr 1.5fr auto;gap:12px;align-items:end}
+        .upload-status{margin-top:14px;display:grid;gap:8px}
+        .upload-item{padding:12px;border:1px solid var(--line);border-radius:12px;background:#f8fbfd}
+        .upload-item strong{display:block;margin-bottom:5px}
+        .upload-item .ok{color:#19723b}.upload-item .bad{color:#b42318}.upload-item .wait{color:#9a6200}
+        .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px}
+        table{width:100%;border-collapse:collapse;min-width:1050px}
+        th,td{padding:10px 11px;border-bottom:1px solid #e6edf3;text-align:left;vertical-align:top}
+        th{background:#eaf2f9;font-size:13px}
+        .pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}
+        .pill.info{background:#dceeff;color:#0b5cab}.pill.success{background:#dcf6e5;color:#146b35}.pill.warning{background:#fff0c9;color:#835500}.pill.danger{background:#ffe2df;color:#a52a22}
+        .small{font-size:12px;color:#61768a}
+        .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .ref-card{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fafcfe}
+        @media(max-width:900px){.grid,.upload-row,.ref-grid{grid-template-columns:1fr}.hero h1{font-size:24px}.wrap{padding-left:12px;padding-right:12px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <h1>Cập nhật dữ liệu hộ dân từ Excel</h1>
+        <p>{{ scope_label }}</p>
+    </div>
+</header>
+
+<main class="wrap">
+
+    <!-- === BAI_13B_9_V1B_1_DELETE_CENTER_START === -->
+    {% if request.query_params.get('deleted') == '1' %}
+    <section class="panel">
+        <div class="notice" style="border-color:#a5d6a7;background:#f1f8e9;color:#256029">
+            <strong>Đã xóa lần gửi.</strong>
+            Lịch sử lỗi và file lưu tạm của lần gửi đã được dọn.
+            Dữ liệu hộ dân đã cập nhật thành công trước đó không bị ảnh hưởng.
+        </div>
+    </section>
+    {% endif %}
+    <!-- === BAI_13B_9_V1B_1_DELETE_CENTER_END === -->
+
+    <section class="panel">
+        <!-- === BAI_13B_12_V2_3_ADMIN_CLEAN_START === -->
+        <div class="ref-grid">
+            <div class="ref-card">
+                <strong>Mẫu cập nhật dữ liệu mới</strong>
+                {% if selected_batch_id %}
+                <a class="btn primary" href="/dieu-tra/{{ selected_batch_id }}/cap-nhat-ho-dan/tai-mau-xlsx">⬇ Tải mẫu .xlsx theo đợt</a>
+                {% endif %}
+                <a class="btn secondary" style="margin-top:8px" href="/dieu-tra/cap-nhat-ho-dan/mau-cap-nhat-goc">Mẫu .xls gốc để đối chiếu</a>
+            </div>
+            <div class="ref-card">
+                <strong>Mẫu phiếu điều tra chính thức</strong>
+                <a class="btn secondary" href="/dieu-tra/cap-nhat-ho-dan/mau-phieu-dieu-tra">⬇ Tải mẫu phiếu điều tra</a>
+            </div>
+        </div>
+        <!-- === BAI_13B_12_V2_3_ADMIN_CLEAN_END === -->
+    </section>
+
+    <section class="panel">
+        <h2 style="margin-top:0">Chọn phạm vi</h2>
+        <form method="get" action="/dieu-tra/cap-nhat-ho-dan">
+            <div class="grid">
+                <div class="field">
+                    <label for="school_year_id">Năm học</label>
+                    <select class="control" id="school_year_id" name="school_year_id">
+                        <option value="">Tất cả năm học</option>
+                        {% for year in school_years %}
+                        <option value="{{ year.id }}" {% if selected_school_year_id == year.id %}selected{% endif %}>{{ year.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="batch_id_filter">Đợt điều tra</label>
+                    <select class="control" id="batch_id_filter" name="batch_id">
+                        {% for batch in batches %}
+                        <option value="{{ batch.id }}" {% if selected_batch_id == batch.id %}selected{% endif %}>
+                            {{ batch.school_year.code }} · {{ batch.commune.name }} · {{ batch.name }}
+                        </option>
+                        {% else %}
+                        <option value="">Không có đợt phù hợp</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field" style="display:flex;align-items:end">
+                    <button class="btn primary" type="submit">Lọc / chọn đợt</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    {% if can_upload %}
+    <section class="panel">
+        <h2 style="margin-top:0">Gửi file cập nhật</h2>
+        <div class="upload-row">
+            <div class="field">
+                <label for="upload_batch">Đợt nhận dữ liệu</label>
+                <select class="control" id="upload_batch">
+                    {% for batch in batches %}
+                    <option value="{{ batch.id }}" {% if selected_batch_id == batch.id %}selected{% endif %}>
+                        {{ batch.school_year.code }} · {{ batch.commune.name }} · {{ batch.name }}
+                        {% if batch.is_locked %} · ĐÃ KHÓA{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="excel_files">Chọn một hoặc nhiều file .xls / .xlsx</label>
+                <input class="control" id="excel_files" type="file" accept=".xls,.xlsx" multiple>
+            </div>
+            <button class="btn primary" id="send_files" type="button">⬆ Gửi file</button>
+        </div>
+        <div id="upload_status" class="upload-status"></div>
+    </section>
+    {% else %}
+    <section class="panel">
+        <div class="notice info">Tài khoản hiện tại chỉ được xem lịch sử và thống kê, không được gửi file cập nhật.</div>
+    </section>
+    {% endif %}
+
+    <section class="panel">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+            <div>
+                <h2 style="margin:0">Thống kê hộ dân và các yếu tố liên quan</h2>
+            </div>
+            {% if selected_batch_id %}
+            <a class="btn secondary" href="/dieu-tra/{{ selected_batch_id }}/cap-nhat-ho-dan/thong-ke">📊 Mở thống kê</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2 style="margin-top:0">Lịch sử gửi Excel</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Mã lần gửi</th>
+                        <th>File</th>
+                        <th>Người/đơn vị gửi</th>
+                        <th>Trạng thái</th>
+                        <th>Kích thước / SHA256</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for job in jobs %}
+                    <tr>
+                        <td>{{ job.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                        <td><strong>{{ job.job_code }}</strong></td>
+                        <td>{{ job.original_file_name }}<div class="small">{{ job.file_ext }}</div></td>
+                        <td>{{ job.actor_name_snapshot or '' }}<div class="small">{{ job.actor_unit_snapshot or '' }}</div></td>
+                        <td>
+                            <span class="pill {{ import_status_classes.get(job.status, 'info') }}">
+                                {{ import_status_labels.get(job.status, job.status) }}
+                            </span>
+                            {% if job.duplicate_of_job_code %}
+                            <div class="small">Trùng: {{ job.duplicate_of_job_code }}</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ '%.1f'|format(job.file_size / 1024) }} KB<div class="small">{{ (job.sha256 or '')[:16] }}{% if job.sha256 %}…{% endif %}</div></td>
+                        <td>
+    <a class="btn secondary" href="/dieu-tra/cap-nhat-ho-dan/lan-gui/{{ job.job_code }}">Xem kết quả</a>
+    {% if job.status == 'DA_CAP_NHAT' %}
+    <a class="btn primary" style="margin-top:6px" href="/dieu-tra/{{ job.survey_batch_id }}/ho-dan">Xem dữ liệu đã cập nhật</a>
+    {% elif can_upload and job.status in ['DA_KIEM_TRA_CAU_TRUC','LOI_DU_LIEU','LOI_CAP_NHAT','CHO_XU_LY_XLS','TRUNG_FILE','LOI_DINH_DANG','LOI_FILE','LOI_DOT_KHOA','CO_XUNG_DOT'] %}
+    <form
+        method="post"
+        action="/dieu-tra/cap-nhat-ho-dan/lan-gui/{{ job.job_code }}/xoa"
+        style="margin-top:6px"
+        onsubmit="return confirm('Xóa lần gửi {{ job.job_code }}? File lỗi và lịch sử lỗi của lần gửi này sẽ bị xóa. Dữ liệu hộ dân đã cập nhật thành công sẽ không bị xóa.');"
+    >
+        <button
+            class="btn"
+            type="submit"
+            style="background:#c62828;color:#fff;border-color:#c62828"
+        >🗑 Xóa</button>
+    </form>
+    {% endif %}
+</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7">Chưa có lần gửi file nào trong phạm vi đang xem.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+{% if can_upload %}
+<script>
+(function(){
+    const button = document.getElementById('send_files');
+    const input = document.getElementById('excel_files');
+    const batch = document.getElementById('upload_batch');
+    const box = document.getElementById('upload_status');
+
+    function addRow(file) {
+        const row = document.createElement('div');
+        row.className = 'upload-item';
+        row.innerHTML = '<strong></strong><div class="wait">Đang chuẩn bị gửi…</div>';
+        row.querySelector('strong').textContent = file.name;
+        box.prepend(row);
+        return row;
+    }
+
+    async function sendOne(file) {
+        const row = addRow(file);
+        const status = row.querySelector('div');
+        const batchId = batch.value;
+        if (!batchId) {
+            status.className = 'bad';
+            status.textContent = 'Chưa chọn đợt điều tra.';
+            return;
+        }
+
+        status.className = 'wait';
+        status.textContent = 'Đang gửi… Chưa có xác nhận của máy chủ.';
+
+        const formData = new FormData();
+        formData.append('excel_file', file, file.name);
+
+        try {
+            const response = await fetch('/dieu-tra/' + batchId + '/cap-nhat-ho-dan/gui-file', {
+                method: 'POST',
+                body: formData,
+                headers: {'X-Requested-With': 'fetch'}
+            });
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error('Máy chủ không trả xác nhận JSON.');
+            }
+            const result = await response.json();
+
+            if (result.job_code) {
+                status.className = result.ok ? 'ok' : 'bad';
+                status.innerHTML =
+                    '<strong>' + (result.status_label || 'Đã nhận') + '</strong><br>' +
+                    'Mã lần gửi: <b>' + result.job_code + '</b><br>' +
+                    (result.message || '') +
+                    (result.redirect_url
+                        ? '<br><a href="' + result.redirect_url + '">Xem chi tiết lần gửi</a>'
+                        : '');
+            } else {
+                status.className = 'bad';
+                status.textContent = result.message || 'Máy chủ từ chối file.';
+            }
+        } catch (error) {
+            status.className = 'bad';
+            status.innerHTML =
+                '<strong>Không gửi được / mất kết nối</strong><br>' +
+                'Máy chủ chưa xác nhận đã nhận file này. Hãy kiểm tra mục Lịch sử gửi trước khi bấm gửi lại.<br>' +
+                '<span class="small">' + String(error) + '</span>';
+        }
+    }
+
+    button.addEventListener('click', async function(){
+        const files = Array.from(input.files || []);
+        if (!files.length) {
+            alert('Hãy chọn ít nhất một file Excel.');
+            return;
+        }
+        button.disabled = true;
+        await Promise.allSettled(files.map(sendOne));
+        button.disabled = false;
+    });
+})();
+</script>
+{% endif %}
+</body>
+</html>

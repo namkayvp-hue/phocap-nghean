@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ catalog.title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root{
+            --blue:#0f5fa8;--blue2:#1976d2;--bg:#eef4f9;--line:#d6e3ee;
+            --text:#17324d;--muted:#678097;--green:#198f42;--amber:#a36a00;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+        .hero{background:linear-gradient(135deg,#0f5fa8,#1682d6);color:#fff;padding:27px 3vw}
+        .hero-inner,.wrap{max-width:1320px;margin:auto}
+        .eyebrow{font-size:13px;font-weight:900;letter-spacing:.08em}
+        .hero h1{margin:7px 0 7px;font-size:30px}
+        .hero p{margin:0;line-height:1.5;opacity:.94}
+        .wrap{padding:20px 3vw 60px}
+        .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px;margin-bottom:17px;box-shadow:0 7px 20px rgba(23,50,77,.05)}
+        .filters{display:grid;grid-template-columns:1fr 1.25fr 1.4fr auto;gap:12px;align-items:end}
+        .field label{display:block;font-weight:800;margin:0 0 7px}
+        select,input,textarea{font:inherit}
+        .field select,.input{width:100%;min-height:45px;border:1px solid #bfd0df;border-radius:10px;background:#fff;padding:9px 11px;color:var(--text)}
+        .input:focus,.field select:focus{outline:3px solid rgba(25,118,210,.12);border-color:#1976d2}
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:10px;padding:10px 14px;text-decoration:none;font-weight:850;cursor:pointer}
+        .btn-primary{background:var(--blue2);color:#fff}
+        .btn-success{background:var(--green);color:#fff}
+        .btn-secondary{background:#e7eef5;color:var(--text)}
+        .btn[disabled]{opacity:.5;cursor:not-allowed}
+        .scope{margin-top:13px;padding:11px 13px;background:#eaf4ff;border-radius:10px;font-weight:800}
+        .top-grid{display:grid;grid-template-columns:1.4fr repeat(3,minmax(0,.55fr));gap:12px;margin-bottom:17px}
+        .info-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
+        .info-card span{display:block;color:var(--muted);font-weight:700;font-size:13px}
+        .info-card strong{display:block;margin-top:5px;font-size:22px}
+        .notice{padding:13px 14px;border-radius:12px;margin:0 0 16px;line-height:1.45}
+        .notice-saved{background:#e8f7ed;border:1px solid #bde3c8;color:#176e36}
+        .notice-warn{background:#fff6df;border:1px solid #ecd196;color:#795607}
+        .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+        .tab{display:inline-flex;padding:9px 12px;border-radius:9px;background:#e7eef5;color:var(--text);text-decoration:none;font-weight:800;font-size:13px}
+        .section{scroll-margin-top:20px}
+        .section h2{margin:0 0 14px;font-size:21px}
+        .fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .input-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfdff;min-width:0}
+        .input-card label{display:block;font-weight:800;line-height:1.35;margin-bottom:7px}
+        .input-row{display:flex;align-items:center;gap:8px}
+        .unit{flex:0 0 auto;min-width:45px;color:var(--muted);font-size:13px;font-weight:800;text-align:right}
+        .source{margin-top:6px;font-size:11px;font-weight:800;color:#1774b8}
+        .help{margin-top:5px;color:var(--muted);font-size:12px;line-height:1.35}
+        .footer-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+        .footer-actions-left,.footer-actions-right{display:flex;gap:9px;flex-wrap:wrap}
+        .warning-list{margin:8px 0 0;padding-left:22px}
+        .warning-list li{margin:6px 0}
+        .readonly-note{font-size:13px;color:#76550a;background:#fff6df;border:1px solid #eed49b;padding:10px 12px;border-radius:10px;margin-bottom:16px}
+
+        /* === BAI_13B_6_V1_3_STAFF_TABLE_CSS_START === */
+        .staff-detail-head{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:flex-start;
+            flex-wrap:wrap;
+            margin-bottom:12px
+        }
+        .staff-detail-head h2{margin:0}
+        .staff-detail-meta{
+            color:var(--muted);
+            font-size:13px;
+            font-weight:700;
+            line-height:1.45
+        }
+        .staff-table-wrap{
+            width:100%;
+            overflow:auto;
+            border:1px solid var(--line);
+            border-radius:12px;
+            background:#fff
+        }
+        .staff-table{
+            width:100%;
+            min-width:980px;
+            border-collapse:collapse
+        }
+        .staff-table th,
+        .staff-table td{
+            padding:10px 9px;
+            border-bottom:1px solid #e3edf5;
+            text-align:left;
+            vertical-align:top;
+            line-height:1.35
+        }
+        .staff-table th{
+            position:sticky;
+            top:0;
+            z-index:1;
+            background:#e8f1f9;
+            color:#17324d;
+            font-size:13px;
+            font-weight:900
+        }
+        .staff-table td{
+            font-size:13px
+        }
+        .staff-table tr:last-child td{
+            border-bottom:0
+        }
+        .staff-name{
+            min-width:170px;
+            font-weight:900;
+            color:#17324d
+        }
+        .staff-badge{
+            display:inline-block;
+            padding:4px 7px;
+            border-radius:999px;
+            background:#edf4fa;
+            font-size:11px;
+            font-weight:900;
+            white-space:nowrap
+        }
+        .staff-empty{
+            padding:14px;
+            border-radius:10px;
+            background:#f7fafc;
+            color:var(--muted);
+            line-height:1.5
+        }
+        /* === BAI_13B_6_V1_3_STAFF_TABLE_CSS_END === */
+
+        @media(max-width:1000px){
+            .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .top-grid{grid-template-columns:1fr 1fr}
+        }
+        @media(max-width:760px){
+            .hero{padding:22px 14px}.hero h1{font-size:24px}
+            .wrap{padding:12px}
+            .filters,.fields,.top-grid{grid-template-columns:1fr}
+            .panel{padding:14px}
+            .btn{width:100%}
+            .footer-actions,.footer-actions-left,.footer-actions-right{display:grid;grid-template-columns:1fr;width:100%}
+            .tabs{display:grid;grid-template-columns:1fr 1fr}
+            .tab{justify-content:center;text-align:center}
+        }
+    </style>
+</head>
+<body>
+{% include 'partials/dropdown_menu_v1.html' %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div class="eyebrow">BÀI 13B-6 · NHẬP DỮ LIỆU CHUYÊN BIỆT THEO MẪU</div>
+        <h1>{{ catalog.title }}</h1>
+        <p>{{ catalog.description }}</p>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="panel">
+        <form method="get" action="/bieu-nhap/{{ slug }}" id="structured-filter-form">
+            <div class="filters">
+                <div class="field">
+                    <label>Năm học</label>
+                    <select name="school_year_id">
+                        {% for y in school_years %}
+                        <option value="{{ y.id }}" {% if y.id == selected_year_id %}selected{% endif %}>{{ y.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Xã/phường</label>
+                    <select name="commune_id">
+                        {% if role_code in ['ADMIN','SO','PHONG_BAN'] %}
+                        <option value="">-- Chọn xã/phường --</option>
+                        {% endif %}
+                        {% for c in communes %}
+                        <option value="{{ c.id }}" {% if c.id == selected_commune_id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Trường đúng cấp học</label>
+                    <select name="school_id">
+                        <option value="">-- Chọn trường --</option>
+                        {% for s in schools %}
+                        <option value="{{ s.id }}" {% if s.id == selected_school_id %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-primary" type="submit" id="open-data-button">Mở dữ liệu</button>
+                </div>
+            </div>
+        </form>
+        <div class="scope">
+            Phạm vi: {{ scope_label }}
+            {% if selected_year %} · Năm học {{ selected_year.code }}{% endif %}
+            · Chỉ hiển thị trường thuộc cấp {{ 'Tiểu học' if catalog.level == 'TH' else 'THCS' }}.
+        </div>
+    </section>
+
+    {% if status == 'saved' %}
+    <div class="notice notice-saved"><strong>✓ Đã lưu dữ liệu.</strong> Các giá trị đã lưu sẽ được ưu tiên khi xuất đúng biểu Excel tương ứng.</div>
+    {% endif %}
+
+    {% if selected_school_id and network_reference_year %}
+    <div class="notice notice-warn">
+        <strong>↻ Dữ liệu mạng lưới {{ network_reference_year }} đã được nạp làm tham chiếu.</strong>
+        {% if selected_year and selected_year.code != network_reference_year %}
+        Bạn đang nhập năm học {{ selected_year.code }}: hãy kiểm tra, điều chỉnh số liệu kế thừa rồi bấm <strong>Lưu toàn bộ biểu</strong>.
+        {% else %}
+        Đây là dữ liệu cùng năm học; hãy kiểm tra trước khi lưu biểu chuyên biệt.
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if not selected_school_id %}
+    <section class="panel">
+        <h2 style="margin-top:0">Chọn trường để nhập</h2>
+        <p style="margin-bottom:0;color:var(--muted);line-height:1.5">
+            Chọn xã/phường và trường ở phía trên. Danh sách trường đã được lọc đúng cấp học của biểu.
+        </p>
+    </section>
+    {% else %}
+
+    <section class="top-grid">
+        <div class="info-card">
+            <span>Trường đang nhập</span>
+            <strong>{{ selected_school.name if selected_school else scope_label }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Mức hoàn thành</span>
+            <strong>{{ completion.filled }}/{{ completion.total }}</strong>
+        </div>
+        <div class="info-card">
+            <span>{{ catalog.derived.label }}</span>
+            <strong id="derived-ratio">{{ derived_value if derived_value is not none else '—' }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Số lớp tham chiếu</span>
+            <strong id="known-class-count">{{ class_count if class_count is not none else '—' }}</strong>
+        </div>
+    </section>
+
+    {% if warnings %}
+    <div class="notice notice-warn" id="kiem-tra">
+        <strong>Kiểm tra dữ liệu:</strong>
+        <ul class="warning-list">
+            {% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="notice notice-saved" id="kiem-tra"><strong>✓ Kiểm tra dữ liệu:</strong> Chưa phát hiện mâu thuẫn cơ bản.</div>
+    {% endif %}
+
+    {% if not can_edit %}
+    <div class="readonly-note">
+        Tài khoản hiện tại được xem nhưng không có quyền sửa biểu này.
+    </div>
+    {% endif %}
+
+    <nav class="tabs" aria-label="Các nhóm chỉ tiêu">
+        {% for group in catalog.groups %}
+        <a class="tab" href="#{{ group.anchor }}">{{ group.title }}</a>
+        {% endfor %}
+        <a class="tab" href="#kiem-tra">Kiểm tra</a>
+    </nav>
+
+
+    {% if catalog.kind == 'staff' %}
+    <!-- === BAI_13B_6_V1_3_STAFF_TABLE_START === -->
+    <section class="panel" id="danh-sach-nhan-su">
+        <div class="staff-detail-head">
+            <div>
+                <h2>Danh sách nhân sự của trường</h2>
+                <div class="staff-detail-meta">
+                    Hiển thị CBQL, giáo viên và nhân viên đang làm việc.
+                    {% if staff_detail_year %}
+                    Nguồn chi tiết: năm học <strong>{{ staff_detail_year }}</strong>.
+                    {% endif %}
+                    {% if selected_year and staff_detail_year and selected_year.code != staff_detail_year %}
+                    Đây là danh sách tham chiếu để rà soát cho năm học {{ selected_year.code }}.
+                    {% endif %}
+                </div>
+            </div>
+            {% if staff_detail_rows %}
+            <span class="staff-badge">{{ staff_detail_rows|length }} nhân sự</span>
+            {% endif %}
+        </div>
+
+        {% if staff_detail_rows %}
+        <div class="staff-table-wrap">
+            <table class="staff-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ và tên</th>
+                        <th>Vị trí</th>
+                        <th>Chức vụ</th>
+                        <th>Môn dạy</th>
+                        <th>Trình độ</th>
+                        <th>Hình thức</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in staff_detail_rows %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="staff-name">
+                            {{ row.staff_member.full_name if row.staff_member else '—' }}
+                        </td>
+                        <td>
+                            {{ staff_position_labels.get(row.position_group, row.position_group or '—') }}
+                        </td>
+                        <td>{{ row.position_title or '—' }}</td>
+                        <td>{{ row.teaching_subject or '—' }}</td>
+                        <td>
+                            {{ qualification_level_labels.get(row.qualification_level, row.qualification_level or '—') }}
+                        </td>
+                        <td>
+                            {{ employment_labels.get(row.employment_type, row.employment_type or '—') }}
+                        </td>
+                        <td>
+                            {{ row.source_status_label or staff_status_labels.get(row.status_code, row.status_code or '—') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="staff-empty">
+            Chưa tìm thấy danh sách nhân sự chi tiết của trường ở năm đang nhập
+            hoặc năm tham chiếu gần nhất. Các chỉ tiêu tổng hợp vẫn được giữ nguyên.
+        </div>
+        {% endif %}
+    </section>
+    <!-- === BAI_13B_6_V1_3_STAFF_TABLE_END === -->
+    {% endif %}
+
+
+    <form method="post" action="/bieu-nhap/{{ slug }}" id="structured-data-form">
+        <input type="hidden" name="school_year_id" value="{{ selected_year_id }}">
+        <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+
+        {% for group in catalog.groups %}
+        <section class="panel section" id="{{ group.anchor }}">
+            <h2>{{ group.title }}</h2>
+            <div class="fields">
+                {% for field in group.fields %}
+                {% set val = effective_values.get(field.code) %}
+                <div class="input-card">
+                    <label for="f_{{ field.code }}">{{ field.label }}</label>
+                    <div class="input-row">
+                        {% if field.type == 'yesno' %}
+                        <select
+                            class="input"
+                            id="f_{{ field.code }}"
+                            name="{{ field.code }}"
+                            data-field-code="{{ field.code }}"
+                            {% if not can_edit %}disabled{% endif %}
+                        >
+                            <option value="" {% if val is none %}selected{% endif %}>-- Chưa xác định --</option>
+                            <option value="1" {% if val == 1 or val == 1.0 or val == '1' %}selected{% endif %}>Có / Đánh dấu X</option>
+                            <option value="0" {% if val == 0 or val == 0.0 or val == '0' %}selected{% endif %}>Không</option>
+                        </select>
+                        {% else %}
+                        <input
+                            class="input"
+                            id="f_{{ field.code }}"
+                            name="{{ field.code }}"
+                            data-field-code="{{ field.code }}"
+                            type="number"
+                            min="0"
+                            step="{{ '0.01' if field.type == 'decimal' else '1' }}"
+                            value="{{ '' if val is none else val }}"
+                            {% if not can_edit %}disabled{% endif %}
+                        >
+                        {% endif %}
+                        {% if field.unit %}<span class="unit">{{ field.unit }}</span>{% endif %}
+                    </div>
+                    {% if source_by_code.get(field.code) == 'auto' %}
+                    <div class="source">↻ Gợi ý từ dữ liệu đội ngũ/lớp hiện có</div>
+                    {% elif source_by_code.get(field.code) == 'saved' %}
+                    <div class="source">✓ Giá trị chuyên biệt đã lưu</div>
+                    {% endif %}
+                    {% if field.help %}<div class="help">{{ field.help }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+
+        <section class="panel">
+            <div class="field">
+                <label for="notes">Ghi chú của biểu</label>
+                <textarea
+                    class="input"
+                    id="notes"
+                    name="notes"
+                    rows="4"
+                    {% if not can_edit %}disabled{% endif %}
+                >{{ record.notes if record and record.notes else '' }}</textarea>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="footer-actions">
+                <div class="footer-actions-left">
+                    <a class="btn btn-secondary"
+                       href="/bao-cao?report_type={{ catalog.report_type }}&school_year_id={{ selected_year_id }}&commune_id={{ selected_commune_id or '' }}&school_id={{ selected_school_id }}">
+                       Mở báo cáo
+                    </a>
+                    <a class="btn btn-secondary"
+                       href="/bao-cao/xuat-danh-muc-excel?report_type={{ catalog.report_type }}&school_year_id={{ selected_year_id }}&commune_id={{ selected_commune_id or '' }}&school_id={{ selected_school_id }}">
+                       Xuất Excel đúng mẫu
+                    </a>
+                </div>
+                <div class="footer-actions-right">
+                    {% if can_edit %}
+                    <button class="btn btn-success" type="submit">✓ Lưu toàn bộ biểu {{ catalog.short_title }}</button>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </form>
+    {% endif %}
+</main>
+
+<script>
+(function () {
+    const filterForm = document.getElementById('structured-filter-form');
+    if (filterForm) {
+        const year = filterForm.querySelector('select[name="school_year_id"]');
+        const commune = filterForm.querySelector('select[name="commune_id"]');
+        const school = filterForm.querySelector('select[name="school_id"]');
+        const open = document.getElementById('open-data-button');
+
+        function syncOpen() {
+            if (!open || !school) return;
+            open.disabled = !school.value;
+        }
+
+        // === BAI_13B_6_V1_1_SAFE_SCOPE_SUBMIT ===
+        function safeScopeSubmit() {
+            const params = new URLSearchParams();
+
+            if (year && year.value) {
+                params.set('school_year_id', year.value);
+            }
+
+            if (commune && commune.value) {
+                params.set('commune_id', commune.value);
+            }
+
+            if (school && school.value) {
+                params.set('school_id', school.value);
+            }
+
+            const query = params.toString();
+            window.location.href = filterForm.action + (query ? '?' + query : '');
+        }
+
+        if (year) {
+            year.addEventListener('change', function () {
+                if (school) school.value = '';
+                safeScopeSubmit();
+            });
+        }
+
+        if (commune) {
+            commune.addEventListener('change', function () {
+                if (school) school.value = '';
+                safeScopeSubmit();
+            });
+        }
+
+        if (school) {
+            school.addEventListener('change', syncOpen);
+        }
+
+        filterForm.addEventListener('submit', function (event) {
+            if ((school && !school.value) || (commune && !commune.value)) {
+                event.preventDefault();
+                safeScopeSubmit();
+            }
+        });
+
+        syncOpen();
+    }
+
+    const dataForm = document.getElementById('structured-data-form');
+    const ratioBox = document.getElementById('derived-ratio');
+    if (!dataForm || !ratioBox) return;
+
+    const formKind = {{ catalog.kind|tojson }};
+    const level = {{ catalog.level|tojson }};
+    const knownClassCount = Number({{ class_count if class_count is not none else 0 }});
+
+    function num(code) {
+        const input = dataForm.querySelector('[data-field-code="' + code + '"]');
+        if (!input || input.value === '') return 0;
+        return Number(input.value || 0);
+    }
+
+    function refreshRatio() {
+        let ratio = null;
+
+        if (formKind === 'staff') {
+            const teachers = num('teacher_total');
+            if (knownClassCount > 0) ratio = teachers / knownClassCount;
+        } else {
+            const classes = num('class_total');
+            let rooms = num('room_permanent') + num('room_semi_permanent') + num('room_temporary');
+            if (level === 'TH') rooms += num('room_rent_borrow');
+            if (classes > 0) ratio = rooms / classes;
+        }
+
+        ratioBox.textContent = ratio === null ? '—' : ratio.toFixed(2);
+    }
+
+    dataForm.addEventListener('input', refreshRatio);
+    dataForm.addEventListener('change', refreshRatio);
+    refreshRatio();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu điều tra phổ cập giáo dục - xóa mù chữ</title>
+    <style>
+        :root{--ink:#111;--line:#333;--soft:#f2f2f2;--blue:#125fb8}
+        *{box-sizing:border-box}
+        body{margin:0;background:#e7edf3;color:var(--ink);font-family:"Times New Roman",serif;font-size:10px}
+        .toolbar{position:sticky;top:0;z-index:20;background:var(--blue);color:#fff;padding:10px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+        .toolbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+        .button{display:inline-block;padding:8px 12px;border:0;border-radius:7px;background:#fff;color:#173b63;font-weight:700;text-decoration:none;cursor:pointer;font-family:Arial,sans-serif}
+        .note{width:287mm;margin:10px auto;padding:9px 12px;background:#fff7df;border:1px solid #e2c36c;font-family:Arial,sans-serif;font-size:12px}
+        .sheet{width:287mm;min-height:200mm;margin:8mm auto;padding:4mm;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.15);page-break-after:always}
+        .sheet:last-child{page-break-after:auto}
+        .cover-title{text-align:center;font-size:18px;font-weight:700;text-transform:uppercase;margin:5mm 0}
+        .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm 8mm;font-size:11px;margin-bottom:4mm}
+        .manifest{width:100%;border-collapse:collapse;font-size:10px}
+        .manifest th,.manifest td{border:1px solid #333;padding:2mm}
+        .manifest th{background:#eee}
+        .form-head{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:3mm;align-items:start;margin-bottom:2mm}
+        .left-info,.right-info{line-height:1.55;font-size:9px}
+        .main-title{text-align:center}
+        .main-title h1{font-size:14px;margin:1mm 0;text-transform:uppercase}
+        .main-title div{font-size:9px}
+        .line{display:inline-block;min-width:38mm;border-bottom:1px dotted #333}
+        .official{width:100%;border-collapse:collapse;table-layout:fixed;font-size:6.8px;line-height:1.08}
+        .official th,.official td{border:1px solid #222;padding:.7mm;vertical-align:top;overflow-wrap:anywhere}
+        .official th{text-align:center;font-weight:700;background:#f4f4f4}
+        .official .c-stt{width:6mm}.official .c-person{width:38mm}.official .c-class{width:31mm}.official .c-school{width:43mm}
+        .official .c-complete{width:30mm}.official .c-finished{width:17mm}.official .c-drop{width:17mm}.official .c-xmc{width:20mm}
+        .official .c-disability{width:20mm}.official .c-move{width:24mm}.official .c-note{width:22mm}
+        .person-cell{min-height:19mm}
+        .person-name{font-size:7.5px;font-weight:700;margin-bottom:.6mm}
+        .person-line{min-height:2.15mm;border-bottom:1px dotted #aaa;padding:.15mm 0}
+        .year-line{min-height:2.45mm;border-bottom:1px dotted #bbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .year-code{display:inline-block;width:13mm;font-weight:700}
+        .center{text-align:center}
+        .page-caption{text-align:right;font-size:8px;margin-top:1mm}
+        .signature-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7mm;text-align:center;margin-top:3mm;font-size:9px;page-break-inside:avoid}
+        .signature-box{min-height:18mm}
+        .footer{display:flex;justify-content:space-between;margin-top:1.5mm;font-size:7.5px;color:#555}
+        .blank-dots{letter-spacing:.04em}
+        @page{size:A4 landscape;margin:4mm}
+        @media print{
+            body{background:#fff}
+            .toolbar,.note{display:none!important}
+            .sheet{width:auto;min-height:auto;margin:0;padding:0;box-shadow:none;break-after:page}
+            .sheet:last-child{break-after:auto}
+        }
+    </style>
+</head>
+<body>
+<div class="toolbar">
+    <div>
+        <strong>Phiếu điều tra PCGD - XMC · A4 nằm ngang</strong><br>
+        {{ batch.commune.name }} · {{ batch.school_year.code }} · {{ form_total }} phiếu
+    </div>
+    <div class="toolbar-actions">
+        
+{# === BAI_13B_10_V3_14_PRINT_BACK_SCOPE_START === #}
+{% set print_role = (nguoi_dung.role_code or '')|upper %}
+{% if print_role == 'TRUONG' %}
+    <a class="button"
+       href="/dieu-tra/{{ batch.id }}/giao-phieu-giao-vien">
+        ← Giao phiếu cho giáo viên
+    </a>
+{% elif print_role == 'GIAO_VIEN' %}
+    <a class="button"
+       href="/dieu-tra/{{ batch.id }}/ho-dan">
+        ← Danh sách hộ được giao
+    </a>
+{% else %}
+    <a class="button"
+       href="/dieu-tra/trung-tam-phieu?school_year_id={{ batch.school_year.id }}">
+        ← Trung tâm phiếu
+    </a>
+{% endif %}
+{# === BAI_13B_10_V3_14_PRINT_BACK_SCOPE_END === #}
+
+        <a class="button" href="/dieu-tra/cap-nhat-ho-dan/mau-phieu-dieu-tra">Mẫu gốc</a>
+        <button class="button" type="button" onclick="window.print()">🖨️ In / Lưu PDF</button>
+    </div>
+</div>
+
+<div class="note">
+    Bản in được bố trí theo mẫu <strong>PHIẾU ĐIỀU TRA PHỔ CẬP GIÁO DỤC - CHỐNG MÙ CHỮ</strong>,
+    khổ <strong>A4 nằm ngang</strong>. Mỗi trang tối đa 7 thành viên. Hộ có trên 7 thành viên tự động tạo
+    trang tiếp theo cùng số phiếu để không phải thu nhỏ chữ quá mức.
+</div>
+
+<section class="sheet">
+    <div class="cover-title">Bảng kê giao nhận phiếu điều tra</div>
+    <div class="meta-grid">
+        <div><strong>Đợt:</strong> {{ batch.name }}</div>
+        <div><strong>Năm học:</strong> {{ batch.school_year.code }}</div>
+        <div><strong>Xã/phường:</strong> {{ batch.commune.name }}</div>
+        <div><strong>Mã đợt:</strong> {{ batch.code }}</div>
+        <div><strong>Tổng phiếu:</strong> {{ form_total }}</div>
+        <div><strong>Tổng thành viên:</strong> {{ person_total }}</div>
+    </div>
+    <table class="manifest">
+        <thead><tr><th>STT</th><th>Số phiếu</th><th>Mã hộ</th><th>Chủ hộ</th><th>Thôn/xóm</th><th>Số người</th><th>Người điều tra</th><th>Ký nhận</th></tr></thead>
+        <tbody>
+        {% for row in form_rows %}
+        <tr>
+            <td class="center">{{ loop.index }}</td>
+            <td>{{ row.form.form_number }}</td>
+            <td>{{ row.household.code }}</td>
+            <td>{{ row.household.head_name }}</td>
+            <td>{{ row.household.hamlet_name or '' }}</td>
+            <td class="center">{{ row.people|length }}</td>
+            <td>{{ row.investigator_names|join(', ') }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="signature-row" style="margin-top:8mm">
+        <div class="signature-box"><strong>NGƯỜI GIAO PHIẾU</strong><br><em>(Ký, ghi rõ họ tên)</em></div>
+        <div class="signature-box"><strong>NGƯỜI NHẬN PHIẾU</strong><br><em>(Ký, ghi rõ họ tên)</em></div>
+        <div class="signature-box"></div>
+        <div class="signature-box"><strong>ĐẠI DIỆN XÃ/PHƯỜNG</strong><br><em>(Ký, đóng dấu)</em></div>
+    </div>
+</section>
+
+{% for row in form_rows %}
+    {% set row_loop = loop %}
+    {% for people_page in row.pages %}
+    {% set page_loop = loop %}
+    <section class="sheet">
+        <div class="form-head">
+            <div class="left-info">
+                <div><strong>Phường/Xã (1):</strong> {{ batch.commune.name }}</div>
+                <div><strong>Tổ, thôn, xóm (2):</strong> {{ row.household.hamlet_name or '................................' }}</div>
+                <div><strong>Địa chỉ (3):</strong> {{ row.household.address or '................................' }}</div>
+            </div>
+            <div class="main-title">
+                <h1>Phiếu điều tra phổ cập giáo dục - chống mù chữ</h1>
+                <div>Năm học {{ batch.school_year.code }}</div>
+                {% if page_loop.length > 1 %}
+                <div><strong>Trang {{ page_loop.index }}/{{ page_loop.length }}</strong></div>
+                {% endif %}
+            </div>
+            <div class="right-info">
+                <div><strong>Họ và tên chủ hộ (4):</strong> {{ row.household.head_name }}</div>
+                <div><strong>Số phiếu (5):</strong> {{ row.form.form_number }}</div>
+                <div><strong>Diện cư trú (6):</strong> □ Thường trú &nbsp; □ Tạm trú</div>
+                <div><strong>Điện thoại (7):</strong> {{ row.household.phone or '........................' }}</div>
+            </div>
+        </div>
+
+        <table class="official">
+            <thead>
+                <tr>
+                    <th class="c-stt">STT</th>
+                    <th class="c-person">HỌ VÀ TÊN ĐỐI TƯỢNG<br><span style="font-weight:400">(Lớn tuổi ghi trước)</span></th>
+                    <th class="c-class">TÊN LỚP ĐANG HỌC<br><span style="font-weight:400">(Theo năm học)</span></th>
+                    <th class="c-school">TÊN TRƯỜNG - HUYỆN ĐANG HỌC<br><span style="font-weight:400">(Tương ứng từng năm học)</span></th>
+                    <th class="c-complete">TỐT NGHIỆP / HOÀN THÀNH<br><span style="font-weight:400">MN → THPT · Bổ túc · TN nghề</span></th>
+                    <th class="c-finished">HỌC XONG<br><span style="font-weight:400">Lớp / Năm</span></th>
+                    <th class="c-drop">BỎ HỌC<br><span style="font-weight:400">Lớp / Năm</span></th>
+                    <th class="c-xmc">MÙ CHỮ<br><span style="font-weight:400">Học XMC / CN XMC / Tái mù</span></th>
+                    <th class="c-disability">KHUYẾT TẬT</th>
+                    <th class="c-move">CHUYỂN ĐẾN, CHUYỂN ĐI, CHẾT</th>
+                    <th class="c-note">GHI CHÚ</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in people_page %}
+                <tr>
+                {% if item %}
+                    <td class="center">{{ (page_loop.index0 * 7) + loop.index }}</td>
+                    <td class="person-cell">
+                        <div class="person-name">{{ item.person.full_name }}</div>
+                        <div class="person-line"><strong>QH chủ hộ:</strong> {{ item.person.relationship_to_head or '' }}</div>
+                        <div class="person-line"><strong>Sinh:</strong> {{ item.date_of_birth or '' }}</div>
+                        <div class="person-line"><strong>Nữ:</strong> {% if item.person.gender == 'Nữ' %}☒{% else %}☐{% endif %} &nbsp; <strong>DT:</strong> {{ item.person.ethnic_group or '' }}</div>
+                        <div class="person-line"><strong>TG:</strong> ................................</div>
+                        <div class="person-line"><strong>Cha, mẹ/Ng. đỡ đầu:</strong> {{ item.parent_name or '' }}</div>
+                        <div class="person-line"><strong>Mã nội bộ:</strong> {{ item.person.code }}</div>
+                    </td>
+                    <td>
+                        {% for y in item.year_rows %}
+                        <div class="year-line"><span class="year-code">{{ y.year_code }}</span>{{ y.class_name or '' }}</div>
+                        {% endfor %}
+                        {% for _ in range(7 - item.year_rows|length) %}
+                        <div class="year-line"><span class="year-code">20__-20__</span></div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for y in item.year_rows %}
+                        <div class="year-line"><span class="year-code">{{ y.year_code }}</span>{{ y.school_name or '' }}</div>
+                        {% endfor %}
+                        {% for _ in range(7 - item.year_rows|length) %}
+                        <div class="year-line"><span class="year-code">20__-20__</span></div>
+                        {% endfor %}
+                    </td>
+                    <td>{{ item.completion_text or '' }}</td>
+                    <td>{{ item.study_completed_text or '' }}</td>
+                    <td>{{ item.dropout_text or '' }}</td>
+                    <td>{{ item.literacy_text or '' }}</td>
+                    <td>{{ item.disability_text or '' }}</td>
+                    <td>{{ item.movement_text or '' }}</td>
+                    <td>{{ item.notes_text or '' }}</td>
+                {% else %}
+                    <td class="center">{{ (page_loop.index0 * 7) + loop.index }}</td>
+                    <td class="person-cell">
+                        <div class="person-name">................................................</div>
+                        <div class="person-line"><strong>QH chủ hộ:</strong></div>
+                        <div class="person-line"><strong>Sinh:</strong></div>
+                        <div class="person-line"><strong>Nữ:</strong> ☐ &nbsp; <strong>DT:</strong></div>
+                        <div class="person-line"><strong>TG:</strong></div>
+                        <div class="person-line"><strong>Cha, mẹ/Ng. đỡ đầu:</strong></div>
+                        <div class="person-line"><strong>Mã:</strong></div>
+                    </td>
+                    <td>{% for _ in range(7) %}<div class="year-line"><span class="year-code">20__-20__</span></div>{% endfor %}</td>
+                    <td>{% for _ in range(7) %}<div class="year-line"><span class="year-code">20__-20__</span></div>{% endfor %}</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% if page_loop.last %}
+        <div class="signature-row">
+            <div class="signature-box"><strong>HỌ, TÊN CHỦ HỘ</strong><br><br><em>(Ký, ghi rõ họ tên)</em></div>
+            <div class="signature-box"><strong>CÁN BỘ, NHÂN VIÊN ĐIỀU TRA 1</strong><br>{{ row.investigator_names[0] if row.investigator_names|length > 0 else '' }}<br><em>(Ký, ghi rõ họ tên)</em></div>
+            <div class="signature-box"><strong>CÁN BỘ, NHÂN VIÊN ĐIỀU TRA 2</strong><br>{{ row.investigator_names[1] if row.investigator_names|length > 1 else '' }}<br><em>(Ký, ghi rõ họ tên)</em></div>
+            <div class="signature-box"><strong>XÁC NHẬN CỦA UBND PHƯỜNG/XÃ</strong><br><br><em>(Ký tên, đóng dấu)</em></div>
+        </div>
+        {% endif %}
+        <div class="footer">
+            <span>{{ batch.code }} · {{ row.form.form_number }} · {{ row.household.code }}</span>
+            <span>In lúc {{ generated_at.strftime('%d/%m/%Y %H:%M') }}</span>
+        </div>
+    </section>
+    {% endfor %}
+{% endfor %}
+</body>
+</html>

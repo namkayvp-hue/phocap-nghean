@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danh sách giáo viên trường gửi về</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<style>
+.team-wrap{width:min(1450px,96%);margin:24px auto 60px}
+.team-panel{background:#fff;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 8px 24px rgba(30,70,110,.08)}
+.summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.card{border:1px solid #d8e4ef;border-radius:12px;padding:14px}
+.card strong{display:block;font-size:24px;color:#1769aa;margin-top:7px}
+.team-table{width:100%;border-collapse:collapse}
+.team-table th,.team-table td{padding:11px;border-bottom:1px solid #e4ebf2;text-align:left;vertical-align:top}
+.team-table th{background:#edf5fc}
+.sent{color:#247535;font-weight:800}.draft{color:#8a6200;font-weight:800}.none{color:#8b99a6}
+select{padding:10px;border:1px solid #c9d6e2;border-radius:9px;min-width:300px}
+@media(max-width:900px){.summary{grid-template-columns:1fr 1fr}.scroll{overflow-x:auto}.team-table{min-width:900px}}
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="team-wrap">
+<section class="team-panel">
+<p class="admin-eyebrow">TỔ ĐIỀU TRA 3 CẤP · BƯỚC 1</p>
+<h1>Danh sách giáo viên các trường gửi về xã/phường</h1>
+<p><strong>{{ nguoi_dung.unit_name }}</strong></p>
+<form method="get" action="/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong">
+<label><strong>Đợt điều tra</strong></label><br>
+<select name="batch_id" onchange="this.form.submit()">
+{% for item in batches %}
+<option value="{{ item.id }}" {% if batch and item.id == batch.id %}selected{% endif %}>{{ item.school_year_code }} · {{ item.name }}</option>
+{% endfor %}
+</select>
+</form>
+</section>
+
+{% if batch %}
+<section class="team-panel">
+<div class="summary">
+<div class="card">GV MN đã gửi<strong>{{ summary.MN }}</strong></div>
+<div class="card">GV TH đã gửi<strong>{{ summary.TH }}</strong></div>
+<div class="card">GV THCS đã gửi<strong>{{ summary.THCS }}</strong></div>
+<div class="card">Trường đã gửi<strong>{{ summary.sent_schools }}</strong></div>
+<div class="card">Tổng GV đã chọn<strong>{{ summary.total_selected }}</strong></div>
+</div>
+</section>
+
+<section class="team-panel">
+<h2>Tình hình đăng ký của các trường</h2>
+
+        <!-- === BAI_13B_10_V2_COMMUNE_BUTTON_START === -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 16px">
+            {% if batch %}
+            <a
+                class="button button-primary"
+                href="/dieu-tra/phan-cong-to-dieu-tra/lap-to?batch_id={{ batch.id }}"
+            >
+                🎲 Lập tổ 3 cấp và chia hộ
+            </a>
+            {% endif %}
+        </div>
+        <!-- === BAI_13B_10_V2_COMMUNE_BUTTON_END === -->
+
+<p>Chỉ danh sách <strong>Đã gửi xã/phường</strong> mới được dùng để ghép tổ ở V2.</p>
+<div class="scroll">
+<table class="team-table">
+<thead><tr><th>STT</th><th>Trường</th><th>Cấp</th><th>Tài khoản GV</th><th>GV đã chọn</th><th>Trạng thái</th><th>Thời gian gửi</th></tr></thead>
+<tbody>
+{% for school in schools %}
+<tr>
+<td>{{ loop.index }}</td>
+<td><strong>{{ school.name }}</strong><div class="muted">{{ school.code }}</div></td>
+<td>{{ school.level_label }}</td>
+<td>{{ school.teacher_count }}</td>
+<td><strong>{{ school.selected_count }}</strong></td>
+<td>
+{% if school.submission_status == 'SENT' %}<span class="sent">Đã gửi xã/phường</span>
+{% elif school.submission_status == 'DRAFT' %}<span class="draft">Bản nháp tại trường</span>
+{% else %}<span class="none">Chưa đăng ký</span>{% endif %}
+</td>
+<td>{% if school.submission and school.submission.sent_at %}{{ school.submission.sent_at }}{% else %}—{% endif %}</td>
+</tr>
+{% else %}
+<tr><td colspan="7">Không có trường trong địa bàn.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+{% else %}
+<section class="team-panel">Chưa có đợt điều tra thuộc xã/phường.</section>
+{% endif %}
+</main>
+</body>
+</html>

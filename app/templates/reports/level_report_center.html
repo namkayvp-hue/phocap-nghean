@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ level.title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root{
+            --blue:#0f5fa8;--blue2:#1976d2;--bg:#eef4f9;--line:#d7e4ef;
+            --text:#17324d;--green:#198f42;--amber:#a66a00;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+        .hero{background:linear-gradient(135deg,#0f5fa8,#1682d6);color:#fff;padding:30px 3vw}
+        .hero-inner,.wrap{max-width:1280px;margin:auto}
+        .hero h1{margin:7px 0 8px;font-size:32px}
+        .hero p{margin:0;opacity:.93;line-height:1.5}
+        .eyebrow{font-weight:900;letter-spacing:.08em;font-size:13px}
+        .wrap{padding:22px 3vw 50px}
+        .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 7px 22px rgba(23,50,77,.05)}
+        .filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+        .field label{display:block;font-weight:800;margin:0 0 7px}
+        .field select{width:100%;min-height:45px;border:1px solid #bfd0df;border-radius:10px;padding:9px 11px;background:#fff;font:inherit}
+        .actions{display:flex;align-items:end;gap:9px;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:10px;padding:10px 14px;text-decoration:none;font-weight:800;cursor:pointer}
+        .primary{background:var(--blue2);color:#fff}.success{background:var(--green);color:#fff}.secondary{background:#e7eef5;color:var(--text)}
+        .scope{margin-top:14px;padding:12px 14px;border-radius:11px;background:#eaf4ff;font-weight:800}
+        .notice{padding:14px;border:1px solid #eed194;border-radius:12px;background:#fff7e5;color:#7b570b;margin-bottom:18px;line-height:1.5}
+        .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+        .card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 6px 18px rgba(23,50,77,.05)}
+        .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+        .card h3{margin:0;font-size:20px}.card p{color:#6b8195;line-height:1.5;min-height:46px}
+        .badge{display:inline-block;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900;white-space:nowrap}
+        .ready{background:#e5f6ea;color:#19743b}.partial{background:#fff1ca;color:#8a5c00}
+        .card-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+        .summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+        .summary-card{background:#fff;border-radius:15px;padding:17px;border:1px solid var(--line)}
+        .summary-card span{display:block;color:#6b8195;font-weight:700}.summary-card strong{display:block;margin-top:7px;font-size:26px;color:var(--blue)}
+        .disabled{opacity:.55;cursor:not-allowed}
+        @media(max-width:850px){.filters,.cards,.summary{grid-template-columns:1fr 1fr}}
+        @media(max-width:620px){.filters,.cards,.summary{grid-template-columns:1fr}.wrap{padding:12px}.panel,.card{padding:14px}.hero{padding:24px 16px}.hero h1{font-size:25px}.actions .btn{width:100%}}
+    </style>
+</head>
+<body>
+{% include 'partials/dropdown_menu_v1.html' %}
+
+<header class="hero">
+    <div class="hero-inner">
+        <div class="eyebrow">BÀI 13B-4 · TRUNG TÂM BÁO CÁO THEO CẤP HỌC</div>
+        <h1>{{ level.title }}</h1>
+        <p>{{ level.description }}</p>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="panel">
+        <h2 style="margin-top:0">Chọn năm học và phạm vi báo cáo</h2>
+        <form method="get" action="{{ level.path }}" id="b134-level-filter">
+            <div class="filters">
+                <div class="field">
+                    <label>Năm học</label>
+                    <select name="school_year_id">
+                        {% for y in school_years %}
+                        <option value="{{ y.id }}" {% if y.id == selected_year_id %}selected{% endif %}>{{ y.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Xã/phường</label>
+                    <select name="commune_id">
+                        {% if province_reader %}<option value="">-- Toàn tỉnh --</option>{% endif %}
+                        {% for c in communes %}
+                        <option value="{{ c.id }}" {% if c.id == selected_commune_id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Trường</label>
+                    <select name="school_id">
+                        <option value="">-- Tất cả trường trong phạm vi --</option>
+                        {% for s in schools %}
+                        <option value="{{ s.id }}" {% if s.id == selected_school_id %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="actions">
+                    <button class="btn primary" type="submit">Mở phạm vi</button>
+                    <a class="btn secondary" href="{{ level.path }}">Xóa lọc</a>
+                </div>
+            </div>
+        </form>
+        <div class="scope">Phạm vi đang xem: {{ scope_label }}{% if selected_year %} · Năm học {{ selected_year.code }}{% endif %}</div>
+    </section>
+
+    <div class="summary">
+        <div class="summary-card"><span>Số biểu trong bộ</span><strong>{{ cards|length }}</strong></div>
+        <div class="summary-card"><span>Biểu có tự động tổng hợp</span><strong>{{ ready_count }}</strong></div>
+        <div class="summary-card"><span>Nguyên tắc</span><strong style="font-size:18px">Không suy diễn dữ liệu</strong></div>
+    </div>
+
+    <div class="notice">
+        <strong>Nguyên tắc lập báo cáo:</strong>
+        dùng đúng mẫu Excel đã có trong hệ thống; chỉ tự động điền các chỉ tiêu có nguồn dữ liệu rõ ràng.
+        Chỉ tiêu chưa có trường dữ liệu chuyên biệt được để trống để tránh kết luận sai.
+    </div>
+
+    <section class="cards">
+        {% for card in cards %}
+        <article class="card">
+            <div class="card-head">
+                <div>
+                    <h3>{{ card.title }}</h3>
+                    <p>{{ card.description }}</p>
+                </div>
+                <span class="badge {{ card.status_class }}">{{ card.status }}</span>
+            </div>
+            <div class="card-actions">
+                <a class="btn secondary" href="{{ card.open_url }}">Mở báo cáo</a>
+                <a class="btn success" href="{{ card.export_url }}">Xuất Excel mẫu</a>
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+</main>
+
+<script>
+(function () {
+    const form = document.getElementById('b134-level-filter');
+    if (!form) return;
+    const year = form.querySelector('select[name="school_year_id"]');
+    const commune = form.querySelector('select[name="commune_id"]');
+    const school = form.querySelector('select[name="school_id"]');
+
+    if (commune) {
+        commune.addEventListener('change', function () {
+            if (school) school.value = '';
+            form.submit();
+        });
+    }
+    if (year) {
+        year.addEventListener('change', function () {
+            if (school) school.value = '';
+            form.submit();
+        });
+    }
+})();
+</script>
+</body>
+</html>

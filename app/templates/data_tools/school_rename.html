@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đổi tên trường</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        .rename-wrap{max-width:1450px;margin:0 auto;padding:24px 18px 60px}
+        .rename-hero,.rename-panel{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:20px;margin-bottom:18px}
+        .rename-hero h1{margin:0 0 8px;font-size:26px}
+        .rename-hero p{margin:6px 0;color:#52606d;line-height:1.55}
+        .rename-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px}
+        .rename-grid.two{grid-template-columns:1fr 1fr}
+        .field label{display:block;font-weight:700;margin-bottom:6px}
+        .field input,.field select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #c9d4df;border-radius:8px;background:#fff}
+        .field input[readonly]{background:#f4f7fa;color:#52606d}
+        .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+        .btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;padding:10px 16px;font-weight:700;text-decoration:none;cursor:pointer}
+        .btn.primary{background:#1f5f99;color:#fff}.btn.success{background:#18794e;color:#fff}.btn.muted{background:#e8eef4;color:#213547}
+        .note{padding:12px 14px;border-radius:9px;margin:10px 0;line-height:1.5}
+        .note.info{background:#eef6ff;border:1px solid #b9d8fa;color:#164e7a}.note.ok{background:#edf9f2;border:1px solid #a8dfbd;color:#155f3a}.note.error{background:#fff0ef;border:1px solid #f0b4ae;color:#842029}
+        .preview{border:2px solid #a8dfbd;background:#f7fcf9;border-radius:12px;padding:18px}
+        .arrow{font-size:24px;font-weight:800;text-align:center;align-self:center}
+        .table-wrap{overflow:auto;border:1px solid #e0e6ec;border-radius:10px}
+        table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:10px;border-bottom:1px solid #e7ecf1;text-align:left}th{background:#f7f9fb}
+        .muted{color:#667788;font-size:13px}
+        .combo{position:relative}.combo-list{display:none;position:absolute;z-index:50;left:0;right:0;top:100%;max-height:280px;overflow:auto;background:#fff;border:1px solid #c9d4df;border-radius:8px;box-shadow:0 8px 22px rgba(20,40,60,.16);margin-top:4px}
+        .combo-list.open{display:block}.combo-item{padding:9px 10px;cursor:pointer;border-bottom:1px solid #eef2f6}.combo-item:hover{background:#eef6ff}.combo-empty{padding:10px;color:#667788}
+        @media(max-width:900px){.rename-grid,.rename-grid.two{grid-template-columns:1fr}.rename-wrap{padding:14px 10px 40px}}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="rename-wrap">
+    <section class="rename-hero">
+        <h1>Đổi tên trường</h1>
+        <p>Chức năng chỉ thay <strong>tên hiện hành</strong> của trường. <strong>school_id, mã trường và toàn bộ dữ liệu liên kết được giữ nguyên.</strong></p>
+        <p>Phần đổi tên chỉ gồm <strong>Tên cũ → Tên mới</strong>. Không yêu cầu số văn bản, ngày văn bản hoặc ghi chú.</p>
+        <div class="actions"><a class="btn muted" href="/cong-cu-du-lieu/sap-nhap-truong">← Sáp nhập trường</a></div>
+    </section>
+
+    {% if error_message %}<div class="note error"><strong>Không thực hiện:</strong> {{ error_message }}</div>{% endif %}
+    {% if status_message %}
+    <div class="note ok"><strong>{{ status_message }}</strong>{% if backup_name %}<br>Backup an toàn: <code>{{ backup_name }}</code>{% endif %}</div>
+    {% endif %}
+
+    <section class="rename-panel">
+        <h2>1. Chọn trường</h2>
+        <form id="select-form" method="get" action="/cong-cu-du-lieu/doi-ten-truong">
+            <div class="rename-grid">
+                <div class="field">
+                    <label>Năm học</label>
+                    <select name="school_year_id" required>
+                        {% for y in school_years %}
+                        <option value="{{ y.id }}" {% if y.id == selected_school_year_id %}selected{% endif %}>
+                            {{ y.code or y.name }}{% if y.is_active %} · đang hoạt động{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="muted">Chỉ năm học đang hoạt động mới được thực hiện đổi tên.</div>
+                </div>
+
+                <div class="field">
+                    <label>Xã/phường</label>
+                    <div class="combo">
+                        <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off">
+                        <input id="commune-id" name="commune_id" type="hidden" value="{{ selected_commune_id or '' }}">
+                        <div id="commune-list" class="combo-list"></div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Trường</label>
+                    <div class="combo">
+                        <input id="school-search" type="text" value="{{ selected_school_name }}" placeholder="Gõ từ đầu tên trường..." autocomplete="off">
+                        <input id="school-id" name="school_id" type="hidden" value="{{ selected_school_id or '' }}">
+                        <div id="school-list" class="combo-list"></div>
+                    </div>
+                    <div class="muted">Chỉ hiển thị trường đang hoạt động trong xã/phường đã chọn.</div>
+                </div>
+            </div>
+            <div class="actions"><button class="btn primary" type="submit">Hiển thị trường</button></div>
+        </form>
+    </section>
+
+    {% if selected_school %}
+    <section class="rename-panel">
+        <h2>2. Tên cũ → Tên mới</h2>
+        <form method="post" action="/cong-cu-du-lieu/doi-ten-truong/xem-truoc">
+            <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+            <input type="hidden" name="commune_id" value="{{ selected_commune_id }}">
+            <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+            <div class="rename-grid two">
+                <div class="field"><label>Tên cũ</label><input type="text" value="{{ selected_school.name }}" readonly></div>
+                <div class="field"><label>Tên mới</label><input type="text" name="new_name" value="{{ new_name }}" placeholder="Nhập tên mới của trường" required></div>
+            </div>
+            <div class="actions"><button class="btn primary" type="submit">Xem trước</button></div>
+        </form>
+    </section>
+    {% endif %}
+
+    {% if preview %}
+    <section class="rename-panel">
+        <h2>3. Xem trước</h2>
+        <div class="preview">
+            <div class="rename-grid">
+                <div><strong>Năm hiệu lực</strong><div>{{ preview.school_year_code }}</div></div>
+                <div><strong>Xã/phường</strong><div>{{ preview.commune_name }}</div></div>
+                <div><strong>Mã trường</strong><div>{{ preview.school_code or "—" }}</div></div>
+            </div>
+            <div class="rename-grid" style="margin-top:18px">
+                <div class="field"><label>Tên cũ</label><input type="text" value="{{ preview.old_name }}" readonly></div>
+                <div class="arrow">→</div>
+                <div class="field"><label>Tên mới</label><input type="text" value="{{ preview.new_name }}" readonly></div>
+            </div>
+            <div class="note info">Không đổi school_id. Không đổi mã trường. Không chuyển lại tài khoản, đội ngũ, lớp, học sinh hoặc dữ liệu điều tra.</div>
+            <form method="post" action="/cong-cu-du-lieu/doi-ten-truong/thuc-hien">
+                <input type="hidden" name="school_year_id" value="{{ preview.school_year_id }}">
+                <input type="hidden" name="commune_id" value="{{ selected_commune_id }}">
+                <input type="hidden" name="school_id" value="{{ preview.school_id }}">
+                <input type="hidden" name="new_name" value="{{ preview.new_name }}">
+                <div class="actions"><button class="btn success" type="submit">Thực hiện đổi tên</button></div>
+            </form>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="rename-panel">
+        <h2>Lịch sử đổi tên trường</h2>
+        {% if history %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Năm hiệu lực</th><th>Xã/phường</th><th>Mã trường</th><th>Tên cũ</th><th>Tên mới</th></tr></thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td>{{ item.school_year_code or item.school_year_name }}</td>
+                        <td>{{ item.commune_name }}</td>
+                        <td>{{ item.school_code or "—" }}</td>
+                        <td>{{ item.old_name }}</td>
+                        <td><strong>{{ item.new_name }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="note info">Chưa có lần đổi tên trường nào được thực hiện bằng chức năng này.</div>
+        {% endif %}
+    </section>
+</main>
+
+<script>
+(function () {
+    "use strict";
+    const communes = {{ communes | tojson }};
+    const schools = {{ schools | tojson }};
+    const communeInput = document.getElementById("commune-search");
+    const communeId = document.getElementById("commune-id");
+    const communeList = document.getElementById("commune-list");
+    const schoolInput = document.getElementById("school-search");
+    const schoolId = document.getElementById("school-id");
+    const schoolList = document.getElementById("school-list");
+
+    function norm(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d").replace(/Đ/g, "D")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim()
+            .replace(/\s+/g, " ");
+    }
+
+    function render(input, hidden, box, rows, labelFn, valueFn) {
+        const q = norm(input.value);
+        box.innerHTML = "";
+        if (!q) { box.classList.remove("open"); return; }
+        const matches = rows.filter(row => norm(labelFn(row)).startsWith(q)).slice(0, 40);
+        if (!matches.length) {
+            const div = document.createElement("div");
+            div.className = "combo-empty";
+            div.textContent = "Không có kết quả phù hợp.";
+            box.appendChild(div);
+            box.classList.add("open");
+            return;
+        }
+        matches.forEach(row => {
+            const div = document.createElement("div");
+            div.className = "combo-item";
+            div.textContent = labelFn(row);
+            div.addEventListener("mousedown", function (event) {
+                event.preventDefault();
+                input.value = labelFn(row);
+                hidden.value = valueFn(row);
+                box.classList.remove("open");
+            });
+            box.appendChild(div);
+        });
+        box.classList.add("open");
+    }
+
+    if (communeInput) {
+        communeInput.addEventListener("input", function () {
+            communeId.value = "";
+            if (schoolInput) { schoolInput.value = ""; schoolId.value = ""; }
+            render(communeInput, communeId, communeList, communes, row => row.name, row => row.id);
+        });
+    }
+
+    if (schoolInput) {
+        schoolInput.addEventListener("input", function () {
+            schoolId.value = "";
+            render(schoolInput, schoolId, schoolList, schools, row => row.name, row => row.id);
+        });
+    }
+
+    document.addEventListener("click", function (event) {
+        if (communeList && !communeList.contains(event.target) && event.target !== communeInput) communeList.classList.remove("open");
+        if (schoolList && !schoolList.contains(event.target) && event.target !== schoolInput) schoolList.classList.remove("open");
+    });
+})();
+</script>
+</body>
+</html>
