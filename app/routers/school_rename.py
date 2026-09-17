@@ -21,7 +21,8 @@ from app.services.school_merger_service import (
 
 APP_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = APP_DIR.parent
-BACKUP_DIR = PROJECT_DIR / "backups"
+# Dùng vùng dữ liệu có quyền ghi và được lưu bền vững trên máy chủ Docker.
+BACKUP_DIR = DATABASE_PATH.parent / "backups"
 
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
@@ -160,7 +161,7 @@ def _history(limit: int = 100, school_id: int | None = None) -> list[dict[str, A
 
 def _backup_database() -> Path:
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     path = BACKUP_DIR / f"phocap_truoc_doi_ten_truong_{stamp}.db"
     src = sqlite3.connect(str(DATABASE_PATH))
     dst = sqlite3.connect(str(path))
