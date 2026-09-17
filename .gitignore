@@ -32,3 +32,35 @@ Thumbs.db
 
 # Ban sao ma nguon cu cuc bo
 app/routers/surveys_truoc_sua_assigned_at_20260715_112012.py
+
+# Du lieu van hanh, tai khoan va ket qua chan doan cuc bo
+/data/
+/backup_*/
+/bao_cao_*/
+/dry_run_*/
+/chan_doan_sap_nhap_3805/
+/ket_qua_*/
+/nguon_*/
+/sap_nhap_QD3805_*/
+/V5_tai_khoan_*/
+/V7_doi_ngu_*/
+*.zip
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.jsonl
+*.before_*
+.env
+.env.*
+!.env.example
+/Screenshot*.png
+/LOI_CAP_TRUONG*.txt
+/chan_doan_*.txt
+/ket_qua_*.txt
+/bao_cao_*.txt
+
+# Tep cu chua mat khau quan tri du phong
+/HUONG_DAN_MAT_KHAU_QUAN_TRI_DU_PHONG_V1.txt
+/cai_dat_mat_khau_quan_tri_du_phong_v1.py

@@ -1,0 +1,1201 @@
+{# ============================================================
+   MENU SỔ XUỐNG V1.5 - PCGD & XMC - ĐỦ 4 CẤP
+   Mục tiêu:
+   - Thanh menu dùng chung cho mọi giao diện con sau đăng nhập.
+   - Menu cấp 1 xổ xuống; nhóm nghiệp vụ bên trong tiếp tục xổ ngang.
+   - Chỉ điều hướng giao diện.
+   - Không thay đổi route, dữ liệu hoặc nghiệp vụ.
+   - Giữ nguyên các liên kết/route đã có trong Menu V1.
+   ============================================================ #}
+<style id="pc-menu-v15-inline-style">
+.pc-global-nav,
+.pc-global-nav * {
+    box-sizing: border-box;
+}
+
+.pc-global-nav {
+    position: sticky;
+    top: 0;
+    z-index: 5000;
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #ffffff;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(18, 52, 86, 0.18);
+}
+
+.pc-global-nav__top {
+    min-height: 56px;
+    padding: 7px max(18px, calc((100% - 1280px) / 2));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    background: linear-gradient(90deg, #0d47a1 0%, #1565c0 58%, #1976d2 100%);
+}
+
+.pc-global-nav__brand {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.pc-global-nav__brand-mark {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0d47a1;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.pc-global-nav__brand-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.pc-global-nav__brand-text strong {
+    color: #ffffff;
+    font-size: 14px;
+    letter-spacing: .25px;
+    white-space: nowrap;
+}
+
+.pc-global-nav__brand-text small {
+    margin-top: 3px;
+    color: rgba(255,255,255,.9);
+    font-size: 11px;
+}
+
+.pc-global-nav__account {
+    display: grid;
+    grid-template-columns: minmax(0, auto) auto;
+    grid-template-areas: "name logout" "unit logout";
+    align-items: center;
+    column-gap: 12px;
+    text-align: right;
+}
+
+.pc-global-nav__account-name {
+    grid-area: name;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.pc-global-nav__account-unit {
+    grid-area: unit;
+    max-width: 460px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255,255,255,.9);
+    font-size: 11px;
+}
+
+.pc-global-nav__logout-form {
+    grid-area: logout;
+    margin: 0 !important;
+}
+
+.pc-global-nav__logout {
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid rgba(255,255,255,.62);
+    border-radius: 7px;
+    background: rgba(255,255,255,.12);
+    color: #ffffff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pc-global-nav__logout:hover,
+.pc-global-nav__logout:focus-visible {
+    background: #ffffff;
+    color: #0d47a1;
+    outline: none;
+}
+
+.pc-global-nav__bar {
+    min-height: 43px;
+    padding: 0 max(18px, calc((100% - 1280px) / 2));
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: #ffffff;
+    border-bottom: 1px solid #d8e1eb;
+    color: #25364a;
+    overflow: visible;
+}
+
+.pc-global-nav__home,
+.pc-menu-trigger {
+    min-height: 43px;
+    margin: 0;
+    padding: 0 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 0;
+    border-right: 1px solid #e5ebf1;
+    border-radius: 0;
+    background: transparent;
+    color: #25364a !important;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none !important;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.pc-global-nav__home:hover,
+.pc-global-nav__home:focus-visible,
+.pc-menu-trigger:hover,
+.pc-menu-trigger:focus-visible,
+.pc-menu-group.is-open > .pc-menu-trigger,
+.pc-menu-group.is-active > .pc-menu-trigger,
+.pc-global-nav__home.is-active {
+    background: #eaf3ff;
+    color: #0d5fb8 !important;
+    outline: none;
+}
+
+.pc-menu-group {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.pc-menu-caret {
+    font-size: 11px;
+    transition: transform .16s ease;
+}
+
+.pc-menu-group.is-open > .pc-menu-trigger .pc-menu-caret {
+    transform: rotate(180deg);
+}
+
+.pc-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 5100;
+    width: max-content;
+    min-width: 300px;
+    max-width: min(430px, calc(100vw - 28px));
+    padding: 6px 0;
+    display: none;
+    background: #ffffff;
+    border: 1px solid #d9e2ec;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 12px 28px rgba(30,53,79,.18);
+}
+
+.pc-menu-group.is-open > .pc-dropdown,
+.pc-menu-group:focus-within > .pc-dropdown {
+    display: block;
+}
+
+.pc-dropdown--right {
+    left: auto;
+    right: 0;
+}
+
+.pc-dropdown > a,
+.pc-submenu-trigger,
+.pc-submenu-panel > a {
+    width: 100%;
+    min-height: 39px;
+    margin: 0;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    color: #26384d !important;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none !important;
+    white-space: normal;
+    cursor: pointer;
+}
+
+.pc-dropdown > a:hover,
+.pc-dropdown > a:focus-visible,
+.pc-submenu-trigger:hover,
+.pc-submenu-trigger:focus-visible,
+.pc-submenu.is-open > .pc-submenu-trigger,
+.pc-submenu:focus-within > .pc-submenu-trigger,
+.pc-submenu-panel > a:hover,
+.pc-submenu-panel > a:focus-visible {
+    background: #eaf3ff;
+    color: #0d5fb8 !important;
+    outline: none;
+}
+
+.pc-submenu {
+    position: relative;
+}
+
+.pc-submenu-trigger {
+    justify-content: space-between;
+    font-weight: 600;
+}
+
+.pc-submenu-trigger__text {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pc-submenu-arrow {
+    flex: 0 0 auto;
+    color: #708196;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.pc-submenu-panel {
+    position: absolute;
+    top: -7px;
+    left: calc(100% - 2px);
+    z-index: 5200;
+    width: max-content;
+    min-width: 315px;
+    max-width: min(430px, calc(100vw - 28px));
+    padding: 6px 0;
+    display: none;
+    background: #ffffff;
+    border: 1px solid #d9e2ec;
+    border-radius: 7px;
+    box-shadow: 0 12px 28px rgba(30,53,79,.18);
+}
+
+.pc-submenu.is-open > .pc-submenu-panel,
+.pc-submenu:focus-within > .pc-submenu-panel {
+    display: block;
+}
+
+.pc-submenu.opens-left > .pc-submenu-panel,
+.pc-dropdown--right .pc-submenu > .pc-submenu-panel {
+    right: calc(100% - 2px);
+    left: auto;
+}
+
+.pc-dropdown__section-title {
+    padding: 7px 14px 6px;
+    color: #8190a1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+.pc-dropdown__divider {
+    height: 1px;
+    margin: 5px 10px;
+    background: #e8edf3;
+}
+
+.pc-dropdown__note {
+    margin: 5px 10px;
+    padding: 9px 10px;
+    display: block;
+    border-radius: 6px;
+    background: #f5f8fb;
+    color: #617286;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.pc-submenu-panel .pc-dropdown__note {
+    margin: 5px 10px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .pc-submenu:hover > .pc-submenu-panel {
+        display: block;
+    }
+
+    .pc-submenu:hover > .pc-submenu-trigger {
+        background: #eaf3ff;
+        color: #0d5fb8 !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .pc-global-nav__account-unit {
+        max-width: 260px;
+    }
+
+    .pc-global-nav__bar {
+        padding-inline: 8px;
+    }
+
+    .pc-global-nav__home,
+    .pc-menu-trigger {
+        padding-inline: 11px;
+    }
+}
+
+@media (max-width: 760px) {
+    .pc-global-nav {
+        position: relative;
+    }
+
+    .pc-global-nav__top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .pc-global-nav__brand-text strong {
+        white-space: normal;
+    }
+
+    .pc-global-nav__account {
+        grid-template-columns: 1fr auto;
+        text-align: left;
+    }
+
+    .pc-global-nav__account-unit {
+        max-width: 100%;
+    }
+
+    .pc-global-nav__bar {
+        flex-wrap: wrap;
+        overflow: visible;
+        padding: 4px 8px;
+    }
+
+    .pc-global-nav__home,
+    .pc-menu-trigger {
+        min-height: 40px;
+        border-right: 0;
+        border-radius: 6px;
+    }
+
+    .pc-dropdown,
+    .pc-dropdown--right {
+        position: fixed;
+        top: 105px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        border-radius: 8px;
+    }
+
+    .pc-submenu-panel,
+    .pc-submenu.opens-left > .pc-submenu-panel,
+    .pc-dropdown--right .pc-submenu > .pc-submenu-panel {
+        position: static;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        margin: 0 8px 6px 18px;
+        padding: 3px 0;
+        border: 0;
+        border-left: 3px solid #d6e7fb;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .pc-submenu-panel > a {
+        min-height: 36px;
+        padding-left: 13px;
+        font-size: 12.5px;
+    }
+
+    .pc-submenu-arrow {
+        transform: rotate(90deg);
+    }
+}
+
+
+/* V1.4: bỏ các ô chọn/truy cập nhanh đã được chuyển lên menu.
+   Chỉ ẩn phần điều hướng trùng lặp; không ẩn biểu mẫu, bảng dữ liệu hay thẻ thống kê. */
+.roles,
+.survey-menu-grid,
+.quick-access-grid,
+.catalog {
+    display: none !important;
+}
+
+.pc-batch-link-needs-selection {
+    color: #60758c !important;
+}
+
+.pc-batch-context {
+    margin: 5px 10px 7px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #f4f8fc;
+    color: #63778d;
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+.pc-batch-context strong {
+    color: #245c92;
+}
+
+@media print {
+    .pc-global-nav {
+        display: none !important;
+    }
+}
+</style>
+
+{% set menu_user = nguoi_dung if nguoi_dung is defined and nguoi_dung else (request.scope.get('auth_user') if request is defined else none) %}
+{% if menu_user %}
+    {% set menu_role = (menu_user.role_code or '')|upper %}
+    {% set menu_path = request.url.path if request is defined else '/' %}
+
+    {# Trang chủ cũ có một tiêu đề hệ thống lớn trùng với thanh đầu trang mới.
+       V1.4 chỉ ẩn tiêu đề hệ thống cũ ở Trang chủ; tiêu đề nghiệp vụ của các trang con vẫn giữ nguyên. #}
+    {% if menu_path == '/' %}
+    <style id="pc-menu-v15-home-cleanup">
+        body > .admin-header { display: none !important; }
+    </style>
+    {% endif %}
+
+    <nav class="pc-global-nav" aria-label="Điều hướng chính">
+        <div class="pc-global-nav__top">
+            <a class="pc-global-nav__brand" href="/" title="Về trang chủ">
+                <span class="pc-global-nav__brand-mark">PC</span>
+                <span class="pc-global-nav__brand-text">
+                    <strong>PHỔ CẬP GIÁO DỤC VÀ XÓA MÙ CHỮ</strong>
+                    <small>Hệ thống quản lý dữ liệu</small>
+                </span>
+            </a>
+
+            <div class="pc-global-nav__account">
+                <span class="pc-global-nav__account-name">{{ menu_user.full_name }}</span>
+                <span class="pc-global-nav__account-unit">{{ menu_user.role_name }} · {{ menu_user.unit_name }}</span>
+                <form method="post" action="/dang-xuat" class="pc-global-nav__logout-form">
+                    <button type="submit" class="pc-global-nav__logout">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+
+        
+
+
+<div class="pc-global-nav__bar" data-pc-dropdown-menu-v15>
+            <a class="pc-global-nav__home {% if menu_path == '/' %}is-active{% endif %}" href="/">Trang chủ</a>
+
+            {# ==========================================================
+               1. DANH MỤC - phân quyền đúng theo 4 cấp nghiệp vụ.
+               Sở: tài khoản + xã + trường.
+               Xã: trường thuộc xã.
+               Trường: tài khoản giáo viên.
+               Giáo viên: không có danh mục quản trị.
+               ========================================================== #}
+            {% if menu_role in ['ADMIN', 'SO'] %}
+            <div class="pc-menu-group {% if menu_path.startswith('/tai-khoan') or menu_path.startswith('/xa') or menu_path.startswith('/truong') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">1.1. Quản lý tài khoản</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/tai-khoan?muc=phong_ban" role="menuitem">1.1.1. Tài khoản Phòng ban</a>
+                            <a href="/tai-khoan?muc=xa" role="menuitem">1.1.2. Tài khoản Xã/phường</a>
+                            <a href="/tai-khoan?muc=truong" role="menuitem">1.1.3. Tài khoản Trường mầm non</a>
+                            <a href="/tai-khoan?muc=tra_cuu" role="menuitem">1.1.4. Tra cứu toàn hệ thống</a>
+                            <a href="/tai-khoan/cap-dong-loat/xem-truoc" role="menuitem">1.1.5. Cấp tài khoản đồng loạt</a>
+                            <a href="/tai-khoan/xuat-don-vi-chua-cap-excel" role="menuitem">1.1.6. Xuất đơn vị chưa cấp Excel</a>
+                        </div>
+                    </div>
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">1.2. Đơn vị hành chính</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/xa" role="menuitem">1.2.1. Danh mục Xã/phường</a>
+                            <a href="/truong" role="menuitem">1.2.2. Danh mục Trường</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% elif menu_role == 'XA' %}
+            <div class="pc-menu-group {% if menu_path.startswith('/truong') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <a href="/truong" role="menuitem">1.1. Danh sách trường thuộc xã/phường</a>
+                </div>
+            </div>
+            {% elif menu_role == 'TRUONG' %}
+            <div class="pc-menu-group {% if menu_path.startswith('/tai-khoan') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <a href="/tai-khoan" role="menuitem">1.1. Quản lý tài khoản giáo viên</a>
+                </div>
+            </div>
+            {% endif %}
+
+            {# ==========================================================
+               2. ĐIỀU TRA HỘ DÂN - dùng cho cả 4 cấp.
+               Mỗi mục chỉ hiện khi cấp đó có quyền/luồng nghiệp vụ tương ứng.
+               ========================================================== #}
+            <div class="pc-menu-group {% if menu_path.startswith('/dieu-tra') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">2. Điều tra hộ dân <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <div class="pc-batch-context" data-pc-batch-context><strong>Đợt đang làm việc:</strong> chưa chọn</div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">2.1. Đợt điều tra</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra" role="menuitem">2.1.1. Danh sách đợt điều tra</a>
+                            {% if menu_role in ['ADMIN', 'SO'] %}
+                                <a href="/dieu-tra/khoi-tao-nam-hoc-toan-tinh" role="menuitem">2.1.2. Khởi tạo năm học toàn tỉnh</a>
+                            {% endif %}
+                            {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN'] %}
+                                <a href="/dieu-tra/dieu-hanh-trien-khai" role="menuitem">2.1.3. Điều hành triển khai toàn tỉnh</a>
+                            {% endif %}
+                            {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN', 'XA'] %}
+                                <a href="/dieu-tra/du-lieu-lich-su" role="menuitem">2.1.4. Trung tâm dữ liệu lịch sử</a>
+                                <a href="/dieu-tra/trung-tam-phieu" role="menuitem">2.1.5. Trung tâm phiếu điều tra</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">2.2. Hộ dân và phân công</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ho-dan" role="menuitem">2.2.1. Danh sách hộ dân / phiếu được giao</a>
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phieu-in-thuc-dia" role="menuitem">2.2.2. In phiếu điều tra</a>
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ho-dan/xuat-excel" role="menuitem">2.2.3. Xuất Excel điều tra</a>
+                            {% if menu_role in ['ADMIN', 'SO', 'XA', 'TRUONG', 'GIAO_VIEN'] %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ho-dan/nhap-excel" role="menuitem">2.2.4. Nhập Excel cập nhật hộ dân</a>
+                            {% endif %}
+
+                            {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-truong" role="menuitem">2.2.5. Trường tham gia và khóa/mở trường</a>
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/giao-phieu-truong" role="menuitem">2.2.6. Giao phiếu cho trường</a>
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-hang-loat" role="menuitem">2.2.7. Phân công hàng loạt</a>
+                            {% elif menu_role == 'TRUONG' %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-truong" role="menuitem">2.2.5. Nhiệm vụ trường / gửi kết quả lên xã</a>
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/giao-phieu-giao-vien" role="menuitem">2.2.6. Giao phiếu cho giáo viên</a>
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-hang-loat" role="menuitem">2.2.7. Phân công hàng loạt</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">2.3. Kiểm tra và tiến độ</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/kiem-tra-du-lieu" role="menuitem">2.3.1. Kiểm tra chất lượng dữ liệu</a>
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/tien-do" role="menuitem">2.3.2. Theo dõi tiến độ</a>
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/bao-cao-tong-hop" role="menuitem">2.3.3. Báo cáo tổng hợp đợt</a>
+                            {% if menu_role in ['ADMIN', 'SO'] %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/chot-so-lieu" role="menuitem">2.3.4. Chốt / mở số liệu cấp tỉnh</a>
+                            {% endif %}
+                            {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN', 'XA'] %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/bang-dieu-hanh-dia-ban" role="menuitem">2.3.5. Bảng điều hành địa bàn</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN', 'XA', 'TRUONG', 'GIAO_VIEN'] %}
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">2.4. Liên năm</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            {% if menu_role in ['ADMIN', 'SO'] %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ke-thua-du-lieu" role="menuitem">2.4.1. Kế thừa dữ liệu năm trước</a>
+                            {% endif %}
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/doi-chieu-nam-hoc" role="menuitem">2.4.2. Đối chiếu giữa các năm học</a>
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/xu-huong-lien-nam" role="menuitem">2.4.3. Xu hướng liên năm</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">2.5. Đối chiếu dữ liệu học sinh</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/doi-chieu-hoc-sinh" role="menuitem">2.5.1. Đối chiếu điều tra với học sinh</a>
+                            {% if menu_role in ['ADMIN', 'SO'] %}
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/doi-chieu-hoc-sinh/chot-ket-qua" role="menuitem">2.5.2. Chốt / mở kết quả đối chiếu</a>
+                            {% endif %}
+                            {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN'] %}
+                                <a href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh" role="menuitem">2.5.3. Tổng hợp chốt đối chiếu toàn tỉnh</a>
+                                <a href="/dieu-tra/don-doc-doi-chieu-hoc-sinh" role="menuitem">2.5.4. Giám sát tiến độ và nhắc việc</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# 3. HỌC SINH: middleware hiện cho ADMIN/SO quản lý danh sách chính. #}
+            {% if menu_role in ['ADMIN', 'SO'] %}
+            <div class="pc-menu-group {% if menu_path.startswith('/hoc-sinh') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">3. Học sinh <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <a href="/hoc-sinh" role="menuitem">3.1. Danh sách học sinh</a>
+                    <a href="/hoc-sinh/them" role="menuitem">3.2. Thêm học sinh mới</a>
+                </div>
+            </div>
+            {% endif %}
+
+            
+            {# === BAI_13B_5_V1_TEAM_MENU_START === #}
+            {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
+            <div class="pc-menu-group {% if menu_path.startswith('/doi-ngu') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">
+                    4. Đội ngũ <span class="pc-menu-caret">▾</span>
+                </button>
+
+                <div class="pc-dropdown pc-dropdown--right" role="menu">
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">4.1. Mầm non</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">
+                                4.1.1. MN-01-GV – Nhập/kiểm tra dữ liệu
+                            </a>
+                            <a href="/doi-ngu" role="menuitem">
+                                4.1.2. Danh sách đội ngũ
+                            </a>
+                            <a href="/doi-ngu/kiem-tra-du-lieu" role="menuitem">
+                                4.1.3. Kiểm tra dữ liệu đội ngũ
+                            </a>
+
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">4.2. Tiểu học</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/bieu-nhap/th-01-gv" role="menuitem">
+                                4.2.1. TH-01-GV – Nhập dữ liệu chuyên biệt
+                            </a>
+                            <a href="/bieu-nhap/th-01-gv#kiem-tra" role="menuitem">
+                                4.2.2. Kiểm tra dữ liệu TH-01-GV
+                            </a>
+
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">4.3. THCS</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/bieu-nhap/thcs-01-gv" role="menuitem">
+                                4.3.1. THCS-01-GV – Nhập dữ liệu chuyên biệt
+                            </a>
+                            <a href="/bieu-nhap/thcs-01-gv#kiem-tra" role="menuitem">
+                                4.3.2. Kiểm tra dữ liệu THCS-01-GV
+                            </a>
+
+                        </div>
+                    </div>
+
+                    {% if menu_role in ['ADMIN', 'SO'] %}
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">4.4. Công cụ quản lý chung</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/doi-ngu/them" role="menuitem">4.4.1. Thêm nhân sự</a>
+                            <a href="/doi-ngu/cau-hinh-lop" role="menuitem">4.4.2. Cấu hình lớp</a>
+                            <a href="/doi-ngu/xuat-mau-excel" role="menuitem">4.4.3. Xuất mẫu Excel đội ngũ</a>
+                            <a href="/doi-ngu/xuat-danh-sach-excel" role="menuitem">4.4.4. Xuất danh sách Excel</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            {# 4. ĐỘI NGŨ: mọi cấp được xem; ADMIN/SO và Trường có quyền cập nhật. #}
+            <div class="pc-menu-group {% if menu_path.startswith('/doi-ngu') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">4. Đội ngũ <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">4.1. Dữ liệu đội ngũ</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/doi-ngu" role="menuitem">4.1.1. Danh sách đội ngũ</a>
+                            <a href="/doi-ngu/kiem-tra-du-lieu" role="menuitem">4.1.2. Kiểm tra dữ liệu đội ngũ</a>
+                            <a href="/doi-ngu/xuat-mau-excel" role="menuitem">4.1.3. Xuất mẫu Excel đội ngũ</a>
+                            <a href="/doi-ngu/xuat-danh-sach-excel" role="menuitem">4.1.4. Xuất danh sách Excel</a>
+                        </div>
+                    </div>
+                    {% if menu_role in ['ADMIN', 'SO', 'TRUONG'] %}
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">4.2. Cập nhật đội ngũ</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/doi-ngu/them" role="menuitem">4.2.1. Thêm nhân sự</a>
+                            <a href="/doi-ngu/cau-hinh-lop" role="menuitem">4.2.2. Cấu hình lớp</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {# === BAI_13B_3_GV_REPORT_INPUT_MENU_START === #}
+                    {% if menu_role in ['ADMIN', 'SO', 'TRUONG'] %}
+                    <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">4.3. Nhập dữ liệu MN-01-GV</a>
+                    {% endif %}
+                    {# === BAI_13B_3_GV_REPORT_INPUT_MENU_END === #}
+                </div>
+            </div>
+            {% endif %}
+            {# === BAI_13B_5_V1_TEAM_MENU_END === #}
+
+
+
+            {# === BAI_13B_5_V1_CSVC_MENU_START === #}
+            {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
+            <div class="pc-menu-group {% if menu_path.startswith('/csvc') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">
+                    CSVC <span class="pc-menu-caret">▾</span>
+                </button>
+
+                <div class="pc-dropdown pc-dropdown--right" role="menu">
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">CSVC.1. Mầm non</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/csvc/co-so" role="menuitem">
+                                CSVC.1.1. MN-01-CSVC – Cơ sở và điểm trường
+                            </a>
+                            <a href="/csvc/nhom-lop" role="menuitem">
+                                CSVC.1.2. Nhóm/lớp và phòng học
+                            </a>
+                            <a href="/csvc/cong-trinh" role="menuitem">
+                                CSVC.1.3. Thiết bị, vệ sinh và nước sạch
+                            </a>
+                            <a href="/csvc/bep-san" role="menuitem">
+                                CSVC.1.4. Bếp ăn, sân chơi và đồ chơi
+                            </a>
+                            <a href="/csvc/kiem-tra" role="menuitem">
+                                CSVC.1.5. Kiểm tra dữ liệu MN-01-CSVC
+                            </a>
+
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">CSVC.2. Tiểu học</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/bieu-nhap/th-01-csvc#diem-truong-lop-phong" role="menuitem">
+                                CSVC.2.1. TH-01-CSVC – Điểm trường, lớp và phòng học
+                            </a>
+                            <a href="/bieu-nhap/th-01-csvc#phong-chuc-nang" role="menuitem">
+                                CSVC.2.2. Phòng chức năng
+                            </a>
+                            <a href="/bieu-nhap/th-01-csvc#cong-trinh-ve-sinh" role="menuitem">
+                                CSVC.2.3. Công trình vệ sinh
+                            </a>
+                            <a href="/bieu-nhap/th-01-csvc#san-bai" role="menuitem">
+                                CSVC.2.4. Sân chơi và bãi tập
+                            </a>
+
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">CSVC.3. THCS</span>
+                            <span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/bieu-nhap/thcs-01-csvc#diem-truong-lop-phong" role="menuitem">
+                                CSVC.3.1. THCS-01-CSVC – Điểm trường, lớp và phòng học
+                            </a>
+                            <a href="/bieu-nhap/thcs-01-csvc#phong-chuc-nang" role="menuitem">
+                                CSVC.3.2. Phòng chức năng và phòng thí nghiệm
+                            </a>
+                            <a href="/bieu-nhap/thcs-01-csvc#cong-trinh-ve-sinh" role="menuitem">
+                                CSVC.3.3. Công trình vệ sinh
+                            </a>
+                            <a href="/bieu-nhap/thcs-01-csvc#san-bai" role="menuitem">
+                                CSVC.3.4. Sân chơi và bãi tập
+                            </a>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% else %}
+            {# === BAI_13B_3_CSVC_MENU_START === #}
+            {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN', 'XA', 'TRUONG'] %}
+            <div class="pc-menu-group {% if menu_path.startswith('/csvc') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">CSVC <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <a href="/csvc/co-so" role="menuitem">CSVC.1. Cơ sở và điểm trường</a>
+                    <a href="/csvc/nhom-lop" role="menuitem">CSVC.2. Nhóm/lớp và phòng học</a>
+                    <a href="/csvc/cong-trinh" role="menuitem">CSVC.3. Thiết bị, vệ sinh và nước sạch</a>
+                    <a href="/csvc/bep-san" role="menuitem">CSVC.4. Bếp ăn, sân chơi và đồ chơi</a>
+                    <a href="/csvc/kiem-tra" role="menuitem">CSVC.5. Kiểm tra dữ liệu MN-01-CSVC</a>
+                </div>
+            </div>
+            {% endif %}
+            {# === BAI_13B_3_CSVC_MENU_END === #}
+            {% endif %}
+            {# === BAI_13B_5_V1_CSVC_MENU_END === #}
+
+
+            {# 5. BÁO CÁO: mở rộng PCGD Mầm non + Tiểu học + THCS + Xóa mù chữ.
+               Giữ nguyên các route cũ; 13 biểu mới dùng route Trung tâm báo cáo hiện có với report_type mới. #}
+            <div class="pc-menu-group {% if menu_path.startswith('/bao-cao') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">5. Báo cáo <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown pc-dropdown--right" role="menu">
+                                        <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">5.1. Trung tâm báo cáo</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/bao-cao?report_type=TONG_HOP_DIEU_TRA" role="menuitem">5.1.1. Báo cáo tổng hợp điều tra</a>
+                            <a href="/bao-cao?report_type=BIEN_DONG_THEO_DOI" role="menuitem">5.1.2. Biến động – theo dõi</a>
+                            <a href="/bao-cao?report_type=DOI_CHIEU_HOC_SINH" role="menuitem">5.1.3. Đối chiếu điều tra với học sinh</a>
+                            <a href="/bao-cao?report_type=TIEN_DO_CHOT" role="menuitem">5.1.4. Tiến độ – đôn đốc</a>
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">5.2. Báo cáo Mầm non</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                                                                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/bao-cao?report_type=PCGD_MN_M1_2025" role="menuitem">5.2.1. MN-M1 – Phổ cập giáo dục Mầm non</a>
+                            <a href="/bao-cao?report_type=PCGD_MN_02_2025" role="menuitem">5.2.2. MN-02 – Kết quả PCGD Mầm non</a>
+                            <a href="/bao-cao?report_type=PCGD_MN_01_GV_2025" role="menuitem">5.2.3. MN-01-GV – Đội ngũ giáo viên</a>
+                            <a href="/bao-cao?report_type=PCGD_MN_01_CSVC_2025" role="menuitem">5.2.4. MN-01-CSVC – Cơ sở vật chất</a>
+                            <a href="/bao-cao?report_type=PCGD_MN_TAICHINH_2025" role="menuitem">5.2.5. MN-TC – Báo cáo tài chính</a>
+
+                            {# === BAI_13B_3_FINANCE_INPUT_MENU_START === #}
+                            {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
+                            <a href="/bao-cao/tai-chinh/nhap" role="menuitem">5.2.6. Nhập dữ liệu BC-Tài chính</a>
+                            {% endif %}
+                            {# === BAI_13B_3_FINANCE_INPUT_MENU_END === #}
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">5.3. Báo cáo Tiểu học</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            
+                            {# === BAI_13B_4_V1_PRIMARY_CENTER_MENU_START === #}
+                            <a href="/bao-cao/tieu-hoc" role="menuitem"><strong>5.3.0. Bộ báo cáo Tiểu học</strong></a>
+                            {# === BAI_13B_4_V1_PRIMARY_CENTER_MENU_END === #}
+
+<a href="/bao-cao?report_type=PCGD_TH_M1_2025" role="menuitem">5.3.1. TH-M1 – Phổ cập giáo dục Tiểu học</a>
+                            <a href="/bao-cao?report_type=PCGD_TH_02_2025" role="menuitem">5.3.2. TH-02 – Kết quả PCGD Tiểu học</a>
+                            <a href="/bao-cao?report_type=PCGD_TH_01_GV_2025" role="menuitem">5.3.3. TH-01-GV – Đội ngũ giáo viên</a>
+                            <a href="/bao-cao?report_type=PCGD_TH_01_CSVC_2025" role="menuitem">5.3.4. TH-01-CSVC – Cơ sở vật chất</a>
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">5.4. Báo cáo THCS</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            
+                            {# === BAI_13B_4_V1_THCS_CENTER_MENU_START === #}
+                            <a href="/bao-cao/thcs" role="menuitem"><strong>5.4.0. Bộ báo cáo THCS</strong></a>
+                            {# === BAI_13B_4_V1_THCS_CENTER_MENU_END === #}
+
+<a href="/bao-cao?report_type=PCGD_THCS_M1_2025" role="menuitem">5.4.1. THCS-M1 – Phổ cập giáo dục THCS</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_M2_2025" role="menuitem">5.4.2. THCS-M2 – Tiêu chuẩn PCGD THCS</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_TK_2025" role="menuitem">5.4.3. THCS-TK – Thống kê kết quả</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_M5_2025" role="menuitem">5.4.4. THCS-M5 – Đội ngũ giáo viên</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_CSVC_2025" role="menuitem">5.4.5. THCS-CSVC – Cơ sở vật chất</a>
+                        </div>
+                    </div>
+
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">5.5. Báo cáo Xóa mù chữ</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            
+                            {# === BAI_13B_4_V1_XMC_CENTER_MENU_START === #}
+                            <a href="/bao-cao/xoa-mu-chu" role="menuitem"><strong>5.5.0. Bộ báo cáo Xóa mù chữ</strong></a>
+                            {# === BAI_13B_4_V1_XMC_CENTER_MENU_END === #}
+
+<a href="/bao-cao?report_type=PCGD_XMC_3_2025" role="menuitem">5.5.1. XMC-3 – Tổng hợp kết quả xóa mù chữ</a>
+                            <a href="/bao-cao?report_type=PCGD_CMC_2_2025" role="menuitem">5.5.2. CMC-2 – Thống kê số người mù chữ</a>
+                            <a href="/bao-cao?report_type=PCGD_CMC_1_2025" role="menuitem">5.5.3. CMC-1 – Tổng hợp chống mù chữ</a>
+                            <a href="/bao-cao?report_type=PCGD_XMC_4_2025" role="menuitem">5.5.4. XMC-4 – Thống kê đạt chuẩn xóa mù chữ</a>
+                        </div>
+                    </div>
+
+                    {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN'] %}
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">5.6. Giám sát cấp tỉnh</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh" role="menuitem">5.6.1. Tổng hợp đối chiếu toàn tỉnh</a>
+                            <a href="/dieu-tra/don-doc-doi-chieu-hoc-sinh" role="menuitem">5.6.2. Danh sách đôn đốc</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        (function () {
+            const nav = document.querySelector('[data-pc-dropdown-menu-v15]');
+            if (!nav || nav.dataset.pcReady === '1') return;
+            nav.dataset.pcReady = '1';
+
+            const groups = Array.from(nav.querySelectorAll('.pc-menu-group'));
+
+            function setExpanded(button, value) {
+                if (button) button.setAttribute('aria-expanded', value ? 'true' : 'false');
+            }
+
+            function closeSubmenus(container) {
+                (container || nav).querySelectorAll('.pc-submenu.is-open').forEach(function (submenu) {
+                    submenu.classList.remove('is-open', 'opens-left');
+                    setExpanded(submenu.querySelector(':scope > .pc-submenu-trigger'), false);
+                });
+            }
+
+            function closeGroup(group) {
+                if (!group) return;
+                group.classList.remove('is-open');
+                setExpanded(group.querySelector(':scope > .pc-menu-trigger'), false);
+                closeSubmenus(group);
+            }
+
+            function closeAll(except) {
+                groups.forEach(function (group) {
+                    if (group !== except) closeGroup(group);
+                });
+            }
+
+            function fitSubmenu(submenu) {
+                const panel = submenu.querySelector(':scope > .pc-submenu-panel');
+                if (!panel || window.innerWidth <= 760) return;
+                submenu.classList.remove('opens-left');
+                const rect = panel.getBoundingClientRect();
+                if (rect.right > window.innerWidth - 8) submenu.classList.add('opens-left');
+            }
+
+            function setupBatchLinks() {
+                const currentMatch = window.location.pathname.match(/^\/dieu-tra\/(\d+)(?:\/|$)/);
+                let batchId = currentMatch ? currentMatch[1] : '';
+
+                try {
+                    if (batchId) {
+                        window.localStorage.setItem('pc_last_survey_batch_id', batchId);
+                    } else {
+                        batchId = window.localStorage.getItem('pc_last_survey_batch_id') || '';
+                    }
+                } catch (error) {
+                    /* Nếu trình duyệt chặn localStorage thì chỉ dùng đợt hiện tại. */
+                }
+
+                const context = nav.querySelector('[data-pc-batch-context]');
+                if (context) {
+                    context.innerHTML = batchId
+                        ? '<strong>Đợt đang làm việc:</strong> #' + batchId
+                        : '<strong>Đợt đang làm việc:</strong> chưa chọn · mở Danh sách đợt để chọn';
+                }
+
+                nav.querySelectorAll('[data-batch-template]').forEach(function (link) {
+                    const template = link.getAttribute('data-batch-template') || '';
+                    if (batchId) {
+                        link.setAttribute('href', template.replace('{batch_id}', batchId));
+                        link.classList.remove('pc-batch-link-needs-selection');
+                        link.removeAttribute('title');
+                    } else {
+                        link.setAttribute('href', '/dieu-tra');
+                        link.classList.add('pc-batch-link-needs-selection');
+                        link.setAttribute('title', 'Mở Danh sách đợt điều tra và chọn đợt đang làm việc trước.');
+                    }
+                });
+            }
+
+            groups.forEach(function (group) {
+                const trigger = group.querySelector(':scope > .pc-menu-trigger');
+                if (!trigger) return;
+
+                trigger.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const opening = !group.classList.contains('is-open');
+                    closeAll(group);
+                    group.classList.toggle('is-open', opening);
+                    setExpanded(trigger, opening);
+                    if (!opening) closeSubmenus(group);
+                });
+
+                group.addEventListener('mouseenter', function () {
+                    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+                    closeAll(group);
+                    group.classList.add('is-open');
+                    setExpanded(trigger, true);
+                });
+
+                group.addEventListener('mouseleave', function () {
+                    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+                    closeGroup(group);
+                });
+
+                group.querySelectorAll('.pc-submenu').forEach(function (submenu) {
+                    const subTrigger = submenu.querySelector(':scope > .pc-submenu-trigger');
+                    if (!subTrigger) return;
+
+                    subTrigger.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const opening = !submenu.classList.contains('is-open');
+                        group.querySelectorAll('.pc-submenu.is-open').forEach(function (other) {
+                            if (other !== submenu) {
+                                other.classList.remove('is-open', 'opens-left');
+                                setExpanded(other.querySelector(':scope > .pc-submenu-trigger'), false);
+                            }
+                        });
+                        submenu.classList.toggle('is-open', opening);
+                        setExpanded(subTrigger, opening);
+                        if (opening) requestAnimationFrame(function () { fitSubmenu(submenu); });
+                        else submenu.classList.remove('opens-left');
+                    });
+
+                    submenu.addEventListener('mouseenter', function () {
+                        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+                        group.querySelectorAll('.pc-submenu.is-open').forEach(function (other) {
+                            if (other !== submenu) {
+                                other.classList.remove('is-open', 'opens-left');
+                                setExpanded(other.querySelector(':scope > .pc-submenu-trigger'), false);
+                            }
+                        });
+                        submenu.classList.add('is-open');
+                        setExpanded(subTrigger, true);
+                        requestAnimationFrame(function () { fitSubmenu(submenu); });
+                    });
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!nav.contains(event.target)) closeAll();
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closeAll();
+            });
+            window.addEventListener('resize', function () {
+                nav.querySelectorAll('.pc-submenu.opens-left').forEach(function (submenu) {
+                    submenu.classList.remove('opens-left');
+                });
+            });
+
+            setupBatchLinks();
+        }());
+    </script>
+{% endif %}
+
+{# === BAI_13B_6_V1_4_REPORT_SCOPE_CASCADE_START === #}
+<script>
+(function () {
+    if (window.location.pathname !== '/bao-cao') return;
+
+    const forms = Array.from(
+        document.querySelectorAll('form[method="get"], form:not([method])')
+    );
+
+    const form = forms.find(function (item) {
+        return item.querySelector('select[name="commune_id"]')
+            && item.querySelector('select[name="school_id"]')
+            && item.querySelector('select[name="report_type"]');
+    });
+
+    if (!form) return;
+
+    const year = form.querySelector('select[name="school_year_id"]');
+    const reportType = form.querySelector('select[name="report_type"]');
+    const commune = form.querySelector('select[name="commune_id"]');
+    const school = form.querySelector('select[name="school_id"]');
+
+    function safeReload() {
+        const params = new URLSearchParams();
+
+        Array.from(form.elements).forEach(function (el) {
+            if (!el.name || el.disabled) return;
+            if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+
+            const value = String(el.value || '').trim();
+            if (!value) return;
+
+            if (el.name === 'school_id' && school && !school.value) return;
+            params.set(el.name, value);
+        });
+
+        params.delete('page');
+
+        const action = form.getAttribute('action') || window.location.pathname;
+        const query = params.toString();
+        window.location.href = action + (query ? '?' + query : '');
+    }
+
+    [year, reportType, commune].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener('change', function () {
+            if (school) school.value = '';
+            safeReload();
+        });
+    });
+})();
+</script>
+{# === BAI_13B_6_V1_4_REPORT_SCOPE_CASCADE_END === #}

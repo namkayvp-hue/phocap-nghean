@@ -1,0 +1,3 @@
+1. Giải nén gói trong C:\PhoCap\exports.
+2. Chạy cai_dat_bai_13a_2_v4.py bằng Python trong .venv.
+3. Khi thành công, khởi động lại Uvicorn và mở /bao-cao/tong-hop-dieu-tra.

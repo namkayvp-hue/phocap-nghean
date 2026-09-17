@@ -1,0 +1,6 @@
+Write-Host "===== 1. ROUTE PHAN-CONG-TRUONG TRONG surveys.py ====="
+Select-String -Path .\app\routers\surveys.py -Pattern "phan-cong-truong" -Context 20,35
+
+Write-Host ""
+Write-Host "===== 2. QUYEN PHAN-CONG-TRUONG TRONG access_control.py ====="
+Select-String -Path .\app\access_control.py -Pattern "phan-cong-truong|dieu-tra" -Context 8,16

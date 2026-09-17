@@ -1,0 +1,18 @@
+BAI 12C-5 - CHAN HOAN THANH PHIEU KHI THIEU DU LIEU
+
+Goi ma thay hai tep:
+- app/routers/surveys.py
+- app/templates/surveys/quick_entry.html
+
+Dieu kien de luu trang thai DA_HOAN_THANH:
+1. Ho co it nhat mot thanh vien dang theo doi.
+2. Tat ca thanh vien co so dinh danh ca nhan.
+3. Tat ca thanh vien co du lieu nam hoc cua dot dieu tra.
+4. Tat ca thanh vien da nhap du 8 chi bao.
+5. Ho gia dinh da xac nhan thong tin.
+
+Neu chua dat, he thong khong ghi trang thai DA_HOAN_THANH va hien ro tung ly do.
+Quy tac duoc ap dung cho ca man hinh Nhap nhanh va man hinh Phieu day du.
+
+CHAY KIEM TRA:
+Set-Location "C:\PhoCap"; & ".\.venv\Scripts\python.exe" ".\kiem_tra_bai_12c_5.py"

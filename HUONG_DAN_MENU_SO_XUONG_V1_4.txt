@@ -1,0 +1,28 @@
+MENU SỔ XUỐNG V1.4 - ĐỦ 4 CẤP
+
+Nguyên tắc cố định:
+1. Chỉ đổi phần điều hướng/menu.
+2. Không làm mất chức năng cũ.
+3. Không đổi route, không đổi dữ liệu, không đổi luồng nghiệp vụ đã chốt.
+4. Có sao lưu và có thể khôi phục.
+
+V1.4:
+- Menu riêng đúng quyền cho Sở, Xã, Trường, Giáo viên.
+- Giữ PHONG_BAN ở chế độ đọc cấp tỉnh hiện có.
+- Bổ sung các chức năng còn thiếu ở menu Trường (nhiệm vụ trường/gửi kết quả lên xã).
+- Chỉ hiện chốt số liệu/chốt đối chiếu ở cấp Sở đúng luồng hiện hành.
+- Bảng điều hành địa bàn chỉ hiện Sở/Phòng ban/Xã theo router hiện có.
+- Ẩn các thẻ truy cập nhanh đã chuyển lên menu.
+- Ẩn tiêu đề hệ thống lớn bị lặp ở Trang chủ; giữ tiêu đề nghiệp vụ của trang con.
+- Không còn lặp chữ “chọn đợt” ở từng mục; menu có một dòng Đợt đang làm việc.
+
+CÀI ĐẶT:
+1. Chép nang_cap_menu_day_du_4_cap_v1_4.py vào C:\PhoCap
+2. Dừng Uvicorn bằng Ctrl+C.
+3. Chạy:
+   & C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\nang_cap_menu_day_du_4_cap_v1_4.py
+4. Khi thấy NANG CAP MENU SO XUONG V1.4 THANH CONG, khởi động lại Uvicorn.
+5. Trên Chrome nhấn Ctrl+F5.
+
+KHÔI PHỤC:
+& C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\khoi_phuc_menu_day_du_4_cap_v1_4.py

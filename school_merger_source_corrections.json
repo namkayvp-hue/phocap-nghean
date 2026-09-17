@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "corrections": [
+    {
+      "correction_id": "V4.4-TH-2025-2026-4017981444-NGHI-THUY",
+      "action": "EXCLUDE_ROW",
+      "dataset_id": "TH-2025-2026-DANH-SACH-GIAO-VIEN",
+      "excel_row": 7663,
+      "staff_code": "4017981444",
+      "full_name": "Trần Thị Ngọc",
+      "date_of_birth": "12/01/1987",
+      "excluded_commune_name": "Phường Cửa Lò",
+      "excluded_school_name": "Trường Tiểu học Nghi Hải",
+      "kept_excel_row": 7861,
+      "canonical_commune_name": "Phường Cửa Lò",
+      "canonical_school_name": "Trường tiểu học Nghi Thuỷ",
+      "canonical_school_code": "40413403",
+      "reason": "Nguồn 2025-2026 có hai dòng đang hoạt động cùng mã/cùng nhân thân tại Nghi Hải và Nghi Thuỷ. Database năm 2025-2026 có đúng một staff_member và đúng một staff_year_record đang ở Nghi Thuỷ; giữ dòng Nghi Thuỷ và loại dòng Nghi Hải chỉ trong registry đối chiếu sáp nhập. File Excel gốc không bị sửa.",
+      "evidence": {
+        "raw_source_duplicate_rows": [7663, 7861],
+        "db_expected_school_code": "40413403",
+        "db_expected_school_name": "Trường tiểu học Nghi Thuỷ",
+        "source_status": "Đang làm việc",
+        "position": "Nhân viên"
+      }
+    }
+  ]
+}

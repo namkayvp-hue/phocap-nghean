@@ -1,0 +1,10 @@
+BỘ CÀI BÀI 12D-15 V7
+
+1. Giải nén tệp ZIP.
+2. Chép cai_dat_bai_12d_15_v7.py vào C:\PhoCap.
+3. Trong Terminal PowerShell chạy:
+   & C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\cai_dat_bai_12d_15_v7.py
+4. Khi thấy hai dòng thành công, khởi động Uvicorn và mở:
+   http://127.0.0.1:8000/dieu-tra/2/doi-chieu-hoc-sinh
+
+V7 sửa bộ kiểm tra để tương thích dự án đang dùng app như namespace package (app.__file__ có thể là None).
