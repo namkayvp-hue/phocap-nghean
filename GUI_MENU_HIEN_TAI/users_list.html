@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài khoản</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <style>
+        :root {
+            --account-blue: #176dcc;
+            --account-blue-dark: #0f58ab;
+            --account-bg: #eef4fa;
+            --account-border: #d9e4ef;
+            --account-text-soft: #607086;
+        }
+
+        body {
+            background: var(--account-bg);
+        }
+
+        .account-shell {
+            width: min(1480px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 46px;
+        }
+
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .quick-access-card {
+            display: block;
+            min-height: 148px;
+            padding: 20px;
+            border: 1px solid #d7e3ef;
+            border-radius: 16px;
+            background: white;
+            color: #17324f;
+            text-decoration: none;
+            box-shadow: 0 8px 24px rgba(29, 73, 116, 0.08);
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+
+        .quick-access-card:hover,
+        .quick-access-card.active {
+            transform: translateY(-2px);
+            border-color: #78afe5;
+            box-shadow: 0 14px 32px rgba(29, 73, 116, 0.14);
+        }
+
+        .quick-access-card.active {
+            background: linear-gradient(145deg, #0f61b9, #2583dc);
+            color: white;
+        }
+
+        .quick-card-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            background: #eaf4ff;
+            font-size: 25px;
+        }
+
+        .quick-access-card.active .quick-card-icon {
+            background: rgba(255, 255, 255, .18);
+        }
+
+        .quick-access-card h2 {
+            margin: 0 0 7px;
+            font-size: 1.06rem;
+        }
+
+        .quick-access-card p {
+            margin: 0;
+            color: var(--account-text-soft);
+            line-height: 1.5;
+            font-size: .92rem;
+        }
+
+        .quick-access-card.active p {
+            color: rgba(255, 255, 255, .88);
+        }
+
+        .quick-count {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #eff6fd;
+            color: #125da7;
+            font-weight: 800;
+            font-size: .82rem;
+        }
+
+        .quick-access-card.active .quick-count {
+            background: rgba(255, 255, 255, .18);
+            color: white;
+        }
+
+        .overview-panel,
+        .filter-panel,
+        .create-panel,
+        .list-panel {
+            border: 1px solid var(--account-border);
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 8px 24px rgba(29, 73, 116, 0.07);
+        }
+
+        .overview-panel {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .overview-panel h2 {
+            margin: 4px 0 10px;
+        }
+
+        .overview-panel p {
+            margin: 0 auto;
+            max-width: 760px;
+            color: var(--account-text-soft);
+            line-height: 1.65;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin: 5px 0 16px;
+        }
+
+        .section-heading h2 {
+            margin: 3px 0 0;
+        }
+
+        .filter-panel {
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: minmax(230px, 1.7fr) repeat(4, minmax(150px, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+
+        .filter-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 350px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .create-panel,
+        .list-panel {
+            padding: 22px;
+        }
+
+        .create-panel {
+            position: sticky;
+            top: 14px;
+        }
+
+        .panel-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .panel-title-row h2 {
+            margin: 3px 0 0;
+        }
+
+        .account-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 14px;
+        }
+
+        .account-form-group label {
+            font-weight: 700;
+            color: #263c52;
+        }
+
+        .account-form-group input,
+        .account-form-group select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #c8d5e2;
+            border-radius: 9px;
+            background: white;
+            font: inherit;
+            color: #172b40;
+            box-sizing: border-box;
+        }
+
+        .account-form-group input:focus,
+        .account-form-group select:focus {
+            border-color: #3b8ddd;
+            outline: 3px solid rgba(59, 141, 221, .14);
+        }
+
+        .readonly-field {
+            padding: 11px 12px;
+            border: 1px solid #d4dfea;
+            border-radius: 9px;
+            background: #f3f7fa;
+            font-weight: 700;
+        }
+
+        .field-help {
+            color: var(--account-text-soft);
+            font-size: .83rem;
+            line-height: 1.45;
+        }
+
+        .list-summary {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            color: var(--account-text-soft);
+            font-size: .92rem;
+        }
+
+        .count-badge-local {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: #eaf4ff;
+            color: #0e5fae;
+            font-weight: 800;
+        }
+
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e0e8f0;
+            border-radius: 12px;
+        }
+
+        .account-table {
+            width: 100%;
+            min-width: 1040px;
+            border-collapse: collapse;
+        }
+
+        .account-table th,
+        .account-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e6edf4;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .account-table th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f1f6fb;
+            color: #365069;
+            font-size: .86rem;
+            white-space: nowrap;
+        }
+
+        .account-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .account-table tbody tr:hover {
+            background: #f8fbfe;
+        }
+
+        .row-inactive {
+            background: #fff8f8;
+        }
+
+        .unit-main {
+            font-weight: 700;
+        }
+
+        .unit-sub {
+            display: block;
+            margin-top: 3px;
+            color: var(--account-text-soft);
+            font-size: .82rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: .78rem;
+            white-space: nowrap;
+        }
+
+        .status-pill.active {
+            background: #e6f5e8;
+            color: #1f752b;
+        }
+
+        .status-pill.locked {
+            background: #fde9ea;
+            color: #b6252f;
+        }
+
+        .status-pill.unassigned {
+            background: #fff2cc;
+            color: #8a5d00;
+        }
+
+        .action-group-local {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-width: 245px;
+        }
+
+        .action-group-local form {
+            margin: 0;
+        }
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 6px 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font: inherit;
+            font-weight: 750;
+            font-size: .79rem;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .action-edit {
+            background: #e6f2ff;
+            color: #0c62b3;
+        }
+
+        .action-reset {
+            border-color: #e8c65d;
+            background: #fff6d8;
+            color: #785800;
+        }
+
+        .action-lock {
+            background: #fde8ea;
+            color: #bd2832;
+        }
+
+        .action-unlock {
+            background: #e5f5e8;
+            color: #24762e;
+        }
+
+        .action-copy {
+            background: #f0f3f6;
+            color: #42576c;
+        }
+
+        .pagination-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .pagination-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 38px;
+            min-height: 36px;
+            padding: 0 9px;
+            border: 1px solid #cfdae5;
+            border-radius: 8px;
+            background: white;
+            color: #28506f;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .page-link.current {
+            border-color: var(--account-blue);
+            background: var(--account-blue);
+            color: white;
+        }
+
+        .page-link.disabled {
+            pointer-events: none;
+            opacity: .45;
+        }
+
+        .empty-account-state {
+            padding: 56px 20px;
+            text-align: center;
+            color: var(--account-text-soft);
+        }
+
+        .empty-account-state strong {
+            display: block;
+            margin: 10px 0 5px;
+            color: #20374e;
+            font-size: 1.08rem;
+        }
+
+        .password-dialog {
+            width: min(560px, calc(100vw - 32px));
+            padding: 0;
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 24px 70px rgba(15, 36, 64, .3);
+        }
+
+        .password-dialog::backdrop {
+            background: rgba(15, 36, 64, .58);
+        }
+
+        .dialog-inner {
+            padding: 24px;
+        }
+
+        .dialog-account {
+            padding: 12px 14px;
+            margin: 16px 0;
+            border: 1px solid #d9e3ee;
+            border-radius: 10px;
+            background: #f5f8fb;
+            line-height: 1.6;
+        }
+
+        .dialog-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 9px;
+            margin-top: 18px;
+        }
+
+        .temporary-password-row {
+            display: flex;
+            gap: 8px;
+            margin: -3px 0 14px;
+        }
+
+        .temporary-password-row button {
+            flex: 1;
+        }
+
+        .toast-copy {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 1000;
+            padding: 11px 14px;
+            border-radius: 10px;
+            background: #17324f;
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: .2s ease;
+        }
+
+        .toast-copy.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1150px) {
+            .quick-access-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .create-panel {
+                position: static;
+            }
+        }
+
+        @media (max-width: 660px) {
+            .account-shell {
+                width: min(100% - 20px, 1480px);
+                padding-top: 18px;
+            }
+
+            .quick-access-grid,
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-heading,
+            .panel-title-row,
+            .pagination-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .dialog-actions {
+                flex-direction: column-reverse;
+            }
+
+            .dialog-actions .button,
+            .dialog-actions .action-button {
+                width: 100%;
+            }
+        }
+    
+        .bulk-account-panel {
+            margin-top: 18px;
+            padding: 22px;
+            border: 1px solid #cfe0f2;
+            border-left: 5px solid #1f7ad7;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f8fe 100%);
+            box-shadow: 0 10px 30px rgba(31, 78, 121, 0.08);
+        }
+
+        .bulk-account-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .bulk-account-panel h3 {
+            margin: 4px 0 8px;
+            font-size: 23px;
+            color: #17365d;
+        }
+
+        .bulk-account-panel p {
+            margin: 0;
+            color: #607086;
+            line-height: 1.6;
+        }
+
+        .bulk-count-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .bulk-count-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #e8f2fd;
+            color: #164f87;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .bulk-count-chip.warning {
+            background: #fff1cf;
+            color: #8a5a00;
+        }
+
+        .bulk-actions-local {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 270px;
+        }
+
+        .button-warning-local {
+            background: #c97a00;
+            color: #fff;
+            border-color: #c97a00;
+        }
+
+        .button-success-local {
+            background: #17843b;
+            color: #fff;
+            border-color: #17843b;
+        }
+
+        .bulk-history-panel {
+            margin-top: 22px;
+            padding: 22px;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid #d9e4ef;
+        }
+
+        .bulk-history-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .bulk-history-item {
+            display: grid;
+            grid-template-columns: 85px 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #f6f9fc;
+        }
+
+        .bulk-history-id {
+            font-weight: 900;
+            color: #1f6fc3;
+        }
+
+        .bulk-history-meta {
+            color: #607086;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .bulk-history-count {
+            font-weight: 900;
+            color: #17843b;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 900px) {
+            .bulk-account-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bulk-actions-local {
+                min-width: 0;
+            }
+
+            .bulk-history-item {
+                grid-template-columns: 1fr;
+            }
+        }
+</style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+
+<header class="admin-header">
+    <div class="admin-header-inner">
+        <div>
+            <p class="admin-eyebrow">PHẦN MỀM PHỔ CẬP GIÁO DỤC</p>
+            <h1>{% if la_cap_truong %}Quản lý giáo viên{% else %}Quản lý tài khoản{% endif %}</h1>
+            <p>
+                {% if la_cap_truong %}
+                    Tạo, tìm kiếm, sửa, khóa và cấp lại mật khẩu giáo viên thuộc {{ nguoi_dung.unit_name }}.
+                {% else %}
+                    Truy cập nhanh tài khoản Phòng ban, Xã/phường và Trường mầm non.
+                {% endif %}
+            </p>
+        </div>
+        <a class="button button-light" href="/">← Trang chủ</a>
+    </div>
+</header>
+
+<main class="account-shell">
+    {% if thong_bao %}
+        <div class="alert {% if trang_thai in ['duplicate','invalid','invalid_password','invalid_role','invalid_scope','forbidden','cannot_self','password_mismatch','invalid_reset_password'] %}alert-error{% else %}alert-success{% endif %}">
+            {{ thong_bao }}
+        </div>
+    {% endif %}
+
+    {% if la_quan_tri %}
+        <section class="quick-access-grid" aria-label="Truy cập nhanh quản lý tài khoản">
+            <a class="quick-access-card {% if muc_hien_tai == 'phong_ban' %}active{% endif %}" href="/tai-khoan?muc=phong_ban">
+                <span class="quick-card-icon">🏢</span>
+                <h2>Tài khoản Phòng ban</h2>
+                <p>Tìm, tạo, sửa, khóa và cấp lại mật khẩu tài khoản cấp Sở.</p>
+                <span class="quick-count">{{ tong_hop.phong_ban }} tài khoản</span>
+            </a>
+
+            <a class="quick-access-card {% if muc_hien_tai == 'xa' %}active{% endif %}" href="/tai-khoan?muc=xa">
+                <span class="quick-card-icon">🏘️</span>
+                <h2>Tài khoản Xã/phường</h2>
+                <p>Tìm nhanh theo mã, tên xã/phường hoặc tên đăng nhập.</p>
+                <span class="quick-count">{{ tong_hop.xa }}/{{ tong_hop.tong_xa }} đã cấp</span>
+            </a>
+
+            <a class="quick-access-card {% if muc_hien_tai == 'truong' %}active{% endif %}" href="/tai-khoan?muc=truong">
+                <span class="quick-card-icon">🏫</span>
+                <h2>Tài khoản Trường MN</h2>
+                <p>Chọn xã/phường trước, sau đó tìm đúng trường cần xử lý.</p>
+                <span class="quick-count">{{ tong_hop.truong }}/{{ tong_hop.tong_truong }} đã cấp</span>
+            </a>
+
+            <a class="quick-access-card {% if muc_hien_tai == 'tra_cuu' %}active{% endif %}" href="/tai-khoan?muc=tra_cuu">
+                <span class="quick-card-icon">🔎</span>
+                <h2>Tra cứu toàn hệ thống</h2>
+                <p>Tìm theo tên đăng nhập, họ tên, mã hoặc tên đơn vị.</p>
+                <span class="quick-count">{{ tong_hop.tat_ca }} tài khoản</span>
+            </a>
+        </section>
+    {% endif %}
+
+    {% if la_quan_tri and muc_hien_tai == 'tong_quan' %}
+        <section class="overview-panel">
+            <p class="panel-label">TRUY CẬP NHANH</p>
+            <h2>Chọn đúng nhóm tài khoản cần xử lý</h2>
+            <p>
+                Khi xã hoặc trường đề nghị cấp lại tài khoản, hãy mở đúng mục phía trên.
+                Hệ thống chỉ tải dữ liệu cần thiết, có bộ lọc rõ ràng và không còn phải dò trong hơn
+                {{ tong_hop.tat_ca }} tài khoản cùng lúc.
+            </p>
+        </section>
+    {% else %}
+        <div class="section-heading">
+            <div>
+                <p class="panel-label">QUẢN LÝ THEO NHÓM</p>
+                <h2>{{ tieu_de_muc }}</h2>
+            </div>
+            {% if la_quan_tri %}
+                <a class="button" href="/tai-khoan">← Truy cập nhanh</a>
+            {% endif %}
+        </div>
+
+        <section class="filter-panel">
+            <form method="get" action="/tai-khoan" id="filter-form">
+                <input type="hidden" name="muc" value="{{ muc_hien_tai }}">
+                <div class="filter-grid">
+                    <div class="account-form-group" style="margin-bottom:0;">
+                        <label for="filter-q">Tìm tài khoản hoặc đơn vị</label>
+                        <input
+                            id="filter-q"
+                            name="q"
+                            type="search"
+                            value="{{ tu_khoa }}"
+                            maxlength="200"
+                            placeholder="Tên đăng nhập, họ tên, mã hoặc tên đơn vị"
+                        >
+                    </div>
+
+                    {% if la_quan_tri and muc_hien_tai in ['xa', 'truong', 'tra_cuu'] %}
+                        <div class="account-form-group" style="margin-bottom:0;">
+                            <label for="filter_commune_id">Xã/phường</label>
+                            <select id="filter_commune_id" name="xa_id">
+                                <option value="">-- Tất cả xã/phường --</option>
+                                {% for xa in danh_sach_xa %}
+                                    <option value="{{ xa.id }}" {% if xa_da_chon == xa.id %}selected{% endif %}>
+                                        {{ xa.code }} – {{ xa.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    {% if la_quan_tri and muc_hien_tai in ['truong', 'tra_cuu'] %}
+                        <div class="account-form-group" style="margin-bottom:0;">
+                            <label for="filter_school_id">Trường</label>
+                            <select id="filter_school_id" name="truong_id">
+                                <option value="">-- Tất cả trường --</option>
+                                {% for truong in danh_sach_truong %}
+                                    <option
+                                        value="{{ truong.id }}"
+                                        data-commune-id="{{ truong.commune_id }}"
+                                        {% if truong_da_chon == truong.id %}selected{% endif %}
+                                    >
+                                        {{ truong.code }} – {{ truong.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    <div class="account-form-group" style="margin-bottom:0;">
+                        <label for="filter-status">Trạng thái</label>
+                        <select id="filter-status" name="trang_thai_tk">
+                            <option value="all" {% if trang_thai_da_chon == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                            <option value="active" {% if trang_thai_da_chon == 'active' %}selected{% endif %}>Đang hoạt động</option>
+                            <option value="locked" {% if trang_thai_da_chon == 'locked' %}selected{% endif %}>Đã khóa</option>
+                            {% if la_danh_sach_don_vi %}
+                                <option value="unassigned" {% if trang_thai_da_chon == 'unassigned' %}selected{% endif %}>Chưa cấp tài khoản</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <div class="account-form-group" style="margin-bottom:0;">
+                        <label for="filter-page-size">Số dòng/trang</label>
+                        <select id="filter-page-size" name="so_dong">
+                            <option value="20" {% if so_dong == 20 %}selected{% endif %}>20 dòng</option>
+                            <option value="50" {% if so_dong == 50 %}selected{% endif %}>50 dòng</option>
+                            <option value="100" {% if so_dong == 100 %}selected{% endif %}>100 dòng</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="button button-primary" type="submit">🔎 Tìm kiếm / Lọc</button>
+                    <a class="button" href="/tai-khoan?muc={{ muc_hien_tai }}">Xóa bộ lọc</a>
+                </div>
+            </form>
+        </section>
+
+        {% if la_quan_tri and la_danh_sach_don_vi %}
+            <section class="bulk-account-panel">
+                <div class="bulk-account-grid">
+                    <div>
+                        <p class="panel-label">CẤP TÀI KHOẢN HÀNG LOẠT</p>
+                        <h3>Cấp đồng loạt cho các đơn vị chưa có tài khoản</h3>
+                        <p>
+                            Hệ thống luôn mở bước xem trước trước khi tạo. Tài khoản đã có sẽ được giữ nguyên,
+                            không đặt lại mật khẩu và không tạo trùng. Sau khi bắt đầu, trang tiến độ tự cập nhật và thông báo khi hoàn thành.
+                        </p>
+                        <div class="bulk-count-row">
+                            <span class="bulk-count-chip">Theo bộ lọc: {{ so_don_vi_chua_cap_trong_bo_loc }} đơn vị chưa cấp</span>
+                            <span class="bulk-count-chip warning">Toàn bộ: {{ so_don_vi_chua_cap_toan_bo }} đơn vị chưa cấp</span>
+                        </div>
+                    </div>
+                    <div class="bulk-actions-local">
+                        <a class="button button-primary" href="{{ url_xem_truoc_cap_theo_bo_loc }}">🔎 Xem trước theo bộ lọc</a>
+                        <a class="button button-warning-local" href="{{ url_xem_truoc_cap_tat_ca }}">⚡ Xem trước cấp tất cả</a>
+                        <a class="button button-success-local" href="{{ url_xuat_don_vi_chua_cap }}">📊 Xuất đơn vị chưa cấp</a>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        <section class="workspace-grid">
+            {% if danh_sach_vai_tro %}
+                <article class="create-panel">
+                    <div class="panel-title-row">
+                        <div>
+                            <p class="panel-label">CẤP TÀI KHOẢN</p>
+                            <h2>Tạo tài khoản</h2>
+                        </div>
+                    </div>
+
+                    <form method="post" action="/tai-khoan/them" id="create-account-form">
+                        <input type="hidden" name="return_to" value="{{ url_bo_loc }}">
+
+                        <div class="account-form-group">
+                            <label for="ten_dang_nhap">Tên đăng nhập</label>
+                            <input
+                                id="ten_dang_nhap"
+                                name="ten_dang_nhap"
+                                type="text"
+                                maxlength="100"
+                                placeholder="Viết liền, không có khoảng trắng"
+                                autocomplete="off"
+                                required
+                            >
+                        </div>
+
+                        <div class="account-form-group">
+                            <label for="ho_ten">Họ và tên / Tên đơn vị</label>
+                            <input
+                                id="ho_ten"
+                                name="ho_ten"
+                                type="text"
+                                maxlength="200"
+                                placeholder="Nhập tên hiển thị"
+                                required
+                            >
+                        </div>
+
+                        <div class="account-form-group">
+                            <label for="mat_khau">Mật khẩu ban đầu</label>
+                            <input
+                                id="mat_khau"
+                                name="mat_khau"
+                                type="password"
+                                minlength="8"
+                                maxlength="128"
+                                placeholder="Tối thiểu 8 ký tự"
+                                autocomplete="new-password"
+                                required
+                            >
+                        </div>
+
+                        {% if danh_sach_vai_tro|length == 1 %}
+                            {% set vai_tro_mac_dinh = danh_sach_vai_tro[0] %}
+                            <input type="hidden" id="role_id" name="role_id" value="{{ vai_tro_mac_dinh.id }}" data-code="{{ vai_tro_mac_dinh.code }}">
+                            <div class="account-form-group">
+                                <label>Vai trò</label>
+                                <div class="readonly-field">{{ vai_tro_mac_dinh.name }}</div>
+                            </div>
+                        {% else %}
+                            <div class="account-form-group">
+                                <label for="role_id">Vai trò</label>
+                                <select id="role_id" name="role_id" required>
+                                    <option value="">-- Chọn vai trò --</option>
+                                    {% for vai_tro in danh_sach_vai_tro %}
+                                        <option value="{{ vai_tro.id }}" data-code="{{ vai_tro.code }}">{{ vai_tro.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endif %}
+
+                        {% if la_quan_tri %}
+                            <div class="account-form-group" id="commune-group" style="display:none;">
+                                <label for="commune_id">Xã/phường được quản lý</label>
+                                <select id="commune_id" name="commune_id">
+                                    <option value="">-- Chọn xã/phường --</option>
+                                    {% for xa in danh_sach_xa %}
+                                        <option value="{{ xa.id }}">{{ xa.code }} – {{ xa.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="account-form-group" id="school-group" style="display:none;">
+                                <label for="school_id">Trường được quản lý</label>
+                                <select id="school_id" name="school_id" disabled>
+                                    <option value="">-- Chọn xã/phường trước --</option>
+                                    {% for truong in danh_sach_truong %}
+                                        <option value="{{ truong.id }}" data-commune-id="{{ truong.commune_id }}">
+                                            {{ truong.code }} – {{ truong.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <span class="field-help">Chọn xã/phường trước; danh sách trường sẽ được lọc đúng địa bàn.</span>
+                            </div>
+                        {% else %}
+                            <input type="hidden" name="school_id" value="{{ nguoi_dung.school_id }}">
+                            <div class="account-form-group">
+                                <label>Trường</label>
+                                <div class="readonly-field">{{ nguoi_dung.unit_name }}</div>
+                            </div>
+                        {% endif %}
+
+                        <button class="button button-primary button-full" type="submit">＋ Tạo tài khoản</button>
+                    </form>
+                </article>
+            {% endif %}
+
+            <article class="list-panel" {% if not danh_sach_vai_tro %}style="grid-column:1/-1;"{% endif %}>
+                <div class="panel-title-row">
+                    <div>
+                        <p class="panel-label">DỮ LIỆU HIỆN CÓ</p>
+                        <h2>{{ tieu_de_muc }}</h2>
+                        <div class="list-summary">
+                            {% if tong_so_tai_khoan %}
+                                Đang hiển thị {{ chi_so_bat_dau }}–{{ chi_so_ket_thuc }} trong tổng số {{ tong_so_tai_khoan }} {% if la_danh_sach_don_vi %}đơn vị{% else %}tài khoản{% endif %}.
+                            {% else %}
+                                Không có {% if la_danh_sach_don_vi %}đơn vị{% else %}tài khoản{% endif %} phù hợp bộ lọc.
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="count-badge-local">{{ tong_so_tai_khoan }} {% if la_danh_sach_don_vi %}đơn vị{% else %}tài khoản{% endif %}</span>
+                </div>
+
+                {% if la_danh_sach_don_vi and danh_sach_don_vi %}
+                    <div class="table-scroll">
+                        <table class="account-table">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã đơn vị</th>
+                                <th>Tên đơn vị</th>
+                                <th>Xã/phường</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Trạng thái cấp</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for dong in danh_sach_don_vi %}
+                                {% set tai_khoan = dong.tai_khoan %}
+                                <tr class="{% if tai_khoan and not tai_khoan.is_active %}row-inactive{% endif %}">
+                                    <td>{{ chi_so_bat_dau + loop.index0 }}</td>
+                                    <td><strong>{{ dong.don_vi.code }}</strong></td>
+                                    <td>
+                                        <span class="unit-main">{{ dong.don_vi.name }}</span>
+                                        {% if dong.loai == 'truong' %}
+                                            <span class="unit-sub">Trường/cơ sở GDMN</span>
+                                        {% else %}
+                                            <span class="unit-sub">Địa bàn cấp xã</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if dong.xa %}
+                                            <span class="unit-main">{{ dong.xa.name }}</span>
+                                            <span class="unit-sub">Mã {{ dong.xa.code }}</span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if tai_khoan %}
+                                            <strong>{{ tai_khoan.username }}</strong>
+                                            <span class="unit-sub">{{ tai_khoan.full_name }}</span>
+                                        {% else %}
+                                            <span class="unit-sub">Chưa có tên đăng nhập</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if not tai_khoan %}
+                                            <span class="status-pill unassigned">Chưa cấp tài khoản</span>
+                                        {% elif tai_khoan.is_active %}
+                                            <span class="status-pill active">Đang hoạt động</span>
+                                        {% else %}
+                                            <span class="status-pill locked">Đã khóa</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-group-local">
+                                            {% if tai_khoan %}
+                                                <button class="action-button action-copy" type="button" data-copy-username="{{ tai_khoan.username }}">Sao chép TĐN</button>
+                                                <a class="action-button action-edit" href="/tai-khoan/{{ tai_khoan.id }}/sua">Sửa</a>
+                                                <button
+                                                    class="action-button action-reset"
+                                                    type="button"
+                                                    data-reset-password
+                                                    data-user-id="{{ tai_khoan.id }}"
+                                                    data-username="{{ tai_khoan.username }}"
+                                                    data-full-name="{{ tai_khoan.full_name }}"
+                                                >Cấp lại MK</button>
+                                                <form method="post" action="/tai-khoan/{{ tai_khoan.id }}/khoa-mo" data-lock-form data-account-name="{{ tai_khoan.username }}" data-action-name="{% if tai_khoan.is_active %}khóa{% else %}mở lại{% endif %}">
+                                                    <input type="hidden" name="return_to" value="{{ url_bo_loc }}">
+                                                    <button class="action-button {% if tai_khoan.is_active %}action-lock{% else %}action-unlock{% endif %}" type="submit">{% if tai_khoan.is_active %}Khóa{% else %}Mở lại{% endif %}</button>
+                                                </form>
+                                            {% else %}
+                                                <button
+                                                    class="action-button action-edit"
+                                                    type="button"
+                                                    data-prefill-unit-account
+                                                    data-unit-type="{{ dong.loai }}"
+                                                    data-unit-name="{{ dong.don_vi.name }}"
+                                                    data-unit-code="{{ dong.don_vi.code }}"
+                                                    data-commune-id="{{ dong.xa.id if dong.xa else '' }}"
+                                                    data-school-id="{{ dong.truong.id if dong.truong else '' }}"
+                                                >Cấp tài khoản</button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination-bar">
+                        <div class="list-summary">Trang {{ trang_hien_tai }}/{{ tong_so_trang }} · {{ tong_so_tai_khoan }} đơn vị</div>
+                        <div class="pagination-links">
+                            <a class="page-link {% if trang_hien_tai <= 1 %}disabled{% endif %}" href="{{ url_bo_loc }}&trang={{ trang_hien_tai - 1 }}">← Trước</a>
+                            {% set bat_dau_trang = [1, trang_hien_tai - 2]|max %}
+                            {% set ket_thuc_trang = [tong_so_trang, trang_hien_tai + 2]|min %}
+                            {% for so_trang in range(bat_dau_trang, ket_thuc_trang + 1) %}
+                                <a class="page-link {% if so_trang == trang_hien_tai %}current{% endif %}" href="{{ url_bo_loc }}&trang={{ so_trang }}">{{ so_trang }}</a>
+                            {% endfor %}
+                            <a class="page-link {% if trang_hien_tai >= tong_so_trang %}disabled{% endif %}" href="{{ url_bo_loc }}&trang={{ trang_hien_tai + 1 }}">Sau →</a>
+                        </div>
+                    </div>
+                {% elif danh_sach_tai_khoan %}
+                    <div class="table-scroll">
+                        <table class="account-table">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Họ và tên</th>
+                                <th>Vai trò</th>
+                                <th>Xã/phường</th>
+                                <th>Trường / Đơn vị</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for tai_khoan in danh_sach_tai_khoan %}
+                                <tr class="{% if not tai_khoan.is_active %}row-inactive{% endif %}">
+                                    <td>{{ chi_so_bat_dau + loop.index0 }}</td>
+                                    <td>
+                                        <strong>{{ tai_khoan.username }}</strong>
+                                        <span class="unit-sub">ID: {{ tai_khoan.id }}</span>
+                                    </td>
+                                    <td>{{ tai_khoan.full_name }}</td>
+                                    <td>{{ tai_khoan.role.name }}</td>
+                                    <td>
+                                        {% if tai_khoan.commune %}
+                                            <span class="unit-main">{{ tai_khoan.commune.name }}</span>
+                                            <span class="unit-sub">Mã {{ tai_khoan.commune.code }}</span>
+                                        {% elif tai_khoan.school and tai_khoan.school.commune %}
+                                            <span class="unit-main">{{ tai_khoan.school.commune.name }}</span>
+                                            <span class="unit-sub">Mã {{ tai_khoan.school.commune.code }}</span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if tai_khoan.school %}
+                                            <span class="unit-main">{{ tai_khoan.school.name }}</span>
+                                            <span class="unit-sub">Mã {{ tai_khoan.school.code }}</span>
+                                        {% elif tai_khoan.commune %}
+                                            <span class="unit-main">Tài khoản cấp xã</span>
+                                        {% elif tai_khoan.role.code == 'PHONG_BAN' %}
+                                            <span class="unit-main">Phòng ban cấp Sở</span>
+                                        {% else %}
+                                            <span class="unit-main">Toàn tỉnh</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if tai_khoan.is_active %}
+                                            <span class="status-pill active">Đang hoạt động</span>
+                                        {% else %}
+                                            <span class="status-pill locked">Đã khóa</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-group-local">
+                                            <button
+                                                class="action-button action-copy"
+                                                type="button"
+                                                data-copy-username="{{ tai_khoan.username }}"
+                                            >
+                                                Sao chép TĐN
+                                            </button>
+
+                                            {% set ma_vai_tro_muc_tieu = tai_khoan.role.code %}
+                                            {% set duoc_quan_ly =
+                                                (la_quan_tri and ma_vai_tro_muc_tieu in ['PHONG_BAN', 'XA', 'TRUONG'])
+                                                or
+                                                (la_cap_truong and ma_vai_tro_muc_tieu == 'GIAO_VIEN')
+                                            %}
+                                            {% if duoc_quan_ly %}
+                                                <a class="action-button action-edit" href="/tai-khoan/{{ tai_khoan.id }}/sua">Sửa</a>
+                                            {% endif %}
+
+                                            {% set duoc_dat_lai_mat_khau =
+                                                (la_quan_tri and ma_vai_tro_muc_tieu in ['PHONG_BAN', 'XA', 'TRUONG', 'GIAO_VIEN'])
+                                                or
+                                                (la_cap_truong and ma_vai_tro_muc_tieu == 'GIAO_VIEN')
+                                            %}
+                                            {% if duoc_dat_lai_mat_khau %}
+                                                <button
+                                                    class="action-button action-reset"
+                                                    type="button"
+                                                    data-reset-password
+                                                    data-user-id="{{ tai_khoan.id }}"
+                                                    data-username="{{ tai_khoan.username }}"
+                                                    data-full-name="{{ tai_khoan.full_name }}"
+                                                >
+                                                    Cấp lại MK
+                                                </button>
+                                            {% endif %}
+
+                                            {% if duoc_quan_ly %}
+                                                <form method="post" action="/tai-khoan/{{ tai_khoan.id }}/khoa-mo" data-lock-form data-account-name="{{ tai_khoan.username }}" data-action-name="{% if tai_khoan.is_active %}khóa{% else %}mở lại{% endif %}">
+                                                    <input type="hidden" name="return_to" value="{{ url_bo_loc }}">
+                                                    <button class="action-button {% if tai_khoan.is_active %}action-lock{% else %}action-unlock{% endif %}" type="submit">
+                                                        {% if tai_khoan.is_active %}Khóa{% else %}Mở lại{% endif %}
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination-bar">
+                        <div class="list-summary">
+                            Trang {{ trang_hien_tai }}/{{ tong_so_trang }} · {{ tong_so_tai_khoan }} tài khoản
+                        </div>
+                        <div class="pagination-links">
+                            <a class="page-link {% if trang_hien_tai <= 1 %}disabled{% endif %}" href="{{ url_bo_loc }}&trang={{ trang_hien_tai - 1 }}">← Trước</a>
+
+                            {% set bat_dau_trang = [1, trang_hien_tai - 2]|max %}
+                            {% set ket_thuc_trang = [tong_so_trang, trang_hien_tai + 2]|min %}
+                            {% for so_trang in range(bat_dau_trang, ket_thuc_trang + 1) %}
+                                <a class="page-link {% if so_trang == trang_hien_tai %}current{% endif %}" href="{{ url_bo_loc }}&trang={{ so_trang }}">{{ so_trang }}</a>
+                            {% endfor %}
+
+                            <a class="page-link {% if trang_hien_tai >= tong_so_trang %}disabled{% endif %}" href="{{ url_bo_loc }}&trang={{ trang_hien_tai + 1 }}">Sau →</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-account-state">
+                        <div style="font-size:42px;">🔎</div>
+                        <strong>Chưa tìm thấy tài khoản phù hợp</strong>
+                        <span>Hãy thay đổi từ khóa hoặc xóa bộ lọc để xem lại danh sách.</span>
+                    </div>
+                {% endif %}
+            </article>
+        </section>
+
+        {% if la_quan_tri and la_danh_sach_don_vi and nhat_ky_cap_dong_loat %}
+            <section class="bulk-history-panel">
+                <p class="panel-label">NHẬT KÝ CẤP ĐỒNG LOẠT</p>
+                <h2 style="margin:4px 0 0;">Các đợt cấp tài khoản gần nhất</h2>
+                <div class="bulk-history-list">
+                    {% for dot in nhat_ky_cap_dong_loat %}
+                        <div class="bulk-history-item">
+                            <div class="bulk-history-id">Đợt #{{ dot.id }}</div>
+                            <div>
+                                <strong>{% if dot.unit_type == 'xa' %}Xã/phường{% else %}Trường mầm non{% endif %} · {% if dot.scope_type == 'all' %}Toàn bộ{% else %}Theo bộ lọc{% endif %}</strong>
+                                <div class="bulk-history-meta">{{ dot.created_by_name or 'Quản trị hệ thống' }} · {{ dot.created_at }}</div>
+                            </div>
+                            <div class="bulk-history-count">
+                                {% if dot.job_status in ['PENDING', 'RUNNING'] %}
+                                    Đang xử lý {{ dot.processed_count }}/{{ dot.total_candidates }}
+                                {% elif dot.job_status == 'FAILED' %}
+                                    Đã dừng · Tạo {{ dot.created_count }} · Lỗi {{ dot.failed_count }}
+                                {% else %}
+                                    Đã cấp {{ dot.created_count }}/{{ dot.total_candidates }}{% if dot.failed_count %} · Lỗi {{ dot.failed_count }}{% endif %}
+                                {% endif %}
+                                <div style="margin-top:7px;"><a href="/tai-khoan/cap-dong-loat/{{ dot.id }}" style="color:#176fc1;font-weight:800;">Xem tiến độ / kết quả →</a></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endif %}
+</main>
+
+<dialog class="password-dialog" id="reset-password-dialog">
+    <form class="dialog-inner" id="reset-password-form" method="post" action="">
+        <input type="hidden" name="return_to" value="{{ url_bo_loc }}">
+        <p class="panel-label">BẢO MẬT TÀI KHOẢN</p>
+        <h2 style="margin:4px 0 8px;">Cấp lại mật khẩu</h2>
+        <p style="margin:0;color:#607086;">Nhập hai lần hoặc tạo mật khẩu tạm để gửi cho đơn vị.</p>
+
+        <div class="dialog-account">
+            <div><strong>Tên đăng nhập:</strong> <span id="reset-password-username"></span></div>
+            <div><strong>Họ và tên:</strong> <span id="reset-password-full-name"></span></div>
+        </div>
+
+        <div class="temporary-password-row">
+            <button class="action-button action-copy" id="generate-temporary-password" type="button">Tạo mật khẩu tạm</button>
+            <button class="action-button action-copy" id="copy-temporary-password" type="button">Sao chép mật khẩu</button>
+        </div>
+
+        <div class="account-form-group">
+            <label for="reset-password-new">Mật khẩu mới</label>
+            <input
+                id="reset-password-new"
+                name="mat_khau_moi"
+                type="password"
+                minlength="8"
+                maxlength="128"
+                placeholder="Từ 8 đến 128 ký tự"
+                autocomplete="new-password"
+                required
+            >
+        </div>
+
+        <div class="account-form-group">
+            <label for="reset-password-confirm">Nhập lại mật khẩu mới</label>
+            <input
+                id="reset-password-confirm"
+                name="xac_nhan_mat_khau"
+                type="password"
+                minlength="8"
+                maxlength="128"
+                placeholder="Nhập lại chính xác mật khẩu mới"
+                autocomplete="new-password"
+                required
+            >
+        </div>
+
+        <p class="field-help">
+            Thao tác chỉ thay đổi mật khẩu; vai trò, đơn vị và trạng thái hoạt động được giữ nguyên.
+        </p>
+
+        <div class="dialog-actions">
+            <button class="button" id="reset-password-cancel" type="button">Hủy</button>
+            <button class="button button-primary" type="submit">Xác nhận cấp lại</button>
+        </div>
+    </form>
+</dialog>
+
+<div class="toast-copy" id="copy-toast">Đã sao chép</div>
+
+<script>
+(function () {
+    const filterForm = document.getElementById("filter-form");
+    const filterCommune = document.getElementById("filter_commune_id");
+    const filterSchool = document.getElementById("filter_school_id");
+
+    if (!filterForm) {
+        return;
+    }
+
+    let schoolItems = [];
+    let selectedSchoolId = "";
+    if (filterSchool) {
+        selectedSchoolId = filterSchool.value;
+        schoolItems = Array.from(filterSchool.querySelectorAll("option[data-commune-id]")).map(function (option) {
+            return {
+                value: option.value,
+                communeId: option.dataset.communeId || "",
+                label: option.textContent.trim()
+            };
+        });
+    }
+
+    function refreshFilterSchools(keepCurrent) {
+        if (!filterSchool || !filterCommune) {
+            return;
+        }
+        const communeId = filterCommune.value;
+        const currentValue = keepCurrent ? selectedSchoolId : "";
+        filterSchool.innerHTML = '<option value="">-- Tất cả trường --</option>';
+
+        schoolItems
+            .filter(function (school) {
+                return !communeId || school.communeId === communeId;
+            })
+            .forEach(function (school) {
+                const option = document.createElement("option");
+                option.value = school.value;
+                option.textContent = school.label;
+                option.dataset.communeId = school.communeId;
+                if (school.value === currentValue) {
+                    option.selected = true;
+                }
+                filterSchool.appendChild(option);
+            });
+    }
+
+    if (filterCommune) {
+        filterCommune.addEventListener("change", function () {
+            refreshFilterSchools(false);
+            if (filterSchool) {
+                filterSchool.value = "";
+            }
+            if (typeof filterForm.requestSubmit === "function") {
+                filterForm.requestSubmit();
+            } else {
+                filterForm.submit();
+            }
+        });
+    }
+
+    if (filterSchool) {
+        filterSchool.addEventListener("change", function () {
+            if (typeof filterForm.requestSubmit === "function") {
+                filterForm.requestSubmit();
+            } else {
+                filterForm.submit();
+            }
+        });
+    }
+
+    refreshFilterSchools(true);
+})();
+</script>
+
+<script>
+(function () {
+    const form = document.getElementById("create-account-form");
+    if (!form) {
+        return;
+    }
+
+    const roleField = document.getElementById("role_id");
+    const communeGroup = document.getElementById("commune-group");
+    const schoolGroup = document.getElementById("school-group");
+    const communeSelect = document.getElementById("commune_id");
+    const schoolSelect = document.getElementById("school_id");
+
+    if (!roleField || !communeGroup || !schoolGroup || !communeSelect || !schoolSelect) {
+        return;
+    }
+
+    const allSchools = Array.from(schoolSelect.querySelectorAll("option[data-commune-id]")).map(function (option) {
+        return {
+            value: option.value,
+            communeId: option.dataset.communeId || "",
+            label: option.textContent.trim()
+        };
+    });
+
+    function selectedRoleCode() {
+        if (roleField.tagName === "INPUT") {
+            return roleField.dataset.code || "";
+        }
+        const selected = roleField.options[roleField.selectedIndex];
+        return selected ? (selected.dataset.code || "") : "";
+    }
+
+    function refreshSchools() {
+        const communeId = communeSelect.value;
+        schoolSelect.innerHTML = '<option value="">-- Chọn trường --</option>';
+        const matching = allSchools.filter(function (school) {
+            return school.communeId === communeId;
+        });
+        matching.forEach(function (school) {
+            const option = document.createElement("option");
+            option.value = school.value;
+            option.textContent = school.label;
+            option.dataset.communeId = school.communeId;
+            schoolSelect.appendChild(option);
+        });
+        schoolSelect.disabled = !communeId;
+    }
+
+    function updateScope() {
+        const roleCode = selectedRoleCode();
+        const needsCommune = roleCode === "XA" || roleCode === "TRUONG" || roleCode === "GIAO_VIEN";
+        const needsSchool = roleCode === "TRUONG" || roleCode === "GIAO_VIEN";
+
+        communeGroup.style.display = needsCommune ? "flex" : "none";
+        schoolGroup.style.display = needsSchool ? "flex" : "none";
+        communeSelect.required = needsCommune;
+        schoolSelect.required = needsSchool;
+
+        if (!needsCommune) {
+            communeSelect.value = "";
+        }
+        if (!needsSchool) {
+            schoolSelect.value = "";
+            schoolSelect.disabled = true;
+        } else {
+            refreshSchools();
+        }
+    }
+
+    communeSelect.addEventListener("change", refreshSchools);
+    if (roleField.tagName === "SELECT") {
+        roleField.addEventListener("change", updateScope);
+    }
+
+    form.addEventListener("submit", function (event) {
+        const roleCode = selectedRoleCode();
+        if (roleCode === "TRUONG" || roleCode === "GIAO_VIEN") {
+            const option = schoolSelect.options[schoolSelect.selectedIndex];
+            const schoolCommuneId = option ? (option.dataset.communeId || "") : "";
+            if (!communeSelect.value || !schoolSelect.value || schoolCommuneId !== communeSelect.value) {
+                event.preventDefault();
+                schoolSelect.setCustomValidity("Hãy chọn một trường thuộc đúng xã/phường đã chọn.");
+                schoolSelect.reportValidity();
+                return;
+            }
+        }
+        schoolSelect.setCustomValidity("");
+    });
+
+    schoolSelect.addEventListener("change", function () {
+        schoolSelect.setCustomValidity("");
+    });
+
+    updateScope();
+})();
+</script>
+
+<script>
+(function () {
+    const buttons = document.querySelectorAll("[data-prefill-unit-account]");
+    const form = document.getElementById("create-account-form");
+    if (!buttons.length || !form) {
+        return;
+    }
+
+    const usernameField = document.getElementById("ten_dang_nhap");
+    const fullNameField = document.getElementById("ho_ten");
+    const passwordField = document.getElementById("mat_khau");
+    const communeField = document.getElementById("commune_id");
+    const schoolField = document.getElementById("school_id");
+
+    function accountName(type, code) {
+        const prefix = type === "xa" ? "xa" : "truong";
+        const cleanCode = String(code || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "");
+        return prefix + "_" + cleanCode;
+    }
+
+    buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const type = button.dataset.unitType || "";
+            const communeId = button.dataset.communeId || "";
+            const schoolId = button.dataset.schoolId || "";
+
+            if (usernameField) {
+                usernameField.value = accountName(type, button.dataset.unitCode || "");
+            }
+            if (fullNameField) {
+                fullNameField.value = button.dataset.unitName || "";
+            }
+            if (communeField) {
+                communeField.value = communeId;
+                communeField.dispatchEvent(new Event("change"));
+            }
+            if (schoolField && schoolId) {
+                window.setTimeout(function () {
+                    schoolField.value = schoolId;
+                    schoolField.disabled = false;
+                }, 0);
+            }
+
+            form.scrollIntoView({behavior: "smooth", block: "start"});
+            if (passwordField) {
+                window.setTimeout(function () {
+                    passwordField.focus();
+                }, 250);
+            }
+        });
+    });
+})();
+</script>
+
+<script>
+(function () {
+    const dialog = document.getElementById("reset-password-dialog");
+    const form = document.getElementById("reset-password-form");
+    const usernameText = document.getElementById("reset-password-username");
+    const fullNameText = document.getElementById("reset-password-full-name");
+    const newPassword = document.getElementById("reset-password-new");
+    const confirmPassword = document.getElementById("reset-password-confirm");
+    const cancelButton = document.getElementById("reset-password-cancel");
+    const generateButton = document.getElementById("generate-temporary-password");
+    const copyPasswordButton = document.getElementById("copy-temporary-password");
+    const openButtons = document.querySelectorAll("[data-reset-password]");
+    const toast = document.getElementById("copy-toast");
+
+    function showToast(message) {
+        if (!toast) {
+            return;
+        }
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(function () {
+            toast.classList.remove("show");
+        }, 1800);
+    }
+
+    async function copyText(text, message) {
+        if (!text) {
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast(message || "Đã sao chép");
+        } catch (error) {
+            const helper = document.createElement("textarea");
+            helper.value = text;
+            document.body.appendChild(helper);
+            helper.select();
+            document.execCommand("copy");
+            helper.remove();
+            showToast(message || "Đã sao chép");
+        }
+    }
+
+    document.querySelectorAll("[data-copy-username]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            copyText(button.dataset.copyUsername || "", "Đã sao chép tên đăng nhập");
+        });
+    });
+
+    document.querySelectorAll("[data-lock-form]").forEach(function (lockForm) {
+        lockForm.addEventListener("submit", function (event) {
+            const accountName = lockForm.dataset.accountName || "tài khoản này";
+            const actionName = lockForm.dataset.actionName || "thay đổi trạng thái";
+            if (!window.confirm("Xác nhận " + actionName + " tài khoản " + accountName + "?")) {
+                event.preventDefault();
+            }
+        });
+    });
+
+    if (!dialog || !form || !usernameText || !fullNameText || !newPassword || !confirmPassword || !cancelButton) {
+        return;
+    }
+
+    function closeDialog() {
+        form.reset();
+        confirmPassword.setCustomValidity("");
+        if (typeof dialog.close === "function") {
+            dialog.close();
+        } else {
+            dialog.removeAttribute("open");
+        }
+    }
+
+    function validateConfirmation() {
+        if (confirmPassword.value && newPassword.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity("Hai lần nhập mật khẩu mới không giống nhau.");
+        } else {
+            confirmPassword.setCustomValidity("");
+        }
+    }
+
+    function createTemporaryPassword() {
+        const letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+        const numbers = "23456789";
+        const symbols = "@#_";
+        const all = letters + numbers + symbols;
+        const random = new Uint32Array(12);
+        window.crypto.getRandomValues(random);
+        let password = "A@" + String(numbers[random[0] % numbers.length]);
+        for (let index = 1; index < 10; index += 1) {
+            password += all[random[index] % all.length];
+        }
+        newPassword.value = password;
+        confirmPassword.value = password;
+        validateConfirmation();
+        showToast("Đã tạo mật khẩu tạm");
+    }
+
+    openButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const userId = button.dataset.userId || "";
+            if (!userId) {
+                return;
+            }
+            form.action = "/tai-khoan/" + encodeURIComponent(userId) + "/dat-lai-mat-khau";
+            usernameText.textContent = button.dataset.username || "";
+            fullNameText.textContent = button.dataset.fullName || "";
+            form.reset();
+            confirmPassword.setCustomValidity("");
+            if (typeof dialog.showModal === "function") {
+                dialog.showModal();
+            } else {
+                dialog.setAttribute("open", "open");
+            }
+            newPassword.focus();
+        });
+    });
+
+    cancelButton.addEventListener("click", closeDialog);
+    dialog.addEventListener("cancel", function (event) {
+        event.preventDefault();
+        closeDialog();
+    });
+    dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) {
+            closeDialog();
+        }
+    });
+
+    if (generateButton) {
+        generateButton.addEventListener("click", createTemporaryPassword);
+    }
+    if (copyPasswordButton) {
+        copyPasswordButton.addEventListener("click", function () {
+            copyText(newPassword.value, "Đã sao chép mật khẩu tạm");
+        });
+    }
+
+    newPassword.addEventListener("input", validateConfirmation);
+    confirmPassword.addEventListener("input", validateConfirmation);
+    form.addEventListener("submit", function (event) {
+        validateConfirmation();
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            form.reportValidity();
+        }
+    });
+})();
+</script>
+</body>
+</html>

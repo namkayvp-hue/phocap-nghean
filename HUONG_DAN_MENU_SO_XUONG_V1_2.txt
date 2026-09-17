@@ -1,0 +1,32 @@
+MENU SỔ XUỐNG V1.2 - MENU ĐA TẦNG CHO CÁC GIAO DIỆN CON
+
+Mục tiêu:
+- Giữ thanh menu ngang đã có ở V1.1.
+- Trong từng menu lớn, nhóm chức năng tiếp tục xổ ngang sang bên phải giống giao diện CSDL ngành.
+- Áp dụng cho mọi giao diện con đã được Menu V1 gắn menu chung.
+- Không đổi route.
+- Không đổi app/main.py.
+- Không đổi data/phocap.db.
+- Không đổi luồng nghiệp vụ.
+- Có sao lưu và khôi phục.
+
+CÀI ĐẶT:
+1. Chép 2 tệp .py vào C:\PhoCap
+2. Dừng Uvicorn bằng Ctrl+C.
+3. Chạy:
+   & C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\nang_cap_menu_da_tang_v1_2.py
+4. Chờ dòng:
+   NANG CAP MENU SO XUONG V1.2 THANH CONG
+5. Khởi động lại:
+   cd C:\PhoCap
+   & C:\PhoCap\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+6. Trên Chrome nhấn Ctrl+F5.
+
+KIỂM TRA:
+- Rê chuột vào 2. Điều tra hộ dân.
+- Rê chuột tiếp vào Đợt điều tra hoặc Đối chiếu dữ liệu học sinh.
+- Menu cấp tiếp theo phải xổ ngang sang bên phải (nếu gần mép màn hình sẽ tự mở sang trái).
+- Mở một trang con bất kỳ; thanh menu vẫn giữ nguyên ở phía trên.
+
+KHÔI PHỤC VỀ V1.1 NẾU CẦN:
+& C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\khoi_phuc_menu_da_tang_v1_2.py

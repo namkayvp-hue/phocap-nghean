@@ -1,0 +1,50 @@
+HOÀN TẤT CỔNG TIỂU HỌC QĐ3805
+
+Căn cứ kiểm tra:
+- Tri Lễ: operation chỉ có 1 nguồn PTDTBT TH Tri Lễ 2, không xác định đích khác -> tách khỏi engine sáp nhập, xử lý Đổi tên trường.
+- Thanh Lĩnh: mã 4000679209 thuộc Lê Văn Hạnh tại Tiểu học Hương Tiến; dòng Võ Xuân Nguyên tại Thanh Lĩnh dùng nhầm mã.
+- Nghi Liên: mã 4002555491 thuộc Lê Sĩ Bản tại Nghi Liên; dòng Tô Thị Thuỷ tại Hưng Đông dùng nhầm mã.
+- Nghi Vạn -> Nghi Diên: nguồn inactive; 2026-2027 đích có 92 = 45 + 47.
+- Nghi Hoa -> Nghi Trung: nguồn inactive; 2026-2027 đích có 82 = 43 + 39.
+- STT 1325 Đồng Thành: chưa có phương án đủ rõ, không tác động và không suy đoán.
+
+Bộ cài:
+- KHÔNG sửa file Excel nguồn.
+- KHÔNG ghi phocap.db.
+- KHÔNG thực hiện sáp nhập.
+- Chỉ bổ sung source correction, resolution overlay và cập nhật service toàn cấp.
+- Có backup và rollback nếu smoke audit không đạt.
+
+Kết quả smoke bắt buộc:
+DONE=141
+READY=19
+BLOCK=0
+KEEP=67
+QĐ3805 action expected=160
+mapped=160
+unresolved=1 (STT 1325, không chạy)
+deferred_unresolved=1
+excluded/tách riêng=75
+effective_block_count=0
+candidate_count=19
+ready_for_execution=true
+
+Cách chạy:
+cd C:\PhoCap
+.\.venv\Scripts\python.exe .\cai_dat_hoan_tat_cong_tieu_hoc_qd3805.py
+
+Sau khi cài thành công:
+1. Khởi động lại Uvicorn.
+2. Vào Sáp nhập toàn cấp -> Tiểu học -> Kiểm tra sẵn sàng toàn cấp.
+3. CHƯA bấm Thực hiện toàn cấp.
+4. Gửi ảnh phần Tổng quan và phần cuối nút Xác nhận để kiểm tra lần cuối.
+
+
+SỬA LỖI BẢN NÀY:
+- Bản trước đếm toàn bộ staff_year_records có is_active=1 của năm 2025-2026,
+  nên Nghi Vạn ra 50 thay vì 47 và Nghi Trung ra 45 thay vì 43.
+- Bản này dùng đúng active_db_eligible của kiểm tra nguồn V4.3:
+  Nghi Vạn 47 + Nghi Diên 45 = 92;
+  Nghi Hoa 39 + Nghi Trung 43 = 82.
+- Vì vậy 2 phương án chỉ được nhận "ĐÃ HOÀN TẤT TRƯỚC" khi source audit PASS
+  và số rollover 2026-2027 khớp chính xác.

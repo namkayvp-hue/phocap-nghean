@@ -1,3 +1,4 @@
+﻿import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -63,10 +64,7 @@ from app.routers.mn_official_reports import (
 BASE_DIR = Path(__file__).resolve().parent
 
 
-SESSION_SECRET_KEY = (
-    "phocap-mamnon-session-"
-    "development-key-2026"
-)
+SESSION_SECRET_KEY = os.environ["PHOCAP_SESSION_SECRET"]
 
 
 middleware = [
@@ -89,12 +87,12 @@ middleware = [
 
 app = FastAPI(
     title=(
-        "Phần mềm Quản lý "
-        "Phổ cập Giáo dục Mầm non"
+        "Pháº§n má»m Quáº£n lÃ½ "
+        "Phá»• cáº­p GiÃ¡o dá»¥c Máº§m non"
     ),
     description=(
-        "Hệ thống quản lý dữ liệu theo các cấp "
-        "ADMIN - Phòng ban - Xã - Trường - Giáo viên"
+        "Há»‡ thá»‘ng quáº£n lÃ½ dá»¯ liá»‡u theo cÃ¡c cáº¥p "
+        "ADMIN - PhÃ²ng ban - XÃ£ - TrÆ°á»ng - GiÃ¡o viÃªn"
     ),
     version="1.0.0",
     middleware=middleware,
@@ -195,7 +193,7 @@ for _survey_summary_route in survey_summary_report_router.routes:
 # === BAI 13A-2 V2: KET THUC ===
 
 # === BAI 13A-3 V3: BAT DAU ===
-# Đăng ký trực tiếp route xuất bộ biểu mẫu PCGDMN 2025.
+# ÄÄƒng kÃ½ trá»±c tiáº¿p route xuáº¥t bá»™ biá»ƒu máº«u PCGDMN 2025.
 for _pcgdmn_template_route in pcgdmn_template_report_router.routes:
     _route_exists = any(
         getattr(_existing_route, "path", None)
@@ -225,7 +223,7 @@ for _staff_management_route in staff_management_router.routes:
 # === BAI 13B-1 V3: KET THUC ===
 
 # === BAI 13B-3 V1: BAT DAU ===
-# Dữ liệu đầu vào phục vụ MN-01-GV, MN-01-CSVC và BC-Tài chính.
+# Dá»¯ liá»‡u Ä‘áº§u vÃ o phá»¥c vá»¥ MN-01-GV, MN-01-CSVC vÃ  BC-TÃ i chÃ­nh.
 for _report_inputs_route in report_inputs_router.routes:
     _route_exists = any(
         getattr(_existing_route, "path", None)
@@ -299,8 +297,8 @@ def trang_chu(
     nguoi_dung = request.scope.get("auth_user")
 
     # === GV_MOBILE_V18B_ROOT_REDIRECT_START ===
-    # Chỉ áp dụng cho tài khoản giáo viên trên thiết bị di động.
-    # Không thay đổi giao diện/luồng của ADMIN, SỞ, XÃ, TRƯỜNG hoặc máy tính.
+    # Chá»‰ Ã¡p dá»¥ng cho tÃ i khoáº£n giÃ¡o viÃªn trÃªn thiáº¿t bá»‹ di Ä‘á»™ng.
+    # KhÃ´ng thay Ä‘á»•i giao diá»‡n/luá»“ng cá»§a ADMIN, Sá»ž, XÃƒ, TRÆ¯á»œNG hoáº·c mÃ¡y tÃ­nh.
     role_code = str(
         (nguoi_dung or {}).get("role_code") or ""
     ).strip().upper()
@@ -333,8 +331,8 @@ def trang_chu(
 
     if status == "forbidden":
         thong_bao = (
-            "Tài khoản của bạn không có quyền "
-            "truy cập chức năng vừa chọn."
+            "TÃ i khoáº£n cá»§a báº¡n khÃ´ng cÃ³ quyá»n "
+            "truy cáº­p chá»©c nÄƒng vá»«a chá»n."
         )
 
     return templates.TemplateResponse(
@@ -342,8 +340,8 @@ def trang_chu(
         name="index.html",
         context={
             "ten_phan_mem": (
-                "PHẦN MỀM QUẢN LÝ "
-                "PHỔ CẬP GIÁO DỤC MẦM NON"
+                "PHáº¦N Má»€M QUáº¢N LÃ "
+                "PHá»” Cáº¬P GIÃO Dá»¤C Máº¦M NON"
             ),
             "phien_ban": "1.0.0",
             "nguoi_dung": nguoi_dung,
@@ -357,8 +355,8 @@ def kiem_tra_he_thong() -> dict[str, str]:
     return {
         "trang_thai": "hoat_dong",
         "thong_bao": (
-            "Phần mềm Phổ cập Giáo dục "
-            "Mầm non đang hoạt động"
+            "Pháº§n má»m Phá»• cáº­p GiÃ¡o dá»¥c "
+            "Máº§m non Ä‘ang hoáº¡t Ä‘á»™ng"
         ),
     }
 
@@ -366,3 +364,6 @@ def kiem_tra_he_thong() -> dict[str, str]:
 from app.routers import network_current as _network_current
 app.include_router(_network_current.router)
 # === BATCH18_NETWORK_CURRENT_END ===
+
+
+

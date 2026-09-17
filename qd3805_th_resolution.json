@@ -1,0 +1,59 @@
+{
+  "schema": "QD3805_TH_RESOLUTION_2026",
+  "level_code": "TH",
+  "effective_school_year": "2026-2027",
+  "principles": [
+    "Không sửa file Excel nguồn.",
+    "Không suy đoán trường khi chưa đủ căn cứ.",
+    "Đổi tên một trường được tách khỏi batch sáp nhập và phải giữ nguyên school_id.",
+    "Phương án đã hoàn tất trước được nhận DONE chỉ khi dấu vết dữ liệu khớp đúng các số khóa.",
+    "Dòng QĐ3805 chưa có phương án rõ được giữ nguyên, không tác động và không chặn các phương án đã rõ."
+  ],
+  "rename_only": [
+    {
+      "operation_id": "QD3805-OP-0415",
+      "source_school_code": "40415412",
+      "source_school_name": "Trường PTDTBT TH Tri Lễ 2",
+      "new_school_name": "Tiểu học Tri Lễ",
+      "relation_type": "ĐỔI TÊN – XỬ LÝ RIÊNG",
+      "display_title": "Tiểu học Tri Lễ – đổi tên từ PTDTBT Tiểu học Tri Lễ 2",
+      "reason": "QĐ3805 chỉ có một trường nguồn và không xác định trường đích khác để gộp. Không chạy bằng engine sáp nhập; xử lý sau bằng chức năng Đổi tên trường, giữ nguyên school_id."
+    }
+  ],
+  "precompleted": [
+    {
+      "operation_id": "QD3805-OP-0339",
+      "source_school_code": "40429436",
+      "target_school_code": "40429412",
+      "previous_year_code": "2025-2026",
+      "current_year_code": "2026-2027",
+      "expected_previous_target_active": 45,
+      "expected_previous_source_active": 47,
+      "expected_current_target_active": 92,
+      "expected_current_source_active": 0,
+      "reason": "Nghi Vạn đã inactive; kiểm tra nguồn PASS; 2026-2027 tại Nghi Diên có đúng 92 đội ngũ hoạt động = 45 Nghi Diên + 47 Nghi Vạn năm 2025-2026. Không chạy lại."
+    },
+    {
+      "operation_id": "QD3805-OP-0340",
+      "source_school_code": "40429429",
+      "target_school_code": "40429427",
+      "previous_year_code": "2025-2026",
+      "current_year_code": "2026-2027",
+      "expected_previous_target_active": 43,
+      "expected_previous_source_active": 39,
+      "expected_current_target_active": 82,
+      "expected_current_source_active": 0,
+      "reason": "Nghi Hoa đã inactive; kiểm tra nguồn PASS; 2026-2027 tại Nghi Trung có đúng 82 đội ngũ hoạt động = 43 Nghi Trung + 39 Nghi Hoa năm 2025-2026. Không chạy lại."
+    }
+  ],
+  "deferred_orphans": [
+    {
+      "stt": 1325,
+      "commune": "Quang Đồng",
+      "school": "Tiểu học Đồng Thành",
+      "status": "CHỜ XÁC NHẬN – KHÔNG TÁC ĐỘNG TRONG SÁP NHẬP TOÀN CẤP",
+      "display_title": "STT 1325 – Tiểu học Đồng Thành – chờ xác nhận, không tự động",
+      "reason": "Nguồn QĐ3805/PA hiện không có phương án hoặc ghi chú đủ rõ. Giữ nguyên trường, không suy đoán nguồn/đích và không để dòng chưa rõ chặn 160 phương án đã xác định."
+    }
+  ]
+}

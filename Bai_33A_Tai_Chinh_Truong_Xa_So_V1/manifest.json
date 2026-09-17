@@ -1,0 +1,20 @@
+{
+  "expected_before": {
+    "app/report_input_models.py": "eafb689273c1ef35cdf6fad62bf38bd6f98cbbff2e8cd35e9cdbd868eaba6c1a",
+    "app/routers/report_inputs.py": "a272ed6c244c1ef4deb1970c194b1ce360424eecb1bbf229cd7cb539ec5cab66",
+    "app/templates/report_inputs/finance.html": "83ca7939ef82417b50089689adaca5573e09a4e98dd4988ec2d39fe9636d20c2",
+    "app/templates/partials/dropdown_menu_v1.html": "3ae9aa7879c32455e9260d8b54ea816ee3fe567ed3a5c8b8165a7b6212176279",
+    "app/routers/pcgdmn_template_report.py": "e10c867a2022df17d8f7c208be3d1ffe329699453a67a2b37ca5fa9179e91258"
+  },
+  "expected_after": {
+    "app/report_input_models.py": "3a2801639ec4f6df6b2935fefcb0bc48c4e64952ccf2c6dc92f1c60f04c7d329",
+    "app/routers/report_inputs.py": "be29d7d788d75384731ed39964702d6b97a696128a66780d92b909f9c5d39e38",
+    "app/templates/report_inputs/finance.html": "92789c8b7f8f7b5060d9ced47c84e9ad7de72d7a7cc4b0d6f1f834a458e0ae8c",
+    "app/templates/partials/dropdown_menu_v1.html": "7386a35193f88230078438aaef3ba8da83c71394a3f784704dd8e003b205111f",
+    "app/routers/pcgdmn_template_report.py": "7cb2709ea453dd640335b1f3cc57a2c1464f86329565a7d88f8d294ffa4daf2d",
+    "app/services/finance_school_service.py": "2c44d47b326c7f9532311be4e71469ac7d950400a27886d1eaba604392b8547c"
+  },
+  "new_files": [
+    "app/services/finance_school_service.py"
+  ]
+}

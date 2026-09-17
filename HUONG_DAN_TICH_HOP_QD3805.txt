@@ -1,0 +1,10 @@
+TÍCH HỢP BẢNG KHÓA QĐ3805 VÀO ENGINE SÁP NHẬP TOÀN CẤP
+
+Bộ cài KHÔNG thực hiện sáp nhập và KHÔNG ghi phocap.db.
+Sau khi cài, màn hình Sáp nhập toàn cấp bắt buộc đọc qd3805_level_lock.json.
+Batch MN/TH/THCS chỉ nhận phương án thuần đúng cấp; liên cấp/đặc thù tách riêng.
+Ba dòng chưa có phương án đủ rõ vẫn CHẶN: THCS Nghi Hương (STT 110), MN Lượng Minh (STT 1211), TH Đồng Thành (STT 1325).
+
+Chạy:
+cd C:\PhoCap
+.\.venv\Scripts\python.exe .\cai_dat_tich_hop_qd3805_vao_sap_nhap_toan_cap.py

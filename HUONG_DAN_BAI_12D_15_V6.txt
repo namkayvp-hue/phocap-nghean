@@ -1,0 +1,20 @@
+CAI DAT BAI 12D-15 V6
+
+1. Giai nen tep ZIP.
+2. Chep tep cai_dat_bai_12d_15_v6.py vao C:\PhoCap
+3. Trong Terminal PyCharm, dung may chu bang Ctrl+C.
+4. Chay lenh:
+
+& C:\PhoCap\.venv\Scripts\python.exe C:\PhoCap\cai_dat_bai_12d_15_v6.py
+
+5. Khi thay:
+   KIEM TRA BAI 12D-15 V6 THANH CONG
+   CAI DAT BAI 12D-15 V6 THANH CONG
+
+   thi khoi dong phan mem:
+
+cd C:\PhoCap
+& C:\PhoCap\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+
+6. Mo:
+http://127.0.0.1:8000/dieu-tra/2/doi-chieu-hoc-sinh
