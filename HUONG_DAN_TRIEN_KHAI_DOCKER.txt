@@ -132,19 +132,49 @@ VI. TRIỂN KHAI LẦN ĐẦU (đã thực hiện, ghi lại để làm lại kh
        docker compose up -d
 
 
-VII. CẬP NHẬT MÃ NGUỒN LẦN SAU
+VII. CẬP NHẬT MÃ NGUỒN LẦN SAU (từ 17/09/2026: chỉ đẩy phần thay đổi)
 
-Làm lại bước 2, 3 của mục VI (KHÔNG làm bước 4, tránh ghi đè cơ sở dữ liệu
-đang chạy trên máy chủ bằng bản cũ trên máy phát triển), sau đó:
-       cd /home/sonnh/data/phocap
-       docker compose up -d --build
+Từ 17/09/2026, project đã có git local, nên KHÔNG còn đóng gói tar toàn bộ
+mỗi lần cập nhật nữa. Dùng script trien_khai_thay_doi.sh (chạy bằng Git Bash,
+ở gốc project):
+
+       bash trien_khai_thay_doi.sh
+
+Script tự làm các việc sau:
+   1. Kiểm tra repo local đã commit hết chưa (từ chối chạy nếu còn thay đổi
+      chưa commit — phải `git commit` trước).
+   2. So sánh HEAD hiện tại với nhãn git "da-trien-khai-server-24" (đánh dấu
+      lần triển khai gần nhất) để biết chính xác tệp nào thêm/sửa/xoá.
+      Lần đầu chạy script (chưa có nhãn) sẽ đẩy toàn bộ mã nguồn đang được
+      git theo dõi — tương đương lần đầu tiên.
+   3. Đóng gói CHỈ các tệp thêm/sửa vào một tar nhỏ, scp lên và giải nén đè
+      vào /home/sonnh/data/phocap (tar chỉ ghi đè đúng những tệp đó, không
+      đụng đến các tệp khác đang có trên server).
+   4. Với tệp bị xoá ở local, ssh vào xoá đúng tệp đó trên server.
+   5. Chạy `docker compose up -d --build` để build lại và khởi động lại.
+   6. Cập nhật nhãn "da-trien-khai-server-24" tới commit vừa đẩy, để lần sau
+      so sánh tiếp từ đây.
+
+Vì data/, uploads/, .env đều bị .gitignore loại trừ nên không bao giờ nằm
+trong git diff — script này tự động không bao giờ đụng tới CSDL thật trên
+server (khớp với quy tắc không được ghi đè data/, xem HUONG_DAN_TRIEN_KHAI_DOCKER.txt
+mục V và bộ nhớ đã lưu).
 
 Nếu bản cập nhật có tệp nâng cấp cơ sở dữ liệu (app/upgrade_*.py),
 chạy trong container sau khi build:
-       docker exec phocap python -m app.upgrade_<ten_bai>
+       ssh -i C:\Users\Admin\.ssh\vantai_deploy sonnh@192.168.1.24 \
+           "docker exec phocap python -m app.upgrade_<ten_bai>"
 
 Chạy các tệp kiểm tra ngay trong container, không cần cài Python trên máy chủ:
        docker exec -w /app phocap python check_sua_loi_https_v1.py
+
+Muốn đẩy lại toàn bộ (ví dụ nghi ngờ server bị lệch tay so với git), xoá nhãn
+rồi chạy lại script:
+       git tag -d da-trien-khai-server-24
+       bash trien_khai_thay_doi.sh
+
+Cách cũ (đóng gói tar toàn bộ mục VI bước 2-3) vẫn dùng được khi cần, nhưng
+từ nay ưu tiên dùng trien_khai_thay_doi.sh.
 
 
 VIII. LỆNH VẬN HÀNH
@@ -322,3 +352,49 @@ XII. CẬP NHẬT NGÀY 14/09/2026
    hạ tầng Docker, 2 tài liệu triển khai, .gitignore, và
    check_sua_loi_https_v1.py. Muốn tìm lại file cũ: git log
    --diff-filter=D --summary, hoặc xem C:\project\PHOCAP_BACKUP_20260914_094623.
+
+
+XIII. CẬP NHẬT NGÀY 17/09/2026
+
+1. Hợp nhất lịch sử git local với repo GitHub
+   (github.com/namkayvp-hue/phocap-nghean, nhánh main, do Đậu Hồng Nam đẩy
+   lên cùng ngày). Hai bên vốn là hai lịch sử git độc lập, không tổ tiên
+   chung. Đã merge --allow-unrelated-histories, 8 file xung đột nội dung
+   thật (app/access_control.py, app/main.py, app/report_input_models.py,
+   app/routers/pcgdmn_template_report.py, app/routers/report_inputs.py,
+   app/templates/partials/dropdown_menu_v1.html,
+   app/templates/report_inputs/finance.html, .gitignore) lấy theo bản
+   GitHub vì mới hơn. Nhánh local đổi tên từ "master" thành "main" cho
+   khớp remote, đã push. Chi tiết xem lịch sử commit git (không lặp lại ở
+   đây vì đã nằm sẵn trong git log).
+
+2. Dọn tiếp 854 file/thư mục còn sót lại sau khi merge (841 file trùng
+   loại đã dọn ở mục XII.5 nhưng bị merge kéo lại, cộng payload/, Mau_goc/,
+   GUI_MENU_HIEN_TAI/, Bai_13A_2_V4_*, Bai_33A_*, và vài file lẻ một-lần
+   khác) — tất cả đã xác minh không còn được app/ tham chiếu trước khi
+   xoá. Repo còn lại 236 file.
+
+3. Tạo trien_khai_thay_doi.sh — script triển khai chỉ đẩy phần chênh lệch
+   (xem lại mục VII, đã viết lại theo cách này).
+
+4. Rà soát lại bản vá HTTPS sau proxy (mục X) và phát hiện 2 lỗi:
+
+   a) app/main.py đọc sai tên biến môi trường: "PHOCAP_SESSION_SECRET"
+      (thiếu "_KEY") và không có fallback — do bản GitHub lấy ở bước 1
+      mang vào. docker-compose.yml chỉ cấp "PHOCAP_SESSION_SECRET_KEY",
+      nên nếu deploy nguyên trạng sẽ KeyError, container không khởi động
+      được. ĐÃ SỬA: đọc lại đúng tên "PHOCAP_SESSION_SECRET_KEY" bằng
+      os.environ.get(...), giữ fallback về giá trị phát triển cũ giống
+      mục III mô tả.
+
+   b) 55 template (thêm sau đợt vá 03/08, không liên quan tới merge ở
+      bước 1) vẫn dùng url_for('static', path='/css/style.css') thay vì
+      /static/css/style.css — sẽ vỡ giao diện sau proxy HTTPS giống hệt
+      lỗi gốc ở mục X.1. Danh sách đầy đủ nằm trong diff của commit sửa
+      lỗi này (git log). ĐÃ SỬA: thay toàn bộ 55 chỗ sang đường dẫn tương
+      đối /static/css/style.css.
+
+   Cả hai lỗi này CHƯA từng được đẩy lên server .24 (server vẫn đang chạy
+   bản mã nguồn cũ trước đợt merge), nên chưa gây sự cố thật. Trước khi
+   chạy trien_khai_thay_doi.sh lần đầu, nên chạy lại
+   check_sua_loi_https_v1.py để xác nhận cả hai đã sửa đúng.

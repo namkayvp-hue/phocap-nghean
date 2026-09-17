@@ -64,7 +64,10 @@ from app.routers.mn_official_reports import (
 BASE_DIR = Path(__file__).resolve().parent
 
 
-SESSION_SECRET_KEY = os.environ["PHOCAP_SESSION_SECRET"]
+SESSION_SECRET_KEY = os.environ.get(
+    "PHOCAP_SESSION_SECRET_KEY",
+    "phocap-mamnon-session-development-key-2026",
+)
 
 
 middleware = [
