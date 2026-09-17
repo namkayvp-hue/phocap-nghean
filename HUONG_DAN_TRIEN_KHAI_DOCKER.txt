@@ -398,3 +398,34 @@ XIII. CẬP NHẬT NGÀY 17/09/2026
    bản mã nguồn cũ trước đợt merge), nên chưa gây sự cố thật. Trước khi
    chạy trien_khai_thay_doi.sh lần đầu, nên chạy lại
    check_sua_loi_https_v1.py để xác nhận cả hai đã sửa đúng.
+
+5. Chạy trien_khai_thay_doi.sh LẦN ĐẦU thật (commit 0a4ef71, chưa có nhãn
+   da-trien-khai-server-24 nên đẩy toàn bộ mã nguồn). Container build lại,
+   restart, healthy. Xác nhận qua /api/kiem-tra, /static/css/style.css
+   (HTTP 200 đúng content-type), /dang-nhap không còn URL http:// nào.
+   Container không crash — xác nhận lỗi 4.a đã sửa đúng trên môi trường
+   thật (server .24 đã có PHOCAP_SESSION_SECRET_KEY trong .env).
+
+6. Cùng ngày, dev (Đậu Hồng Nam) đẩy thêm 1 commit lên GitHub (5efab2a):
+   thêm tính năng ẩn mục học tập khi không theo dõi
+   (app/templates/surveys/year_records.html), sửa nhãn menu tài chính, và
+   thêm app/static/js/year_record_tracking.js. Commit này LẶP LẠI đúng
+   lỗi ở mục 4.b (nạp file JS mới bằng
+   url_for('static', path='js/year_record_tracking.js')) — cho thấy lỗi
+   này có nguy cơ tái diễn mỗi khi có code mới từ nguồn khác, cần rà lại
+   mỗi lần pull. Đã pull, sửa thành /static/js/year_record_tracking.js,
+   push (e46906e), rồi chạy trien_khai_thay_doi.sh LẦN 2 — lần này script
+   nhận diện đúng chỉ 3 file thay đổi (không đẩy lại toàn bộ), xác nhận
+   cơ chế đẩy delta hoạt động đúng như thiết kế. Deploy thành công, đã
+   kiểm tra lại /static/js/year_record_tracking.js phục vụ đúng qua giả
+   lập proxy HTTPS.
+
+   Từ nay: mỗi khi pull code mới từ GitHub, nên chạy lại
+   check_sua_loi_https_v1.py hoặc tự grep "url_for(['\"]static['\"]"
+   trong app/templates/ trước khi deploy, vì đây là lỗi dễ tái phát khi
+   có người khác cùng sửa mã nguồn mà không biết quy ước /static/... .
+
+   Ghi nhận thêm (chưa xử lý, không khẩn cấp): thông báo trong
+   /api/kiem-tra và tiêu đề FastAPI ở app/main.py bị lỗi mã hoá (mojibake,
+   dạng "Pháº§n má»m..." thay vì "Phần mềm..."), không liên quan tới HTTPS,
+   chỉ ảnh hưởng hiển thị ở /docs và kết quả /api/kiem-tra.
