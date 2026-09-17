@@ -132,7 +132,7 @@
 
     <section class="rename-panel">
         <h2>Lịch sử đổi tên trường</h2>
-        {% if history %}
+        {% if history and not school_account %}
         <div class="table-wrap">
             <table>
                 <thead><tr><th>Năm hiệu lực</th><th>Xã/phường</th><th>Mã trường</th><th>Tên cũ</th><th>Tên mới</th></tr></thead>

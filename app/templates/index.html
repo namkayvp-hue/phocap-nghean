@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ ten_phan_mem }}</title>
+    <title>{{ nguoi_dung.unit_name if nguoi_dung and nguoi_dung.role_code == 'TRUONG' else ten_phan_mem }}</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>

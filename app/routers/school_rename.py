@@ -445,6 +445,11 @@ def execute_school_rename(
             )
             if cur.rowcount != 1:
                 raise RuntimeError("Không cập nhật được đúng 1 trường.")
+            con.execute(
+                "UPDATE users SET full_name=? WHERE school_id=? "
+                "AND lower(substr(username,1,7))='truong_'",
+                (clean_new_name, int(school_id)),
+            )
             integrity = con.execute("PRAGMA integrity_check").fetchone()[0]
             fk = con.execute("PRAGMA foreign_key_check").fetchall()
             if integrity != "ok":

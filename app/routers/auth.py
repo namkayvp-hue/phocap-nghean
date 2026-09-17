@@ -380,7 +380,7 @@ def api_lua_chon_dang_nhap(
             sub_parts = [
                 part
                 for part in (
-                    str(item.full_name or ""),
+                    str(item.school.name if item.school is not None and item.username.lower().startswith("truong_") else item.full_name or ""),
                     role_name,
                     location,
                 )
@@ -392,7 +392,7 @@ def api_lua_chon_dang_nhap(
                     "id": int(item.id),
                     "value": str(item.username or ""),
                     "text": str(item.username or ""),
-                    "subtext": " · ".join(sub_parts),
+                    "subtext": " · ".join(dict.fromkeys(sub_parts)),
                 }
             )
 

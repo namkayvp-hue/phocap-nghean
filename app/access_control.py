@@ -447,7 +447,11 @@ class AccessControlMiddleware:
             auth_user: dict[str, Any] = {
                 "id": user.id,
                 "username": user.username,
-                "full_name": user.full_name,
+                "full_name": (
+                    user.school.name
+                    if user.school is not None and user.username.lower().startswith("truong_")
+                    else user.full_name
+                ),
                 "role_code": role_code,
                 "role_name": user.role.name,
                 "commune_id": user.commune_id,
