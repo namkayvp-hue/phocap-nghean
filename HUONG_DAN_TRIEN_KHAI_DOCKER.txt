@@ -429,3 +429,38 @@ XIII. CẬP NHẬT NGÀY 17/09/2026
    /api/kiem-tra và tiêu đề FastAPI ở app/main.py bị lỗi mã hoá (mojibake,
    dạng "Pháº§n má»m..." thay vì "Phần mềm..."), không liên quan tới HTTPS,
    chỉ ảnh hưởng hiển thị ở /docs và kết quả /api/kiem-tra.
+
+7. Clone project sang máy phát triển khác (C:\project\PHOCAP, máy mới,
+   không phải máy đã làm mục XIII.1-6) từ GitHub
+   (github.com/namkayvp-hue/phocap-nghean). Rà lại bản vá HTTPS mục X:
+   xác nhận cả ba điểm vẫn đúng (0 template dùng url_for('static'),
+   Dockerfile có --proxy-headers, docker-compose.yml có
+   FORWARDED_ALLOW_IPS).
+
+   Máy mới KHÔNG có nhãn git cục bộ "da-trien-khai-server-24" (nhãn chỉ
+   tồn tại trên máy đã tạo ra nó, không được push lên GitHub — git không
+   tự đẩy tag trừ khi chạy "git push --tags"). Vì vậy chạy
+   trien_khai_thay_doi.sh trên máy mới LUÔN bị coi là "lần đầu": đẩy toàn
+   bộ mã nguồn đang được git theo dõi (238 tệp tính đến giờ) thay vì chỉ
+   phần chênh lệch. Không hại gì (data/, uploads/, .env vẫn được
+   .gitignore loại trừ), chỉ chậm hơn vì build lại từ đầu. CẦN LÀM RÕ
+   SAU: cân nhắc "git push --tags" sau mỗi lần deploy để đồng bộ nhãn này
+   giữa các máy phát triển, tránh lặp lại việc đẩy toàn bộ.
+
+   Đã chạy trien_khai_thay_doi.sh, deploy tới commit be34a3e ("Cho phep
+   tai khoan truong doi ten truong tai menu 1.3"). Container healthy,
+   /, /dang-nhap, /static/css/style.css, /api/kiem-tra đều đúng như mục
+   IX.
+
+   PHÁT HIỆN: check_sua_loi_https_v1.py báo lỗi giả ở bước 2 (dòng 83-86)
+   — "Trang /dang-nhap khong nap duoc /static/css/style.css". Nguyên
+   nhân: app/templates/auth/login.html không nạp CSS ngoài, toàn bộ kiểu
+   dáng nằm trong thẻ <style> nhúng ngay trong trang. Đây KHÔNG PHẢI lỗi
+   HTTPS thật (xác nhận bằng curl thủ công kèm X-Forwarded-Proto: https —
+   không có URL http:// tuyệt đối nào trong trang, không có mixed
+   content). Kiểm tra git log cho thấy login.html đã dùng <style> nhúng
+   từ khi khởi tạo git (commit 49df3a6, 14/09/2026), không phải thay đổi
+   mới — nghĩa là giả định "mọi trang đều nạp /static/css/style.css"
+   trong check_sua_loi_https_v1.py đã sai kể từ khi có git, chỉ là chưa
+   ai chạy lại script này để phát hiện. CHƯA SỬA script (đang chờ quyết
+   định có nên bỏ điều kiện này riêng cho /dang-nhap hay không).
