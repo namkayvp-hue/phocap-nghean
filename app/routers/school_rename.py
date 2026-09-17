@@ -36,6 +36,29 @@ def _auth_user(request: Request) -> dict[str, Any]:
 def _admin_only(request: Request) -> bool:
     return is_admin_role(normalize_role_code(_auth_user(request).get("role_code")))
 
+
+def _own_school(request: Request) -> dict[str, Any] | None:
+    user = _auth_user(request)
+    if normalize_role_code(user.get("role_code")) != "TRUONG":
+        return None
+    school_id = _safe_int(user.get("school_id"))
+    if school_id is None:
+        return None
+    with _connect(read_only=True) as con:
+        school = _school_row(con, school_id)
+    if school is None or not school["is_active"]:
+        return None
+    return dict(school)
+
+
+def _can_rename(request: Request, school_id: int | None = None) -> bool:
+    if _admin_only(request):
+        return True
+    own_school = _own_school(request)
+    return own_school is not None and (
+        school_id is None or int(own_school["id"]) == school_id
+    )
+
 def _safe_int(value: Any) -> int | None:
     try:
         text = str(value or "").strip()
@@ -112,7 +135,7 @@ def _school_row(con: sqlite3.Connection, school_id: int) -> sqlite3.Row | None:
         (int(school_id),),
     ).fetchone()
 
-def _history(limit: int = 100) -> list[dict[str, Any]]:
+def _history(limit: int = 100, school_id: int | None = None) -> list[dict[str, Any]]:
     with _connect(read_only=True) as con:
         try:
             rows = con.execute(
@@ -125,10 +148,11 @@ def _history(limit: int = 100) -> list[dict[str, Any]]:
                 JOIN schools s ON s.id=h.school_id
                 JOIN communes c ON c.id=s.commune_id
                 JOIN school_years y ON y.id=h.effective_school_year_id
+                WHERE (? IS NULL OR h.school_id=?)
                 ORDER BY h.id DESC
                 LIMIT ?
                 """,
-                (int(limit),),
+                (school_id, school_id, int(limit)),
             ).fetchall()
         except sqlite3.Error:
             return []
@@ -214,17 +238,28 @@ def _page_context(
     status_message: str = "",
     backup_name: str = "",
 ) -> dict[str, Any]:
+    school_account = normalize_role_code(_auth_user(request).get("role_code")) == "TRUONG"
+    own_school = _own_school(request) if school_account else None
+    if school_account:
+        if own_school is None:
+            raise ValueError("Tài khoản chưa gắn với trường đang hoạt động.")
+        school_id = int(own_school["id"])
+        commune_id = int(own_school["commune_id"])
     years = list_school_years()
     if school_year_id is None:
         school_year_id = _default_year_id(years)
     selected_year = _year_row(years, school_year_id)
     communes = [x for x in list_communes() if int(x.get("is_active") or 0) == 1]
+    if school_account:
+        communes = [x for x in communes if int(x["id"]) == commune_id]
     selected_commune = next(
         (x for x in communes if commune_id is not None and int(x["id"]) == int(commune_id)),
         None,
     )
     schools: list[dict[str, Any]] = []
-    if school_year_id is not None and commune_id is not None:
+    if school_account:
+        schools = [own_school]
+    elif school_year_id is not None and commune_id is not None:
         schools = list_schools(
             year_id=int(school_year_id),
             commune_id=int(commune_id),
@@ -236,6 +271,7 @@ def _page_context(
     )
     return {
         "nguoi_dung": _auth_user(request),
+        "school_account": school_account,
         "school_years": years,
         "selected_school_year_id": school_year_id,
         "selected_year": selected_year,
@@ -251,7 +287,7 @@ def _page_context(
         "error_message": error_message,
         "status_message": status_message,
         "backup_name": backup_name,
-        "history": _history(limit=100),
+        "history": _history(limit=100, school_id=school_id if school_account else None),
     }
 
 def _render(request: Request, *, status_code: int = 200, **kwargs: Any):
@@ -271,7 +307,7 @@ def school_rename_page(
     status: str = Query(default=""),
     backup_name: str = Query(default=""),
 ):
-    if not _admin_only(request):
+    if not _can_rename(request):
         return RedirectResponse(url="/?status=forbidden", status_code=303)
     message = ""
     if status == "success":
@@ -296,7 +332,7 @@ def preview_school_rename(
     school_id: int = Form(...),
     new_name: str = Form(...),
 ):
-    if not _admin_only(request):
+    if not _can_rename(request, school_id):
         return RedirectResponse(url="/?status=forbidden", status_code=303)
     try:
         years = list_school_years()
@@ -355,7 +391,7 @@ def execute_school_rename(
     school_id: int = Form(...),
     new_name: str = Form(...),
 ):
-    if not _admin_only(request):
+    if not _can_rename(request, school_id):
         return RedirectResponse(url="/?status=forbidden", status_code=303)
 
     backup: Path | None = None

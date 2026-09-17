@@ -37,7 +37,11 @@
         <h1>Đổi tên trường</h1>
         <p>Chức năng chỉ thay <strong>tên hiện hành</strong> của trường. <strong>school_id, mã trường và toàn bộ dữ liệu liên kết được giữ nguyên.</strong></p>
         <p>Phần đổi tên chỉ gồm <strong>Tên cũ → Tên mới</strong>. Không yêu cầu số văn bản, ngày văn bản hoặc ghi chú.</p>
+        {% if school_account %}
+        <p>Bạn có thể cập nhật tên mới của trường mình sau sáp nhập. Chọn năm học hiệu lực, nhập tên mới và xem trước để kiểm tra trước khi lưu.</p>
+        {% else %}
         <div class="actions"><a class="btn muted" href="/cong-cu-du-lieu/sap-nhap-truong">← Sáp nhập trường</a></div>
+        {% endif %}
     </section>
 
     {% if error_message %}<div class="note error"><strong>Không thực hiện:</strong> {{ error_message }}</div>{% endif %}
@@ -64,7 +68,7 @@
                 <div class="field">
                     <label>Xã/phường</label>
                     <div class="combo">
-                        <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off">
+                        <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off" {% if school_account %}readonly{% endif %}>
                         <input id="commune-id" name="commune_id" type="hidden" value="{{ selected_commune_id or '' }}">
                         <div id="commune-list" class="combo-list"></div>
                     </div>
@@ -73,11 +77,11 @@
                 <div class="field">
                     <label>Trường</label>
                     <div class="combo">
-                        <input id="school-search" type="text" value="{{ selected_school_name }}" placeholder="Gõ từ đầu tên trường..." autocomplete="off">
+                        <input id="school-search" type="text" value="{{ selected_school_name }}" placeholder="Gõ từ đầu tên trường..." autocomplete="off" {% if school_account %}readonly{% endif %}>
                         <input id="school-id" name="school_id" type="hidden" value="{{ selected_school_id or '' }}">
                         <div id="school-list" class="combo-list"></div>
                     </div>
-                    <div class="muted">Chỉ hiển thị trường đang hoạt động trong xã/phường đã chọn.</div>
+                    <div class="muted">{% if school_account %}Trường được cố định theo tài khoản đang đăng nhập.{% else %}Chỉ hiển thị trường đang hoạt động trong xã/phường đã chọn.{% endif %}</div>
                 </div>
             </div>
             <div class="actions"><button class="btn primary" type="submit">Hiển thị trường</button></div>
@@ -154,6 +158,7 @@
 <script>
 (function () {
     "use strict";
+    if ({{ school_account | default(false) | tojson }}) return;
     const communes = {{ communes | tojson }};
     const schools = {{ schools | tojson }};
     const communeInput = document.getElementById("commune-search");

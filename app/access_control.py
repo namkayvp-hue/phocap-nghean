@@ -529,6 +529,12 @@ class AccessControlMiddleware:
 
     @staticmethod
     def _co_quyen_theo_vai_tro(*, path: str, role_code: str) -> bool:
+        if path.rstrip("/") in {
+            "/cong-cu-du-lieu/doi-ten-truong",
+            "/cong-cu-du-lieu/doi-ten-truong/xem-truoc",
+            "/cong-cu-du-lieu/doi-ten-truong/thuc-hien",
+        }:
+            return is_admin_role(role_code) or role_code == SCHOOL_ROLE_CODE
         for path_prefix, allowed_roles in ROLE_RULES:
             if path.startswith(path_prefix):
                 return role_code in allowed_roles
@@ -545,6 +551,12 @@ class AccessControlMiddleware:
             return True
 
         normalized_path = path.rstrip("/") or "/"
+        if normalized_path in {
+            "/cong-cu-du-lieu/doi-ten-truong",
+            "/cong-cu-du-lieu/doi-ten-truong/xem-truoc",
+            "/cong-cu-du-lieu/doi-ten-truong/thuc-hien",
+        }:
+            return is_admin_role(role_code) or role_code == SCHOOL_ROLE_CODE
 
         # === V12_STUDENT_RECONCILIATION_SOURCE_ACTION_START ===
         if normalized_path.startswith("/dieu-tra/nguon-hoc-sinh-doi-chieu"):
