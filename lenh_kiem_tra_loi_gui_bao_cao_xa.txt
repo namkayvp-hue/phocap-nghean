@@ -1,1 +1,0 @@
-Get-ChildItem .\app -Recurse -File | Select-String -Pattern "Gửi lại báo cáo cho xã/phường|Gửi báo cáo cho xã/phường|gui-lai-bao-cao|gui-bao-cao|status=forbidden" -Context 6,10

@@ -1,9 +1,0 @@
-{
-  "name": "Bai_33A_3_Dinh_Dang_So_Tai_Chinh",
-  "scope": "display-only",
-  "database_write": false,
-  "files": {
-    "app/services/finance_school_service.py": "6afe6a8aacb0da41f8d5e9d3c8f14f9db09d9a75ee63c81ec741d8d6bdd2c9a7",
-    "app/templates/report_inputs/finance.html": "397ebf6441ed8687d740e6ffe27f6faa7319b81116307f21ad9d9b85e2c98df1"
-  }
-}
