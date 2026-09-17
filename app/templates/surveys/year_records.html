@@ -726,6 +726,11 @@
         /* === GV_MOBILE_V191_AFTER_SAVE_CSS_END === */
 
     </style>
+<style>
+    #year_record_form.not-tracking-learning [data-learning-only] {
+        display: none !important;
+    }
+</style>
 </head>
 <body class="{% if nguoi_dung.role_code == 'GIAO_VIEN' %}pc-gv-mobile-year-edit{% if year_record_saved %} pc-gv-v191-saved{% endif %}{% endif %}">
 {% include "partials/dropdown_menu_v1.html" %}
@@ -921,6 +926,7 @@
 
 <form
                 id="year_record_form"
+                class="{% if selected_record and selected_record.learning_status == 'KHONG_THUOC_DIEN' %}not-tracking-learning{% endif %}"
                 method="post"
                 action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/doi-tuong/{{ person.id }}/nam-hoc/luu"
             >
@@ -942,7 +948,7 @@
                 <div class="form-grid">
 
                     <!-- === BAI_13B_11_13_2_XMC_UI_START === -->
-                    <div class="form-group full b131132-card b131132-xmc-main">
+                    <div data-learning-only class="form-group full b131132-card b131132-xmc-main">
                         <div class="b131132-title">
                             1. Phạm vi điều tra Xóa mù chữ
                         </div>
@@ -979,7 +985,7 @@
                         </select>
                     </div>
 
-                    <div
+                    <div data-learning-only
                         id="b131132_xmc_details"
                         class="form-group full b131132-card b131132-xmc-details"
                     >
@@ -1271,7 +1277,7 @@
 
                     </div>
 
-                    <div class="form-group full lookup-group">
+                    <div data-learning-only class="form-group full lookup-group">
                         <label for="commune_search">
                             <span class="lookup-step">1</span>
                             Xã/phường hiện tại
@@ -1313,7 +1319,7 @@
                         ></div>
                     </div>
 
-                    <div class="form-group full lookup-group">
+                    <div data-learning-only class="form-group full lookup-group">
                         <label for="school_search">
                             <span class="lookup-step">2</span>
                             Trường hiện tại
@@ -1385,7 +1391,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group full lookup-group">
+                    <div data-learning-only class="form-group full lookup-group">
                         <label for="class_search">
                             <span class="lookup-step">3</span>
                             Lớp hiện tại
@@ -1449,7 +1455,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div data-learning-only class="form-group">
                         <label for="school_name_reported">
                             Tên trường theo phiếu
                         </label>
@@ -1464,7 +1470,7 @@
                         >
                     </div>
 
-                    <div class="form-group">
+                    <div data-learning-only class="form-group">
                         <label for="class_name_reported">
                             Tên lớp theo phiếu
                         </label>
@@ -1647,7 +1653,7 @@
 <!-- === BAI_13B_11_14_3_RESIDENCY_EVENTS_UI_END === -->
 
 <!-- === BAI_13B_11_14_2_PCGDMN_REPORT_UI_START === -->
-                    <div
+                    <div data-learning-only
                         id="b131133_preschool_indicators"
                         class="form-group full"
                     >
@@ -1736,7 +1742,7 @@
                     <!-- === BAI_13B_11_14_2_PCGDMN_REPORT_UI_END === -->
 
 <!-- === BAI_13B_11_13_2_LEVEL_UI_START === -->
-                    <div
+                    <div data-learning-only
                         id="b131132_primary_indicators"
                         class="form-group full b131132-card b131132-level-card"
                     >
@@ -1777,7 +1783,7 @@
                         </select>
                     </div>
 
-                    <div
+                    <div data-learning-only
                         id="b131132_thcs_indicators"
                         class="form-group full b131132-card b131132-level-card"
                     >
@@ -1866,7 +1872,7 @@
                     <!-- === BAI_13B_11_13_2_LEVEL_UI_END === -->
 
 
-                    <div class="form-group full disability-section">
+                    <div data-learning-only class="form-group full disability-section">
                         <div class="disability-heading">
                             <div>
                                 <h3>♿ Theo dõi trẻ khuyết tật</h3>
@@ -2006,7 +2012,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group full">
+                    <div data-learning-only class="form-group full">
                         <label for="special_circumstances">
                             Hoàn cảnh đặc biệt
                         </label>
@@ -2018,7 +2024,7 @@
                         >{{ selected_record.special_circumstances if selected_record and selected_record.special_circumstances else '' }}</textarea>
                     </div>
 
-                    <div class="form-group full">
+                    <div data-learning-only class="form-group full">
                         <label for="notes">Ghi chú</label>
 
                         <textarea
@@ -2031,7 +2037,7 @@
 
                 
 {# === BAI_13B_11_15_2_PRIMARY_THCS_INPUT_START === #}
-<div
+<div data-learning-only
     id="b1512_primary_thcs_fields"
     class="form-group full"
     hidden
@@ -5959,6 +5965,7 @@
             }
 
             showNote(select, age);
+            select.dispatchEvent(new Event("learning-tracking-updated"));
             return;
         }
 
@@ -5999,5 +6006,6 @@
 })();
 </script>
 <!-- === BAI29B_SAFE_AUTO_NOT_TRACKED_END === -->
+<script src="{{ url_for('static', path='js/year_record_tracking.js') }}"></script>
 </body>
 </html>
