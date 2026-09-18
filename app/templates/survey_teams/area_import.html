@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nhập Excel danh mục địa bàn</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<style>
+.area-import{max-width:1100px;margin:24px auto;background:white;padding:24px;border-radius:14px}
+.area-import table{width:100%;border-collapse:collapse;margin:20px 0}.area-import th,.area-import td{padding:10px;text-align:left;border-bottom:1px solid #ddd}
+.area-import th{background:#edf5ff}.area-error{padding:16px;background:#fff0f0;color:#a21b1b}.area-success{padding:16px;background:#edf9f0;color:#226a34}
+.area-actions{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+</style></head>
+<body>{% include "partials/dropdown_menu_v1.html" %}
+<main class="area-import">
+<h1>Nhập Excel danh mục thôn/xóm/khối/tổ/bản</h1>
+<p><strong>{{ commune.name }}</strong> · Năm học {{ year.code }}</p>
+{% if error %}<p class="area-error">{{ error }}</p>
+{% elif saved %}<p class="area-success">Đã thêm {{ created }} địa bàn. Bỏ qua {{ skipped }} địa bàn đã tồn tại.</p>
+{% else %}
+<p>Đọc được {{ rows|length }} địa bàn. Kiểm tra danh sách rồi xác nhận để lưu vào xã và năm học ở trên.</p>
+<div style="overflow:auto"><table><thead><tr><th>STT</th><th>Loại</th><th>Tên địa bàn</th><th>Số hộ dự kiến</th><th>Ghi chú</th><th>Kết quả dự kiến</th></tr></thead>
+<tbody>{% for row in rows %}<tr><td>{{ loop.index }}</td><td>{{ area_types[row.area_type] }}</td><td>{{ row.name }}</td><td>{{ row.expected_households }}</td><td>{{ row.notes }}</td><td>{{ 'Bỏ qua: đã tồn tại' if row.exists else 'Thêm mới' }}</td></tr>{% endfor %}</tbody></table></div>
+{% endif %}
+<div class="area-actions">
+{% if not error and not saved %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/nhap-excel/luu">
+<input type="hidden" name="school_year_id" value="{{ year.id }}">
+<textarea name="payload" hidden>{{ payload }}</textarea>
+<button type="submit" class="button button-primary">Xác nhận nhập địa bàn</button>
+</form>{% endif %}
+<a href="/dieu-tra/phan-cong-to-dieu-tra/dia-ban?school_year_id={{ year.id }}">Quay lại danh mục địa bàn</a>
+</div></main></body></html>

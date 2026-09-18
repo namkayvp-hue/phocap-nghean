@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+from io import BytesIO
+from zipfile import ZipFile
 from typing import Annotated, Any
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Form, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from openpyxl import Workbook, load_workbook
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -139,44 +142,42 @@ def level_school_ids(
             if item is not None
         }
 
-    exact_statement = select(SchoolNetworkYearData.school_id).where(
-        SchoolNetworkYearData.level_code == level_code
-    )
-    if school_year_id is not None:
-        exact_statement = exact_statement.where(
-            SchoolNetworkYearData.school_year_id == school_year_id
-        )
-
-    exact_ids = {
-        int(item)
-        for item in db.scalars(exact_statement.distinct()).all()
-    }
-    if exact_ids:
-        return exact_ids
-
-    # Nếu năm hiện tại chưa nhập mạng lưới, dùng phân loại cấp học gần nhất
-    # đã có trong hệ thống. Chỉ dùng để lọc danh mục, không tự sinh lớp.
     return {
-        int(item)
-        for item in db.scalars(
-            select(SchoolNetworkYearData.school_id)
-            .where(SchoolNetworkYearData.level_code == level_code)
-            .distinct()
-        ).all()
+        school_id
+        for school_id, levels in network_levels_by_school(db, school_year_id).items()
+        if level_code in levels
     }
 
 
-def school_levels(db: Session, school_id: int) -> list[str]:
-    levels = {
-        str(item).strip().upper()
-        for item in db.scalars(
-            select(SchoolNetworkYearData.level_code)
-            .where(SchoolNetworkYearData.school_id == school_id)
-            .distinct()
-        ).all()
-        if str(item or "").strip().upper() in LEVEL_LABELS
-    }
+def network_levels_by_school(
+    db: Session, school_year_id: int | None,
+) -> dict[int, set[str]]:
+    """D?ng n?m g?n nh?t c?a t?ng tr??ng, kh?ng l?y ph?n lo?i t? n?m t??ng lai."""
+    statement = (
+        select(
+            SchoolNetworkYearData.school_id,
+            SchoolNetworkYearData.level_code,
+            SchoolYear.code,
+        )
+        .join(SchoolYear, SchoolYear.id == SchoolNetworkYearData.school_year_id)
+        .order_by(SchoolYear.code.desc())
+    )
+    year = db.get(SchoolYear, school_year_id) if school_year_id else None
+    if year is not None:
+        statement = statement.where(SchoolYear.code <= year.code)
+    latest_year: dict[int, str] = {}
+    result: dict[int, set[str]] = {}
+    for school_id, level, year_code in db.execute(statement):
+        latest_year.setdefault(school_id, year_code)
+        if year_code == latest_year[school_id]:
+            result.setdefault(school_id, set()).add(str(level).strip().upper())
+    return result
 
+
+def school_levels(
+    db: Session, school_id: int, school_year_id: int | None = None,
+) -> list[str]:
+    levels = network_levels_by_school(db, school_year_id).get(school_id, set())
     is_thpt = db.scalar(
         select(THPTSchoolReference.id).where(
             THPTSchoolReference.official_school_id == school_id
@@ -184,9 +185,7 @@ def school_levels(db: Session, school_id: int) -> list[str]:
     )
     if is_thpt is not None:
         levels.add("THPT")
-
-    order = {code: index for index, code in enumerate(LEVEL_LABELS)}
-    return sorted(levels, key=lambda code: order.get(code, 999))
+    return [code for code in LEVEL_LABELS if code in levels]
 
 
 def load_years(db: Session) -> list[SchoolYear]:
@@ -388,8 +387,8 @@ def list_classes(
 
     if role == SCHOOL_ROLE_CODE and actor.get("school_id") is not None:
         school_id = int(actor["school_id"])
-        own_levels = school_levels(db, school_id)
-        if level_code is None and len(own_levels) == 1:
+        own_levels = school_levels(db, school_id, school_year_id)
+        if own_levels and level_code not in own_levels:
             level_code = own_levels[0]
     elif level_code is None:
         level_code = "MN"
@@ -511,7 +510,11 @@ def list_classes(
         name="classrooms/list.html",
         context={
             "nguoi_dung": actor,
-            "levels": LEVEL_LABELS,
+            "levels": (
+                {code: LEVEL_LABELS[code] for code in own_levels}
+                if role == SCHOOL_ROLE_CODE and actor.get("school_id") is not None and own_levels
+                else LEVEL_LABELS
+            ),
             "selected_level": level_code,
             "selected_level_label": LEVEL_LABELS.get(level_code, "Tất cả cấp"),
             "school_years": years,
@@ -535,6 +538,113 @@ def list_classes(
             "thpt_unlinked": thpt_unlinked,
         },
     )
+
+
+def read_class_excel(content: bytes) -> list[str]:
+    if len(content) > 5 * 1024 * 1024:
+        raise ValueError("File Excel không được vượt quá 5 MB.")
+    try:
+        with ZipFile(BytesIO(content)) as archive:
+            if sum(info.file_size for info in archive.infolist()) > 20 * 1024 * 1024:
+                raise ValueError("File Excel có dữ liệu giải nén quá lớn.")
+        workbook = load_workbook(BytesIO(content), read_only=True, data_only=False)
+    except ValueError:
+        raise
+    except Exception as exc:
+        raise ValueError("Không đọc được file. Hãy dùng file .xlsx theo mẫu.") from exc
+    try:
+        sheet = workbook.active
+        rows = sheet.iter_rows(max_row=1002, max_col=20)
+        header = next(rows, ())
+        columns = [i for i, cell in enumerate(header)
+                   if normalize_name(str(cell.value or "")).casefold() == "tên lớp"]
+        if len(columns) != 1:
+            raise ValueError("Dòng đầu phải có đúng một cột Tên lớp. Hãy tải file mẫu.")
+        column = columns[0]
+        names: list[str] = []
+        seen: set[str] = set()
+        for number, row in enumerate(rows, start=2):
+            cell = row[column]
+            if cell.value is None or not str(cell.value).strip():
+                continue
+            if number > 1001:
+                raise ValueError("File chỉ được chứa tối đa 1.000 dòng dữ liệu.")
+            name = normalize_name(str(cell.value))
+            if cell.data_type in {"f", "e"} or len(name) > 200 or ";" in name:
+                raise ValueError(f"Dòng {number}: tên lớp không hợp lệ; không dùng công thức hoặc dấu chấm phẩy.")
+            if name.casefold() not in seen:
+                names.append(name)
+                seen.add(name.casefold())
+        if sheet.max_row and sheet.max_row > 1002:
+            raise ValueError("File chỉ được chứa tối đa 1.000 dòng dữ liệu.")
+        if not names or len(names) > 200:
+            raise ValueError("File phải có từ 1 đến 200 tên lớp khác nhau.")
+        return names
+    finally:
+        workbook.close()
+
+
+@router.get("/mau-excel")
+def class_excel_template(request: Request, cap: str = "TH"):
+    if role_of(request) not in READ_ROLES:
+        return RedirectResponse("/?status=forbidden", 303)
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Danh sách lớp"
+    sheet.append(["STT", "Tên lớp"])
+    examples = {"MN": ["3 tuổi A", "4 tuổi A"], "THCS": ["6A", "6B"], "THPT": ["10A1", "10A2"]}
+    for index, name in enumerate(examples.get(cap, ["1A", "1B"]), 1):
+        sheet.append([index, name])
+    sheet.column_dimensions["A"].width = 10
+    sheet.column_dimensions["B"].width = 35
+    sheet.freeze_panes = "A2"
+    output = BytesIO()
+    workbook.save(output)
+    workbook.close()
+    output.seek(0)
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             headers={"Content-Disposition": 'attachment; filename="mau_danh_sach_lop.xlsx"'})
+
+
+@router.post("/nhap-excel", response_class=HTMLResponse)
+def preview_class_excel(
+    request: Request,
+    school_year_id: Annotated[int, Form()],
+    school_id: Annotated[int, Form()],
+    file: Annotated[UploadFile, File()],
+    cap: Annotated[str, Form()] = "",
+    db: Session = Depends(get_db),
+):
+    level = normalize_level(cap)
+    year, school, error = validate_target(request, db, school_year_id=school_year_id,
+                                           school_id=school_id, level_code=level)
+    if error:
+        file.file.close()
+        return redirect_list(school_year_id=school_year_id, school_id=school_id,
+                             commune_id=school.commune_id if school else None,
+                             level_code=level, status=error)
+    names = []
+    message = ""
+    try:
+        if not str(file.filename or "").lower().endswith(".xlsx"):
+            raise ValueError("Vui lòng chọn file Excel .xlsx.")
+        names = read_class_excel(file.file.read(5 * 1024 * 1024 + 1))
+    except ValueError as exc:
+        message = str(exc)
+    finally:
+        file.file.close()
+    existing = {normalize_name(item.name).casefold(): item for item in db.scalars(
+        select(Classroom).where(Classroom.school_id == school_id, Classroom.school_year_id == school_year_id)
+    )}
+    rows = []
+    for name in names:
+        item = existing.get(name.casefold())
+        action = "Thêm mới" if item is None else ("Bỏ qua: đã tồn tại" if item.is_active else "Mở lại lớp đã khóa")
+        rows.append({"name": name, "action": action})
+    return templates.TemplateResponse(request=request, name="classrooms/import_preview.html",
+        context={"nguoi_dung": actor_of(request), "school": school, "year": year,
+                 "cap": level or "", "rows": rows, "names": "\n".join(names), "error": message},
+        status_code=400 if message else 200)
 
 
 @router.post("/them")

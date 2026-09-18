@@ -86,6 +86,16 @@ td.num,th.num{text-align:right}.muted{color:#758798;font-size:12px}.nowrap{white
 
 <section class="b1322-panel">
 <h2>2. Khai báo địa bàn và số hộ dự kiến</h2>
+{% if selected_year and selected_year.is_active %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/nhap-excel" enctype="multipart/form-data" class="b1322-note">
+<h3>Nhập danh mục từ Excel</h3>
+<input type="hidden" name="school_year_id" value="{{ selected_year.id }}">
+<p><a href="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/mau-excel">Tải file Excel mẫu</a> · Điền loại địa bàn, tên địa bàn, số hộ dự kiến và ghi chú. Thay các dòng ví dụ bằng danh mục của xã.</p>
+<div class="b1322-field"><label for="area-excel">Chọn file .xlsx (tối đa 500 địa bàn, 5 MB)</label><input id="area-excel" type="file" name="file" accept=".xlsx" required></div>
+<p>Địa bàn trùng loại và tên đã có trong năm học sẽ được bỏ qua. Dữ liệu hiện có và phân công tổ được giữ nguyên.</p>
+<button class="b1322-btn b1322-primary" type="submit">Xem trước dữ liệu Excel</button>
+</form>
+{% endif %}
 <form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/dia-ban/luu" id="area-form">
 <input type="hidden" name="school_year_id" value="{{ selected_year.id if selected_year else '' }}">
 <input type="hidden" name="batch_id" value="{{ selected_batch.id if selected_batch else '' }}">

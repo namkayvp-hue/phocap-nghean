@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Xem trước danh sách lớp Excel</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .import-page{max-width:1000px;margin:24px auto;padding:24px;background:white;border-radius:16px}
+        .import-page table{width:100%;border-collapse:collapse;margin:20px 0}
+        .import-page td,.import-page th{padding:10px;text-align:left;border-bottom:1px solid #ddd}
+        .import-page th{background:#edf5ff}.import-error{color:#a21b1b;padding:16px;background:#fff0f0}
+        .import-actions{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+    </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="import-page">
+    <h1>Xem trước danh sách lớp Excel</h1>
+    <p><strong>{{ school.name }}</strong> · Năm học {{ year.code }}</p>
+    {% if error %}<p class="import-error">{{ error }}</p>{% else %}
+    <p>Đọc được {{ rows|length }} tên lớp khác nhau. Kiểm tra danh sách trước khi lưu. Các dòng trùng tên trong file đã được gộp.</p>
+    <table><thead><tr><th>STT</th><th>Tên lớp</th><th>Kết quả dự kiến</th></tr></thead>
+    <tbody>{% for row in rows %}<tr><td>{{ loop.index }}</td><td>{{ row.name }}</td><td>{{ row.action }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+    <div class="import-actions">
+        {% if not error %}
+        <form method="post" action="/lop-hoc/them">
+            <input type="hidden" name="school_year_id" value="{{ year.id }}">
+            <input type="hidden" name="school_id" value="{{ school.id }}">
+            <input type="hidden" name="cap" value="{{ cap }}">
+            <textarea name="ten_lop" hidden>{{ names }}</textarea>
+            <button class="button button-primary" type="submit">Xác nhận nhập lớp</button>
+        </form>
+        {% endif %}
+        <a href="/lop-hoc?school_year_id={{ year.id }}&school_id={{ school.id }}&cap={{ cap }}">Quay lại danh mục lớp</a>
+    </div>
+</main>
+</body>
+</html>

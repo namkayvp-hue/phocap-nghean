@@ -638,18 +638,6 @@
                 <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown" role="menu">
                     <a href="/truong" role="menuitem">1.1. Danh sách trường thuộc xã/phường</a>
-                    {# === BAI_13B_11_16_1_CLASSROOM_CATALOG_COMMUNE_MENU === #}
-                    <div class="pc-submenu">
-                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">1.2. Danh mục lớp</span><span class="pc-submenu-arrow">▶</span>
-                        </button>
-                        <div class="pc-submenu-panel" role="menu">
-                            <a href="/lop-hoc?cap=MN" role="menuitem">1.2.1. Lớp Mầm non</a>
-                            <a href="/lop-hoc?cap=TH" role="menuitem">1.2.2. Lớp Tiểu học</a>
-                            <a href="/lop-hoc?cap=THCS" role="menuitem">1.2.3. Lớp THCS</a>
-                            <a href="/lop-hoc?cap=THPT" role="menuitem">1.2.4. Lớp THPT</a>
-                        </div>
-                    </div>
                     {# === BAI_13B_12_V2_2_MENU_AREA_START === #}
                     <a href="/dieu-tra/phan-cong-to-dieu-tra/dia-ban" role="menuitem">1.3. Danh mục thôn/xóm/khối/tổ/bản</a>
                     {# === BAI_13B_12_V2_2_MENU_AREA_END === #}
@@ -920,25 +908,25 @@
             {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
             <div class="pc-menu-group {% if menu_path.startswith('/doi-ngu') %}is-active{% endif %}">
                 <button type="button" class="pc-menu-trigger" aria-expanded="false">
-                    4. Đội ngũ <span class="pc-menu-caret">▾</span>
+                    {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}. Đội ngũ <span class="pc-menu-caret">▾</span>
                 </button>
 
                 <div class="pc-dropdown pc-dropdown--right" role="menu">
 
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">4.1. Mầm non</span>
+                            <span class="pc-submenu-trigger__text">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1. Mầm non</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">
-                                4.1.1. MN-01-GV – Nhập/kiểm tra dữ liệu
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.1. MN-01-GV – Nhập/kiểm tra dữ liệu
                             </a>
                             <a href="/doi-ngu" role="menuitem">
-                                4.1.2. Danh sách đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.2. Danh sách đội ngũ
                             </a>
                             <a href="/doi-ngu/kiem-tra-du-lieu" role="menuitem">
-                                4.1.3. Kiểm tra dữ liệu đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.3. Kiểm tra dữ liệu đội ngũ
                             </a>
 
                         </div>
@@ -946,23 +934,23 @@
 
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">4.2. Tiểu học</span>
+                            <span class="pc-submenu-trigger__text">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.2. Tiểu học</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             <a href="/bieu-nhap/th-01-gv" role="menuitem">
-                                4.2.1. TH-01-GV – Nhập dữ liệu chuyên biệt
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.2.1. TH-01-GV – Nhập dữ liệu chuyên biệt
                             </a>
                             {# === FIX_MENU_STAFF_LIST_TH_V1_START === #}
                             <a
                                 href="/bieu-nhap/th-01-gv#danh-sach-nhan-su"
                                 role="menuitem"
                             >
-                                4.2.2. Danh sách đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.2.2. Danh sách đội ngũ
                             </a>
                             {# === FIX_MENU_STAFF_LIST_TH_V1_END === #}
                             <a href="/bieu-nhap/th-01-gv#kiem-tra" role="menuitem">
-                                4.2.3. Kiểm tra dữ liệu TH-01-GV
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.2.3. Kiểm tra dữ liệu TH-01-GV
                             </a>
 
                         </div>
@@ -970,23 +958,23 @@
 
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">4.3. THCS</span>
+                            <span class="pc-submenu-trigger__text">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3. THCS</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             <a href="/bieu-nhap/thcs-01-gv" role="menuitem">
-                                4.3.1. THCS-01-GV – Nhập dữ liệu chuyên biệt
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3.1. THCS-01-GV – Nhập dữ liệu chuyên biệt
                             </a>
                             {# === FIX_MENU_STAFF_LIST_THCS_V1_START === #}
                             <a
                                 href="/bieu-nhap/thcs-01-gv#danh-sach-nhan-su"
                                 role="menuitem"
                             >
-                                4.3.2. Danh sách đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3.2. Danh sách đội ngũ
                             </a>
                             {# === FIX_MENU_STAFF_LIST_THCS_V1_END === #}
                             <a href="/bieu-nhap/thcs-01-gv#kiem-tra" role="menuitem">
-                                4.3.3. Kiểm tra dữ liệu THCS-01-GV
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3.3. Kiểm tra dữ liệu THCS-01-GV
                             </a>
 
                         </div>
@@ -995,56 +983,56 @@
                     {% if menu_role in ['ADMIN', 'SO'] %}
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">4.4. Công cụ quản lý chung</span>
+                            <span class="pc-submenu-trigger__text">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.4. Công cụ quản lý chung</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
-                            <a href="/doi-ngu/them" role="menuitem">4.4.1. Thêm nhân sự</a>
+                            <a href="/doi-ngu/them" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.4.1. Thêm nhân sự</a>
                             
-                            <a href="/doi-ngu/xuat-mau-excel" role="menuitem">4.4.3. Xuất mẫu Excel đội ngũ</a>
-                            <a href="/doi-ngu/xuat-danh-sach-excel" role="menuitem">4.4.4. Xuất danh sách Excel</a>
+                            <a href="/doi-ngu/xuat-mau-excel" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.4.3. Xuất mẫu Excel đội ngũ</a>
+                            <a href="/doi-ngu/xuat-danh-sach-excel" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.4.4. Xuất danh sách Excel</a>
                         </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
             {% else %}
-            {# 4. ĐỘI NGŨ: mọi cấp được xem; ADMIN/SO và Trường có quyền cập nhật. #}
+            {# {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}. ĐỘI NGŨ: mọi cấp được xem; ADMIN/SO và Trường có quyền cập nhật. #}
             <div class="pc-menu-group {% if menu_path.startswith('/doi-ngu') %}is-active{% endif %}">
-                <button type="button" class="pc-menu-trigger" aria-expanded="false">4. Đội ngũ <span class="pc-menu-caret">▾</span></button>
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}. Đội ngũ <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown" role="menu">
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">4.1. Dữ liệu đội ngũ</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1. Dữ liệu đội ngũ</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                                                         {# === FIX_4_1_1_STAFF_LIST_BY_SCHOOL_LEVEL_V1_1_START === #}
                             {% if menu_role == 'TRUONG' and menu_school_thcs and not menu_school_liencap %}
                             <a href="/bieu-nhap/thcs-01-gv#danh-sach-nhan-su" role="menuitem">
-                                4.1.1. Danh sách đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.1. Danh sách đội ngũ
                             </a>
                             {% elif menu_role == 'TRUONG' and (menu_school_th or menu_school_liencap) %}
                             <a href="/bieu-nhap/th-01-gv#danh-sach-nhan-su" role="menuitem">
-                                4.1.1. Danh sách đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.1. Danh sách đội ngũ
                             </a>
                             {% else %}
                             <a href="/doi-ngu" role="menuitem">
-                                4.1.1. Danh sách đội ngũ
+                                {{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.1. Danh sách đội ngũ
                             </a>
                             {% endif %}
                             {# === FIX_4_1_1_STAFF_LIST_BY_SCHOOL_LEVEL_V1_1_END === #}
-                            <a href="/doi-ngu/kiem-tra-du-lieu" role="menuitem">4.1.2. Kiểm tra dữ liệu đội ngũ</a>
-                            <a href="/doi-ngu/xuat-mau-excel" role="menuitem">4.1.3. Xuất mẫu Excel đội ngũ</a>
-                            <a href="/doi-ngu/xuat-danh-sach-excel" role="menuitem">4.1.4. Xuất danh sách Excel</a>
+                            <a href="/doi-ngu/kiem-tra-du-lieu" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.2. Kiểm tra dữ liệu đội ngũ</a>
+                            <a href="/doi-ngu/xuat-mau-excel" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.3. Xuất mẫu Excel đội ngũ</a>
+                            <a href="/doi-ngu/xuat-danh-sach-excel" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.1.4. Xuất danh sách Excel</a>
                         </div>
                     </div>
                     {% if menu_role in ['ADMIN', 'SO', 'TRUONG'] %}
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">4.2. Cập nhật đội ngũ</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.2. Cập nhật đội ngũ</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
-                            <a href="/doi-ngu/them" role="menuitem">4.2.1. Thêm nhân sự</a>
+                            <a href="/doi-ngu/them" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.2.1. Thêm nhân sự</a>
                             
                         </div>
                     </div>
@@ -1052,14 +1040,14 @@
 
                     {# === BAI_13B_3_GV_REPORT_INPUT_MENU_START === #}
                     {% if menu_role in ['ADMIN', 'SO'] %}
-                    <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">4.3. Nhập dữ liệu MN-01-GV</a>
+                    <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3. Nhập dữ liệu MN-01-GV</a>
                     {% elif menu_role == 'TRUONG' %}
                         {% if menu_school_thcs and not menu_school_liencap %}
-                        <a href="/bieu-nhap/thcs-01-gv" role="menuitem">4.3. Nhập dữ liệu THCS-01-GV</a>
+                        <a href="/bieu-nhap/thcs-01-gv" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3. Nhập dữ liệu THCS-01-GV</a>
                         {% elif menu_school_th or menu_school_liencap %}
-                        <a href="/bieu-nhap/th-01-gv" role="menuitem">4.3. Nhập dữ liệu TH-01-GV</a>
+                        <a href="/bieu-nhap/th-01-gv" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3. Nhập dữ liệu TH-01-GV</a>
                         {% else %}
-                        <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">4.3. Nhập dữ liệu MN-01-GV</a>
+                        <a href="/doi-ngu/nhap-mn-01-gv" role="menuitem">{{ 4 if menu_role in ['ADMIN', 'SO'] else 3 }}.3. Nhập dữ liệu MN-01-GV</a>
                         {% endif %}
                     {% endif %}
                     {# === BAI_13B_3_GV_REPORT_INPUT_MENU_END === #}
@@ -1074,31 +1062,31 @@
             {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
             <div class="pc-menu-group {% if menu_path.startswith('/csvc') or menu_path == '/bao-cao/tai-chinh/nhap' %}is-active{% endif %}">
                 <button type="button" class="pc-menu-trigger" aria-expanded="false">
-                    CSVC <span class="pc-menu-caret">▾</span>
+                    {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}. CSVC <span class="pc-menu-caret">▾</span>
                 </button>
 
                 <div class="pc-dropdown pc-dropdown--right" role="menu">
 
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">CSVC.1. Mầm non</span>
+                            <span class="pc-submenu-trigger__text">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1. Mầm non</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             <a href="/csvc/co-so" role="menuitem">
-                                CSVC.1.1. MN-01-CSVC – Cơ sở và điểm trường
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1.1. MN-01-CSVC – Cơ sở và điểm trường
                             </a>
                             <a href="/csvc/nhom-lop" role="menuitem">
-                                CSVC.1.2. Nhóm/lớp và phòng học
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1.2. Nhóm/lớp và phòng học
                             </a>
                             <a href="/csvc/cong-trinh" role="menuitem">
-                                CSVC.1.3. Thiết bị, vệ sinh và nước sạch
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1.3. Thiết bị, vệ sinh và nước sạch
                             </a>
                             <a href="/csvc/bep-san" role="menuitem">
-                                CSVC.1.4. Bếp ăn, sân chơi và đồ chơi
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1.4. Bếp ăn, sân chơi và đồ chơi
                             </a>
                             <a href="/csvc/kiem-tra" role="menuitem">
-                                CSVC.1.5. Kiểm tra dữ liệu MN-01-CSVC
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1.5. Kiểm tra dữ liệu MN-01-CSVC
                             </a>
 
                         </div>
@@ -1106,21 +1094,21 @@
 
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">CSVC.2. Tiểu học</span>
+                            <span class="pc-submenu-trigger__text">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2. Tiểu học</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             <a href="/bieu-nhap/th-01-csvc#diem-truong-lop-phong" role="menuitem">
-                                CSVC.2.1. TH-01-CSVC – Điểm trường, lớp và phòng học
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2.1. TH-01-CSVC – Điểm trường, lớp và phòng học
                             </a>
                             <a href="/bieu-nhap/th-01-csvc#phong-chuc-nang" role="menuitem">
-                                CSVC.2.2. Phòng chức năng
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2.2. Phòng chức năng
                             </a>
                             <a href="/bieu-nhap/th-01-csvc#cong-trinh-ve-sinh" role="menuitem">
-                                CSVC.2.3. Công trình vệ sinh
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2.3. Công trình vệ sinh
                             </a>
                             <a href="/bieu-nhap/th-01-csvc#san-bai" role="menuitem">
-                                CSVC.2.4. Sân chơi và bãi tập
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2.4. Sân chơi và bãi tập
                             </a>
 
                         </div>
@@ -1128,28 +1116,28 @@
 
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">CSVC.3. THCS</span>
+                            <span class="pc-submenu-trigger__text">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3. THCS</span>
                             <span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             <a href="/bieu-nhap/thcs-01-csvc#diem-truong-lop-phong" role="menuitem">
-                                CSVC.3.1. THCS-01-CSVC – Điểm trường, lớp và phòng học
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3.1. THCS-01-CSVC – Điểm trường, lớp và phòng học
                             </a>
                             <a href="/bieu-nhap/thcs-01-csvc#phong-chuc-nang" role="menuitem">
-                                CSVC.3.2. Phòng chức năng và phòng thí nghiệm
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3.2. Phòng chức năng và phòng thí nghiệm
                             </a>
                             <a href="/bieu-nhap/thcs-01-csvc#cong-trinh-ve-sinh" role="menuitem">
-                                CSVC.3.3. Công trình vệ sinh
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3.3. Công trình vệ sinh
                             </a>
                             <a href="/bieu-nhap/thcs-01-csvc#san-bai" role="menuitem">
-                                CSVC.3.4. Sân chơi và bãi tập
+                                {{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3.4. Sân chơi và bãi tập
                             </a>
 
                         </div>
                     </div>
 
                     {# === BAI_33A_2_FINANCE_IN_CSVC_ADMIN_START === #}
-                    <a href="/bao-cao/tai-chinh/nhap" role="menuitem">CSVC.4. Nhập dữ liệu báo cáo tài chính</a>
+                    <a href="/bao-cao/tai-chinh/nhap" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.4. Nhập dữ liệu báo cáo tài chính</a>
                     {# === BAI_33A_2_FINANCE_IN_CSVC_ADMIN_END === #}
 
                 </div>
@@ -1158,31 +1146,31 @@
             {# === BAI_13B_3_CSVC_MENU_START === #}
             {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN', 'XA', 'TRUONG'] %}
             <div class="pc-menu-group {% if menu_path.startswith('/csvc') or menu_path == '/bao-cao/tai-chinh/nhap' %}is-active{% endif %}">
-                <button type="button" class="pc-menu-trigger" aria-expanded="false">CSVC <span class="pc-menu-caret">▾</span></button>
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}. CSVC <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown" role="menu">
                     {% if menu_role == 'TRUONG' and menu_school_thcs and not menu_school_liencap %}
-                        <a href="/bieu-nhap/thcs-01-csvc#diem-truong-lop-phong" role="menuitem">CSVC.1. Điểm trường, lớp và phòng học</a>
-                        <a href="/bieu-nhap/thcs-01-csvc#phong-chuc-nang" role="menuitem">CSVC.2. Phòng chức năng và phòng thí nghiệm</a>
-                        <a href="/bieu-nhap/thcs-01-csvc#cong-trinh-ve-sinh" role="menuitem">CSVC.3. Công trình vệ sinh</a>
-                        <a href="/bieu-nhap/thcs-01-csvc#san-bai" role="menuitem">CSVC.4. Sân chơi và bãi tập</a>
-                        <a href="/bieu-nhap/thcs-01-csvc#kiem-tra" role="menuitem">CSVC.5. Kiểm tra dữ liệu THCS-01-CSVC</a>
+                        <a href="/bieu-nhap/thcs-01-csvc#diem-truong-lop-phong" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1. Điểm trường, lớp và phòng học</a>
+                        <a href="/bieu-nhap/thcs-01-csvc#phong-chuc-nang" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2. Phòng chức năng và phòng thí nghiệm</a>
+                        <a href="/bieu-nhap/thcs-01-csvc#cong-trinh-ve-sinh" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3. Công trình vệ sinh</a>
+                        <a href="/bieu-nhap/thcs-01-csvc#san-bai" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.4. Sân chơi và bãi tập</a>
+                        <a href="/bieu-nhap/thcs-01-csvc#kiem-tra" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.5. Kiểm tra dữ liệu THCS-01-CSVC</a>
                     {% elif menu_role == 'TRUONG' and (menu_school_th or menu_school_liencap) %}
-                        <a href="/bieu-nhap/th-01-csvc#diem-truong-lop-phong" role="menuitem">CSVC.1. Điểm trường, lớp và phòng học</a>
-                        <a href="/bieu-nhap/th-01-csvc#phong-chuc-nang" role="menuitem">CSVC.2. Phòng chức năng</a>
-                        <a href="/bieu-nhap/th-01-csvc#cong-trinh-ve-sinh" role="menuitem">CSVC.3. Công trình vệ sinh</a>
-                        <a href="/bieu-nhap/th-01-csvc#san-bai" role="menuitem">CSVC.4. Sân chơi và bãi tập</a>
-                        <a href="/bieu-nhap/th-01-csvc#kiem-tra" role="menuitem">CSVC.5. Kiểm tra dữ liệu TH-01-CSVC</a>
+                        <a href="/bieu-nhap/th-01-csvc#diem-truong-lop-phong" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1. Điểm trường, lớp và phòng học</a>
+                        <a href="/bieu-nhap/th-01-csvc#phong-chuc-nang" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2. Phòng chức năng</a>
+                        <a href="/bieu-nhap/th-01-csvc#cong-trinh-ve-sinh" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3. Công trình vệ sinh</a>
+                        <a href="/bieu-nhap/th-01-csvc#san-bai" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.4. Sân chơi và bãi tập</a>
+                        <a href="/bieu-nhap/th-01-csvc#kiem-tra" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.5. Kiểm tra dữ liệu TH-01-CSVC</a>
                     {% else %}
-                        <a href="/csvc/co-so" role="menuitem">CSVC.1. Cơ sở và điểm trường</a>
-                        <a href="/csvc/nhom-lop" role="menuitem">CSVC.2. Nhóm/lớp và phòng học</a>
-                        <a href="/csvc/cong-trinh" role="menuitem">CSVC.3. Thiết bị, vệ sinh và nước sạch</a>
-                        <a href="/csvc/bep-san" role="menuitem">CSVC.4. Bếp ăn, sân chơi và đồ chơi</a>
-                        <a href="/csvc/kiem-tra" role="menuitem">CSVC.5. Kiểm tra dữ liệu MN-01-CSVC</a>
+                        <a href="/csvc/co-so" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.1. Cơ sở và điểm trường</a>
+                        <a href="/csvc/nhom-lop" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.2. Nhóm/lớp và phòng học</a>
+                        <a href="/csvc/cong-trinh" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.3. Thiết bị, vệ sinh và nước sạch</a>
+                        <a href="/csvc/bep-san" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.4. Bếp ăn, sân chơi và đồ chơi</a>
+                        <a href="/csvc/kiem-tra" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.5. Kiểm tra dữ liệu MN-01-CSVC</a>
                     {% endif %}
 
                     {# === BAI_33A_2_FINANCE_IN_CSVC_SCHOOL_START === #}
                     {% if menu_role == 'PHONG_BAN' or (menu_role == 'TRUONG' and (menu_school_mn or (not menu_school_th and not menu_school_thcs))) %}
-                        <a href="/bao-cao/tai-chinh/nhap" role="menuitem">CSVC.6. Nhập dữ liệu báo cáo tài chính</a>
+                        <a href="/bao-cao/tai-chinh/nhap" role="menuitem">{{ 5 if menu_role in ['ADMIN', 'SO'] else 4 }}.6. Nhập dữ liệu báo cáo tài chính</a>
                     {% endif %}
                     {# === BAI_33A_2_FINANCE_IN_CSVC_SCHOOL_END === #}
                 </div>
@@ -1193,20 +1181,20 @@
             {# === BAI_13B_5_V1_CSVC_MENU_END === #}
 
 
-            {# 5. BÁO CÁO: mở rộng PCGD Mầm non + Tiểu học + THCS + Xóa mù chữ.
+            {# {{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}. BÁO CÁO: mở rộng PCGD Mầm non + Tiểu học + THCS + Xóa mù chữ.
                Giữ nguyên các route cũ; 13 biểu mới dùng route Trung tâm báo cáo hiện có với report_type mới. #}
             <div class="pc-menu-group {% if menu_path.startswith('/bao-cao') and menu_path != '/bao-cao/tai-chinh/nhap' %}is-active{% endif %}">
-                <button type="button" class="pc-menu-trigger" aria-expanded="false">5. Báo cáo <span class="pc-menu-caret">▾</span></button>
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}. Báo cáo <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown pc-dropdown--right" role="menu">
                                         <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">5.1. Trung tâm báo cáo</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.1. Trung tâm báo cáo</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
-                            <a href="/bao-cao?report_type=TONG_HOP_DIEU_TRA" role="menuitem">5.1.1. Báo cáo tổng hợp điều tra</a>
-                            <a href="/bao-cao?report_type=BIEN_DONG_THEO_DOI" role="menuitem">5.1.2. Biến động – theo dõi</a>
-                            <a href="/bao-cao?report_type=DOI_CHIEU_HOC_SINH" role="menuitem">5.1.3. Đối chiếu điều tra với học sinh</a>
-                            <a href="/bao-cao?report_type=TIEN_DO_CHOT" role="menuitem">5.1.4. Tiến độ – đôn đốc</a>
+                            <a href="/bao-cao?report_type=TONG_HOP_DIEU_TRA" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.1.1. Báo cáo tổng hợp điều tra</a>
+                            <a href="/bao-cao?report_type=BIEN_DONG_THEO_DOI" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.1.2. Biến động – theo dõi</a>
+                            <a href="/bao-cao?report_type=DOI_CHIEU_HOC_SINH" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.1.3. Đối chiếu điều tra với học sinh</a>
+                            <a href="/bao-cao?report_type=TIEN_DO_CHOT" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.1.4. Tiến độ – đôn đốc</a>
                         </div>
                     </div>
 
@@ -1214,18 +1202,18 @@
                     {% if menu_role not in ['TRUONG', 'GIAO_VIEN'] or menu_school_mn or (not menu_school_th and not menu_school_thcs) %}
 <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">5.2. Báo cáo Mầm non</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2. Báo cáo Mầm non</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                                                                         <div class="pc-submenu-panel" role="menu">
                             {# === BAI_13B_12_V2_4_2_MN_7_REPORT_MENU_START === #}
                             {# === BAI_13B_12_V2_4_3_4_MENU_7_MN_SINGLE_PIPELINE === #}
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-01-te" role="menuitem">5.2.1. MN-01-TE – Thống kê trẻ em Mầm non theo độ tuổi</a>
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-02" role="menuitem">5.2.2. MN-02 – Kết quả PCGD Mầm non</a>
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-01-gv" role="menuitem">5.2.3. MN-01-GV – Thống kê đội ngũ CBQL, giáo viên, nhân viên</a>
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-01-csvc" role="menuitem">5.2.4. MN-01-CSVC – Cơ sở vật chất</a>
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-tc" role="menuitem">5.2.5. MN-TC – Báo cáo tài chính</a>
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=tre-khuyet-tat" role="menuitem">5.2.6. MN-Trẻ KT – Thống kê trẻ khuyết tật</a>
-                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=so-theo-doi" role="menuitem">5.2.7. Sổ theo dõi PCGDMN</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-01-te" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.1. MN-01-TE – Thống kê trẻ em Mầm non theo độ tuổi</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-02" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.2. MN-02 – Kết quả PCGD Mầm non</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-01-gv" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.3. MN-01-GV – Thống kê đội ngũ CBQL, giáo viên, nhân viên</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-01-csvc" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.4. MN-01-CSVC – Cơ sở vật chất</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=mn-tc" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.5. MN-TC – Báo cáo tài chính</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=tre-khuyet-tat" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.6. MN-Trẻ KT – Thống kê trẻ khuyết tật</a>
+                            <a href="/bao-cao/pcgdmn-mau-2025?sheet_code=so-theo-doi" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.2.7. Sổ theo dõi PCGDMN</a>
                             {# === BAI_13B_12_V2_4_2_MN_7_REPORT_MENU_END === #}
 
                         </div>
@@ -1237,18 +1225,18 @@
                     {% if menu_role not in ['TRUONG', 'GIAO_VIEN'] or menu_school_th or menu_school_liencap %}
 <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">5.3. Báo cáo Tiểu học</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.3. Báo cáo Tiểu học</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             
                             {# === BAI_13B_4_V1_PRIMARY_CENTER_MENU_START === #}
-                            <a href="/bao-cao/tieu-hoc" role="menuitem"><strong>5.3.0. Bộ báo cáo Tiểu học</strong></a>
+                            <a href="/bao-cao/tieu-hoc" role="menuitem"><strong>{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.3.0. Bộ báo cáo Tiểu học</strong></a>
                             {# === BAI_13B_4_V1_PRIMARY_CENTER_MENU_END === #}
 
-<a href="/bao-cao?report_type=PCGD_TH_M1_2025" role="menuitem">5.3.1. TH-M1 – Phổ cập giáo dục Tiểu học</a>
-                            <a href="/bao-cao?report_type=PCGD_TH_02_2025" role="menuitem">5.3.2. TH-02 – Kết quả PCGD Tiểu học</a>
-                            <a href="/bao-cao?report_type=PCGD_TH_01_GV_2025" role="menuitem">5.3.3. TH-01-GV – Đội ngũ giáo viên</a>
-                            <a href="/bao-cao?report_type=PCGD_TH_01_CSVC_2025" role="menuitem">5.3.4. TH-01-CSVC – Cơ sở vật chất</a>
+<a href="/bao-cao?report_type=PCGD_TH_M1_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.3.1. TH-M1 – Phổ cập giáo dục Tiểu học</a>
+                            <a href="/bao-cao?report_type=PCGD_TH_02_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.3.2. TH-02 – Kết quả PCGD Tiểu học</a>
+                            <a href="/bao-cao?report_type=PCGD_TH_01_GV_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.3.3. TH-01-GV – Đội ngũ giáo viên</a>
+                            <a href="/bao-cao?report_type=PCGD_TH_01_CSVC_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.3.4. TH-01-CSVC – Cơ sở vật chất</a>
                         </div>
                     </div>
                     {% endif %}
@@ -1258,19 +1246,19 @@
                     {% if menu_role not in ['TRUONG', 'GIAO_VIEN'] or menu_school_thcs or menu_school_liencap %}
 <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">5.4. Báo cáo THCS</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4. Báo cáo THCS</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             
                             {# === BAI_13B_4_V1_THCS_CENTER_MENU_START === #}
-                            <a href="/bao-cao/thcs" role="menuitem"><strong>5.4.0. Bộ báo cáo THCS</strong></a>
+                            <a href="/bao-cao/thcs" role="menuitem"><strong>{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4.0. Bộ báo cáo THCS</strong></a>
                             {# === BAI_13B_4_V1_THCS_CENTER_MENU_END === #}
 
-<a href="/bao-cao?report_type=PCGD_THCS_M1_2025" role="menuitem">5.4.1. THCS-M1 – Phổ cập giáo dục THCS</a>
-                            <a href="/bao-cao?report_type=PCGD_THCS_M2_2025" role="menuitem">5.4.2. THCS-M2 – Tiêu chuẩn PCGD THCS</a>
-                            <a href="/bao-cao?report_type=PCGD_THCS_TK_2025" role="menuitem">5.4.3. THCS-TK – Thống kê kết quả</a>
-                            <a href="/bao-cao?report_type=PCGD_THCS_M5_2025" role="menuitem">5.4.4. THCS-M5 – Đội ngũ giáo viên</a>
-                            <a href="/bao-cao?report_type=PCGD_THCS_CSVC_2025" role="menuitem">5.4.5. THCS-CSVC – Cơ sở vật chất</a>
+<a href="/bao-cao?report_type=PCGD_THCS_M1_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4.1. THCS-M1 – Phổ cập giáo dục THCS</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_M2_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4.2. THCS-M2 – Tiêu chuẩn PCGD THCS</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_TK_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4.3. THCS-TK – Thống kê kết quả</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_M5_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4.4. THCS-M5 – Đội ngũ giáo viên</a>
+                            <a href="/bao-cao?report_type=PCGD_THCS_CSVC_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.4.5. THCS-CSVC – Cơ sở vật chất</a>
                         </div>
                     </div>
                     {% endif %}
@@ -1280,18 +1268,18 @@
                     {% if menu_role not in ['TRUONG', 'GIAO_VIEN'] %}
 <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">5.5. Báo cáo Xóa mù chữ</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5. Báo cáo Xóa mù chữ</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
                             
                             {# === BAI_13B_4_V1_XMC_CENTER_MENU_START === #}
-                            <a href="/bao-cao/xoa-mu-chu" role="menuitem"><strong>5.5.0. Bộ báo cáo Xóa mù chữ</strong></a>
+                            <a href="/bao-cao/xoa-mu-chu" role="menuitem"><strong>{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.0. Bộ báo cáo Xóa mù chữ</strong></a>
                             {# === BAI_13B_4_V1_XMC_CENTER_MENU_END === #}
 
-<a href="/bao-cao?report_type=PCGD_XMC_3_2025" role="menuitem">5.5.1. XMC-3 – Tổng hợp kết quả xóa mù chữ</a>
-                            <a href="/bao-cao?report_type=PCGD_CMC_2_2025" role="menuitem">5.5.2. CMC-2 – Thống kê số người mù chữ</a>
-                            <a href="/bao-cao?report_type=PCGD_CMC_1_2025" role="menuitem">5.5.3. CMC-1 – Tổng hợp chống mù chữ</a>
-                            <a href="/bao-cao?report_type=PCGD_XMC_4_2025" role="menuitem">5.5.4. XMC-4 – Thống kê đạt chuẩn xóa mù chữ</a>
+<a href="/bao-cao?report_type=PCGD_XMC_3_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.1. XMC-3 – Tổng hợp kết quả xóa mù chữ</a>
+                            <a href="/bao-cao?report_type=PCGD_CMC_2_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.2. CMC-2 – Thống kê số người mù chữ</a>
+                            <a href="/bao-cao?report_type=PCGD_CMC_1_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.3. CMC-1 – Tổng hợp chống mù chữ</a>
+                            <a href="/bao-cao?report_type=PCGD_XMC_4_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.4. XMC-4 – Thống kê đạt chuẩn xóa mù chữ</a>
                         </div>
                     </div>
                     {% endif %}
@@ -1301,11 +1289,11 @@
                     {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN'] %}
                     <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
-                            <span class="pc-submenu-trigger__text">5.6. Giám sát cấp tỉnh</span><span class="pc-submenu-arrow">▶</span>
+                            <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.6. Giám sát cấp tỉnh</span><span class="pc-submenu-arrow">▶</span>
                         </button>
                         <div class="pc-submenu-panel" role="menu">
-                            <a href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh" role="menuitem">5.6.1. Tổng hợp đối chiếu toàn tỉnh</a>
-                            <a href="/dieu-tra/don-doc-doi-chieu-hoc-sinh" role="menuitem">5.6.2. Danh sách đôn đốc</a>
+                            <a href="/dieu-tra/tong-hop-doi-chieu-hoc-sinh" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.6.1. Tổng hợp đối chiếu toàn tỉnh</a>
+                            <a href="/dieu-tra/don-doc-doi-chieu-hoc-sinh" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.6.2. Danh sách đôn đốc</a>
                         </div>
                     </div>
                     {% endif %}

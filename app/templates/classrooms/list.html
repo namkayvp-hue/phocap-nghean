@@ -117,7 +117,7 @@
                 <button class="classroom-btn classroom-btn--primary" type="submit">🔎 Xem danh mục</button>
             </div>
         </form>
-        <p class="help">Nếu đổi cấp học/xã/năm học, bấm <strong>Xem danh mục</strong> rồi chọn trường phù hợp. Tài khoản Xã và Trường chỉ thấy đúng phạm vi được giao.</p>
+        <p class="help">{% if nguoi_dung.role_code == 'TRUONG' %}Đã chọn trường theo tài khoản đăng nhập. Chọn năm học rồi bấm <strong>Xem danh mục</strong> để quản lý lớp.{% else %}Nếu đổi cấp học/xã/năm học, bấm <strong>Xem danh mục</strong> rồi chọn trường phù hợp. Tài khoản Xã chỉ thấy đúng phạm vi được giao.{% endif %}</p>
     </section>
 
     {% if selected_school and selected_year %}
@@ -134,12 +134,23 @@
         <article class="classroom-card">
             <h2>3. Thêm lớp</h2>
             {% if can_manage %}
+            <form method="post" action="/lop-hoc/nhap-excel" enctype="multipart/form-data" class="classroom-form" style="margin-bottom:20px">
+                <h3>Nhập từ Excel</h3>
+                <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
+                <input type="hidden" name="school_id" value="{{ selected_school_id }}">
+                <input type="hidden" name="cap" value="{{ selected_level or '' }}">
+                <p><a href="/lop-hoc/mau-excel?cap={{ selected_level or 'TH' }}">Tải file Excel mẫu</a></p>
+                <label for="class_excel">File danh sách lớp (.xlsx)</label>
+                <input id="class_excel" name="file" type="file" accept=".xlsx" required>
+                <p class="help">Mỗi dòng là một lớp, tối đa 200 lớp và 5 MB. Thay các lớp ví dụ trong file mẫu bằng danh sách của trường. Lớp đã có được bỏ qua; lớp đã khóa sẽ được mở lại khi xác nhận.</p>
+                <button type="submit" class="classroom-btn classroom-btn--primary" style="margin-top:10px">Xem trước dữ liệu Excel</button>
+            </form>
             <form method="post" action="/lop-hoc/them" class="classroom-form">
                 <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
                 <input type="hidden" name="school_id" value="{{ selected_school_id }}">
                 <input type="hidden" name="cap" value="{{ selected_level or '' }}">
                 <label for="ten_lop">Tên lớp</label>
-                <textarea id="ten_lop" name="ten_lop" required placeholder="Có thể nhập nhiều lớp, mỗi dòng một lớp. Ví dụ:&#10;1A&#10;1B&#10;1C"></textarea>
+                <textarea id="ten_lop" name="ten_lop" required placeholder="Có thể nhập nhiều lớp, mỗi dòng một lớp. Ví dụ:&#10;{% if selected_level == 'THCS' %}6A&#10;6B&#10;7A{% elif selected_level == 'THPT' %}10A1&#10;10A2&#10;11A1{% elif selected_level == 'MN' %}3 tuổi A&#10;4 tuổi A&#10;5 tuổi A{% else %}1A&#10;1B&#10;2A{% endif %}"></textarea>
                 <p class="help">Có thể nhập tối đa 200 lớp/lần. Hệ thống không tự sinh tên lớp và không tạo học sinh giả.</p>
                 <div class="button-row" style="margin-top:12px">
                     <button class="classroom-btn classroom-btn--primary" type="submit">＋ Thêm vào danh mục</button>
