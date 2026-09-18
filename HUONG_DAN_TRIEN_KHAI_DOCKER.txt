@@ -464,3 +464,28 @@ XIII. CẬP NHẬT NGÀY 17/09/2026
    trong check_sua_loi_https_v1.py đã sai kể từ khi có git, chỉ là chưa
    ai chạy lại script này để phát hiện. CHƯA SỬA script (đang chờ quyết
    định có nên bỏ điều kiện này riêng cho /dang-nhap hay không).
+
+XIV. CẬP NHẬT NGÀY 18/09/2026
+
+1. Đồng bộ máy phát triển (C:\project\PHOCAP) với GitHub: local đứng ở
+   b51e970, GitHub đã có thêm 3 commit mới (b8cf61b) do dev khác đẩy lên
+   — đổi tên trường tại menu 1.3 và đồng bộ tên trường mới trên giao diện
+   + tài khoản (app/access_control.py, app/routers/auth.py,
+   app/routers/school_rename.py, các template liên quan). Local sạch
+   (không có commit riêng), nên chỉ "git pull --ff-only origin main",
+   không cần merge.
+
+2. Theo đúng thói quen đã ghi nhận ở mục XIII.6: trước khi deploy, grep
+   lại "url_for(['\"]static" trong toàn bộ app/ để chắc code mới kéo về
+   không tái phạm lỗi HTTPS ở mục X. Kết quả: 0 kết quả trong
+   app/templates, app/routers, app/static — chỉ còn xuất hiện trong các
+   tệp tài liệu/script kiểm tra (HUONG_DAN_TRIEN_KHAI_DOCKER.txt,
+   HUONG_DAN_SUA_LOI_HTTPS_V1.txt, check_sua_loi_https_v1.py) như ví dụ
+   lỗi, không phải lỗi thật. An toàn để deploy.
+
+3. Chạy trien_khai_thay_doi.sh: nhãn "da-trien-khai-server-24" đang ở
+   e46906e, đẩy đúng 7 file chênh lệch (6 file mã nguồn của 3 commit mới
+   + HUONG_DAN_TRIEN_KHAI_DOCKER.txt), không xoá file nào. Container
+   build lại và restart thành công, nhãn cập nhật sang b8cf61b. Kiểm tra
+   nhanh bằng curl: server trả HTTP 303 (chuyển hướng do chưa đăng nhập),
+   đúng như kỳ vọng.
