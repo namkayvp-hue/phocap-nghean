@@ -489,3 +489,21 @@ XIV. CẬP NHẬT NGÀY 18/09/2026
    build lại và restart thành công, nhãn cập nhật sang b8cf61b. Kiểm tra
    nhanh bằng curl: server trả HTTP 303 (chuyển hướng do chưa đăng nhập),
    đúng như kỳ vọng.
+
+XV. CẬP NHẬT NGÀY 23/09/2026
+
+1. Đồng bộ với GitHub: local đứng ở 4f026e6, GitHub có thêm 1 commit
+   d05b05b do dev khác đẩy lên — bổ sung điều chỉnh tổ điều tra, lưu trữ
+   điều tra (/dieu-tra/luu-tru: app/routers/survey_archive.py,
+   app/services/survey_archive_service.py, templates/surveys/archive.html)
+   và giữ hiển thị xoá mù. Local sạch nên chỉ "git pull --ff-only".
+
+2. Grep "url_for(['\"]static" trong app/: 0 kết quả. Commit mới không
+   thay đổi cấu trúc CSDL, không có tệp app/upgrade_*.py nên không cần
+   chạy nâng cấp tay.
+
+3. Chạy trien_khai_thay_doi.sh: nhãn "da-trien-khai-server-24" đang ở
+   4f026e6, đẩy đúng 11 file chênh lệch, không xoá file nào. Container
+   build lại, trạng thái healthy, log khởi động không lỗi. Curl
+   /dieu-tra/luu-tru trả 303 (chuyển hướng đăng nhập) — route đã được
+   nạp. Nhãn cập nhật sang d05b05b.
