@@ -555,6 +555,9 @@ class AccessControlMiddleware:
             return True
 
         normalized_path = path.rstrip("/") or "/"
+
+        if normalized_path == "/dieu-tra/luu-tru" or normalized_path.startswith("/dieu-tra/luu-tru/"):
+            return role_code in {*ADMIN_ROLE_CODES, COMMUNE_ROLE_CODE}
         if normalized_path in {
             "/cong-cu-du-lieu/doi-ten-truong",
             "/cong-cu-du-lieu/doi-ten-truong/xem-truoc",
@@ -880,6 +883,9 @@ class AccessControlMiddleware:
             return True
 
         normalized_path = path.rstrip("/") or "/"
+
+        if normalized_path == "/dieu-tra/luu-tru" or normalized_path.startswith("/dieu-tra/luu-tru/"):
+            return role_code == COMMUNE_ROLE_CODE
 
         # === V12_STUDENT_RECONCILIATION_SOURCE_SCOPE_START ===
         if normalized_path.startswith("/dieu-tra/nguon-hoc-sinh-doi-chieu"):

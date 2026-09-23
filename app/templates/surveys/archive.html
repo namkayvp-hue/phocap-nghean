@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.6. Xuất dữ liệu lưu trữ</title><link rel="stylesheet" href="/static/css/style.css">
+<style>
+.archive-page{max-width:1100px;margin:24px auto;padding:0 16px}.archive-card{padding:24px;background:#fff;border:1px solid #dce6ef;border-radius:16px;margin-bottom:20px}
+.archive-card h1,.archive-card h2{margin-top:0}.archive-card label{display:block;margin:12px 0 6px;font-weight:700}
+.archive-card select,.archive-card input[type=file]{max-width:100%;padding:10px;border:1px solid #cad8e5;border-radius:8px}
+.archive-communes{max-height:260px;overflow:auto;border:1px solid #dce6ef;padding:12px;margin:12px 0}.archive-communes label{font-weight:400}
+.archive-error{padding:16px;background:#fff0ed;color:#912718}.archive-ok{padding:16px;background:#edf9ef;color:#236234}.archive-note{color:#536879;line-height:1.6}
+.archive-counts{display:flex;gap:24px;flex-wrap:wrap;margin:20px 0}
+</style></head><body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main class="archive-page">
+<section class="archive-card"><h1>2.6. Xuất dữ liệu lưu trữ</h1>
+<p>Lưu trọn thông tin điều tra sau khi hoàn thành: hộ dân, đối tượng, thông tin năm học, học tập, xóa mù chữ, khuyết tật, biến động, phân công và nhật ký.</p>
+<p class="archive-note">Gói ZIP giữ nguyên dữ liệu và các liên kết để khôi phục bản ghi còn thiếu của đúng năm học trên hệ thống có cùng danh mục. Đây không phải chức năng chuyển dữ liệu sang năm học mới.</p>
+{% if error %}<p class="archive-error">{{ error }}</p>{% endif %}
+{% if result %}<p class="archive-ok">{{ result }}</p>{% endif %}
+</section>
+<section class="archive-card"><h2>Xuất bản lưu trữ</h2>
+<form method="post" action="/dieu-tra/luu-tru/xuat">
+<label for="archive-year">Năm học</label><select id="archive-year" name="school_year_id" required>{% for year in years %}<option value="{{ year.id }}">{{ year.code }}</option>{% endfor %}</select>
+<label>Phạm vi xã/phường</label>
+{% if commune_account %}{% for commune in communes %}<p><strong>{{ commune.name }}</strong><input type="hidden" name="commune_ids" value="{{ commune.id }}"></p>{% endfor %}
+{% else %}
+<button type="button" class="button button-light" onclick="document.querySelectorAll('[name=commune_ids]').forEach(el => el.checked = true)">Chọn tất cả xã</button>
+<button type="button" class="button button-light" onclick="document.querySelectorAll('[name=commune_ids]').forEach(el => el.checked = false)">Bỏ chọn</button>
+<div class="archive-communes">{% for commune in communes %}<label><input type="checkbox" name="commune_ids" value="{{ commune.id }}"> {{ commune.name }} · {{ commune.code }}</label>{% endfor %}</div>
+{% endif %}
+<p class="archive-note">Tất cả phiếu trong phạm vi đã chọn phải ở trạng thái đã hoàn thành. Gói lưu trữ không chứa mật khẩu tài khoản hoặc file Excel nguồn đã tải lên.</p>
+<button type="submit" class="button button-primary">Tải gói lưu trữ ZIP</button>
+</form></section>
+<section class="archive-card"><h2>Nhập lại bản lưu trữ</h2>
+<p>Chọn gói đã xuất để kiểm tra. Phần mềm chỉ thêm bản ghi còn thiếu, bỏ qua bản ghi giống nhau và dừng khi dữ liệu hiện tại khác bản lưu trữ. Danh mục tham chiếu cần có sẵn trên hệ thống.</p>
+<form method="post" action="/dieu-tra/luu-tru/xem-truoc" enctype="multipart/form-data">
+<label for="archive-file">Gói lưu trữ ZIP (tối đa 100 MB)</label><input id="archive-file" type="file" name="file" accept=".zip" required>
+<button type="submit" class="button button-primary">Kiểm tra và xem trước</button>
+</form>
+{% if preview %}
+<h3>Kết quả kiểm tra bản lưu trữ</h3><p>Thời điểm xuất: {{ preview.created_at }}</p>
+<p><strong>Năm học {{ preview.year_name }}</strong> · {{ preview.commune_names|join(', ') }}</p>
+<p>{{ preview.households }} hộ · {{ preview.people }} đối tượng · {{ preview.forms }} phiếu · {{ preview.records }} bản ghi thông tin năm học.</p>
+<div class="archive-counts"><strong>{{ preview.new }} bản ghi còn thiếu</strong><strong>{{ preview.same }} bản ghi đã có</strong><strong>{{ preview.conflict_count }} xung đột</strong></div>
+{% if preview.conflict_count %}<p class="archive-error">Chưa thể khôi phục vì dữ liệu hoặc danh mục hiện tại không khớp. Không ghi đè dữ liệu đang có.</p><details><summary>Xem chi tiết xung đột (tối đa 100 dòng)</summary><ul>{% for conflict in preview.conflicts %}<li>{{ conflict }}</li>{% endfor %}</ul></details>
+{% elif token %}<form method="post" action="/dieu-tra/luu-tru/nhap" onsubmit="return confirm('Khôi phục các bản ghi còn thiếu từ gói lưu trữ này?');"><input type="hidden" name="token" value="{{ token }}"><button class="button button-primary" type="submit">Xác nhận khôi phục dữ liệu còn thiếu</button></form>
+{% else %}<p class="archive-ok">Dữ liệu trong gói đã có đầy đủ; không cần nhập thêm.</p>{% endif %}
+{% endif %}
+</section></main></body></html>

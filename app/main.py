@@ -35,6 +35,7 @@ from app.routers.surveys import router as surveys_router
 from app.routers.survey_batch_admin_v13b11 import router as survey_batch_admin_v13b11_router
 from app.routers.survey_team_registration import router as survey_team_registration_router
 from app.routers.commune_area_excel import router as commune_area_excel_router
+from app.routers.survey_archive import router as survey_archive_router
 from app.routers.survey_comparisons import router as survey_comparisons_router
 from app.routers.survey_dashboard import router as survey_dashboard_router
 from app.routers.province_year_start import router as province_year_start_router
@@ -140,6 +141,7 @@ app.include_router(surveys_router)
 app.include_router(survey_batch_admin_v13b11_router)
 app.include_router(survey_team_registration_router)
 app.include_router(commune_area_excel_router)
+app.include_router(survey_archive_router)
 app.include_router(survey_comparisons_router)
 app.include_router(survey_dashboard_router)
 app.include_router(province_year_start_router)

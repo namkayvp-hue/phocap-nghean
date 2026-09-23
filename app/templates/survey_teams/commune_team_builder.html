@@ -145,6 +145,8 @@
     {% if preview.team_count > 0 %}
     <section class="panel">
         <h2>Xem trước các tổ điều tra</h2>
+        <p>Khi tổ còn dự thảo, chọn <strong>Điều chỉnh giáo viên</strong> dưới tên thành viên. Chọn giáo viên cùng cấp ở tổ khác để hoán đổi, hoặc chọn giáo viên dự phòng để thay thế; người được thay sẽ về danh sách dự phòng. Hộ và địa bàn vẫn thuộc tổ hiện tại.</p>
+        {% if changes_locked %}<p>Đợt điều tra đã khóa, không thể điều chỉnh giáo viên.</p>{% endif %}
         <div class="scroll">
             <table class="team-table">
                 <thead>
@@ -166,6 +168,28 @@
                                 <span class="badge">{{ member.level_code }}</span>
                                 <strong>{{ member.full_name }}</strong>
                                 · {{ member.school_name }}
+                                {% if team.status == 'DRAFT' and not changes_locked %}
+                                <details style="margin:8px 0 14px">
+                                    <summary style="cursor:pointer;color:#1268ad">Điều chỉnh giáo viên</summary>
+                                    <form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/lap-to/dieu-chinh-giao-vien" style="margin-top:8px" onsubmit="return confirm('Xác nhận hoán đổi với giáo viên đã chọn? Nếu chọn dự phòng, giáo viên hiện tại sẽ về dự phòng. Hộ và địa bàn của tổ được giữ nguyên.');">
+                                        <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                                        <input type="hidden" name="team_id" value="{{ team.id }}">
+                                        <input type="hidden" name="old_user_id" value="{{ member.user_id }}">
+                                        <label for="replace-{{ team.id }}-{{ member.user_id }}">Giáo viên {{ member.level_code }} thay cho {{ member.full_name }}</label>
+                                        <select id="replace-{{ team.id }}-{{ member.user_id }}" name="new_user_id" required style="display:block;width:100%;max-width:520px;margin:6px 0;padding:9px">
+                                            <option value="">— Chọn giáo viên cùng cấp —</option>
+                                            {% for candidate in member_options.get(member.level_code, []) %}
+                                            {% if candidate.user_id != member.user_id %}
+                                            <option value="{{ candidate.user_id }}">{{ candidate.location }} · {{ candidate.full_name }} · {{ candidate.school_name }}</option>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                        <button class="button button-secondary" type="submit">Lưu điều chỉnh</button>
+                                    </form>
+                                </details>
+                                {% elif team.status != 'DRAFT' %}
+                                <div class="muted">Tổ đã chốt/gửi — không thể điều chỉnh.</div>
+                                {% endif %}
                             </div>
                             {% endfor %}
                         </td>

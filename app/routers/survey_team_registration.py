@@ -2041,6 +2041,105 @@ def _team_preview_data(
     }
 
 
+def _team_changes_locked(db: Session, batch_id: int) -> bool:
+    from app.survey_models import SurveyBatch
+    from app.survey_workflow_models import SurveyCommuneExecutionState
+    from sqlalchemy import select
+
+    batch = db.get(SurveyBatch, batch_id)
+    if batch is None or batch.is_locked:
+        return True
+    state = db.scalar(select(SurveyCommuneExecutionState).where(
+        SurveyCommuneExecutionState.survey_batch_id == batch_id
+    ))
+    return bool(state and (state.is_commune_locked or state.is_province_locked))
+
+
+def _change_team_member(db: Session, request: Request, *, batch_id: int,
+                        team_id: int, old_user_id: int, new_user_id: int) -> None:
+    """Hoán đổi cùng cấp hoặc thay bằng dự phòng trong một giao dịch."""
+    batch = _commune_batch_scope(db, request, batch_id)
+    if batch is None:
+        raise ValueError("member_scope")
+    # Giữ khóa ghi trong suốt kiểm tra và hoán đổi trên SQLite.
+    changed = db.execute(text("""UPDATE survey_investigation_teams
+        SET updated_at=updated_at WHERE id=:team AND survey_batch_id=:batch
+        AND commune_id=:commune AND status='DRAFT'"""),
+        {"team": team_id, "batch": batch_id, "commune": batch["commune_id"]})
+    if changed.rowcount != 1 or _team_changes_locked(db, batch_id):
+        raise ValueError("member_locked")
+    if old_user_id == new_user_id:
+        raise ValueError("member_invalid")
+    teams = {row["id"]: dict(row) for row in db.execute(text(
+        "SELECT id,status,commune_id,team_number,generation_code FROM survey_investigation_teams WHERE survey_batch_id=:batch"
+    ), {"batch": batch_id}).mappings()}
+    members = [dict(row) for row in db.execute(text("""SELECT m.* FROM survey_investigation_team_members m
+        JOIN survey_investigation_teams t ON t.id=m.team_id WHERE t.survey_batch_id=:batch"""),
+        {"batch": batch_id}).mappings()]
+    old_rows = [m for m in members if m["user_id"] == old_user_id]
+    new_rows = [m for m in members if m["user_id"] == new_user_id]
+    if len(old_rows) != 1 or old_rows[0]["team_id"] != team_id or len(new_rows) > 1:
+        raise ValueError("member_stale")
+    old = old_rows[0]
+    replacement = new_rows[0] if new_rows else None
+    participants = {p["user_id"]: p for p in _sent_participants(db, batch_id=batch_id)}
+    incoming = participants.get(new_user_id)
+    outgoing = participants.get(old_user_id)
+    if not incoming or not outgoing or incoming["level_code"] != old["level_code"] or outgoing["level_code"] != old["level_code"]:
+        raise ValueError("member_invalid")
+    affected = {team_id}
+    if replacement:
+        if replacement["team_id"] == team_id or replacement["level_code"] != old["level_code"]:
+            raise ValueError("member_invalid")
+        affected.add(replacement["team_id"])
+    for affected_id in affected:
+        team = teams[affected_id]
+        if team["status"] != "DRAFT" or team["commune_id"] != batch["commune_id"]:
+            raise ValueError("member_locked")
+        slots = [m for m in members if m["team_id"] == affected_id]
+        if len(slots) != 3 or {m["level_code"] for m in slots} != {"MN", "TH", "THCS"}:
+            raise ValueError("member_invalid")
+    db.execute(text("UPDATE survey_investigation_team_members SET user_id=:user,school_id=:school WHERE id=:id"),
+               {"user": new_user_id, "school": incoming["school_id"], "id": old["id"]})
+    if replacement:
+        db.execute(text("UPDATE survey_investigation_team_members SET user_id=:user,school_id=:school WHERE id=:id"),
+                   {"user": old_user_id, "school": outgoing["school_id"], "id": replacement["id"]})
+    now = datetime.now()
+    for affected_id in affected:
+        db.execute(text("UPDATE survey_investigation_teams SET updated_at=:now WHERE id=:id"), {"now": now, "id": affected_id})
+    destination = f"tổ {teams[replacement['team_id']]['team_number']}" if replacement else "dự phòng"
+    _generation_log(db, request=request, batch_id=batch_id, commune_id=batch["commune_id"],
+        generation_code=teams[team_id]["generation_code"], action="CHANGE_MEMBER", team_count=len(affected),
+        household_count=0, mn_count=0, th_count=0, thcs_count=0, reserve_count=0,
+        notes=f"Tổ {teams[team_id]['team_number']}: {outgoing['full_name']} (user_id={old_user_id}) đổi với {incoming['full_name']} (user_id={new_user_id}) từ {destination}; cấp {old['level_code']}.")
+
+
+@router.post("/lap-to/dieu-chinh-giao-vien")
+async def change_team_member(request: Request, db: Session = Depends(get_db)):
+    if _role(request) != COMMUNE_ROLE_CODE:
+        return _forbidden()
+    form = await request.form()
+    try:
+        batch_id, team_id, old_id, new_id = [int(form.get(key) or 0) for key in
+            ("batch_id", "team_id", "old_user_id", "new_user_id")]
+    except (TypeError, ValueError):
+        return _forbidden()
+    if _commune_batch_scope(db, request, batch_id) is None:
+        return _forbidden()
+    from sqlalchemy.exc import IntegrityError
+    try:
+        _change_team_member(db, request, batch_id=batch_id, team_id=team_id, old_user_id=old_id, new_user_id=new_id)
+        db.commit()
+        status = "member_changed"
+    except ValueError as exc:
+        db.rollback()
+        status = str(exc) if str(exc) in {"member_scope", "member_locked", "member_invalid", "member_stale"} else "member_invalid"
+    except IntegrityError:
+        db.rollback()
+        status = "member_stale"
+    return RedirectResponse(f"/dieu-tra/phan-cong-to-dieu-tra/lap-to?batch_id={batch_id}&status={status}", status_code=303)
+
+
 @router.get("/lap-to", response_class=HTMLResponse)
 def commune_team_builder_page(
     request: Request,
@@ -2088,7 +2187,22 @@ def commune_team_builder_page(
             batch_id=int(batch["id"]),
         )
 
+    member_options = {"MN": [], "TH": [], "THCS": []}
+    changes_locked = batch is None or _team_changes_locked(db, int(batch["id"]))
+    if batch is not None and not changes_locked:
+        locations = {m["user_id"]: team for team in preview["teams"] for m in team["members"]}
+        for person in _sent_participants(db, batch_id=int(batch["id"])):
+            location = locations.get(person["user_id"])
+            if location is None or location["status"] == "DRAFT":
+                member_options[person["level_code"]].append({**person,
+                    "location": f"Tổ {location['team_number']}" if location else "Dự phòng"})
+
     status_messages = {
+        "member_changed": "Đã điều chỉnh giáo viên. Mỗi tổ vẫn đủ 3 cấp; hộ và địa bàn của tổ được giữ nguyên.",
+        "member_scope": "Không thể điều chỉnh tổ ngoài phạm vi xã hoặc đợt điều tra.",
+        "member_locked": "Tổ đã chốt/gửi hoặc đợt điều tra đã khóa; không thể điều chỉnh giáo viên.",
+        "member_invalid": "Không thể điều chỉnh: cần chọn giáo viên cùng cấp trong danh sách trường đã gửi và giữ đủ 3 cấp trong mỗi tổ.",
+        "member_stale": "Thành viên tổ đã thay đổi. Hãy tải lại trang và chọn lại giáo viên.",
         "sent": (
             "Đã chốt và gửi phân công xuống Trường/Giáo viên."
         ),
@@ -2126,6 +2240,8 @@ def commune_team_builder_page(
             "batches": batches,
             "batch": batch,
             "preview": preview,
+            "member_options": member_options,
+            "changes_locked": changes_locked,
             "message": status_messages.get(status),
         },
     )
