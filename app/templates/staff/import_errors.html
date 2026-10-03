@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lỗi nhập Excel đội ngũ</title><link rel="stylesheet" href="/static/css/style.css"></head>
+<body>{% include "partials/dropdown_menu_v1.html" %}
+<main style="max-width:1100px;margin:24px auto;padding:20px">
+<h1>Kiểm tra lại file Excel giáo viên</h1>
+<p>File có {{ row_errors|length }} lỗi. Dữ liệu đội ngũ chưa được cập nhật. Hãy sửa các dòng dưới đây rồi nhập lại file.</p>
+<table style="width:100%;text-align:left"><thead><tr><th>Dòng Excel</th><th>Cột</th><th>Nội dung lỗi</th></tr></thead><tbody>
+{% for row, column, message in row_errors %}<tr><td>{{ row }}</td><td>{{ column }}</td><td>{{ message }}</td></tr>{% endfor %}
+</tbody></table>
+<p><a href="/doi-ngu?school_year_id={{ school_year_id }}&amp;school_id={{ school_id or '' }}#staff-excel-import">Quay lại nhập Excel</a></p>
+</main></body></html>

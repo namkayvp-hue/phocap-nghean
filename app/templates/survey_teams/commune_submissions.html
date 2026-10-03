@@ -26,6 +26,7 @@ select{padding:10px;border:1px solid #c9d6e2;border-radius:9px;min-width:300px}
 <p class="admin-eyebrow">TỔ ĐIỀU TRA 3 CẤP · BƯỚC 1</p>
 <h1>Danh sách giáo viên các trường gửi về xã/phường</h1>
 <p><strong>{{ nguoi_dung.unit_name }}</strong></p>
+{% if removal_message %}<p role="status">{{ removal_message }}</p>{% endif %}
 <form method="get" action="/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong">
 <label><strong>Đợt điều tra</strong></label><br>
 <select name="batch_id" onchange="this.form.submit()">
@@ -88,6 +89,28 @@ select{padding:10px;border:1px solid #c9d6e2;border-radius:9px;min-width:300px}
 </tbody>
 </table>
 </div>
+</section>
+<section class="team-panel">
+<h2>Giáo viên trường đã gửi tham gia điều tra</h2>
+<p>Xóa khỏi danh sách tham gia của đợt này vẫn giữ tài khoản và hồ sơ giáo viên. Giáo viên đã có tổ cần được thay tại mục <a href="/dieu-tra/phan-cong-to-dieu-tra/lap-to?batch_id={{ batch.id }}">Lập tổ</a> trước khi xóa.</p>
+{% if removal_locked %}<p>Đợt điều tra đã khóa hoặc kết thúc; không thể xóa giáo viên.</p>{% endif %}
+<div class="scroll"><table class="team-table">
+<thead><tr><th>Họ tên</th><th>Trường</th><th>Thao tác</th></tr></thead>
+<tbody>
+{% for teacher in participants %}
+<tr><td>{{ teacher.full_name }}</td><td>{{ teacher.school_name }}</td><td>
+{% if teacher.in_team %}
+<a href="/dieu-tra/phan-cong-to-dieu-tra/lap-to?batch_id={{ batch.id }}">Đã có tổ — thay giáo viên trước khi xóa</a>
+{% elif not removal_locked %}
+<form method="post" action="/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong/xoa-giao-vien" onsubmit="return confirm('Xóa giáo viên này khỏi danh sách tham gia điều tra của đợt này?');">
+<input type="hidden" name="batch_id" value="{{ batch.id }}">
+<input type="hidden" name="user_id" value="{{ teacher.user_id }}">
+<button type="submit" class="button button-secondary" aria-label="Xóa {{ teacher.full_name }} khỏi danh sách điều tra">Xóa khỏi danh sách điều tra</button>
+</form>
+{% else %}Đã khóa{% endif %}
+</td></tr>
+{% else %}<tr><td colspan="3">Chưa có giáo viên trong danh sách đã gửi.</td></tr>{% endfor %}
+</tbody></table></div>
 </section>
 {% else %}
 <section class="team-panel">Chưa có đợt điều tra thuộc xã/phường.</section>

@@ -95,6 +95,46 @@ class TeamMemberTests(unittest.TestCase):
         self.assertIn("member_locked", self.change().headers["location"])
         self.assertEqual(self.members(), before)
 
+    def remove(self, user=7):
+        return self.client.post("/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong/xoa-giao-vien",
+            data={"batch_id": 1, "user_id": user}, follow_redirects=False)
+
+    def test_remove_submitted_reserve(self):
+        page = self.client.get("/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong?batch_id=1")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn('/danh-sach-truong/xoa-giao-vien', page.text)
+        before = self.members()
+        self.assertIn('participant_removed', self.remove().headers['location'])
+        self.assertNotIn(7, teams._participant_ids(self.db, batch_id=1, school_id=1))
+        self.assertIsNotNone(self.db.get(User, 7))
+        self.assertEqual(self.members(), before)
+        self.assertIn('participant_missing', self.remove().headers['location'])
+        self.assertEqual(self.db.execute(text("SELECT count(*) FROM survey_team_registration_logs WHERE action='REMOVE_PARTICIPANT'")).scalar(), 1)
+
+    def test_remove_scope_lock_and_member(self):
+        self.assertIn('participant_in_team', self.remove(1).headers['location'])
+        self.actor['commune_id'] = 99
+        self.assertIn('forbidden', self.remove().headers['location'])
+        self.actor['commune_id'] = 1
+        self.actor['role_code'] = 'TRUONG'
+        self.assertIn('forbidden', self.remove().headers['location'])
+        self.actor['role_code'] = 'XA'
+        self.db.add(SurveyCommuneExecutionState(survey_batch_id=1, is_commune_locked=True))
+        self.db.commit()
+        self.assertIn('participant_locked', self.remove().headers['location'])
+        self.assertIn(7, teams._participant_ids(self.db, batch_id=1, school_id=1))
+        from app.access_control import AccessControlMiddleware
+        for role in ['XA', 'TRUONG', 'GIAO_VIEN']:
+            self.assertEqual(AccessControlMiddleware._co_quyen_theo_thao_tac(
+                path='/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong/xoa-giao-vien',
+                method='POST', role_code=role), role == 'XA')
+
+    def test_removal_log_failure_rolls_back(self):
+        with patch.object(teams, '_log', side_effect=RuntimeError('test')):
+            with self.assertRaises(RuntimeError):
+                self.remove()
+        self.assertIn(7, teams._participant_ids(self.db, batch_id=1, school_id=1))
+
     def test_batch_lock_and_rollback(self):
         before = self.members()
         self.db.add(SurveyCommuneExecutionState(survey_batch_id=1, is_province_locked=True))

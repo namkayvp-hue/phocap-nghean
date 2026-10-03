@@ -5479,6 +5479,48 @@ def xoa_phan_cong_nguoi_dieu_tra(
 # TRẠNG THÁI PHIẾU VÀ TIẾN ĐỘ ĐIỀU TRA
 # =========================================================
 
+def _commune_confirmation_lock(db, request, survey_form):
+    from app.access_control import AccessControlMiddleware
+    user = lay_thong_tin_nguoi_dung(request)
+    return AccessControlMiddleware._kiem_tra_khoa_dot_dieu_tra(
+        db=db, path=f"/dieu-tra/{survey_form.survey_batch_id}/ho-dan/{survey_form.household_id}/phieu/xac-nhan-xa",
+        method="POST", role_code=normalize_role_code(user.get("role_code")), auth_user=user,
+    ) or (survey_form.survey_batch.status == "DA_KET_THUC")
+
+
+@router.post("/{batch_id}/ho-dan/{household_id}/phieu/xac-nhan-xa")
+def confirm_commune_form(
+    batch_id: int, household_id: int, request: Request,
+    commune_confirmed: Annotated[bool, Form()] = False,
+    db: Session = Depends(get_db),
+):
+    user = lay_thong_tin_nguoi_dung(request)
+    role = normalize_role_code(user.get("role_code"))
+    survey_form = lay_phieu_ho(db=db, batch_id=batch_id, household_id=household_id)
+    if survey_form is None or not (is_admin_role(role) or role == "XA"):
+        return RedirectResponse("/?status=forbidden", 303)
+    if role == "XA" and (
+        user.get("commune_id") != survey_form.survey_batch.commune_id
+        or user.get("commune_id") != survey_form.household.commune_id
+    ):
+        return RedirectResponse("/?status=forbidden", 303)
+    error = ""
+    if _commune_confirmation_lock(db, request, survey_form):
+        error = "Đợt điều tra đã khóa hoặc kết thúc; không thể thay đổi xác nhận xã/phường."
+    elif commune_confirmed and (
+        survey_form.status != "DA_HOAN_THANH" or survey_form.household_confirmed_at is None
+    ):
+        error = "Chỉ xác nhận xã/phường khi phiếu đã hoàn thành và hộ gia đình đã xác nhận."
+    if error:
+        return hien_thi_trang_cap_nhat_phieu(request=request, survey_form=survey_form,
+            active_people_count=db.scalar(select(func.count(SurveyPerson.id)).where(
+                SurveyPerson.household_id == household_id, SurveyPerson.is_active.is_(True))) or 0,
+            thong_bao_loi=error, status_code=400)
+    survey_form.commune_confirmed_at = (survey_form.commune_confirmed_at or datetime.now()) if commune_confirmed else None
+    db.commit()
+    return RedirectResponse(f"/dieu-tra/{batch_id}/ho-dan/{household_id}/phieu?status=form_updated", 303)
+
+
 def hien_thi_trang_cap_nhat_phieu(
     *,
     request: Request,
@@ -5495,6 +5537,13 @@ def hien_thi_trang_cap_nhat_phieu(
     role_code = str(nguoi_dung.get("role_code") or "")
     can_confirm_commune = is_admin_role(role_code) or normalize_role_code(role_code) == "XA"
     can_edit_data = can_edit_survey_data(role_code)
+
+    from sqlalchemy.orm import object_session
+    confirmation_db = object_session(survey_form)
+    commune_confirmation_locked = bool(
+        survey_form.survey_batch.is_locked or confirmation_db is None
+        or _commune_confirmation_lock(confirmation_db, request, survey_form)
+    )
 
     if form_data is None:
         form_data = {
@@ -5525,6 +5574,7 @@ def hien_thi_trang_cap_nhat_phieu(
         context={
             "nguoi_dung": nguoi_dung,
             "can_confirm_commune": can_confirm_commune,
+            "commune_confirmation_locked": commune_confirmation_locked,
             "can_edit_data": can_edit_data,
             "batch": survey_form.survey_batch,
             "survey_form": survey_form,

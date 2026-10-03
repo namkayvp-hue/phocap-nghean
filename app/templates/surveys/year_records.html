@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script src="/static/js/year_record_thcs.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theo dõi năm học của đối tượng</title>
@@ -3183,7 +3184,7 @@
         const preschoolContainers = findPreschoolContainers();
 
         setVisible(primary, level === "TH");
-        setVisible(thcs, level === "THCS");
+        setVisible(thcs, window.showSurveyThcsIndicators(level === "THCS"));
 
         preschoolContainers.forEach(function (item) {
             setVisible(item, level === "MN");
@@ -3785,7 +3786,7 @@
 
         setHardVisible(
             thcs,
-            level === "THCS"
+            window.showSurveyThcsIndicators(level === "THCS")
         );
 
         if (preschoolScope) {
@@ -4087,7 +4088,7 @@
         );
         setVisible(
             document.getElementById("b131132_thcs_indicators"),
-            level === "THCS"
+            window.showSurveyThcsIndicators(level === "THCS")
         );
 
         document.body.dataset.b131133Level = level;
@@ -4553,7 +4554,7 @@
 
         setSectionVisible(
             thcsSection,
-            level === LEVEL.THCS
+            window.showSurveyThcsIndicators(level === LEVEL.THCS)
         );
 
         const shared =
@@ -5329,7 +5330,7 @@
         );
         hardVisible(
             document.getElementById("b131132_thcs_indicators"),
-            level === "THCS"
+            window.showSurveyThcsIndicators(level === "THCS")
         );
 
         document.body.dataset.b13236Level = level || "OTHER";

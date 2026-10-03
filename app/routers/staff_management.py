@@ -5,6 +5,7 @@ import unicodedata
 from datetime import date, datetime
 from io import BytesIO
 from math import ceil
+from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlencode
 
@@ -1020,8 +1021,9 @@ def export_staff_import_template(
     db: Session = Depends(get_db),
 ) -> StreamingResponse:
     scope = _load_page_scope(db, request, _parse_optional_int(school_year_id), _parse_optional_int(commune_id), _parse_optional_int(school_id))
-    workbook = _create_import_template_workbook(db, scope)
+    workbook = load_workbook(Path(__file__).resolve().parents[1] / "report_templates" / "staff_import.xlsx")
     year_code = next((year.code for year in scope["school_years"] if year.id == scope["selected_year_id"]), "nam_hoc")
+    workbook.active["A4"] = f"Năm học: {year_code}"
     return _excel_response(workbook, f"mau_nhap_doi_ngu_{year_code}.xlsx")
 
 
@@ -1462,9 +1464,12 @@ def import_staff_excel(
     if forced_school_id is not None and not _ensure_school_in_scope(user, forced_school_id):
         return RedirectResponse("/doi-ngu?status=forbidden", status_code=303)
     created = updated = skipped = errors = 0
+    row_errors = []
     try:
         content = excel_file.file.read()
-        workbook = load_workbook(BytesIO(content), data_only=True, read_only=True)
+        # Mẫu của Sở có ô gộp và tiêu đề ở dòng 6; chế độ read_only làm
+        # `ws.cell()` không đọc ổn định các ô trong một số file Excel đó.
+        workbook = load_workbook(BytesIO(content), data_only=True, read_only=False)
         ws = workbook["Nhap danh sach"] if "Nhap danh sach" in workbook.sheetnames else workbook[workbook.sheetnames[0]]
         header_row, header_map = _find_header_map(ws)
         columns = {
@@ -1483,10 +1488,10 @@ def import_staff_excel(
             "phone": _column(header_map, "Số điện thoại", "Điện thoại"),
             "email": _column(header_map, "Email"),
             "position": _column(header_map, "Vị trí việc làm"),
-            "title": _column(header_map, "Chức vụ"),
-            "employment": _column(header_map, "Hình thức tuyển dụng", "Loại hợp đồng"),
+            "title": _column(header_map, "Chức vụ", "Nhóm chức vụ"),
+            "employment": _column(header_map, "Hình thức tuyển dụng", "Loại hợp đồng", "Hình thức hợp đồng"),
             "recruit": _column(header_map, "Ngày tuyển dụng"),
-            "qualification": _column(header_map, "Trình độ đào tạo"),
+            "qualification": _column(header_map, "Trình độ đào tạo", "T.Độ chuyên môn nghiệp vụ"),
             "qualification_standard": _column(header_map, "Mức chuẩn đào tạo", "Đạt chuẩn"),
             "professional": _column(header_map, "Kết quả chuẩn nghề nghiệp", "Chuẩn nghề nghiệp"),
             "teaching_level": _column(header_map, "Cấp học trực tiếp"),
@@ -1497,6 +1502,7 @@ def import_staff_excel(
             "policy": _column(header_map, "Hưởng chế độ, chính sách", "Hưởng chính sách"),
             "status": _column(header_map, "Trạng thái công tác", "Trạng thái"),
             "notes": _column(header_map, "Ghi chú"),
+            "inclusive": _column(header_map, "Dạy HSKT học hòa nhập"),
         }
         if columns["name"] is None:
             raise ValueError("Tệp Excel thiếu cột Họ và tên.")
@@ -1541,6 +1547,7 @@ def import_staff_excel(
                 continue
             row_year = _clean(ws.cell(row_number, columns["year"]).value) if columns["year"] else ""
             if row_year and row_year != valid_year.code:
+                row_errors.append((row_number, "Năm học", f"Phải là {valid_year.code}."))
                 skipped += 1
                 continue
             target_school_id = forced_school_id
@@ -1597,10 +1604,12 @@ def import_staff_excel(
                     if len(candidates) == 1:
                         school_obj = candidates[0]
                     elif len(candidates) > 1:
+                        row_errors.append((row_number, "Tên trường", "Trùng tên nhiều trường; cần điền mã trường."))
                         errors += 1
                         continue
                 target_school_id = school_obj.id if school_obj else None
             if target_school_id is None or not _ensure_school_in_scope(user, target_school_id):
+                row_errors.append((row_number, "Trường", "Không tìm thấy trường hoặc trường ngoài phạm vi tài khoản."))
                 skipped += 1
                 continue
             username = _clean(ws.cell(row_number, columns["username"]).value) if columns["username"] else ""
@@ -1609,8 +1618,12 @@ def import_staff_excel(
                 ministry_code = _account_staff_code(username)
             personal_id = _clean(ws.cell(row_number, columns["personal"]).value) if columns["personal"] else ""
             birth_date = _parse_date(ws.cell(row_number, columns["birth"]).value) if columns["birth"] else None
+            if columns["birth"] and ws.cell(row_number, columns["birth"]).value and birth_date is None:
+                row_errors.append((row_number, "Ngày sinh", "Ngày không hợp lệ; dùng định dạng ngày/tháng/năm."))
+                continue
             member, match_error = _match_staff_member(db, ministry_code, personal_id, full_name, birth_date)
             if match_error:
+                row_errors.append((row_number, "Mã/Họ tên", str(match_error)))
                 errors += 1
                 continue
             if member is None:
@@ -1666,6 +1679,21 @@ def import_staff_excel(
                 "receives_policy": _map_boolean(ws.cell(row_number, columns["policy"]).value) if columns["policy"] else False,
                 "notes": _clean(ws.cell(row_number, columns["notes"]).value) if columns["notes"] else None,
             }
+            if columns["employment"]:
+                employment_text = _normalize(ws.cell(row_number, columns["employment"]).value)
+                if "hdlv" in employment_text or "hop dong lam viec" in employment_text:
+                    defaults["employment_type"] = "HOP_DONG_LAM_VIEC"
+                elif "hdld" in employment_text or "hop dong lao dong" in employment_text:
+                    defaults["employment_type"] = "HOP_DONG_LAO_DONG"
+            if not columns["teaching_level"] and columns["teaching_age"]:
+                teaching = ws.cell(row_number, columns["teaching_age"]).value
+                defaults["teaching_level"] = _map_label_code(teaching, TEACHING_LEVEL_LABELS, "KHONG_DAY")
+            if columns["inclusive"]:
+                inclusive = _clean(ws.cell(row_number, columns["inclusive"]).value)
+                if inclusive:
+                    notes = defaults["notes"] or (existing.notes if existing else "") or ""
+                    notes = "\n".join(line for line in notes.splitlines() if not line.startswith("Dạy HSKT học hòa nhập:"))
+                    defaults["notes"] = (notes + f"\nDạy HSKT học hòa nhập: {inclusive}").strip()
             if existing is None:
                 db.add(StaffYearRecord(staff_member_id=member.id, school_year_id=school_year_id, created_by_user_id=user.get("id"), **defaults))
                 created += 1
@@ -1681,11 +1709,18 @@ def import_staff_excel(
                         "staff_evaluation": "evaluation", "source_status_label": "status",
                         "teaching_age_group": "teaching_age", "receives_policy": "policy", "notes": "notes",
                     }.get(key)
-                    if key == "school_id" or column_key is None or columns.get(column_key):
+                    if (key == "school_id" or column_key is None or columns.get(column_key)
+                        or (key == "teaching_level" and columns["teaching_age"])
+                        or (key == "notes" and columns["inclusive"])):
                         if value not in (None, "") or key in {"receives_policy", "school_id"}:
                             setattr(existing, key, value)
                 existing.is_active = True
                 updated += 1
+        if row_errors:
+            db.rollback()
+            return templates.TemplateResponse(request=request, name="staff/import_errors.html",
+                context={"nguoi_dung": user, "row_errors": row_errors,
+                         "school_year_id": school_year_id, "school_id": forced_school_id}, status_code=400)
         db.commit()
         return RedirectResponse(
             f"/doi-ngu?school_year_id={school_year_id}&school_id={forced_school_id or ''}&status=imported_{created}_{updated}_{skipped}_{errors}&audit=1",

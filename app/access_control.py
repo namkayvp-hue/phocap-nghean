@@ -556,6 +556,12 @@ class AccessControlMiddleware:
 
         normalized_path = path.rstrip("/") or "/"
 
+        if normalized_path == "/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong/xoa-giao-vien":
+            return role_code == COMMUNE_ROLE_CODE
+
+        if re.fullmatch(r"/dieu-tra/\d+/ho-dan/\d+/phieu/xac-nhan-xa", normalized_path):
+            return is_admin_role(role_code) or role_code == COMMUNE_ROLE_CODE
+
         if normalized_path == "/dieu-tra/luu-tru" or normalized_path.startswith("/dieu-tra/luu-tru/"):
             return role_code in {*ADMIN_ROLE_CODES, COMMUNE_ROLE_CODE}
         if normalized_path in {

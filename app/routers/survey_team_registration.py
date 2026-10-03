@@ -1424,10 +1424,66 @@ async def withdraw_school_participants(
     )
 
 
+@router.post("/danh-sach-truong/xoa-giao-vien")
+async def remove_submitted_teacher(request: Request, db: Session = Depends(get_db)):
+    if _role(request) != COMMUNE_ROLE_CODE:
+        return _forbidden()
+    form = await request.form()
+    try:
+        batch_id = int(form.get("batch_id") or 0)
+        user_id = int(form.get("user_id") or 0)
+    except (TypeError, ValueError):
+        return _forbidden()
+    batch = _commune_batch_scope(db, request, batch_id)
+    if batch is None:
+        return _forbidden()
+    _ensure_schema(db)
+    _ensure_team_schema(db)
+    try:
+        # Serialize removal with team generation/member changes on SQLite.
+        db.execute(text("UPDATE survey_batches SET id=id WHERE id=:id"), {"id": batch_id})
+        participant = db.execute(text("""
+            SELECT p.school_id FROM survey_investigation_participants p
+            JOIN schools s ON s.id=p.school_id AND s.commune_id=:commune
+            JOIN survey_participant_submissions sub ON sub.survey_batch_id=p.survey_batch_id
+                AND sub.school_id=p.school_id AND sub.status='SENT'
+            WHERE p.survey_batch_id=:batch AND p.user_id=:user
+        """), {"batch": batch_id, "user": user_id, "commune": batch["commune_id"]}).first()
+        if participant is None:
+            status = "participant_missing"
+        elif _team_changes_locked(db, batch_id) or batch.get("status") == "DA_KET_THUC":
+            status = "participant_locked"
+        elif db.execute(text("""SELECT 1 FROM survey_investigation_team_members m
+            JOIN survey_investigation_teams t ON t.id=m.team_id
+            WHERE t.survey_batch_id=:batch AND m.user_id=:user LIMIT 1"""),
+            {"batch": batch_id, "user": user_id}).first():
+            status = "participant_in_team"
+        else:
+            db.execute(text("""DELETE FROM survey_investigation_participants
+                WHERE survey_batch_id=:batch AND user_id=:user AND school_id=:school"""),
+                {"batch": batch_id, "user": user_id, "school": participant.school_id})
+            _log(db, batch_id=batch_id, school_id=participant.school_id, request=request,
+                 action="REMOVE_PARTICIPANT", count=len(_participant_ids(
+                     db, batch_id=batch_id, school_id=participant.school_id)),
+                 notes=f"Removed participant user_id={user_id} from submitted list.")
+            db.commit()
+            status = "participant_removed"
+        if status != "participant_removed":
+            db.rollback()
+    except Exception:
+        db.rollback()
+        raise
+    return RedirectResponse(
+        f"/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong?batch_id={batch_id}&status={status}",
+        status_code=303,
+    )
+
+
 @router.get("/danh-sach-truong", response_class=HTMLResponse)
 def commune_submissions_page(
     request: Request,
     batch_id: int | None = None,
+    status: str | None = None,
     db: Session = Depends(get_db),
 ):
     if _role(request) != COMMUNE_ROLE_CODE:
@@ -1446,6 +1502,24 @@ def commune_submissions_page(
         batch_id=batch_id,
     )
 
+    _ensure_team_schema(db)
+    participants = []
+    removal_locked = True
+    if batch is not None:
+        removal_locked = _team_changes_locked(db, int(batch["id"])) or batch.get("status") == "DA_KET_THUC"
+        participants = [dict(row) for row in db.execute(text("""
+            SELECT p.user_id, p.school_id, u.full_name, s.name AS school_name,
+                   EXISTS(SELECT 1 FROM survey_investigation_team_members m
+                          JOIN survey_investigation_teams t ON t.id=m.team_id
+                          WHERE t.survey_batch_id=p.survey_batch_id AND m.user_id=p.user_id) AS in_team
+            FROM survey_investigation_participants p
+            JOIN survey_participant_submissions sub ON sub.survey_batch_id=p.survey_batch_id
+                AND sub.school_id=p.school_id AND sub.status='SENT'
+            JOIN users u ON u.id=p.user_id
+            JOIN schools s ON s.id=p.school_id
+            WHERE p.survey_batch_id=:batch AND s.commune_id=:commune
+            ORDER BY s.name, u.full_name, p.user_id
+        """), {"batch": batch["id"], "commune": commune_id}).mappings()]
     school_rows: list[dict[str, Any]] = []
     summary = {
         "MN": 0,
@@ -1550,6 +1624,14 @@ def commune_submissions_page(
             "batches": batches,
             "batch": batch,
             "schools": school_rows,
+            "participants": participants,
+            "removal_locked": removal_locked,
+            "removal_message": {
+                "participant_removed": "Đã xóa giáo viên khỏi danh sách tham gia điều tra của đợt này.",
+                "participant_locked": "Đợt điều tra đã khóa hoặc kết thúc; không thể xóa giáo viên.",
+                "participant_in_team": "Giáo viên đã được xếp tổ. Hãy thay giáo viên tại mục Lập tổ trước khi xóa khỏi danh sách.",
+                "participant_missing": "Giáo viên không còn trong danh sách trường đã gửi.",
+            }.get(status),
             "summary": summary,
             "submission_labels": SUBMISSION_LABELS,
         },

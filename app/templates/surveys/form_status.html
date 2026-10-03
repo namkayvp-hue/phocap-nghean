@@ -62,6 +62,8 @@
         <div class="locked-box">
             🔒 Đợt điều tra đã được chốt và khóa dữ liệu. Bạn có thể xem thông tin phiếu nhưng không thể thay đổi hoặc lưu lại.
         </div>
+    {% elif can_confirm_commune and not can_edit_data and not commune_confirmation_locked %}
+        <div class="alert alert-success">Tài khoản xã được xác nhận phiếu bằng nút <strong>Lưu xác nhận xã/phường</strong> bên dưới; các thông tin điều tra ở chế độ chỉ xem.</div>
     {% elif not can_edit_data %}
         <div class="alert alert-success"><strong>Chế độ chỉ xem:</strong> Tài khoản không được thay đổi thông tin phiếu.</div>
     {% endif %}
@@ -111,8 +113,8 @@
                         </label>
 
                         {% if can_confirm_commune %}
-                            <label class="check-card {% if readonly_mode %}check-card-readonly{% endif %}">
-                                <input type="checkbox" name="commune_confirmed" value="1" {% if form_data.commune_confirmed %}checked{% endif %} {% if readonly_mode %}disabled{% endif %}>
+                            <label class="check-card {% if commune_confirmation_locked %}check-card-readonly{% endif %}">
+                                <input type="checkbox" name="commune_confirmed" value="1" {% if not can_edit_data %}form="commune-confirmation-form"{% endif %} {% if form_data.commune_confirmed %}checked{% endif %} {% if commune_confirmation_locked %}disabled{% endif %}>
                                 <span>
                                     <strong>Xã/phường đã xác nhận</strong><br>
                                     <small>Tài khoản Xã và ADMIN được thay đổi xác nhận cấp xã/phường.</small>
@@ -151,6 +153,16 @@
                 {% endif %}
             </div>
         </form>
+        {% if can_confirm_commune and not can_edit_data %}
+        <form id="commune-confirmation-form" method="post" action="/dieu-tra/{{ batch.id }}/ho-dan/{{ household.id }}/phieu/xac-nhan-xa">
+            {% if commune_confirmation_locked %}
+                <p>Đợt điều tra đã khóa hoặc kết thúc; không thể thay đổi xác nhận xã/phường.</p>
+            {% else %}
+                <p>Xã/phường được xác nhận hoặc bỏ xác nhận phiếu. Nội dung điều tra do giáo viên nhập được giữ nguyên.</p>
+                <button class="button button-primary" type="submit">Lưu xác nhận xã/phường</button>
+            {% endif %}
+        </form>
+        {% endif %}
     </section>
 </main>
 </body>
