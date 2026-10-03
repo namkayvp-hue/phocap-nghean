@@ -507,3 +507,50 @@ XV. CẬP NHẬT NGÀY 23/09/2026
    build lại, trạng thái healthy, log khởi động không lỗi. Curl
    /dieu-tra/luu-tru trả 303 (chuyển hướng đăng nhập) — route đã được
    nạp. Nhãn cập nhật sang d05b05b.
+
+XVI. CẬP NHẬT NGÀY 03/10/2026 — LỖI 500 KHI XUẤT MN-02 TRÊN SERVER
+
+1. Đồng bộ với GitHub: local đứng ở 4f4e2bf, GitHub có thêm commit
+   1da185c (mẫu Excel nhập cán bộ trường, luồng xã xác nhận). Local sạch
+   nên chỉ "git pull --ff-only".
+
+2. Hiện tượng: /bao-cao/pcgdmn-mau-2025/xuat-bieu/mn-02?school_year_id=2
+   báo "Internal Server Error" trên server, nhưng máy dev chạy bình
+   thường dù mã nguồn giống nhau.
+
+3. Nguyên nhân: log container ghi
+   "sqlite3.OperationalError: no such table: school_finance_report_values".
+   Bảng này khai báo trong app/report_input_models.py nhưng KHÔNG có đoạn
+   nào tự tạo bảng khi app khởi động, và trien_khai_thay_doi.sh chỉ đẩy
+   mã nguồn rồi build lại container (không migrate CSDL). DB máy dev đã có
+   bảng từ trước, DB production (/app/data/phocap.db) thì chưa.
+   Các script app/upgrade_bai_12d_*.py chỉ create_all cho survey_models
+   nên không tạo bảng này.
+
+4. Cách xử lý đã làm trên server: sao lưu DB bằng sqlite3 backup API vào
+   /app/data/backups/phocap_truoc_tao_bang_finance_20261003_211101.db,
+   rồi tạo đúng 1 bảng bằng
+   Base.metadata.tables["school_finance_report_values"].create(
+   bind=engine, checkfirst=True) sau khi import app.models và
+   app.report_input_models. Trước đó đã so sánh Base.metadata với DB:
+   chỉ thiếu đúng bảng này. Không động tới dữ liệu cũ.
+
+5. BÀI HỌC: nhận định "không có app/upgrade_*.py nên không cần nâng cấp
+   CSDL" (mục XV.2) là chưa đủ. Trước mỗi lần deploy phải kiểm tra thêm
+   xem commit có thêm model/bảng mới trong app/*models*.py hay không. Cách
+   kiểm tra nhanh trên server (chỉ đọc):
+     docker exec -i phocap python - <<'PY'
+     import sqlite3
+     from app.database import Base
+     import app.models, app.report_input_models
+     c = sqlite3.connect('/app/data/phocap.db')
+     have = {r[0] for r in c.execute("select name from sqlite_master where type='table'")}
+     print(sorted({t.name for t in Base.metadata.sorted_tables} - have))
+     PY
+   (import thêm các module *_models khác nếu có). Danh sách in ra khác
+   rỗng nghĩa là còn bảng thiếu.
+
+6. Việc còn lại: viết app/upgrade_report_inputs.py (backup rồi
+   create_all) và thêm nhắc nhở vào trien_khai_thay_doi.sh để tự động
+   hoá bước này. Chưa làm. Chưa kiểm tra lại trang MN-02 sau khi tạo bảng
+   (chờ dev xác nhận).
