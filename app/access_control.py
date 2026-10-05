@@ -691,9 +691,9 @@ class AccessControlMiddleware:
         if is_household_update_center or is_household_update_batch:
             allowed_roles = {
                 *ADMIN_ROLE_CODES,
-                # V2.3: chỉ ADMIN/SO cập nhật tập trung.
-                # BAI_13B_12_V2_2_HIDE_UPDATE_XA: bỏ quyền Xã.
-                # V2.3: Trường không truy cập cập nhật hộ tập trung.
+                # Tài khoản xã được nhập Excel trong đúng các đợt thuộc xã;
+                # router tiếp tục lọc batch theo commune_id của tài khoản.
+                COMMUNE_ROLE_CODE,
             }
             if role_code not in allowed_roles:
                 return False
@@ -909,9 +909,7 @@ class AccessControlMiddleware:
 
         # === BAI_13B_9_V1A_ACCESS_SCOPE_START ===
         if normalized_path.startswith("/dieu-tra/cap-nhat-ho-dan"):
-            # V2.3: Xã/Trường/GV đều bị chặn; ADMIN/SO đã qua ở đầu hàm.
-            return False
-        # V2.3: Cập nhật hộ tập trung chỉ dành cho ADMIN/SO.
+            return role_code == COMMUNE_ROLE_CODE
         # === BAI_13B_9_V1A_ACCESS_SCOPE_END ===
 
         # Bài 12D-14A: Trung tâm dữ liệu lịch sử dùng URL chung,

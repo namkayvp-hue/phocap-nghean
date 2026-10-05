@@ -665,7 +665,7 @@
                     {# === BAI_13B_9_V1A_MENU === #}
                     {# === BAI_13B_12_V2_2_HIDE_UPDATE_XA_START === #}
 {# === BAI_13B_12_V2_3_UPDATE_MENU_ONLY_SO === #}
-{% if menu_role in ['ADMIN', 'SO'] %}
+{% if menu_role in ['ADMIN', 'SO', 'XA'] %}
                     <a
                         href="/dieu-tra/cap-nhat-ho-dan"
                         role="menuitem"
@@ -721,12 +721,10 @@
                             <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ho-dan" role="menuitem">2.2.1. Danh sách hộ dân / phiếu được giao</a>
                             <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phieu-in-thuc-dia" role="menuitem">2.2.2. In phiếu điều tra</a>
                             <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ho-dan/xuat-excel" role="menuitem">2.2.3. Xuất Excel điều tra</a>
-                            {% if menu_role in ['ADMIN', 'SO', 'XA', 'TRUONG', 'GIAO_VIEN'] %}
-                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ho-dan/nhap-excel" role="menuitem">2.2.4. Nhập Excel cập nhật hộ dân</a>
-                            {% endif %}
+                            {# 2.2.4 được ẩn khỏi menu; mục Cập nhật dữ liệu hộ dân ở đầu phần 2 vẫn giữ nguyên. #}
 
                             {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
-                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-truong" role="menuitem">2.2.5. Trường tham gia và khóa/mở trường</a>
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-truong" role="menuitem">2.2.4. Trường tham gia và khóa/mở trường</a>
                                 {# === BAI_13B_11_7_HIDE_226_XA_START === #}
                                 {# Ẩn khỏi menu vì thao tác đã có trên màn hình danh sách hộ; không xóa route/backend. #}
                                 {#
@@ -739,7 +737,7 @@
                                     href="/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong"
                                     role="menuitem"
                                 >
-                                    2.2.7. GV trường gửi về xã/phường
+                                    2.2.5. GV trường gửi về xã/phường
                                 </a>
                                 {% endif %}
                                 {# === BAI_13B_10_V1_2_MENU_END === #}
@@ -748,7 +746,7 @@
                     
 
                             {% elif menu_role == 'TRUONG' %}
-                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-truong" role="menuitem">2.2.5. Nhiệm vụ trường / gửi kết quả lên xã</a>
+                                <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/phan-cong-truong" role="menuitem">2.2.4. Nhiệm vụ trường / gửi kết quả lên xã</a>
                                 {# === BAI_13B_11_7_HIDE_226_TRUONG_START === #}
                                 {# Ẩn khỏi menu vì thao tác đã có trên màn hình danh sách hộ; không xóa route/backend. #}
                                 {#
@@ -760,7 +758,7 @@
                                     href="/dieu-tra/phan-cong-to-dieu-tra/giao-vien-tham-gia"
                                     role="menuitem"
                                 >
-                                    2.2.7. Giáo viên tham gia điều tra
+                                    2.2.5. Giáo viên tham gia điều tra
                                 </a>
                                 {# === BAI_13B_10_V1_2_SCHOOL_MENU_END === #}
                                 
