@@ -38,7 +38,7 @@ TMP_DEL=$(mktemp)
 trap 'rm -f "$TMP_LIST" "$TMP_DEL" phocap_delta.tar.gz' EXIT
 
 if [ -n "$BASELINE" ]; then
-    git diff --name-status "$BASELINE" HEAD | while IFS=$'\t' read -r status path _rest; do
+    git diff --no-renames --name-status "$BASELINE" HEAD | while IFS=$'\t' read -r status path _rest; do
         case "$status" in
             D) echo "$path" >> "$TMP_DEL" ;;
             *) echo "$path" >> "$TMP_LIST" ;;
