@@ -41,7 +41,7 @@ ROLE_RULES = (
     # === SAP_NHAP_TRUONG_DUNG_CHUNG_V9_2_ACCESS ===
     ("/cong-cu-du-lieu", ADMIN_ROLE_CODES),
     ("/tai-khoan", ACCOUNT_MANAGEMENT_ROLE_CODES),
-    ("/xa", ADMIN_ROLE_CODES),
+    ("/xa", frozenset({*ADMIN_ROLE_CODES, DEPARTMENT_ROLE_CODE})),
     ("/truong", frozenset({*ADMIN_ROLE_CODES, COMMUNE_ROLE_CODE})),
     # === BAI_13B_11_16_1_CLASSROOM_CATALOG_ROLE ===
     ("/lop-hoc", frozenset({*ADMIN_ROLE_CODES, DEPARTMENT_ROLE_CODE, COMMUNE_ROLE_CODE, SCHOOL_ROLE_CODE})),
@@ -555,6 +555,17 @@ class AccessControlMiddleware:
             return True
 
         normalized_path = path.rstrip("/") or "/"
+
+        # Phòng ban chỉ đọc/xuất; không cho các nhánh nghiệp vụ bên dưới
+        # vô tình cấp quyền ghi khi bổ sung chức năng mới.
+        if role_code == DEPARTMENT_ROLE_CODE:
+            if method not in SAFE_METHODS:
+                return False
+            if normalized_path.startswith("/xa/"):
+                return False
+
+        if re.fullmatch(r"/bao-cao/xoa-mu-chu/du-lieu-bo-sung/\d+", normalized_path):
+            return role_code in {*ADMIN_ROLE_CODES, COMMUNE_ROLE_CODE, SCHOOL_ROLE_CODE, TEACHER_ROLE_CODE}
 
         if normalized_path == "/dieu-tra/phan-cong-to-dieu-tra/danh-sach-truong/xoa-giao-vien":
             return role_code == COMMUNE_ROLE_CODE

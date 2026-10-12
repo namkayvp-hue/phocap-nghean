@@ -1,0 +1,18 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dữ liệu bổ sung XMC</title>
+<link rel="stylesheet" href="/static/css/style.css"><style>main{max-width:1200px;margin:auto;padding:24px}article{border:1px solid #cbd5e1;border-radius:12px;padding:18px;margin:16px 0;background:white}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}label{display:flex;flex-direction:column;gap:5px}input,select{padding:8px}summary{cursor:pointer;font-weight:bold}p{line-height:1.6}</style></head><body>
+{% include 'partials/dropdown_menu_v1.html' %}
+<main><h1>Dữ liệu bổ sung xóa mù chữ</h1><p>{{ ctx.label }} · Năm học {{ ctx.year.code }}</p><a href="{{ back_url }}">← Bộ báo cáo XMC</a>
+<p>Theo Điều 23 Nghị định 353/2026/NĐ-CP: mức 1 gồm hoàn thành giai đoạn 1 XMC hoặc lớp 3; mức 2 gồm hoàn thành giai đoạn 2 XMC hoặc chương trình tiểu học. Bổ sung kết quả giai đoạn XMC tại đây; thông tin học phổ thông cập nhật tại phiếu điều tra. “Chưa xác định” không được tính là “Không”.</p>
+{% if not can_edit %}<p><strong>Tài khoản phòng ban chỉ được xem và xuất báo cáo.</strong></p>{% endif %}
+<form method="get"><input type="hidden" name="school_year_id" value="{{ ctx.year.id }}">{% for key in ['commune_id','school_id'] %}{% if ctx[key] is not none %}<input type="hidden" name="{{ key }}" value="{{ ctx[key] }}">{% endif %}{% endfor %}<input name="q" value="{{ q }}" placeholder="Họ tên hoặc số định danh"><button>Tìm kiếm</button></form>
+<p>{{ total }} đối tượng · Trang {{ page }}</p>
+{% for person,record in rows %}<article><details><summary>{{ person.full_name }} · {{ person.date_of_birth or 'Chưa có ngày sinh' }} · {{ person.personal_id or 'Chưa có số định danh' }}</summary>
+{% if record %}{% set data = ctx.evidence.get(record.id,{}) %}
+{% set levels = personal_levels(record, data) %}
+<p>Hồ sơ năm học: {{ record.id }}. Kết quả dùng cho biểu mới — Mức 1: {{ 'Đạt' if levels[0] == true else ('Chưa đạt' if levels[0] == false else 'Chưa xác định') }}; mức 2: {{ 'Đạt' if levels[1] == true else ('Chưa đạt' if levels[1] == false else 'Chưa xác định') }}.</p>
+<form method="post" action="/bao-cao/xoa-mu-chu/du-lieu-bo-sung/{{ record.id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><fieldset {% if not can_edit %}disabled{% endif %}><div class="fields">
+{% for key,label in bool_fields.items() %}<label>{{ label }}<select name="{{ key }}"><option value="" {% if data.get(key) is none %}selected{% endif %}>Chưa xác định</option><option value="true" {% if data.get(key) == true %}selected{% endif %}>Có</option><option value="false" {% if data.get(key) == false %}selected{% endif %}>Không</option></select></label>{% endfor %}
+{% for key,label in text_fields.items() %}<label>{{ label }}<input name="{{ key }}" value="{{ data.get(key) or '' }}" maxlength="1000"></label>{% endfor %}</div>{% if can_edit %}<p><button type="submit">Lưu dữ liệu XMC</button></p>{% endif %}</fieldset></form>
+{% else %}<p>Chưa có hồ sơ năm học. Cần bổ sung phiếu điều tra trước khi cập nhật.</p>{% endif %}</details></article>{% else %}<p>Không có đối tượng trong phạm vi được giao.</p>{% endfor %}
+{% if prev_url %}<a href="{{ prev_url }}">Trang trước</a>{% endif %} {% if next_url %}<a href="{{ next_url }}">Trang sau</a>{% endif %}
+</main></body></html>

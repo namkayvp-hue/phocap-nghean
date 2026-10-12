@@ -27,6 +27,18 @@
         Tuổi tính tại {{ reference_date.strftime('%d/%m/%Y') }}. Phổ cập: 0–18 tuổi; Xóa mù chữ: 18–60 tuổi;
         người 18 tuổi được tính ở cả hai nhóm. Cấp học được suy ra từ trường/lớp hiện có, không theo cấp của giáo viên.
     </div>
+    <section class="panel">
+        <h2>Tìm nhanh theo độ tuổi và đối tượng</h2>
+        <form method="get" action="/dieu-tra/{{ batch.id }}/cap-nhat-ho-dan/thong-ke" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+            <label>Từ tuổi<br><input type="number" name="age_min" min="0" max="120" value="{{ age_min if age_min is not none else '' }}"></label>
+            <label>Đến tuổi<br><input type="number" name="age_max" min="0" max="120" value="{{ age_max if age_max is not none else '' }}"></label>
+            <label style="min-width:280px">Tên, địa chỉ, số định danh<br><input type="search" name="q" value="{{ search_query }}" placeholder="Nhập để tìm nhanh"></label>
+            <button class="btn" style="background:#0f5fa8;color:#fff;border:0" type="submit">Tìm kiếm</button>
+            <a class="btn" href="/dieu-tra/{{ batch.id }}/cap-nhat-ho-dan/thong-ke">Xóa lọc</a>
+            <a class="btn" href="/dieu-tra/{{ batch.id }}/cap-nhat-ho-dan/thong-ke/xuat-excel?age_min={{ age_min or '' }}&amp;age_max={{ age_max or '' }}&amp;q={{ search_query|urlencode }}">Xuất danh sách Excel</a>
+        </form>
+        <p style="margin-bottom:0">Đang hiển thị <strong>{{ detail_rows|length }}</strong> đối tượng phù hợp.</p>
+    </section>
     <section class="cards">
         <div class="card"><span>TỔNG HỘ</span><strong>{{ total_households }}</strong></div>
         <div class="card"><span>TỔNG THÀNH VIÊN</span><strong>{{ total_people }}</strong></div>
@@ -50,6 +62,12 @@
         <article class="panel"><h2>Cư trú</h2><table><thead><tr><th>Trạng thái</th><th>Số người</th></tr></thead><tbody>
         {% for code,label in residency_labels.items() %}<tr><td>{{ label }}</td><td><strong>{{ residency_counts.get(code,0) }}</strong></td></tr>{% endfor %}
         </tbody></table></article>
+    </section>
+    <section class="panel" style="margin-top:16px">
+        <h2>Danh sách đối tượng theo kết quả lọc</h2>
+        <div style="overflow:auto"><table><thead><tr><th>STT</th><th>Họ tên</th><th>Tuổi</th><th>Ngày sinh</th><th>Địa chỉ</th><th>Cấp học</th><th>Số định danh</th></tr></thead><tbody>
+        {% for row in detail_rows %}<tr><td>{{ loop.index }}</td><td>{{ row.person.full_name }}</td><td>{{ row.age if row.age is not none else 'Chưa rõ' }}</td><td>{{ row.person.date_of_birth.strftime('%d/%m/%Y') if row.person.date_of_birth else '' }}</td><td>{{ row.address }}</td><td>{{ level_labels.get(row.level, row.level) }}</td><td>{{ row.person.personal_id or '' }}</td></tr>{% else %}<tr><td colspan="7">Không có đối tượng phù hợp.</td></tr>{% endfor %}
+        </tbody></table></div>
     </section>
 </main>
 </body>

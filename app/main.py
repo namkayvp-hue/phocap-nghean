@@ -372,5 +372,15 @@ from app.routers import network_current as _network_current
 app.include_router(_network_current.router)
 # === BATCH18_NETWORK_CURRENT_END ===
 
+from app.routers.xmc_appendix_reports import router as xmc_appendix_router
+from app.xmc_models import XmcEvidence
+from app.database import engine as xmc_engine
+app.include_router(xmc_appendix_router)
+
+
+@app.on_event("startup")
+def initialize_xmc_evidence_table():
+    XmcEvidence.__table__.create(bind=xmc_engine, checkfirst=True)
+
 
 

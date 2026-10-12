@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -21,6 +21,7 @@ from sqlalchemy import and_, distinct, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.comparison_models import StudentSurveyComparisonSignoff
+from app.xmc_appendices import TEMPLATE_DIR as XMC_APPENDIX_DIR, XMC_FORMS, COMPULSORY_FORMS, template_files
 from app.database import get_db
 from app.models import (
     Commune,
@@ -33,6 +34,7 @@ from app.permissions import (
     COMMUNE_ROLE_CODE,
     SCHOOL_ROLE_CODE,
     TEACHER_ROLE_CODE,
+    SURVEY_ROLE_CODES,
     is_province_reader,
     normalize_role_code,
 )
@@ -3014,6 +3016,9 @@ def _b134_level_center_context(
         "scope_label": scope_label,
         "province_reader": is_province_reader(normalize_role_code(user.get("role_code"))),
         "cards": cards,
+        "xmc_appendices": XMC_FORMS if level_code == "xoa-mu-chu" else (),
+        "compulsory_appendices": COMPULSORY_FORMS if level_code == "xoa-mu-chu" else (),
+        "xmc_export_query": urlencode(base_params),
         "ready_count": sum(1 for item in cards if item["status_class"] == "ready"),
     }
 
@@ -3084,3 +3089,33 @@ def b134_literacy_report_center(
     )
 
 # === BAI_13B_4_V1_LEVEL_REPORT_CENTERS_END ===
+
+
+@router.get("/xoa-mu-chu/phu-luc/{template_code}/excel")
+def download_xmc_appendix(request: Request, template_code: str):
+    user = lay_thong_tin_nguoi_dung(request)
+    role = normalize_role_code(user.get("role_code"))
+    if role not in SURVEY_ROLE_CODES:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền tải biểu mẫu xóa mù chữ.")
+    filename = template_files().get(template_code)
+    if filename is None:
+        raise HTTPException(status_code=404, detail="Không tìm thấy biểu mẫu.")
+    path = XMC_APPENDIX_DIR / filename
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Tệp biểu mẫu chưa được cài đặt.")
+    return FileResponse(path, filename=filename,
+                        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+@router.get("/xoa-mu-chu/phu-luc/{number}/pdf")
+def download_xmc_document_appendix(request: Request, number: int):
+    user = lay_thong_tin_nguoi_dung(request)
+    if normalize_role_code(user.get("role_code")) not in SURVEY_ROLE_CODES:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền tải biểu mẫu.")
+    if number not in {4, 5}:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phụ lục.")
+    filename = f"Phu_luc_{number}.pdf"
+    path = XMC_APPENDIX_DIR / filename
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Tệp phụ lục chưa được cài đặt.")
+    return FileResponse(path, filename=filename, media_type="application/pdf")

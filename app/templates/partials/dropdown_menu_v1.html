@@ -629,6 +629,20 @@
                             </a>
 <!-- BATCH18C_NETWORK_CURRENT_MENU -->
 <a class="pc-global-nav__brand" href="/mang-luoi-hien-hanh" title="Về trang chủ">1.3.4. Mạng lưới năm học hiện hành</a>
+                            <a
+                                href="/dieu-tra"
+                                data-batch-template="/dieu-tra/{batch_id}/cap-nhat-ho-dan/thong-ke"
+                                role="menuitem"
+                            >
+                                1.3.5. Thống kê độ tuổi đối tượng
+                            </a>
+                            <a
+                                href="/dieu-tra"
+                                data-batch-template="/dieu-tra/{batch_id}/xu-huong-lien-nam"
+                                role="menuitem"
+                            >
+                                1.3.6. Dashboard lộ trình và xu hướng
+                            </a>
                         </div>
                     </div>
 </div>
@@ -638,9 +652,25 @@
                 <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown" role="menu">
                     <a href="/truong" role="menuitem">1.1. Danh sách trường thuộc xã/phường</a>
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">1.3. Công cụ dữ liệu</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/cap-nhat-ho-dan/thong-ke" role="menuitem">1.3.1. Thống kê độ tuổi đối tượng</a>
+                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/xu-huong-lien-nam" role="menuitem">1.3.2. Dashboard lộ trình và xu hướng</a>
+                        </div>
+                    </div>
                     {# === BAI_13B_12_V2_2_MENU_AREA_START === #}
-                    <a href="/dieu-tra/phan-cong-to-dieu-tra/dia-ban" role="menuitem">1.3. Danh mục thôn/xóm/khối/tổ/bản</a>
+                    <a href="/dieu-tra/phan-cong-to-dieu-tra/dia-ban" role="menuitem">1.4. Danh mục thôn/xóm/khối/tổ/bản</a>
                     {# === BAI_13B_12_V2_2_MENU_AREA_END === #}
+                </div>
+            </div>
+            {% elif menu_role == 'PHONG_BAN' %}
+            <div class="pc-menu-group {% if menu_path.startswith('/xa') %}is-active{% endif %}">
+                <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
+                <div class="pc-dropdown" role="menu">
+                    <a href="/xa" role="menuitem">1.1. Xem tất cả xã/phường</a>
                 </div>
             </div>
             {% elif menu_role == 'TRUONG' %}
@@ -793,7 +823,6 @@
                                 <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/ke-thua-du-lieu" role="menuitem">2.4.1. Kế thừa dữ liệu năm trước</a>
                             {% endif %}
                             <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/doi-chieu-nam-hoc" role="menuitem">2.4.2. Đối chiếu giữa các năm học</a>
-                            <a href="/dieu-tra" data-batch-template="/dieu-tra/{batch_id}/xu-huong-lien-nam" role="menuitem">2.4.3. Dashboard lộ trình và xu hướng</a>
                         </div>
                     </div>
                     {% endif %}
@@ -1266,7 +1295,7 @@
                     {# === FIX_CAP_TRUONG_V1_REPORT_THCS_END === #}
 
                     {# === FIX_CAP_TRUONG_V1_REPORT_XMC_START === #}
-                    {% if menu_role not in ['TRUONG', 'GIAO_VIEN'] %}
+                    {% if menu_role in ['ADMIN', 'SO', 'PHONG_BAN', 'XA', 'TRUONG', 'GIAO_VIEN'] %}
 <div class="pc-submenu">
                         <button type="button" class="pc-submenu-trigger" aria-expanded="false">
                             <span class="pc-submenu-trigger__text">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5. Báo cáo Xóa mù chữ</span><span class="pc-submenu-arrow">▶</span>
@@ -1275,12 +1304,17 @@
                             
                             {# === BAI_13B_4_V1_XMC_CENTER_MENU_START === #}
                             <a href="/bao-cao/xoa-mu-chu" role="menuitem"><strong>{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.0. Bộ báo cáo Xóa mù chữ</strong></a>
+                            {% for number in range(1, 6) %}
+                            <a href="/bao-cao/xoa-mu-chu#phu-luc-{{ number }}" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.{{ number }} — Phụ lục {{ number }}</a>
+                            {% endfor %}
                             {# === BAI_13B_4_V1_XMC_CENTER_MENU_END === #}
 
+{% if false %}{# Ẩn bốn biểu cũ trên menu; giữ nguyên đường dẫn và chức năng. #}
 <a href="/bao-cao?report_type=PCGD_XMC_3_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.1. XMC-3 – Tổng hợp kết quả xóa mù chữ</a>
                             <a href="/bao-cao?report_type=PCGD_CMC_2_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.2. CMC-2 – Thống kê số người mù chữ</a>
                             <a href="/bao-cao?report_type=PCGD_CMC_1_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.3. CMC-1 – Tổng hợp chống mù chữ</a>
                             <a href="/bao-cao?report_type=PCGD_XMC_4_2025" role="menuitem">{{ 6 if menu_role in ['ADMIN', 'SO'] else 5 }}.5.4. XMC-4 – Thống kê đạt chuẩn xóa mù chữ</a>
+{% endif %}
                         </div>
                     </div>
                     {% endif %}

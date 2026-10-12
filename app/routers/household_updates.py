@@ -1432,16 +1432,22 @@ def _level_from_record(
     )
     key = _normalize_no_accent(f"{school_name} {class_name}")
 
-    if any(x in key for x in ("mam non", "mau giao", "nha tre")):
+    class_key = _normalize_no_accent(class_name)
+    if (
+        any(x in key for x in ("mam non", "mau giao", "nha tre"))
+        or re.search(r"\b(?:mn|mg|nt)\b", key)
+        or re.search(r"\b\d+\s*(?:[-–]\s*\d+\s*)?(?:tuoi|thang)\b", class_key)
+    ):
         return "MN"
     if any(x in key for x in ("trung hoc pho thong", "thpt")):
         return "THPT"
     if any(x in key for x in ("trung hoc co so", "thcs")):
         return "THCS"
-    if "tieu hoc" in key:
+    if "tieu hoc" in key or re.search(r"\bth\b", key):
         return "TH"
 
-    match = re.search(r"(?:lop\s*)?(\d{1,2})(?:\D|$)", key)
+    # Chỉ đọc khối từ tên lớp; số trong tên trường không phải khối học.
+    match = re.fullmatch(r"(?:lop\s*)?(\d{1,2})(?:\s*[a-z][a-z0-9]*)?", class_key)
     if match:
         grade = int(match.group(1))
         if 1 <= grade <= 5:
@@ -1468,6 +1474,9 @@ def _level_from_record(
 def household_related_statistics(
     batch_id: int,
     request: Request,
+    age_min: int | None = None,
+    age_max: int | None = None,
+    q: str = "",
     db: Session = Depends(get_db),
 ):
     batch = _batch_in_scope(db, request, batch_id)
@@ -1575,6 +1584,30 @@ def household_related_statistics(
         for code in FORM_STATUS_LABELS
     }
 
+    age_min = max(0, age_min) if age_min is not None else None
+    age_max = min(120, age_max) if age_max is not None else None
+    search_key = _normalize_no_accent(q)
+    detail_rows = []
+    filtered_people = []
+    for person in people:
+        age = _age_on(person.date_of_birth, reference_date)
+        form = next((item for item in forms if item.household_id == person.household_id), None)
+        address = form.household.address if form is not None else ""
+        haystack = _normalize_no_accent(f"{person.full_name} {address} {person.personal_id or ''} {getattr(person, 'citizen_id', '') or ''}")
+        if age_min is not None and (age is None or age < age_min):
+            continue
+        if age_max is not None and (age is None or age > age_max):
+            continue
+        if search_key and search_key not in haystack:
+            continue
+        filtered_people.append(person)
+        record = record_by_person.get(person.id)
+        detail_rows.append({"person": person, "age": age, "address": address, "record": record,
+                            "level": _level_from_record(record, schools.get(record.school_id) if record else None,
+                                                          classrooms.get(record.class_id) if record else None)})
+    people = filtered_people
+    total_households = len({person.household_id for person in people})
+
     for form in forms:
         form_status[form.status] = form_status.get(form.status, 0) + 1
 
@@ -1612,6 +1645,7 @@ def household_related_statistics(
         )
         levels[level] = levels.get(level, 0) + 1
 
+    age_counts = {str(age): sum(row["age"] == age for row in detail_rows) for age in range(0, 121)}
     return templates.TemplateResponse(
         request=request,
         name="surveys/household_statistics_v1.html",
@@ -1643,5 +1677,40 @@ def household_related_statistics(
             "residency_labels": RESIDENCY_STATUS_LABELS,
             "form_status_counts": form_status,
             "form_status_labels": FORM_STATUS_LABELS,
+            "detail_rows": detail_rows,
+            "age_counts": age_counts,
+            "age_min": age_min,
+            "age_max": age_max,
+            "search_query": q,
         },
     )
+
+
+@router.get("/{batch_id}/cap-nhat-ho-dan/thong-ke/xuat-excel")
+def export_household_statistics(
+    batch_id: int,
+    request: Request,
+    age_min: int | None = None,
+    age_max: int | None = None,
+    q: str = "",
+    db: Session = Depends(get_db),
+):
+    batch = _batch_in_scope(db, request, batch_id)
+    if batch is None:
+        return RedirectResponse(url="/dieu-tra/cap-nhat-ho-dan", status_code=303)
+    # Reuse the rendered statistics data so scope and filters stay identical.
+    response = household_related_statistics(batch_id, request, age_min, age_max, q, db)
+    context = response.context
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Thong_ke_do_tuoi"
+    ws.append(["STT", "Họ tên", "Tuổi", "Ngày sinh", "Địa chỉ", "Cấp học", "Số định danh", "CCCD"])
+    for index, row in enumerate(context["detail_rows"], 1):
+        person = row["person"]
+        ws.append([index, person.full_name, row["age"], person.date_of_birth,
+                   row["address"], row["level"], person.personal_id or "", getattr(person, "citizen_id", "") or ""])
+    for cell in ws[1]: cell.font = Font(bold=True)
+    ws.freeze_panes = "A2"
+    output = BytesIO(); wb.save(output); output.seek(0)
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="thong_ke_do_tuoi_{batch.id}.xlsx"'})

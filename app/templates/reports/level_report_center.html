@@ -38,6 +38,7 @@
         .summary-card{background:#fff;border-radius:15px;padding:17px;border:1px solid var(--line)}
         .summary-card span{display:block;color:#6b8195;font-weight:700}.summary-card strong{display:block;margin-top:7px;font-size:26px;color:var(--blue)}
         .disabled{opacity:.55;cursor:not-allowed}
+        [id^="phu-luc-"]{scroll-margin-top:350px}
         @media(max-width:850px){.filters,.cards,.summary{grid-template-columns:1fr 1fr}}
         @media(max-width:620px){.filters,.cards,.summary{grid-template-columns:1fr}.wrap{padding:12px}.panel,.card{padding:14px}.hero{padding:24px 16px}.hero h1{font-size:25px}.actions .btn{width:100%}}
     </style>
@@ -54,6 +55,7 @@
 </header>
 
 <main class="wrap">
+
     <section class="panel">
         <h2 style="margin-top:0">Chọn năm học và phạm vi báo cáo</h2>
         <form method="get" action="{{ level.path }}" id="b134-level-filter">
@@ -93,6 +95,95 @@
         <div class="scope">Phạm vi đang xem: {{ scope_label }}{% if selected_year %} · Năm học {{ selected_year.code }}{% endif %}</div>
     </section>
 
+    {% if xmc_appendices %}
+    <nav class="panel actions" aria-label="Chọn phụ lục">
+        {% for number in range(1, 6) %}
+        <a class="btn secondary" href="#phu-luc-{{ number }}">Phụ lục {{ number }}</a>
+        {% endfor %}
+    </nav>
+    <section class="panel" id="phu-luc-1">
+        <h2>Phụ lục 1 — Phiếu điều tra</h2>
+        <div class="cards">
+            <article class="card">
+                <h3>Phiếu điều tra giáo dục bắt buộc, xóa mù chữ</h3>
+                <p>Mẫu phiếu điều tra hộ dân và thông tin các thành viên.</p>
+                <a class="btn success" href="/bao-cao/xoa-mu-chu/phu-luc/phieu-dieu-tra/excel">Tải Excel phiếu điều tra</a>
+            </article>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if compulsory_appendices %}
+    <section class="panel" id="phu-luc-2">
+        <h2>Phụ lục 2 — 8 biểu giáo dục bắt buộc</h2>
+        <p>Xuất số liệu theo năm học và phạm vi đã chọn. Ô chưa đủ dữ liệu được để trống và ghi rõ tại trang Kiểm tra dữ liệu.</p>
+        <div class="actions" style="margin-bottom:18px">
+            <a class="btn success" href="/bao-cao/xoa-mu-chu/phu-luc/giao-duc-bat-buoc/excel">Tải cả bộ 8 biểu Phụ lục 2</a>
+            <a class="btn primary" href="/bao-cao/xoa-mu-chu/phu-luc/bo-pl2/tong-hop?{{ xmc_export_query }}">Tổng hợp cả bộ 8 biểu</a>
+            <a class="btn secondary" href="#phu-luc-2026">Đến Phụ lục 3 — 9 biểu XMC</a>
+        </div>
+        <div class="cards">
+            {% for code, title, pages in compulsory_appendices %}
+            <article class="card">
+                <h3>Mẫu {{ code }} — {{ title }}</h3>
+                <p>Trang {{ pages|join(', ') }} trong PDF · Tổng hợp dữ liệu trong phạm vi tài khoản.</p>
+                <a class="btn primary" href="/bao-cao/xoa-mu-chu/phu-luc/{{ code }}/tong-hop?{{ xmc_export_query }}">Xuất báo cáo có số liệu</a>
+                <a class="btn success" href="/bao-cao/xoa-mu-chu/phu-luc/{{ code }}/excel">Tải Excel mẫu {{ code }}</a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if xmc_appendices %}
+    <section class="panel" id="phu-luc-2026">
+        <div id="phu-luc-3"></div>
+        <h2>Biểu mẫu từ Các phụ lục.pdf — Phụ lục 3: Xóa mù chữ</h2>
+        <p>Căn cứ Điều 21, 23–25 Nghị định 353/2026/NĐ-CP, hiệu lực từ 01/11/2026. Xuất trước ngày này là tính thử theo quy định mới. Xã đạt chỉ tiêu khi ít nhất 90% người 15–60 tuổi đạt mức tương ứng; xã đặc biệt khó khăn dùng nhóm 15–35 tuổi. Kết quả tính không thay quyết định công nhận.</p>
+        <p>Phụ lục 1: phiếu điều tra · Phụ lục 2: 8 biểu giáo dục bắt buộc · Phụ lục 3: 9 biểu XMC. Mẫu 01/XMC và 07/XMC là bảng liên tục, tự ngắt trang và lặp tiêu đề khi in.</p>
+        <p>Xuất số liệu tự động theo năm học và phạm vi bên dưới. Trường xem các phiếu được giao cho nhân sự của trường; giáo viên xem phiếu được giao trực tiếp. Ô thiếu dữ liệu xác nhận được để trống và ghi trong trang “Kiểm tra dữ liệu”.</p>
+        <p>Đang chọn: <strong>{{ scope_label }} · {{ selected_year.code if selected_year else '' }}</strong></p>
+        <p><label>Cột “Đạt chuẩn biết chữ” của mẫu 01/XMC:
+            <select id="xmc-literacy-basis"><option value="g1">Đạt từ mức độ 1 trở lên (mặc định)</option><option value="g2">Đạt mức độ 2</option></select></label></p>
+        <div class="actions" style="margin-bottom:18px">
+            <a class="btn primary xmc-auto-export" href="/bao-cao/xoa-mu-chu/phu-luc/bo-xmc/tong-hop?{{ xmc_export_query }}">Tổng hợp cả bộ 9 mẫu</a>
+            <a class="btn secondary" href="/bao-cao/xoa-mu-chu/du-lieu-bo-sung?{{ xmc_export_query }}">Dữ liệu bổ sung XMC</a>
+            <a class="btn success" href="/bao-cao/xoa-mu-chu/phu-luc/bo-xmc/excel">Tải cả bộ 9 mẫu XMC</a>
+            <a class="btn secondary" href="/bao-cao/xoa-mu-chu/phu-luc/tat-ca/excel">Tải Excel Phụ lục 1–3</a>
+            <a class="btn secondary" href="/bao-cao/xoa-mu-chu/phu-luc/phieu-dieu-tra/excel">Phụ lục 1 — Phiếu điều tra</a>
+            <a class="btn secondary" href="/bao-cao/xoa-mu-chu/phu-luc/giao-duc-bat-buoc/excel">Phụ lục 2 — Bộ 8 biểu</a>
+        </div>
+        <div class="cards">
+            {% for code, title, pages in xmc_appendices %}
+            <article class="card">
+                <h3>Mẫu {{ code }}/XMC — {{ title }}</h3>
+                <p>Trang {{ pages|join(', ') }} trong PDF · Tổng hợp từ dữ liệu trong phạm vi tài khoản.</p>
+                <a class="btn primary xmc-auto-export" href="/bao-cao/xoa-mu-chu/phu-luc/{{ code }}/tong-hop?{{ xmc_export_query }}">Xuất báo cáo có số liệu</a>
+                <a class="btn success" href="/bao-cao/xoa-mu-chu/phu-luc/{{ code }}/excel">Tải Excel mẫu {{ code }}/XMC</a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% for number, title, description in [
+        (4, 'Biên bản tự kiểm tra', 'Biên bản tự kiểm tra kết quả giáo dục bắt buộc, xóa mù chữ. Đầy đủ nội dung và phần ký xác nhận, gồm 3 trang.'),
+        (5, 'Báo cáo kết quả phổ cập giáo dục, xóa mù chữ', 'Mẫu báo cáo kết quả thực hiện, đánh giá và phương hướng công tác. Đầy đủ nội dung và phần ký xác nhận, gồm 4 trang.')
+    ] %}
+    <section class="panel" id="phu-luc-{{ number }}">
+        <h2>Phụ lục {{ number }} — {{ title }}</h2>
+        <div class="cards">
+            <article class="card">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <p>Xuất Word có số liệu theo phạm vi đã chọn; đơn vị hoàn thiện nhận xét, kiến nghị và ký xác nhận.</p>
+                <a class="btn primary" href="/bao-cao/xoa-mu-chu/phu-luc/pl{{ number }}/tong-hop?{{ xmc_export_query }}">Xuất báo cáo có số liệu (Word)</a>
+                <a class="btn success" href="/bao-cao/xoa-mu-chu/phu-luc/{{ number }}/pdf">Tải PDF Phụ lục {{ number }}</a>
+            </article>
+        </div>
+    </section>
+    {% endfor %}
+    {% endif %}
+
+    {% if not xmc_appendices %}
     <div class="summary">
         <div class="summary-card"><span>Số biểu trong bộ</span><strong>{{ cards|length }}</strong></div>
         <div class="summary-card"><span>Biểu có tự động tổng hợp</span><strong>{{ ready_count }}</strong></div>
@@ -122,26 +213,42 @@
         </article>
         {% endfor %}
     </section>
+    {% endif %}
 </main>
 
 <script>
 (function () {
+    const basis = document.getElementById('xmc-literacy-basis');
+    if (basis) basis.addEventListener('change', function () {
+        document.querySelectorAll('.xmc-auto-export').forEach(function (link) {
+            const url = new URL(link.href);
+            if (basis.value) url.searchParams.set('literacy_basis', basis.value);
+            else url.searchParams.delete('literacy_basis');
+            link.href = url.toString();
+        });
+    });
     const form = document.getElementById('b134-level-filter');
     if (!form) return;
     const year = form.querySelector('select[name="school_year_id"]');
     const commune = form.querySelector('select[name="commune_id"]');
     const school = form.querySelector('select[name="school_id"]');
+    form.addEventListener('submit', function () {
+        // Không gửi chuỗi rỗng vào tham số số nguyên tùy chọn.
+        [commune, school].forEach(function (select) {
+            if (select && !select.value) select.disabled = true;
+        });
+    });
 
     if (commune) {
         commune.addEventListener('change', function () {
             if (school) school.value = '';
-            form.submit();
+            form.requestSubmit();
         });
     }
     if (year) {
         year.addEventListener('change', function () {
             if (school) school.value = '';
-            form.submit();
+            form.requestSubmit();
         });
     }
 })();

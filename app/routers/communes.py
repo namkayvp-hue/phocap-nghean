@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Commune
+from app.permissions import is_admin_role
 
 
 # Thư mục app
@@ -79,6 +80,7 @@ def danh_sach_xa(
         request=request,
         name="communes/list.html",
         context={
+            "can_manage": is_admin_role(request.scope.get("auth_user", {}).get("role_code")),
             "danh_sach_xa": danh_sach,
             "thong_bao": STATUS_MESSAGES.get(status),
             "trang_thai": status,

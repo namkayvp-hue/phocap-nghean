@@ -26,11 +26,15 @@
                     PHẦN MỀM PHỔ CẬP GIÁO DỤC
                 </p>
 
-                <h1>Quản lý danh mục xã</h1>
+                <h1>Danh mục xã/phường</h1>
 
                 <p>
+                    {% if can_manage %}
                     Thêm, cập nhật, khóa và kiểm tra
                     thông tin các xã trong hệ thống.
+                    {% else %}
+                    Xem tất cả xã/phường. Tài khoản phòng ban chỉ xem và xuất báo cáo, không được chỉnh sửa dữ liệu.
+                    {% endif %}
                 </p>
             </div>
 
@@ -57,6 +61,7 @@
         {% endif %}
 
         <section class="admin-grid">
+            {% if can_manage %}
             <article class="panel">
                 <div class="panel-header">
                     <div>
@@ -131,7 +136,8 @@
                 </form>
             </article>
 
-            <article class="panel panel-wide">
+            {% endif %}
+            <article class="panel panel-wide" {% if not can_manage %}style="grid-column: 1 / -1;"{% endif %}>
                 <div class="panel-header">
                     <div>
                         <p class="panel-label">
@@ -157,7 +163,7 @@
                                     <th>Loại địa bàn</th>
                                     <th>Trạng thái</th>
                                     <th>Ngày tạo</th>
-                                    <th>Thao tác</th>
+                                    {% if can_manage %}<th>Thao tác</th>{% endif %}
                                 </tr>
                             </thead>
 
@@ -218,6 +224,7 @@
                                             }}
                                         </td>
 
+                                        {% if can_manage %}
                                         <td>
                                             <div class="action-group">
                                                 <a
@@ -258,6 +265,7 @@
                                                 </form>
                                             </div>
                                         </td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -270,8 +278,8 @@
                         <h3>Chưa có xã nào</h3>
 
                         <p>
-                            Hãy nhập mã xã và tên xã
-                            trong biểu mẫu bên cạnh.
+                            {% if can_manage %}Hãy nhập mã xã và tên xã trong biểu mẫu bên cạnh.
+                            {% else %}Chưa có dữ liệu xã/phường trong hệ thống.{% endif %}
                         </p>
                     </div>
                 {% endif %}
