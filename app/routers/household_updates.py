@@ -515,13 +515,21 @@ def _parse_xlsx_rows(content: bytes, batch) -> tuple[list[dict], list[dict], dic
             issues.append({"severity":"ERROR","code":"MISSING_FORM","row":row_no,"column":"Số phiếu","message":"Thiếu Số phiếu; không xác định được hộ cần cập nhật."})
 
         try:
-            day = int(float(get_text(row_no, "ngay")))
-            month = int(float(get_text(row_no, "thang")))
-            year = int(float(get_text(row_no, "nam_sinh")))
+            parts = [float(get_text(row_no, key)) for key in ("ngay", "thang", "nam_sinh")]
+            if not all(value.is_integer() for value in parts):
+                raise ValueError("Ngày, tháng, năm sinh phải là số nguyên.")
+            day, month, year = map(int, parts)
             birth = date(year, month, day)
-        except Exception:
+            if not 1900 <= year <= date.today().year:
+                raise ValueError(f"Năm sinh {year} không hợp lệ; nhập năm đầy đủ từ 1900 đến {date.today().year}.")
+            if birth > date.today():
+                raise ValueError("Ngày sinh không được lớn hơn ngày hiện tại.")
+            if expected_year is not None and year > expected_year:
+                raise ValueError(f"Năm sinh {year} lớn hơn năm điều tra {expected_year}.")
+        except (ValueError, OverflowError) as exc:
             birth = None
-            issues.append({"severity":"ERROR","code":"INVALID_BIRTH_DATE","row":row_no,"column":"Ngày/Tháng/Năm sinh","message":"Ngày sinh không hợp lệ."})
+            message = str(exc) if str(exc).startswith(('Năm sinh', 'Ngày sinh', 'Ngày, tháng')) else "Ngày sinh không hợp lệ; kiểm tra ngày, tháng và năm sinh đầy đủ."
+            issues.append({"severity":"ERROR","code":"INVALID_BIRTH_DATE","row":row_no,"column":"Ngày/Tháng/Năm sinh","message":message})
 
         identity = (_norm(head_name), _norm(address), row_no)
         if form_number:

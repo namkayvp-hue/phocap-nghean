@@ -9,6 +9,7 @@ from app.xmc_appendices import TEMPLATE_DIR
 from app.services.compulsory_report_data import Population, school_data, total, disabled
 from app.services.xmc_appendix_reports import ratio
 from app.services.xmc_rules_353 import LEGAL_BASIS
+from app.services.report_export_date import export_date, stamp_date_text
 
 
 def display(value):
@@ -43,11 +44,12 @@ def word_document(paragraphs):
 
 
 def build_narrative(number, db, ctx):
+    generated_on = export_date()
     source=json.loads((TEMPLATE_DIR/f'Phu_luc_{number}.json').read_text(encoding='utf-8'))
     pop=Population(ctx); metrics=pop.indicators()
     year=ctx['reference_year']
     paragraphs=[f"PHỤ LỤC {number} — BẢN TỔNG HỢP CÓ SỐ LIỆU",
-                f"Phạm vi: {ctx['label']} · Năm học: {ctx['year'].code} · Xuất ngày {date.today():%d/%m/%Y}",
+                f"Phạm vi: {ctx['label']} · Năm học: {ctx['year'].code} · Xuất ngày {generated_on:%d/%m/%Y}",
                 'Số liệu tại thời điểm xuất; không phải bản chốt lịch sử ngày 30/9. Các chỗ trống, nhận xét, quyết định công nhận và chữ ký cần đơn vị hoàn thiện.',
                 LEGAL_BASIS]
     def filled(text):
@@ -91,7 +93,7 @@ def build_narrative(number, db, ctx):
             text=text.split(':',1)[0]+': '+metric_text(pop.metric(*current_range,lambda x:x['data'].get('illiterate')))+'.'
         if text.startswith(('BIÊN BẢN TỰ KIỂM TRA KẾT QUẢ','Kết quả giáo dục bắt buộc, xóa mù chữ năm')):
             text=re.sub(r'năm\s*[.…]+',f'năm {year}',text)
-        paragraphs.append(text)
+        paragraphs.append(stamp_date_text(text, generated_on))
     paragraphs.extend(['BẢNG ĐỐI CHIẾU SỐ LIỆU TỰ ĐỘNG',
         'Các số liệu dưới đây cùng nguồn với Phụ lục 2 và 3, chỉ bao gồm phạm vi đã chọn.'])
     labels={'entry6':'Trẻ 6 tuổi vào lớp 1','primary11':'Trẻ 11 tuổi hoàn thành tiểu học',

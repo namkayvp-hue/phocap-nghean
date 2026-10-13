@@ -170,7 +170,8 @@ def fill_completion(ws, pop, level):
         if index<len(people):
             x=people[index]; p=x['person']
             # Current school and school-year are not proof of graduation place/date.
-            values=[index+1,p.full_name,p.date_of_birth,p.gender,p.ethnic_group,p.household.address,'X',None,None]
+            completion_year = attr(x,'primary_completion_year' if level=='TH' else 'lower_secondary_graduation_year')
+            values=[index+1,p.full_name,p.date_of_birth,p.gender,p.ethnic_group,p.household.address,'X',completion_year,None]
         for col,value in enumerate(values,1):
             put(ws,9+index,col,value)
         ws.cell(9+index,3).number_format='dd/mm/yyyy'
@@ -274,7 +275,7 @@ def build_compulsory(code, db, ctx):
         ['Phạm vi số liệu','Trường/giáo viên: dân số từ phiếu được phân công; đội ngũ và CSVC giới hạn trường của tài khoản.'],
         ['Số phải phổ cập','Kế thừa quy ước thường trú và không thuộc diện ngừng theo dõi. Nơi học dùng trường thông tin đã xác nhận trên phiếu.'],
         ['Lớp/chương trình','Không suy lớp từ tuổi. Chương trình PT/TX/GDNN lấy trường dữ liệu hoặc trường THCS/GDTX được khai báo; chưa rõ để trống.'],
-        ['Mẫu hoàn thành','Chỉ lấy xác nhận hoàn thành chương trình. Chưa có trường năm/trường hoàn thành chuyên biệt nên để trống, không lấy năm/trường đang học. Mẫu 08 sửa nhãn cột G từ tiểu học thành THCS theo tiêu đề biểu.'],
+        ['Mẫu hoàn thành','Chỉ lấy xác nhận hoàn thành chương trình và năm hoàn thành/tốt nghiệp đã nhập. Nơi hoàn thành chưa được xác nhận thì để trống, không lấy trường đang học. Mẫu 08 sửa nhãn cột G từ tiểu học thành THCS theo tiêu đề biểu.'],
         ['Đội ngũ/CSVC','Ưu tiên số liệu nhập theo biểu đúng năm; tiếp đến hồ sơ đội ngũ/mạng lưới đúng năm. Hồ sơ chưa đầy đủ cần đối chiếu trước khi ký.'],
         ['Dữ liệu thiếu ngày sinh',sum(x['age'] is None for x in pop.items)],
     ]: audit.append(row)
@@ -295,5 +296,9 @@ def build_compulsory(code, db, ctx):
         for cell in row:
             cell.alignment=Alignment(wrap_text=True,vertical='top')
             if isinstance(cell.value,str): cell.data_type='s'
+    from app.services.appendix_pagination import join_compulsory_pages
+    from app.services.report_export_date import stamp_workbook
+    stamp_workbook(wb)
+    join_compulsory_pages(wb)
     output=BytesIO(); wb.save(output); output.seek(0)
     return output

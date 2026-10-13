@@ -453,14 +453,32 @@ def b131133_tien_do_nam_hoc(*, person, record, school_year):
             )
         # === BAI_13B_11_14_2_REPORT_PROGRESS_END ===
     elif level == "TH":
-        required_fields.append("completed_primary_program")
+        from app.services.survey_school_details import grade_number
+        current_grade = grade_number(getattr(getattr(record,'classroom',None),'name',None) or getattr(record,'class_name_reported',None))
+        if current_grade == 5:
+            required_fields.append("completed_primary_program")
+            if getattr(record,'completed_primary_program',None) is True:
+                required_fields.append("primary_completion_year")
     elif level == "THCS":
-        required_fields.extend(
-            (
-                "completed_lower_secondary_program",
-                "post_lower_secondary_path",
-            )
-        )
+        from app.services.survey_school_details import grade_number
+        current_grade = grade_number(getattr(getattr(record,'classroom',None),'name',None) or getattr(record,'class_name_reported',None))
+        required_fields.append("post_lower_secondary_path")
+        if current_grade == 9:
+            required_fields.append("completed_lower_secondary_program")
+            if getattr(record,'completed_lower_secondary_program',None) is True:
+                required_fields.append("lower_secondary_graduation_year")
+
+    from app.services.survey_school_details import completion_reference_age
+    completion_age = completion_reference_age(person.date_of_birth, school_year)
+    for low, high, flag, year_field in (
+        (11, 14, "completed_primary_program", "primary_completion_year"),
+        (15, 18, "completed_lower_secondary_program", "lower_secondary_graduation_year"),
+    ):
+        if completion_age is not None and low <= completion_age <= high:
+            if flag not in required_fields:
+                required_fields.append(flag)
+            if getattr(record, flag, None) is True and year_field not in required_fields:
+                required_fields.append(year_field)
 
     answered = sum(
         b131133_truong_da_tra_loi(record, field_name)
@@ -5879,6 +5897,21 @@ def lay_chuoi_phieu_nhap_nhanh(
     return [dict(row) for row in rows]
 
 
+def next_unfinished_household_url(*, db, request, batch_id, household_id, school_year_id):
+    """Continue within the same permission-filtered household queue."""
+    sequence = lay_chuoi_phieu_nhap_nhanh(db=db, request=request, batch_id=batch_id)
+    current = next((i for i, row in enumerate(sequence) if int(row['household_id']) == household_id), None)
+    if current is None:
+        return None
+    remaining = sequence[current + 1:] + sequence[:current]
+    for row in remaining:
+        if row['form_status'] in {'DA_HOAN_THANH', 'DA_DUYET'}:
+            continue
+        return (f"/dieu-tra/{batch_id}/ho-dan/{row['household_id']}/nhap-nhanh"
+                f"?school_year_id={school_year_id}&status=quick_saved_next#members")
+    return None
+
+
 # === BAI_13B_12_V2_4_4_6_MOBILE_DYNAMIC_COMPLETION_START ===
 def danh_gia_do_day_du_phieu_nhap_nhanh(
     *,
@@ -7060,6 +7093,8 @@ def chap_nhan_thanh_vien_nhap_nhanh_mobile(
         "completed_grade_5",
         "completed_primary_program",
         "completed_lower_secondary_program",
+        "primary_completion_year",
+        "lower_secondary_graduation_year",
         "post_lower_secondary_path",
         "completed_preschool_5",
         "special_circumstances",
@@ -14773,6 +14808,10 @@ def luu_theo_doi_nam_hoc(
     completed_grade_5: Annotated[str | None, Form()] = None,
     completed_primary_program: Annotated[str | None, Form()] = None,
     completed_lower_secondary_program: Annotated[str | None, Form()] = None,
+    primary_completion_year: Annotated[str | None, Form()] = None,
+    lower_secondary_graduation_year: Annotated[str | None, Form()] = None,
+    study_origin_address: Annotated[str | None, Form()] = None,
+    study_destination_address: Annotated[str | None, Form()] = None,
     post_lower_secondary_path: Annotated[str | None, Form()] = None,
     study_location_scope: Annotated[str | None, Form()] = None,
     is_repeating_grade: Annotated[str | None, Form()] = None,
@@ -15377,6 +15416,18 @@ def luu_theo_doi_nam_hoc(
             )
     # === BAI_13B_11_14_3_SAVE_EVENTS_END ===
 
+    from app.services.survey_school_details import grade_number, validate_completion_details, completion_reference_age
+    _completion_age = completion_reference_age(person.date_of_birth, school_year)
+    _details_grade = None if _b13236_is_preschool else grade_number(selected_class.name if selected_class else class_name_reported)
+    _completion_details, _details_errors = validate_completion_details(
+        _details_grade, completed_primary_program, completed_lower_secondary_program,
+        primary_completion_year, lower_secondary_graduation_year, person.date_of_birth, school_year,
+    )
+    errors.extend(_details_errors)
+    for address in (study_origin_address, study_destination_address):
+        if address is not None and len(address.strip()) > 500:
+            errors.append("Địa chỉ nơi đi/nơi đến không được dài quá 500 ký tự.")
+
     if errors:
         school_years = db.scalars(
             select(SchoolYear)
@@ -15399,6 +15450,12 @@ def luu_theo_doi_nam_hoc(
         form_record.class_id = parsed_class_id
         form_record.school_name_reported = school_name_reported or None
         form_record.class_name_reported = class_name_reported or None
+        for key, value in [('primary_completion_year',primary_completion_year),
+                           ('lower_secondary_graduation_year',lower_secondary_graduation_year),
+                           ('study_origin_address',study_origin_address),
+                           ('study_destination_address',study_destination_address)]:
+            if value is not None:
+                setattr(form_record,key,value)
         form_record.learning_status = learning_status
         form_record.completed_preschool_by_age = completed_preschool_by_age_value
         # === BAI_13B_12_V2_3_7_SAVE_TWO_SESSIONS_START ===
@@ -15616,12 +15673,15 @@ def luu_theo_doi_nam_hoc(
             record.literacy_status = "CHUA_XAC_DINH"
         # === BAI_13B_11_15_2_4_7_1B_DERIVE_LITERACY_STATUS_END ===
 
-        record.completed_primary_program = _b131132_optional_bool(
-            completed_primary_program
-        )
-        record.completed_lower_secondary_program = _b131132_optional_bool(
-            completed_lower_secondary_program
-        )
+        if completed_primary_program is not None and (_details_grade == 5 or (_completion_age is not None and 11 <= _completion_age <= 14)):
+            record.completed_primary_program = _b131132_optional_bool(completed_primary_program)
+        if completed_lower_secondary_program is not None and (_details_grade == 9 or (_completion_age is not None and 15 <= _completion_age <= 18)):
+            record.completed_lower_secondary_program = _b131132_optional_bool(completed_lower_secondary_program)
+        for key, value in _completion_details.items():
+            setattr(record, key, value)
+        for key, value in [('study_origin_address',study_origin_address), ('study_destination_address',study_destination_address)]:
+            if value is not None:
+                setattr(record, key, value.strip() or None)
 
         _b131132_post_path = str(
             post_lower_secondary_path or "CHUA_XAC_DINH"
@@ -15636,7 +15696,8 @@ def luu_theo_doi_nam_hoc(
         }:
             _b131132_post_path = "CHUA_XAC_DINH"
 
-        record.post_lower_secondary_path = _b131132_post_path
+        if post_lower_secondary_path is not None:
+            record.post_lower_secondary_path = _b131132_post_path
         # === BAI_13B_11_13_2_SAVE_FIELDS_END ===
         # === BAI_13B_11_15_2_SAVE_PRIMARY_THCS_FIELDS_START ===
         # Nơi học dùng chung Tiểu học + THCS.
@@ -15792,8 +15853,12 @@ def luu_theo_doi_nam_hoc(
         db.commit()
 
         if _b13239_household_completed:
+            next_url = next_unfinished_household_url(
+                db=db, request=request, batch_id=batch_id, household_id=household_id,
+                school_year_id=school_year_id,
+            )
             return RedirectResponse(
-                url=(
+                url=next_url or (
                     f"/dieu-tra/{batch_id}/ho-dan"
                     f"?school_year_id={school_year_id}"
                     "&status=household_auto_completed"
@@ -15979,6 +16044,8 @@ def fix26g_luu_chi_bao_nhanh(
     school_year_id: Annotated[int, Form()],
     study_location_scope: Annotated[str | None, Form()] = None,
     disability_can_learn: Annotated[str | None, Form()] = None,
+    study_origin_address: Annotated[str | None, Form()] = None,
+    study_destination_address: Annotated[str | None, Form()] = None,
     disability_access_education: Annotated[str | None, Form()] = None,
     db: Session = Depends(get_db),
 ):
@@ -16044,6 +16111,12 @@ def fix26g_luu_chi_bao_nhanh(
         "DI_HOC_NOI_KHAC",
         "NOI_KHAC_DEN",
     }
+
+    for key, value in [('study_origin_address',study_origin_address), ('study_destination_address',study_destination_address)]:
+        if value is not None:
+            if len(value.strip()) > 500:
+                return {"ok": False, "message": "Địa chỉ nơi đi/nơi đến không được dài quá 500 ký tự."}
+            setattr(record,key,value.strip() or None)
 
     if study_location_scope is not None:
         location = str(study_location_scope or "").strip().upper()

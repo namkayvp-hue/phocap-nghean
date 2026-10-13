@@ -3103,6 +3103,16 @@ def download_xmc_appendix(request: Request, template_code: str):
     path = XMC_APPENDIX_DIR / filename
     if not path.is_file():
         raise HTTPException(status_code=404, detail="Tệp biểu mẫu chưa được cài đặt.")
+    if template_code in {'tat-ca', 'giao-duc-bat-buoc', 'bo-xmc'} or template_code in {c for c, _, _ in COMPULSORY_FORMS + XMC_FORMS}:
+        from io import BytesIO
+        from openpyxl import load_workbook
+        from app.services.appendix_pagination import join_compulsory_pages
+        from app.services.report_export_date import stamp_workbook
+        output = BytesIO()
+        join_compulsory_pages(stamp_workbook(load_workbook(path))).save(output)
+        output.seek(0)
+        return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 headers={"Content-Disposition": f'attachment; filename="{filename}"'})
     return FileResponse(path, filename=filename,
                         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

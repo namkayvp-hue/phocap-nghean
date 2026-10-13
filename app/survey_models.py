@@ -930,6 +930,10 @@ class SurveyPersonYearRecord(Base):
         Boolean,
         nullable=True,
     )
+    primary_completion_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    lower_secondary_graduation_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    study_origin_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    study_destination_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     completed_lower_secondary_program: Mapped[bool | None] = mapped_column(
         Boolean,
         nullable=True,

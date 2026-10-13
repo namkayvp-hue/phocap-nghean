@@ -1654,6 +1654,12 @@
 <!-- === BAI_13B_11_14_3_RESIDENCY_EVENTS_UI_END === -->
 
 <!-- === BAI_13B_11_14_2_PCGDMN_REPORT_UI_START === -->
+                    <div id="age_completion_indicators" class="form-group full b131132-card" hidden
+                         data-birth-year="{{ person.date_of_birth.year if person.date_of_birth else '' }}"
+                         data-school-year="{% for year in school_years %}{% if year.id == selected_school_year_id %}{{ year.code }}{% endif %}{% endfor %}">
+                        <div class="b131132-title">Thông tin hoàn thành chương trình theo độ tuổi</div>
+                        <div id="age_completion_fields" class="b131132-grid"></div>
+                    </div>
                     <div data-learning-only
                         id="b131133_preschool_indicators"
                         class="form-group full"
@@ -1755,6 +1761,7 @@
                             Giáo viên chỉ nhập dữ liệu gốc không thể tự suy ra.
                         </p>
 
+                        <div data-completion-grade="5">
                         <label for="completed_primary_program">
                             Hoàn thành chương trình Tiểu học
                         </label>
@@ -1784,6 +1791,13 @@
                         </select>
                     </div>
 
+                        <div data-completion-year="completed_primary_program">
+                            <label for="primary_completion_year">Năm hoàn thành chương trình Tiểu học</label>
+                            <input type="number" id="primary_completion_year" name="primary_completion_year" min="1900" step="1" form="year_record_form"
+                                   value="{{ selected_record.primary_completion_year or '' if selected_record else '' }}">
+                        </div>
+                    </div>
+
                     <div data-learning-only
                         id="b131132_thcs_indicators"
                         class="form-group full b131132-card b131132-level-card"
@@ -1796,9 +1810,9 @@
                         </p>
 
                         <div class="b131132-grid">
-                            <div>
+                            <div data-completion-grade="9">
                                 <label for="completed_lower_secondary_program">
-                                    Hoàn thành chương trình THCS
+                                    Tốt nghiệp THCS (hoàn thành chương trình THCS)
                                 </label>
                                 <select
                                     id="completed_lower_secondary_program"
@@ -1826,7 +1840,12 @@
                                 </select>
                             </div>
 
-                            <div>
+                            <div data-completion-year="completed_lower_secondary_program" data-year-grade="9">
+                                <label for="lower_secondary_graduation_year">Năm tốt nghiệp THCS</label>
+                                <input type="number" id="lower_secondary_graduation_year" name="lower_secondary_graduation_year" min="1900" step="1" form="year_record_form"
+                                       value="{{ selected_record.lower_secondary_graduation_year or '' if selected_record else '' }}">
+                            </div>
+                            <div id="post_lower_secondary_path_wrap">
                                 <!-- === BAI_13B_12_V2_3_12_POST_THCS_LABELS === -->
                                 <label for="post_lower_secondary_path">
                                     Hướng học sau THCS
@@ -2051,7 +2070,7 @@
     "
 >
     <h3 style="margin:0 0 8px 0;">
-        Thông tin phục vụ báo cáo Tiểu học / THCS
+        Thông tin phục vụ báo cáo Mầm non / Tiểu học / THCS
     </h3>
 
     <p style="margin:0 0 14px 0;color:#60758a;">
@@ -2123,6 +2142,16 @@
             </select>
         </div>
 
+        <div class="form-group" id="study_destination_wrap" hidden>
+            <label for="study_destination_address">Địa chỉ nơi đến học</label>
+            <input id="study_destination_address" name="study_destination_address" maxlength="500" form="year_record_form"
+                   value="{{ selected_record.study_destination_address or '' if selected_record else '' }}" placeholder="Trường, xã/phường, tỉnh/thành nơi đến">
+        </div>
+        <div class="form-group" id="study_origin_wrap" hidden>
+            <label for="study_origin_address">Địa chỉ nơi đi (chuyển đến từ)</label>
+            <input id="study_origin_address" name="study_origin_address" maxlength="500" form="year_record_form"
+                   value="{{ selected_record.study_origin_address or '' if selected_record else '' }}" placeholder="Trường, xã/phường, tỉnh/thành nơi đi">
+        </div>
         <div class="form-group">
             <label for="is_repeating_grade">
                 Lưu ban
@@ -2228,7 +2257,7 @@
                         {% if next_person_url %}
                             Lưu và chuyển thành viên tiếp theo
                         {% else %}
-                            ✓ Lưu thành viên cuối và hoàn thành hộ
+                            ✓ Hoàn thành hộ và chuyển hộ tiếp theo
                         {% endif %}
                     {% else %}
                         Lưu thông tin năm học
@@ -4428,6 +4457,14 @@
         fieldNames,
         headingTexts
     ) {
+        // Completion fields can live in the independent age-based section.
+        // Resolve the original level cards directly instead of climbing to the form.
+        if (fieldNames.includes("completed_primary_program")) {
+            return document.getElementById("b131132_primary_indicators");
+        }
+        if (fieldNames.includes("completed_lower_secondary_program")) {
+            return document.getElementById("b131132_thcs_indicators");
+        }
         let field = null;
 
         for (const name of fieldNames) {
@@ -5552,6 +5589,17 @@
 
         studyGroup = select.closest(".form-group") || select.parentElement;
 
+        // Keep the conditional addresses with the location selector when the
+        // preschool view moves it out of the general education indicators.
+        if (studyGroup) {
+            ["study_destination_wrap", "study_origin_wrap"].forEach(function (id) {
+                const addressGroup = document.getElementById(id);
+                if (addressGroup && addressGroup.parentNode !== studyGroup) {
+                    studyGroup.appendChild(addressGroup);
+                }
+            });
+        }
+
         if (studyGroup && !originalParent) {
             originalParent = studyGroup.parentNode;
             originalNextSibling = studyGroup.nextSibling;
@@ -5726,6 +5774,8 @@
 
     const ids = [
         "study_location_scope",
+        "study_origin_address",
+        "study_destination_address",
         "disability_can_learn",
         "disability_access_education"
     ];
@@ -5780,6 +5830,10 @@
         if (location) {
             data.set("study_location_scope", location.value || "");
         }
+        ["study_origin_address", "study_destination_address"].forEach(id => {
+            const input = field(id);
+            if (input && !input.disabled) data.set(id, input.value || "");
+        });
         if (canLearn) {
             data.set("disability_can_learn", canLearn.value || "");
         }
@@ -6008,5 +6062,6 @@
 </script>
 <!-- === BAI29B_SAFE_AUTO_NOT_TRACKED_END === -->
 <script src="/static/js/year_record_tracking.js"></script>
+<script src="/static/js/year_record_school_details.js?v=3"></script>
 </body>
 </html>

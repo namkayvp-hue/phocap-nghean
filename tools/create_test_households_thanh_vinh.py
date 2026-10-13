@@ -3,7 +3,7 @@ from pathlib import Path
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, Side
 
-OUT = Path("C:/phocap/du_lieu_test_50_ho_phuong_thanh_vinh.xlsx")
+OUT = Path("C:/phocap/du_lieu_test_50_ho_phuong_thanh_vinh_da_sua.xlsx")
 commune = "Phường Thành Vinh"
 year = 2026
 headers = [
@@ -34,16 +34,16 @@ for household_no in range(1, 51):
     head_last, head_name = head_first.rsplit(" ", 1)
     address = f"{household_no} {streets[(household_no - 1) % len(streets)]}, {hamlets[(household_no - 1) % len(hamlets)]}, {commune}"
     members = [
-        (head_last, head_name, 10 + household_no % 18, "", "", "", "", "", ""),
-        ("Nguyễn Văn", f"Minh {household_no:02d}", 10 + household_no % 3, "", "THPT", f"Lớp {10 + household_no % 3}", "Trường THPT Thành Vinh", "THPT-TV", ""),
-        ("Nguyễn Thị", f"Lan {household_no:02d}", 13 + household_no % 2, "X", "THCS", f"Lớp {6 + household_no % 4}", "Trường THCS Thành Vinh", "THCS-TV", ""),
-        ("Nguyễn Văn", f"Nam {household_no:02d}", 8 + household_no % 2, "", "TH", f"Lớp {1 + household_no % 5}", "Trường Tiểu học Thành Vinh", "TH-TV", ""),
+        (head_last, head_name, 35 + household_no % 18, "X", "", "", "", "", ""),
+        ("Nguyễn Văn", f"Minh {household_no:02d}", 15 + household_no % 3, "", "THPT", f"Lớp {10 + household_no % 3}", "Trường THPT Thành Vinh", "THPT-TV", ""),
+        ("Nguyễn Thị", f"Lan {household_no:02d}", 11 + household_no % 4, "X", "THCS", f"Lớp {6 + household_no % 4}", "Trường THCS Thành Vinh", "THCS-TV", ""),
+        ("Nguyễn Văn", f"Nam {household_no:02d}", 6 + household_no % 5, "", "TH", f"Lớp {1 + household_no % 5}", "Trường Tiểu học Thành Vinh", "TH-TV", ""),
         ("Nguyễn Thị", f"Mai {household_no:02d}", 5, "X", "MN", "Mẫu giáo 5 tuổi", "Trường Mầm non Thành Vinh", "MN-TV", ""),
     ]
-    for member_index, (surname, given, birth_year, female, level, klass, school, school_code, _unused) in enumerate(members):
+    for member_index, (surname, given, age, female, level, klass, school, school_code, _unused) in enumerate(members):
         pid = f"TV{household_no:03d}{member_index + 1:02d}"
         cccd = f"405026{household_no:04d}{member_index + 1:03d}"
-        birth = date(birth_year, (household_no % 12) + 1, (household_no % 27) + 1)
+        birth = date(year - age, (household_no % 12) + 1, (household_no % 27) + 1)
         ws.cell(row, 1).value = row - 5
         ws.cell(row, 2).value = surname
         ws.cell(row, 3).value = given

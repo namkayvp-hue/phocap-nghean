@@ -53,6 +53,7 @@ from app.routers.report_center import router as report_center_router
 from app.routers.survey_summary_report import router as survey_summary_report_router
 from app.routers.pcgdmn_template_report import router as pcgdmn_template_report_router
 from app.routers.staff_management import router as staff_management_router
+from app.routers.staff_bulk_delete import router as staff_bulk_delete_router
 from app.routers.report_inputs import router as report_inputs_router
 from app.routers.users import router as users_router
 from app.routers.survey_school_workflow import router as survey_school_workflow_router
@@ -119,6 +120,7 @@ templates = Jinja2Templates(
 
 
 app.include_router(auth_router)
+app.router.routes.extend(staff_bulk_delete_router.routes)
 app.include_router(communes_router)
 app.include_router(schools_router)
 # === BAI_13B_10_V3_18A_DATA_TOOLS_INCLUDE ===
@@ -380,6 +382,8 @@ app.include_router(xmc_appendix_router)
 
 @app.on_event("startup")
 def initialize_xmc_evidence_table():
+    from app.services.survey_school_details import ensure_school_details_schema
+    ensure_school_details_schema(xmc_engine)
     XmcEvidence.__table__.create(bind=xmc_engine, checkfirst=True)
 
 

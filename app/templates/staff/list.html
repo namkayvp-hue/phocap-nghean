@@ -143,11 +143,15 @@
 
 <header class="hero"><div class="hero-inner"><div><p class="eyebrow">BÀI 13B-2</p><h1>Kiểm tra, chuyển và quản lý dữ liệu đội ngũ</h1><p>Rà soát danh sách toàn tỉnh, xuất Excel mẫu, nhập cập nhật chống trùng và lập biểu MN-01 GV.</p></div><div class="user"><strong>{{ nguoi_dung.full_name }}</strong><br><span>{{ nguoi_dung.role_name }} – {{ nguoi_dung.unit_name }}</span><div class="nav"><a class="button button-light" href="/bao-cao/pcgdmn-mau-2025?school_year_id={{ selected_year_id }}">Biểu mẫu PCGDMN</a><a class="button button-light" href="/">Trang chủ</a></div></div></div></header>
 <main class="container">
+    {% if can_manage %}<section class="panel" id="xoa-danh-sach" style="scroll-margin-top:180px"><h2>Xóa danh sách khi nhập nhầm</h2>
+        {% if selected_school_id and selected_year_id %}<a class="button button-danger" href="/doi-ngu/xoa-danh-sach?school_id={{ selected_school_id }}&school_year_id={{ selected_year_id }}">Xóa danh sách giáo viên</a><p class="muted">Xem danh sách và xác nhận trước khi xóa dữ liệu của trường trong năm học đang chọn.</p>
+        {% else %}<p>Chọn một trường và năm học trong bộ lọc bên dưới, bấm Lọc để sử dụng chức năng xóa danh sách.</p>{% endif %}
+    </section>{% endif %}
     {% if status %}
         {% if status in ['forbidden','import_error','duplicate','duplicate_code','not_found'] %}<div class="notice error">
             {% if status == 'forbidden' %}Tài khoản không có quyền thực hiện thao tác này.{% elif status == 'import_error' %}Không nhập được tệp Excel. Hãy dùng đúng file mẫu, kiểm tra tên trường và năm học.{% elif status in ['duplicate','duplicate_code'] %}Dữ liệu bị trùng trong năm học hoặc trùng mã định danh cán bộ.{% else %}Không tìm thấy hồ sơ cần xử lý.{% endif %}
         </div>{% else %}<div class="notice">
-            {% if status == 'created' %}Đã thêm hồ sơ đội ngũ.{% elif status == 'updated' %}Đã cập nhật hồ sơ đội ngũ.{% elif status == 'archived' %}Đã ngừng theo dõi bản ghi năm học.{% elif status.startswith('synced_') %}Đã đồng bộ tài khoản. Kết quả tạo mới / đã tồn tại: {{ status.replace('synced_','').replace('_',' / ') }}.{% elif status.startswith('imported_') %}Đã nhập Excel. Kết quả tạo mới / cập nhật / bỏ qua / lỗi định danh: {{ status.replace('imported_','').replace('_',' / ') }}.{% endif %}
+            {% if status.startswith('deleted_') %}{{ status.replace('deleted_','') }} hồ sơ đã xóa; đã lưu bản sao trước khi xóa.{% elif status == 'created' %}Đã thêm hồ sơ đội ngũ.{% elif status == 'updated' %}Đã cập nhật hồ sơ đội ngũ.{% elif status == 'archived' %}Đã ngừng theo dõi bản ghi năm học.{% elif status.startswith('synced_') %}Đã đồng bộ tài khoản. Kết quả tạo mới / đã tồn tại: {{ status.replace('synced_','').replace('_',' / ') }}.{% elif status.startswith('imported_') %}Đã nhập Excel. Kết quả tạo mới / cập nhật / bỏ qua / lỗi định danh: {{ status.replace('imported_','').replace('_',' / ') }}.{% endif %}
         </div>{% endif %}
     {% endif %}
     {% if not can_manage %}<div class="readonly">Tài khoản hiện tại được xem và xuất báo cáo, không được thay đổi dữ liệu đội ngũ.</div>{% endif %}

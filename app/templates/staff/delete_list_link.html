@@ -1,0 +1,7 @@
+{% if role_code in ['ADMIN', 'SO', 'TRUONG'] and selected_school_id and selected_year_id %}
+<div style="margin:16px 0">
+    <a class="btn" style="display:inline-block;background:#b42318;color:white;padding:10px 16px;border-radius:8px;text-decoration:none"
+       href="/doi-ngu/xoa-danh-sach?school_id={{ selected_school_id }}&amp;school_year_id={{ selected_year_id }}">Xóa danh sách giáo viên</a>
+    <p>Xem và xác nhận danh sách cần xóa của năm học {{ selected_year.code }}. Nếu bảng đang hiển thị dữ liệu tham chiếu từ năm khác, hãy chọn đúng năm học của hồ sơ cần xóa.</p>
+</div>
+{% endif %}

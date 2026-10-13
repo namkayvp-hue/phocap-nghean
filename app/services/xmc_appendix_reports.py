@@ -366,6 +366,8 @@ def build_report(code, people, evidence, year, year_code, scope_label, communes,
             if isinstance(cell.value, str):
                 cell.data_type = "s"
     stream = BytesIO()
+    from app.services.report_export_date import stamp_workbook
+    stamp_workbook(wb)
     wb.save(stream)
     stream.seek(0)
     return stream

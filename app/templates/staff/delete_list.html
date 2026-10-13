@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Xóa danh sách giáo viên</title>
+<style>body{font:16px Arial,sans-serif;background:#eef4f9;color:#18364c;margin:0}main{max-width:1000px;margin:35px auto;background:white;padding:28px;border-radius:16px}label{display:block;margin:16px 0 8px}button,a.button{display:inline-block;padding:12px 18px;border-radius:8px;border:0;background:#186db3;color:white;text-decoration:none;cursor:pointer}button.danger{background:#b42318}input,select{padding:10px;max-width:100%;box-sizing:border-box}.warning{background:#fff4e5;padding:16px;line-height:1.6}.table-wrap{max-height:360px;overflow:auto;margin:20px 0}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}th{background:#edf5fa;position:sticky;top:0}.actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}</style></head>
+<body><main>
+<h1>Xóa danh sách giáo viên khi nhập nhầm</h1>
+<p><strong>{{ school.name }}</strong> — {{ school.commune.name }}<br>Năm học: <strong>{{ year.code }}</strong></p>
+<form method="get" action="/doi-ngu/xoa-danh-sach">
+<input type="hidden" name="school_id" value="{{ school.id }}"><input type="hidden" name="school_year_id" value="{{ year.id }}">
+<label for="group">Nhóm hồ sơ cần xóa</label><select id="group" name="group">{% for key,label in groups.items() %}<option value="{{ key }}" {% if group == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select> <button type="submit">Xem danh sách cần xóa</button>
+</form>
+<h2>{{ records|length }} hồ sơ sẽ bị xóa — {{ groups[group] }}</h2>
+<div class="warning">Xóa toàn bộ nhóm hồ sơ nêu trên của trường trong năm học này, bao gồm hồ sơ đã ngừng theo dõi. Từ khóa tìm kiếm và trang đang xem ở màn hình trước không giới hạn danh sách xóa. Đây không phải thao tác hoàn tác một lần nhập Excel.<br>Hệ thống sao lưu trước khi xóa. Hồ sơ các năm học khác và tài khoản đăng nhập được giữ nguyên.</div>
+<div class="table-wrap"><table><thead><tr><th>STT</th><th>Họ tên</th><th>Mã cán bộ</th><th>Vị trí</th></tr></thead><tbody>{% for record in records %}<tr><td>{{ loop.index }}</td><td>{{ record.staff_member.full_name }}</td><td>{{ record.staff_member.ministry_staff_code or record.staff_member.code }}</td><td>{{ {'GIAO_VIEN':'Giáo viên','CBQL':'Cán bộ quản lý','NHAN_VIEN':'Nhân viên'}.get(record.position_group,record.position_group) }}</td></tr>{% else %}<tr><td colspan="4">Không có hồ sơ để xóa.</td></tr>{% endfor %}</tbody></table></div>
+{% if records %}<form method="post" action="/doi-ngu/xoa-danh-sach">
+<input type="hidden" name="school_id" value="{{ school.id }}"><input type="hidden" name="school_year_id" value="{{ year.id }}"><input type="hidden" name="group" value="{{ group }}"><input type="hidden" name="token" value="{{ token }}">
+<label for="confirmation">Nhập <strong>XOA</strong> để xác nhận xóa {{ records|length }} hồ sơ trong danh sách trên</label><input id="confirmation" name="confirmation" required pattern="XOA" autocomplete="off" placeholder="XOA">
+<div class="actions"><button class="danger" type="submit">Xác nhận xóa {{ records|length }} hồ sơ</button><a class="button" href="/doi-ngu?school_year_id={{ year.id }}&school_id={{ school.id }}">Hủy, quay lại danh sách</a></div>
+</form>{% else %}<a class="button" href="/doi-ngu?school_year_id={{ year.id }}&school_id={{ school.id }}">Quay lại danh sách</a>{% endif %}
+</main></body></html>

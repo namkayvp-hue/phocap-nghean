@@ -1,10 +1,14 @@
 import json
 import unittest
+from collections import Counter
 from datetime import date
 from io import BytesIO
 from zipfile import ZipFile
 from xml.etree import ElementTree as ET
 from openpyxl import load_workbook
+from openpyxl.utils.cell import coordinate_to_tuple
+from app.services.appendix_pagination import column_maps
+from app.xmc_appendices import TEMPLATE_DIR
 from app.models import School
 from app.survey_models import SurveyPerson, SurveyPersonYearRecord
 from app.report_input_models import SchoolNetworkYearData, SchoolStructuredReportInput
@@ -43,6 +47,15 @@ class NewAppendixTests(unittest.TestCase):
     def workbook(self,code,query=''):
         return load_workbook(BytesIO(self.response(code,query).content))
 
+    def age_cell(self, wb, page, address):
+        source = load_workbook(TEMPLATE_DIR / 'Phu_luc_2_Giao_duc_bat_buoc.xlsx')
+        names = ['Trang_04', 'Trang_05'] if page in (4,5) else ['Trang_09', 'Trang_10']
+        sheets = [source[name] for name in names]
+        _, maps = column_maps(sheets)
+        index = names.index(f'Trang_{page:02d}')
+        row, col = coordinate_to_tuple(address)
+        return wb[names[0]].cell(row + (sheets[0].max_row if index else 0), maps[index][col-1])
+
     def resources(self):
         for i in range(1,8):
             s=self.db.get(School,i)
@@ -59,21 +72,37 @@ class NewAppendixTests(unittest.TestCase):
         self.db.add(SchoolNetworkYearData(school_id=1,school_year_id=2,level_code='TH',data_json='{"teachers":999,"class_total":999}'))
         self.db.commit()
 
+    def test_blank_downloads_keep_all_content_in_one_sheet_per_form(self):
+        for code in ['01-TH_TN','05-THCS_TTN','giao-duc-bat-buoc']:
+            response=self.client.get(f'/bao-cao/xoa-mu-chu/phu-luc/{code}/excel')
+            self.assertEqual(response.status_code,200)
+            wb=load_workbook(BytesIO(response.content))
+            source=load_workbook(TEMPLATE_DIR / ('Phu_luc_2_Giao_duc_bat_buoc.xlsx' if code=='giao-duc-bat-buoc' else f'Mau_{code}.xlsx'))
+            from app.services.report_export_date import stamp_workbook
+            stamp_workbook(source)
+            values=lambda book: Counter(str(c.value) for ws in book for row in ws for c in row if c.value is not None)
+            self.assertEqual(values(wb),values(source))
+            self.assertEqual(len(wb.sheetnames),9 if code=='giao-duc-bat-buoc' else 1)
+            for ws in wb:
+                if ws.title=='Trang_03': continue
+                self.assertTrue(ws.print_title_rows)
+                self.assertEqual(ws.page_setup.fitToWidth,1)
+                self.assertEqual(ws.page_setup.fitToHeight,0)
+                self.assertTrue(ws.sheet_properties.pageSetUpPr.fitToPage)
+
     def test_all_eight_forms_bundle_and_population_values(self):
         for code,_,pages in COMPULSORY_FORMS:
             wb=self.workbook(code)
-            self.assertEqual(len(wb.sheetnames),len(pages)+1)
+            self.assertEqual(len(wb.sheetnames),2)
+            self.assertTrue(wb.worksheets[0].sheet_properties.pageSetUpPr.fitToPage)
+            self.assertEqual(wb.worksheets[0].page_setup.fitToHeight,0)
         wb=self.workbook('bo-pl2')
-        self.assertEqual(len(wb.sheetnames),12)
-        self.assertEqual(wb['Trang_04']['F9'].value,1)
-        self.assertEqual(wb['Trang_04']['L9'].value,1)
-        self.assertEqual(wb['Trang_05']['F11'].value,1)
-        self.assertEqual(wb['Trang_05']['G11'].value,1)
-        self.assertEqual(wb['Trang_05']['G11'].number_format,'0%')
-        self.assertEqual(wb['Trang_09']['N9'].value,1)
-        self.assertEqual(wb['Trang_09']['O26'].value,1)  # 15-year-old, grade 9, GDTX
-        self.assertEqual(wb['Trang_10']['L20'].value,1)
-        self.assertEqual(wb['Trang_10']['M20'].value,1)
+        self.assertEqual(len(wb.sheetnames),10)
+        self.assertNotIn('Trang_05',wb.sheetnames)
+        self.assertNotIn('Trang_10',wb.sheetnames)
+        for page,cell in [(4,'F9'),(4,'L9'),(5,'F11'),(5,'G11'),(9,'N9'),(9,'O26'),(10,'L20'),(10,'M20')]:
+            self.assertEqual(self.age_cell(wb,page,cell).value,1)
+        self.assertEqual(self.age_cell(wb,5,'G11').number_format,'0%')
 
     def test_school_rows_expand_and_weighted_totals(self):
         self.resources()
@@ -93,12 +122,12 @@ class NewAppendixTests(unittest.TestCase):
     def test_missing_data_does_not_become_zero(self):
         self.db.get(SurveyPersonYearRecord,1).completed_primary_program=None
         self.db.commit()
-        ws=self.workbook('01-TH_TN')['Trang_04']
-        self.assertIsNone(ws['F31'].value)
-        self.assertEqual(ws['F12'].value,0)  # explicit no disability
+        wb=self.workbook('01-TH_TN')
+        self.assertIsNone(self.age_cell(wb,4,'F31').value)
+        self.assertEqual(self.age_cell(wb,4,'F12').value,0)  # explicit no disability
         self.db.get(SurveyPerson,1).date_of_birth=None
         self.db.commit()
-        self.assertIsNone(self.workbook('01-TH_TN')['Trang_04']['F9'].value)
+        self.assertIsNone(self.age_cell(self.workbook('01-TH_TN'),4,'F9').value)
 
     def test_completion_list_is_confirmed_and_safe(self):
         self.db.get(SurveyPerson,2).full_name='=1+1'
@@ -109,6 +138,9 @@ class NewAppendixTests(unittest.TestCase):
         self.assertIsNone(ws['H9'].value)
         self.assertIsNone(ws['I9'].value)
         self.assertNotIn('Person 1',[c.value for row in ws for c in row])
+        self.db.get(SurveyPersonYearRecord,2).primary_completion_year=2026
+        self.db.commit()
+        self.assertEqual(self.workbook('04-TH_HT')['Trang_08']['H9'].value,2026)
 
     def test_word_is_valid_and_has_numbers_and_template_sections(self):
         for code in ['pl4','pl5']:
