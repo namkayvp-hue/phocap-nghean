@@ -4,6 +4,8 @@ from datetime import date
 from sqlalchemy import inspect, text
 
 DETAIL_COLUMNS = {
+    'literacy_learning_support': 'BOOLEAN', 'literacy_support_period': 'VARCHAR(200)',
+    'literacy_support_result': 'VARCHAR(1000)',
     'study_origin_address': 'VARCHAR(500)', 'study_destination_address': 'VARCHAR(500)',
     'primary_completion_year': 'INTEGER', 'lower_secondary_graduation_year': 'INTEGER',
 }

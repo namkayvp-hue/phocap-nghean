@@ -13,6 +13,12 @@ from app.database import DATABASE_PATH
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 REGISTRY_FILE = PROJECT_DIR / "data" / "school_merger_official_registry.json"
 LEVEL_LOCK_FILE = PROJECT_DIR / "data" / "school_merger_registry" / "qd3805_level_lock.json"
+REFERENCE_DIR = PROJECT_DIR / "app" / "reference" / "school_merger"
+
+
+def _reference_path(path: Path) -> Path:
+    # Server data is authoritative. Fresh Docker installs use bundled references.
+    return path if path.exists() else REFERENCE_DIR / path.name
 
 OFFICIAL_DOCUMENT_CODE = "PA SẮP XẾP 2026"
 OFFICIAL_DOCUMENT_TITLE = (
@@ -58,10 +64,11 @@ def _school_key(value: Any) -> str:
 
 
 def _load_registry() -> dict[str, Any]:
-    if not REGISTRY_FILE.exists():
+    path = _reference_path(REGISTRY_FILE)
+    if not path.exists():
         raise SchoolMergerRegistryError(f"Không tìm thấy sổ phương án: {REGISTRY_FILE}")
     try:
-        payload = json.loads(REGISTRY_FILE.read_text(encoding="utf-8"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
         raise SchoolMergerRegistryError(f"Không đọc được sổ phương án: {exc}") from exc
     if not isinstance(payload, dict) or not isinstance(payload.get("plans"), list):
@@ -71,10 +78,11 @@ def _load_registry() -> dict[str, Any]:
 
 def _load_level_lock_index() -> dict[int, list[str]]:
     """Excel row -> mã trường QĐ3805. Không ghi DB, không suy đoán bằng tên."""
-    if not LEVEL_LOCK_FILE.exists():
+    path = _reference_path(LEVEL_LOCK_FILE)
+    if not path.exists():
         return {}
     try:
-        payload = json.loads(LEVEL_LOCK_FILE.read_text(encoding="utf-8"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
     out: dict[int, list[str]] = {}
@@ -101,10 +109,11 @@ def _load_level_lock_index() -> dict[int, list[str]]:
 
 def _load_mn_action_lock_operations() -> list[dict[str, Any]]:
     """QĐ3805: Mầm non là batch thuần MN, không có liên cấp."""
-    if not LEVEL_LOCK_FILE.exists():
+    path = _reference_path(LEVEL_LOCK_FILE)
+    if not path.exists():
         return []
     try:
-        payload = json.loads(LEVEL_LOCK_FILE.read_text(encoding="utf-8"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return []
     out = []

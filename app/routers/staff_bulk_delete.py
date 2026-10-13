@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import secrets
 import time
@@ -13,14 +14,16 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import delete, select, text
 from sqlalchemy.orm import Session, selectinload
 
-from app.database import PROJECT_DIR, get_db
+from app.database import DATABASE_PATH, get_db
 from app.models import School, SchoolYear
 from app.staff_models import StaffYearRecord
 from app.routers.staff_management import _can_manage, _ensure_school_in_scope, templates
 from app.routers.surveys import lay_thong_tin_nguoi_dung
 
 router = APIRouter(prefix="/doi-ngu")
-BACKUP_DIR = PROJECT_DIR / "backups" / "staff_list_delete"
+# The Docker deployment persists and grants write access to the data directory.
+BACKUP_DIR = DATABASE_PATH.parent / "backups" / "staff_list_delete"
+logger = logging.getLogger(__name__)
 GROUPS = {"GIAO_VIEN": "Chỉ giáo viên", "ALL": "Toàn bộ đội ngũ (giáo viên, cán bộ quản lý, nhân viên)"}
 
 
@@ -76,6 +79,7 @@ def execute(request: Request, school_id: int = Form(...), school_year_id: int = 
         raise HTTPException(403, "Xác nhận không hợp lệ hoặc đã hết hạn. Hãy mở lại màn hình xóa danh sách.")
     # This application uses SQLite. Reserve the write lock before re-reading the
     # previewed data so a simultaneous import cannot change the deletion set.
+    stage = "lock"
     try:
         db.execute(text("BEGIN IMMEDIATE"))
         _, school, year = _scope(request, db, school_id, school_year_id, group)
@@ -90,6 +94,7 @@ def execute(request: Request, school_id: int = Form(...), school_year_id: int = 
             "school_year_id": school_year_id, "school_year": year.code, "group": group,
             "count": len(rows), "digest": digest, "records": rows,
         }
+        stage = "backup"
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         path = BACKUP_DIR / f"{datetime.now():%Y%m%d_%H%M%S}_{secrets.token_hex(8)}.json"
         # A complete durable recovery copy is required before any SQL deletion.
@@ -97,15 +102,25 @@ def execute(request: Request, school_id: int = Form(...), school_year_id: int = 
             json.dump(backup, stream, ensure_ascii=False, indent=2, default=str)
             stream.flush()
             os.fsync(stream.fileno())
+        stage = "delete"
         result = db.execute(delete(StaffYearRecord).where(*_conditions(school_id, school_year_id, group)))
         if result.rowcount != len(rows):
             raise HTTPException(409, "Danh sách đã thay đổi. Chưa xóa dữ liệu; hãy kiểm tra lại.")
+        stage = "commit"
         db.commit()
     except HTTPException:
         db.rollback()
         raise
     except Exception as exc:
         db.rollback()
-        raise HTTPException(503, "Chưa xóa dữ liệu: không thể sao lưu hoặc lưu thay đổi. Vui lòng thử lại.") from exc
+        logger.exception("Staff list deletion failed at %s (school_id=%s, school_year_id=%s)", stage, school_id, school_year_id)
+        message = ("Chưa xóa dữ liệu: không thể tạo bản sao lưu. Vui lòng liên hệ quản trị để kiểm tra quyền ghi hoặc dung lượng lưu trữ."
+                   if stage == "backup" else "Chưa xóa dữ liệu: không thể lưu thay đổi. Vui lòng thử lại.")
+        if stage == "backup":
+            return templates.TemplateResponse(request=request, name="staff/delete_list.html", status_code=503, context={
+                "nguoi_dung": user, "school": school, "year": year, "group": group, "groups": GROUPS,
+                "records": records, "token": token, "error_message": message,
+            })
+        raise HTTPException(503, message) from exc
     request.session.pop("staff_delete", None)
     return RedirectResponse(f"/doi-ngu?school_year_id={school_year_id}&school_id={school_id}&status=deleted_{len(rows)}", status_code=303)

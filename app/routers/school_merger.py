@@ -29,6 +29,7 @@ from app.services.school_merger_service import (
     save_merger_plan_draft,
 )
 from app.services.school_merger_official_registry import (
+    SchoolMergerRegistryError,
     list_official_registry_plans,
     official_registry_summary,
 )
@@ -170,16 +171,22 @@ def _page_context(
     display_mode = _normalize_display(display_mode)
     data_view = _normalize_data_view(data_view)
 
-    plans = (
-        list_official_registry_plans(
-            school_year_id=school_year_id,
-            commune_id=commune_id,
-            level_code=level_code or None,
-            display_mode=display_mode,
+    registry_summary = {"group_count": 0, "execution_enabled": False}
+    plans = []
+    try:
+        registry_summary = official_registry_summary()
+        plans = (
+            list_official_registry_plans(
+                school_year_id=school_year_id,
+                commune_id=commune_id,
+                level_code=level_code or None,
+                display_mode=display_mode,
+            )
+            if school_year_id is not None and commune_id is not None
+            else []
         )
-        if school_year_id is not None and commune_id is not None
-        else []
-    )
+    except SchoolMergerRegistryError as exc:
+        error_message = f"Chưa thể tải phương án sáp nhập: {exc}"
 
     return {
         "nguoi_dung": _auth_user(request),
@@ -203,7 +210,7 @@ def _page_context(
         "backup_name": backup_name,
         "history": merger_history(limit=15),
         "execution_enabled": False,
-        "official_registry_summary": official_registry_summary(),
+        "official_registry_summary": registry_summary,
     }
 
 

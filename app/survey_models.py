@@ -918,6 +918,9 @@ class SurveyPersonYearRecord(Base):
         default="CHUA_XAC_DINH",
         server_default="CHUA_XAC_DINH",
     )
+    literacy_learning_support: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    literacy_support_period: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    literacy_support_result: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     completed_grade_3: Mapped[bool | None] = mapped_column(
         Boolean,
         nullable=True,

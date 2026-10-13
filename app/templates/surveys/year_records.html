@@ -1095,6 +1095,27 @@
                             </div>
                         </div>
                     </div>
+                    <div id="literacy_support_wrap" class="form-group full b131132-card" hidden>
+                        <div class="b131132-subtitle">Hỗ trợ học tập cho đối tượng mù chữ</div>
+                        <div class="b131132-grid">
+                            <div>
+                                <label for="literacy_learning_support">Có được hỗ trợ học tập</label>
+                                <select id="literacy_learning_support" name="literacy_learning_support" form="year_record_form">
+                                    <option value="CHUA_XAC_DINH">-- Chưa xác định --</option>
+                                    <option value="CO" {% if selected_record and selected_record.literacy_learning_support is sameas true %}selected{% endif %}>Có</option>
+                                    <option value="KHONG" {% if selected_record and selected_record.literacy_learning_support is sameas false %}selected{% endif %}>Không</option>
+                                </select>
+                            </div>
+                            <div id="literacy_support_details" hidden>
+                                <label for="literacy_support_period">Thời gian hỗ trợ</label>
+                                <input id="literacy_support_period" name="literacy_support_period" form="year_record_form" maxlength="200"
+                                       value="{{ selected_record.literacy_support_period or '' if selected_record else '' }}" placeholder="Ví dụ: từ tháng 9/2026 đến tháng 5/2027">
+                                <label for="literacy_support_result">Kết quả hỗ trợ học tập</label>
+                                <textarea id="literacy_support_result" name="literacy_support_result" form="year_record_form" maxlength="1000"
+                                          placeholder="Nhập kết quả hỗ trợ học tập">{{ selected_record.literacy_support_result or '' if selected_record else '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
                     <!-- === BAI_13B_11_13_2_XMC_UI_END === -->
 
                     <div class="form-group full">
@@ -6063,5 +6084,6 @@
 <!-- === BAI29B_SAFE_AUTO_NOT_TRACKED_END === -->
 <script src="/static/js/year_record_tracking.js"></script>
 <script src="/static/js/year_record_school_details.js?v=3"></script>
+<script src="/static/js/year_record_literacy_support.js?v=1"></script>
 </body>
 </html>

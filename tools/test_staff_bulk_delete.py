@@ -125,8 +125,23 @@ class StaffDeleteTests(unittest.TestCase):
     def test_failed_backup_does_not_delete(self):
         data = self.preview()
         with patch.object(module.os, 'fsync', side_effect=OSError('full disk')):
-            self.assertEqual(self.execute(data).status_code,503)
+            response = self.execute(data)
+            self.assertEqual(response.status_code,503)
+            self.assertIn('không thể tạo bản sao lưu', response.text)
+            self.assertIn('Xác nhận xóa', response.text)
         self.assertEqual(len(self.ids()),5)
+
+    def test_backup_permission_failure_can_be_retried(self):
+        data = self.preview()
+        with patch.object(Path, 'mkdir', side_effect=PermissionError('read-only application directory')):
+            with self.assertLogs(module.logger, level='ERROR') as captured:
+                response = self.execute(data)
+            self.assertEqual(response.status_code,503)
+            self.assertIn('quyền ghi', response.text)
+            self.assertIn('failed at backup', captured.output[0])
+        self.assertEqual(len(self.ids()),5)
+        self.assertEqual(self.execute(data).status_code,303)
+        self.assertEqual(self.ids(),{3,4,5})
 
     def test_scope_required_and_admin_supported(self):
         self.user['role_code'] = 'ADMIN'

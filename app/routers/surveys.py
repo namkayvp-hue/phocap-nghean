@@ -7090,6 +7090,9 @@ def chap_nhan_thanh_vien_nhap_nhanh_mobile(
         "is_literacy_target",
         "literacy_status",
         "completed_grade_3",
+        "literacy_learning_support",
+        "literacy_support_period",
+        "literacy_support_result",
         "completed_grade_5",
         "completed_primary_program",
         "completed_lower_secondary_program",
@@ -14186,6 +14189,9 @@ def tao_ban_ghi_hien_thi_nam_hoc(
         return selected_record, []
 
     field_names = (
+        "literacy_learning_support",
+        "literacy_support_period",
+        "literacy_support_result",
         "school_id",
         "class_id",
         "school_name_reported",
@@ -14215,6 +14221,9 @@ def tao_ban_ghi_hien_thi_nam_hoc(
     )
 
     values: dict[str, Any] = {
+        "literacy_learning_support": None,
+        "literacy_support_period": None,
+        "literacy_support_result": None,
         "survey_form_id": survey_form_id,
         "survey_person_id": person_id,
         "school_year_id": school_year_id,
@@ -14804,6 +14813,9 @@ def luu_theo_doi_nam_hoc(
 
     is_literacy_target: Annotated[str | None, Form()] = None,
     literacy_status: Annotated[str | None, Form()] = None,
+    literacy_learning_support: Annotated[str | None, Form()] = None,
+    literacy_support_period: Annotated[str | None, Form()] = None,
+    literacy_support_result: Annotated[str | None, Form()] = None,
     completed_grade_3: Annotated[str | None, Form()] = None,
     completed_grade_5: Annotated[str | None, Form()] = None,
     completed_primary_program: Annotated[str | None, Form()] = None,
@@ -15424,6 +15436,11 @@ def luu_theo_doi_nam_hoc(
         primary_completion_year, lower_secondary_graduation_year, person.date_of_birth, school_year,
     )
     errors.extend(_details_errors)
+    if literacy_learning_support not in (None, '', 'CHUA_XAC_DINH', 'CO', 'KHONG'):
+        errors.append("Giá trị hỗ trợ học tập Xóa mù chữ không hợp lệ.")
+    for value, limit, label in ((literacy_support_period, 200, 'Thời gian hỗ trợ'), (literacy_support_result, 1000, 'Kết quả hỗ trợ')):
+        if value is not None and len(value.strip()) > limit:
+            errors.append(f'{label} không được dài quá {limit} ký tự.')
     for address in (study_origin_address, study_destination_address):
         if address is not None and len(address.strip()) > 500:
             errors.append("Địa chỉ nơi đi/nơi đến không được dài quá 500 ký tự.")
@@ -15457,6 +15474,11 @@ def luu_theo_doi_nam_hoc(
             if value is not None:
                 setattr(form_record,key,value)
         form_record.learning_status = learning_status
+        if literacy_learning_support is not None:
+            form_record.literacy_learning_support = True if literacy_learning_support == 'CO' else False if literacy_learning_support == 'KHONG' else None
+        for key, value in [('literacy_support_period', literacy_support_period), ('literacy_support_result', literacy_support_result)]:
+            if value is not None:
+                setattr(form_record, key, value.strip() or None)
         form_record.completed_preschool_by_age = completed_preschool_by_age_value
         # === BAI_13B_12_V2_3_7_SAVE_TWO_SESSIONS_START ===
         form_record.attends_two_sessions_per_day = parsed_tri_state["attends_two_sessions_per_day"]
@@ -15672,6 +15694,14 @@ def luu_theo_doi_nam_hoc(
         else:
             record.literacy_status = "CHUA_XAC_DINH"
         # === BAI_13B_11_15_2_4_7_1B_DERIVE_LITERACY_STATUS_END ===
+
+        if record.is_literacy_target is True and record.completed_grade_5 is False and record.completed_grade_3 in (True, False):
+            if literacy_learning_support is not None:
+                record.literacy_learning_support = _b131132_optional_bool(literacy_learning_support)
+            if record.literacy_learning_support is True:
+                for key, value in [('literacy_support_period', literacy_support_period), ('literacy_support_result', literacy_support_result)]:
+                    if value is not None:
+                        setattr(record, key, value.strip() or None)
 
         if completed_primary_program is not None and (_details_grade == 5 or (_completion_age is not None and 11 <= _completion_age <= 14)):
             record.completed_primary_program = _b131132_optional_bool(completed_primary_program)

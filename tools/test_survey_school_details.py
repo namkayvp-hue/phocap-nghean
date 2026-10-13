@@ -96,6 +96,20 @@ class SchoolDetailsTests(unittest.TestCase):
                         self.assertTrue(getattr(record,flag))
                         self.assertEqual(getattr(record,year_field),2025)
                     fixture.user['role_code']='GIAO_VIEN'
+                    response=fixture.client.post(url+'luu',data=dict(school_year_id=1,learning_status='KHONG_THUOC_DIEN',residency_status='THUONG_TRU',
+                        highest_completed_grade='0',education_attainment_level='CHUA_HOAN_THANH_TIEU_HOC',
+                        literacy_learning_support='CO',literacy_support_period='9/2026–5/2027',literacy_support_result='Đang học'),follow_redirects=False)
+                    self.assertEqual(response.status_code,303,response.text[:1000])
+                    fixture.db.expire_all()
+                    record=fixture.db.get(SurveyPersonYearRecord,1)
+                    self.assertTrue(record.literacy_learning_support)
+                    self.assertEqual(record.literacy_support_period,'9/2026–5/2027')
+                    self.assertEqual(record.literacy_support_result,'Đang học')
+                    response=fixture.client.post(url+'luu',data=dict(school_year_id=1,learning_status='DANG_HOC',residency_status='THUONG_TRU',
+                        highest_completed_grade='5',school_name_reported='THCS',class_name_reported='6A'),follow_redirects=False)
+                    self.assertEqual(response.status_code,303,response.text[:1000])
+                    fixture.db.expire_all()
+                    self.assertEqual(fixture.db.get(SurveyPersonYearRecord,1).literacy_support_result,'Đang học')
                     with patch.object(surveys,'b131133_danh_gia_do_day_du_phieu_nhap_nhanh',return_value={
                         'active_people_count':1,'missing_year_record_count':0,'incomplete_year_record_count':0}), \
                         patch.object(surveys,'lay_chuoi_phieu_nhap_nhanh',return_value=[
