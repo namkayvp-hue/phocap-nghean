@@ -473,8 +473,8 @@
   <div id="pcgd-db-warning" class="pcgd-db-warning" hidden></div>
 
   <div class="pcgd-db-cards">
-    <article><span>Tổng xã/phường</span><strong id="db-total">–</strong></article>
-    <article><span>Đăng ký theo lộ trình năm nay</span><strong id="db-due">–</strong></article>
+    <article><span id="db-total-label">Tổng xã/phường</span><strong id="db-total">–</strong></article>
+    <article><span id="db-due-label">Đăng ký theo lộ trình năm nay</span><strong id="db-due">–</strong></article>
     <article><span>Điều tra hoàn thành</span><strong id="db-complete">–</strong></article>
     <article><span>Đủ 2 chỉ tiêu trẻ 5 tuổi</span><strong id="db-five-pass">–</strong></article>
     <article><span>Xã ĐBKK</span><strong id="db-special">–</strong></article>
@@ -529,7 +529,7 @@
         <small>THEO DÕI CHI TIẾT</small>
         <h2 id="db-table-title">Lộ trình 3–5 tuổi và mức sẵn sàng dữ liệu</h2>
       </div>
-      <span id="db-row-count" class="pcgd-pill">0 xã/phường</span>
+      <span id="db-row-count" class="pcgd-pill" aria-live="polite">0 xã/phường</span>
     </div>
 
     <div class="pcgd-table-wrap">
@@ -572,7 +572,11 @@
 .pcgd-panel-head h2{margin:3px 0 0;font-size:19px}
 .pcgd-pill{display:inline-flex;padding:6px 10px;border-radius:999px;background:#edf6ff;color:#0b5ca8;font-size:12px;font-weight:900}
 .pcgd-bars{display:grid;gap:9px}
-.pcgd-bar-row{display:grid;grid-template-columns:54px 1fr 45px;align-items:center;gap:9px;font-size:13px}
+.pcgd-bar-row{display:grid;grid-template-columns:54px 1fr 45px;align-items:center;gap:9px;font-size:13px;width:100%;border:0;padding:4px 0;background:transparent;color:inherit;font-family:inherit;text-align:left;cursor:pointer;border-radius:6px}
+.pcgd-bar-row:hover,.pcgd-bar-row[aria-pressed="true"]{background:#edf6ff;color:#0b5ca8}
+.pcgd-bar-row:focus-visible{outline:2px solid #0b6dc6;outline-offset:3px}
+.pcgd-bar-row[aria-pressed="true"] .pcgd-bar-fill{background:#0757a3}
+.pcgd-bar-track,.pcgd-bar-fill{display:block}
 .pcgd-bar-track{height:11px;border-radius:999px;background:#e8eef5;overflow:hidden}
 .pcgd-bar-fill{height:100%;background:linear-gradient(90deg,#0b6dc6,#5aa9ef);border-radius:999px}
 .pcgd-filter-row{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px}
@@ -600,7 +604,7 @@
 
   const el=id=>document.getElementById(id);
   const fmt=v=>(v===null||v===undefined)?'—':String(v);
-  const pct=v=>(v===null||v===undefined)?'—':Number(v).toFixed(2)+'%';
+  const pct=v=>(v===null||v===undefined)?'—':Number(Number(v).toFixed(2))+'%';
   const badge=(text,code)=>`<span class="pcgd-status pcgd-s-${code||'DATA'}">${text}</span>`;
 
   function endpoint(){
@@ -608,13 +612,18 @@
       .replace(/\/xu-huong-lien-nam\/?$/,'/dashboard-dat-chuan-data');
   }
 
-  function renderCards(){
+  function renderCards(rows){
     const s=DATA.summary||{};
-    el('db-total').textContent=fmt(s.total_communes);
-    el('db-due').textContent=fmt(s.roadmap_current_year);
-    el('db-complete').textContent=fmt(s.survey_complete);
-    el('db-five-pass').textContent=fmt(s.five_child_indicator_pass);
-    el('db-special').textContent=fmt(s.special_difficulty);
+    const year=el('db-year-filter').value;
+    const selectedYear=year && year!=='NONE';
+    const filtering=year || el('db-search').value.trim() || el('db-status-filter').value;
+    el('db-total-label').textContent=filtering?'Xã/phường theo bộ lọc':'Tổng xã/phường';
+    el('db-due-label').textContent=selectedYear?`Đăng ký theo lộ trình năm ${year}`:'Đăng ký theo lộ trình năm nay';
+    el('db-total').textContent=fmt(filtering?rows.length:s.total_communes);
+    el('db-due').textContent=fmt(filtering?rows.filter(r=>selectedYear?String(r.target_year_3_5)===year:r.roadmap_code==='DUE').length:s.roadmap_current_year);
+    el('db-complete').textContent=fmt(filtering?rows.filter(r=>r.survey_complete).length:s.survey_complete);
+    el('db-five-pass').textContent=fmt(filtering?rows.filter(r=>r.five_status_code==='PASS').length:s.five_child_indicator_pass);
+    el('db-special').textContent=fmt(filtering?rows.filter(r=>r.is_special).length:s.special_difficulty);
     el('db-roadmap-loaded').textContent=`Lộ trình ${fmt(DATA.roadmap_loaded)}/${fmt(s.total_communes)}`;
   }
 
@@ -626,7 +635,7 @@
     wrap.innerHTML=years.map(y=>{
       const n=Number(counts[y]||0);
       const width=Math.round(n*100/max);
-      return `<div class="pcgd-bar-row"><strong>${y}</strong><div class="pcgd-bar-track"><div class="pcgd-bar-fill" style="width:${width}%"></div></div><span>${n} xã</span></div>`;
+      return `<button type="button" class="pcgd-bar-row" data-year="${y}" aria-pressed="false" aria-controls="db-table-body" aria-label="Xem ${n} xã/phường đăng ký năm ${y}"><strong>${y}</strong><span class="pcgd-bar-track"><span class="pcgd-bar-fill" style="width:${width}%"></span></span><span>${n} xã</span></button>`;
     }).join('');
   }
 
@@ -655,7 +664,13 @@
   }
 
   function renderTable(){
+    if(!DATA) return;
     const rows=filteredRows();
+    renderCards(rows);
+    const year=el('db-year-filter').value;
+    el('db-roadmap-bars').querySelectorAll('[data-year]').forEach(button=>{
+      button.setAttribute('aria-pressed',String(button.dataset.year===year));
+    });
     el('db-row-count').textContent=`${rows.length} xã/phường`;
 
     if(TAB==='roadmap'){
@@ -693,10 +708,13 @@
         <td>${badge(r.five_status,r.five_status_code)}</td>
       </tr>`).join('') || '<tr><td colspan="8">Không có dữ liệu phù hợp.</td></tr>';
     }
+    if(year) el('db-table-title').textContent+=year==='NONE'?' · Chưa có lộ trình':` · Năm đăng ký ${year}`;
+    root.querySelectorAll('.pcqs-table-toolbar__input').forEach(input=>{
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+    });
   }
 
   function render(){
-    renderCards();
     renderBars();
     renderTable();
     if(DATA.roadmap_warning){
@@ -713,6 +731,17 @@
       TAB=btn.dataset.tab;
       renderTable();
     });
+  });
+
+  el('db-roadmap-bars').addEventListener('click',event=>{
+    const button=event.target.closest('button[data-year]');
+    if(!button || !DATA) return;
+    el('db-year-filter').value=button.dataset.year;
+    el('db-search').value='';
+    el('db-status-filter').value='';
+    root.querySelectorAll('.pcqs-table-toolbar__input').forEach(input=>{input.value='';});
+    renderTable();
+    el('db-table-title').scrollIntoView({behavior:'smooth',block:'center'});
   });
 
   ['db-search','db-year-filter','db-status-filter'].forEach(id=>{

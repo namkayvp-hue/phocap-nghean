@@ -1446,6 +1446,8 @@ def _th_m1_load_people_and_records(
     selected_school_id: int | None,
 ) -> list[tuple[SurveyPerson, SurveyPersonYearRecord | None]]:
     form_filters = list(_form_scope_filters(request, selected_school_id))
+    from app.services.survey_report_scope import completed_survey_forms
+    form_filters.append(completed_survey_forms())
     statement = (
         select(SurveyForm)
         .where(

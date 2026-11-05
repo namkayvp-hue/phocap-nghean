@@ -356,6 +356,7 @@ def _load_person_rows(
     batch_ids: list[int],
     school_year_id: int | None,
     school_id: int | None,
+    completed_only: bool = False,
 ) -> list[dict[str, Any]]:
     if not batch_ids or school_year_id is None:
         return []
@@ -451,6 +452,10 @@ def _load_person_rows(
             SurveyPerson.id.asc(),
         )
     )
+
+    if completed_only:
+        from app.services.survey_report_scope import completed_survey_forms
+        statement = statement.where(completed_survey_forms())
 
     if school_id is not None:
         statement = statement.where(
@@ -805,6 +810,7 @@ def build_report_data(
     school_id: int | None,
     data_state: str,
     q: str,
+    completed_only: bool = False,
 ) -> dict[str, Any]:
     school_year = db.get(SchoolYear, school_year_id) if school_year_id else None
     batches, counts = _load_batches(
@@ -823,6 +829,7 @@ def build_report_data(
         batch_ids=batch_ids,
         school_year_id=school_year_id,
         school_id=school_id,
+        completed_only=completed_only,
     )
     result = _finalize_people(
         batches=batches,

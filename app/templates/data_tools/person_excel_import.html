@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nhập dữ liệu đã điều tra</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#eef4f8;color:#17324d;font:15px Arial,sans-serif}
+    main{max-width:1460px;margin:auto;padding:24px}h1{font-size:27px}h2{font-size:20px;margin-top:0}
+    .panel{background:#fff;border:1px solid #d5e2ed;border-radius:14px;padding:22px;margin:18px 0}
+    .muted{color:#607589;line-height:1.6}.fields{display:flex;flex-wrap:wrap;gap:16px;align-items:end}
+    .field{flex:1;min-width:230px}label{display:block;font-weight:bold;margin-bottom:8px}
+    input[type=file],select{width:100%;padding:11px;border:1px solid #b8ccdf;border-radius:8px;background:#fff;font:inherit}
+    .btn{display:inline-block;border:0;border-radius:8px;background:#126bb3;color:white;padding:12px 16px;text-decoration:none;font-weight:bold;cursor:pointer}
+    .secondary{background:#e7f0f8;color:#195887}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .notice{padding:14px;border-radius:8px;background:#e8f4ff;line-height:1.6}.error{background:#fff0ef;color:#9d251c}
+    .scroll{overflow:auto;max-height:500px}table{width:100%;border-collapse:collapse;min-width:850px}td,th{padding:11px;text-align:left;border-bottom:1px solid #e1e9f0}th{background:#edf5fc;position:sticky;top:0}
+    .check{font-weight:normal;line-height:1.7;margin:18px 0}.check input{margin-right:8px}
+  </style>
+</head>
+<body>
+{% include "partials/dropdown_menu_v1.html" %}
+<main>
+  <h1>Nhập dữ liệu đã điều tra</h1>
+  <p class="muted">Điều tra hộ dân → Cập nhật dữ liệu hộ dân. Nhập kết quả chi tiết từng đối tượng để tổng hợp các báo cáo hiện có.</p>
+  <nav class="actions" aria-label="Loại nhập dữ liệu hộ dân">
+    <a class="btn secondary" href="/dieu-tra/cap-nhat-ho-dan">Nhập dữ liệu điều tra</a>
+    <a class="btn" href="{{ prefix }}" aria-current="page">Nhập dữ liệu đã điều tra</a>
+  </nav>
+  {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+  <section class="panel">
+    <h2>1. Chọn năm học và đợt điều tra của xã</h2>
+    <form method="get" action="{{ prefix }}" class="fields">
+      <div class="field"><label for="school_year_id">Năm học</label><select id="school_year_id" name="school_year_id" onchange="this.form.submit()">{% for year in years %}<option value="{{ year.id }}" {% if year.id == school_year_id %}selected{% endif %}>{{ year.code }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="batch_id">Xã/phường và đợt nhận dữ liệu</label><select id="batch_id" name="batch_id" required><option value="" disabled {% if not batch %}selected{% endif %}>Chọn xã/phường và đợt</option>{% for item in batches %}<option value="{{ item.id }}" {% if batch and item.id == batch.id %}selected{% endif %}>{{ item.commune.code }} · {{ item.commune.name }} · {{ item.name }}{% if item.is_locked %} · Đã khóa{% endif %}</option>{% endfor %}</select></div>
+      <button class="btn" type="submit">Chọn phạm vi</button>
+    </form>
+    {% if not batches %}<p class="muted">Chưa có đợt điều tra trong năm học này. Tạo đợt theo quy trình điều tra trước khi nhập.</p>{% endif %}
+  </section>
+  {% if batch %}
+  <section class="panel">
+    <h2>2. Tải mẫu và kiểm tra file</h2>
+    <p><strong>{{ batch.commune.name }} · {{ batch.school_year.code }} · {{ batch.name }}</strong></p>
+    <p class="muted">Một dòng cho một đối tượng; cùng hộ dùng cùng số phiếu. Có thể dùng mẫu cập nhật hộ dân hiện có hoặc mẫu bên dưới có thêm các cột kết quả học tập. Ô bổ sung để trống giữ nguyên thông tin đã lưu. Các đối tượng không có trong file vẫn được giữ lại.</p>
+    <div class="actions"><a class="btn secondary" href="{{ prefix }}/mau-excel?batch_id={{ batch.id }}">Tải mẫu Excel chi tiết</a><a class="btn secondary" href="/dieu-tra/{{ batch.id }}/ho-dan">Xem dữ liệu của đợt</a></div>
+    <form method="post" action="{{ prefix }}/xem-truoc" enctype="multipart/form-data" style="margin-top:20px">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="batch_id" value="{{ batch.id }}">
+      <div class="fields">
+        <div class="field"><label for="excel_file">File Excel chi tiết (.xlsx, tối đa 15 MB)</label><input id="excel_file" name="excel_file" type="file" accept=".xlsx" required></div>
+        <div class="field"><label for="mode">Cách tiếp nhận kết quả</label><select id="mode" name="mode"><option value="draft">Nhập để rà soát — phiếu đang điều tra</option><option value="complete" {% if mode == 'complete' %}selected{% endif %}>Kết quả đã kiểm tra — hoàn thành phiếu, dùng cho báo cáo</option></select></div>
+      </div>
+      <p class="muted">Chọn hoàn thành khi đã kiểm tra kết quả của toàn bộ thành viên trong từng hộ. Việc chốt/khóa đợt để xuất báo cáo chính thức vẫn thực hiện theo quy trình hiện hành.</p>
+      <button class="btn" type="submit">Kiểm tra và xem trước</button>
+    </form>
+  </section>
+  {% endif %}
+  {% if preview %}
+  <section class="panel">
+    <h2>3. Xem trước và xác nhận</h2>
+    <p><strong>{{ filename }}</strong> · {{ total }} đối tượng · {{ households }} hộ</p>
+    {% if issues %}
+      <div class="notice error" role="alert">File có {{ issues|length }} lỗi. Chưa ghi dữ liệu điều tra.</div>
+      <div class="scroll"><table><thead><tr><th>Dòng Excel</th><th>Nội dung cần sửa</th></tr></thead><tbody>{% for issue in issues %}<tr><td>{{ issue.row or '—' }}</td><td>{{ issue.message }}</td></tr>{% endfor %}</tbody></table></div>
+    {% else %}
+      <div class="notice">Sẽ thêm {{ new_people }} đối tượng, cập nhật {{ total - new_people }} đối tượng. {% if mode == 'complete' %}Các phiếu trong file sẽ được đánh dấu hoàn thành và dùng làm nguồn báo cáo.{% else %}Phiếu đang điều tra; chưa được tính vào báo cáo chỉ lấy phiếu hoàn thành.{% endif %}</div>
+    {% endif %}
+    <div class="scroll" style="margin-top:16px"><table><thead><tr><th>Dòng</th><th>Số phiếu</th><th>Họ tên</th><th>Ngày sinh</th><th>Trường/lớp khai báo</th><th>Kết quả bổ sung</th><th>Thao tác</th></tr></thead><tbody>{% for row in rows[:200] %}<tr><td>{{ row.row_number }}</td><td>{{ row.form_number }}</td><td>{{ row.full_name }}</td><td>{{ row.date_of_birth or '—' }}</td><td>{{ row.school_name }} {{ row.class_name }}</td><td><details><summary>Xem {{ row.extra|length }} thông tin</summary>{% for field,value in row.extra.items() %}<p>{{ field_labels.get(field, field) }}: <strong>{% if value is sameas true %}Có{% elif value is sameas false %}Không{% else %}{{ value }}{% endif %}</strong></p>{% endfor %}</details></td><td>{{ row.action or 'Cần kiểm tra' }}</td></tr>{% endfor %}</tbody></table></div>
+    {% if total > 200 %}<p class="muted">Hiển thị 200 dòng đầu. Toàn bộ {{ total }} dòng đã được kiểm tra.</p>{% endif %}
+    {% if token and not issues %}
+    <form method="post" action="{{ prefix }}/xac-nhan" onsubmit="this.querySelector('button').disabled=true">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="token" value="{{ token }}">
+      <label class="check"><input type="checkbox" name="acknowledge" value="yes" required>Tôi đã kiểm tra đúng xã, đợt, năm học và nội dung file.{% if mode == 'complete' %} Tôi xác nhận các hộ trong file đã hoàn thành điều tra.{% endif %}</label>
+      <button class="btn" type="submit">Xác nhận nhập {{ total }} đối tượng</button>
+    </form>
+    {% endif %}
+  </section>
+  {% endif %}
+  <section class="panel">
+    <h2>Lịch sử nhập chi tiết trong năm học</h2>
+    <div class="scroll"><table><thead><tr><th>Thời gian</th><th>File</th><th>Người nhập</th><th>Kết quả</th><th>Dữ liệu và báo cáo</th></tr></thead><tbody>
+      {% for job in jobs %}<tr><td>{{ job.created_at.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ job.original_file_name }}</td><td>{{ job.actor_name_snapshot or job.actor_role_snapshot }}</td><td>{{ job.message }}</td><td><a href="/dieu-tra/{{ job.survey_batch_id }}/ho-dan">Xem đối tượng</a><br><a href="/bao-cao/tong-hop-dieu-tra?school_year_id={{ job.school_year_id }}&commune_id={{ job.commune_id }}">Báo cáo tổng hợp điều tra</a></td></tr>{% else %}<tr><td colspan="5">Chưa có lần nhập chi tiết nào qua công cụ này trong năm học đã chọn.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</main>
+</body>
+</html>

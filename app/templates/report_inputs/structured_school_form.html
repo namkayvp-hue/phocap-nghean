@@ -223,6 +223,10 @@
     </section>
     {% else %}
 
+    {% if catalog.kind == 'facility' and catalog.level in ['TH', 'THCS'] %}
+    {% with csvc_level=catalog.level %}{% include 'report_inputs/csvc_excel_actions.html' %}{% endwith %}
+    {% endif %}
+
     <section class="top-grid">
         <div class="info-card">
             <span>Trường đang nhập</span>

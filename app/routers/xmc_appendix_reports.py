@@ -23,11 +23,12 @@ router = APIRouter(prefix="/bao-cao/xoa-mu-chu", tags=["Tổng hợp phụ lục
 
 
 def load_people(db, user, year_id, commune_id=None, school_id=None):
+    from app.services.survey_report_scope import completed_survey_forms
     role = user.get("role_code")
     if role not in SURVEY_ROLE_CODES:
         raise HTTPException(403, "Không có quyền xem báo cáo.")
     stmt = select(SurveyForm).join(SurveyBatch).join(Household).where(
-        SurveyBatch.school_year_id == year_id, Household.is_active.is_(True),
+        SurveyBatch.school_year_id == year_id, completed_survey_forms(), Household.is_active.is_(True),
         Household.commune.has(Commune.is_active.is_(True)))
     if role == "XA":
         if not user.get("commune_id"):

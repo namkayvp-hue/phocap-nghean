@@ -405,11 +405,72 @@
     <section class="panel panel-wide report-panel">
         <div class="panel-header">
             <div>
-                <p class="panel-label">CHI TIẾT THEO NGƯỜI THỰC HIỆN</p>
-                <h2>Khối lượng và tiến độ của người điều tra</h2>
+                <p class="panel-label">KẾT QUẢ CHUNG CỦA TỔ</p>
+                <h2>Tiến độ theo tổ được phân công</h2>
                 <p class="report-description">
-                    Theo dõi số phiếu đã giao, số phiếu phụ trách chính và mức hoàn thành của từng tài khoản.
+                    Một hoặc hai thành viên có thể đại diện nhập liệu. Phiếu hoàn thành được tính
+                    vào kết quả chung của tổ, không phụ thuộc người nhập hay người phụ trách chính.
+                    Mỗi phiếu chỉ tính một lần trong tổ.
                 </p>
+            </div>
+            <span class="count-badge">{{ team_progress|length }} tổ</span>
+        </div>
+
+        {% if team_progress %}
+            <div class="table-wrapper">
+                <table class="data-table progress-table">
+                    <thead><tr>
+                        <th>STT</th><th>Tổ / Địa bàn</th><th>Thành viên – Trường</th>
+                        <th>Tổng phiếu được giao</th><th>Chưa điều tra</th><th>Đang điều tra</th>
+                        <th>Đã hoàn thành</th><th>Cần bổ sung</th><th>Tiến độ chung</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for item in team_progress %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td class="name-cell">Tổ {{ item.team_number }}
+                                <span class="muted-line">{{ item.hamlets|join('; ') }}</span>
+                            </td>
+                            <td class="school-cell">
+                                {% for member in item.members %}
+                                <div style="margin-bottom:8px">
+                                    <strong>{{ member.full_name }}</strong> ({{ member.level_code }})
+                                    <span class="muted-line">{{ member.school_name or 'Chưa gắn trường' }}</span>
+                                </div>
+                                {% endfor %}
+                            </td>
+                            <td class="number-cell">{{ item.total }}</td>
+                            <td class="number-cell">{{ item.counts.get('CHUA_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DANG_DIEU_TRA', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('DA_HOAN_THANH', 0) }}</td>
+                            <td class="number-cell">{{ item.counts.get('CAN_BO_SUNG', 0) }}</td>
+                            <td class="mini-progress">
+                                <strong>{{ item.progress_percent }}%</strong>
+                                <div class="progress-bar"><div class="progress-value" style="width:{{ item.progress_percent }}%;"></div></div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="report-note">Tiến độ chung = số phiếu hoàn thành / tổng phiếu được giao cho tổ.
+                Chỉ hiển thị tổ đã chốt/gửi phân công; tổ chưa có phiếu hiển thị 0%.</div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <h3>Chưa có tổ đã chốt/gửi trong phạm vi báo cáo</h3>
+                <p>Chốt/gửi phân công tổ để theo dõi kết quả chung. Các phiếu phân công riêng vẫn có trong bảng tham khảo bên dưới.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <details class="panel panel-wide report-panel">
+        <summary style="cursor:pointer;font-weight:700">Xem phân công theo cá nhân (tham khảo)</summary>
+        <div class="panel-header">
+            <div>
+                <h2>Phiếu được phân công cho từng tài khoản</h2>
+                <p class="report-description">Bảng này dùng tra cứu phân công, không đánh giá ai đã nhập liệu.
+                    Kết quả thực hiện xem tại bảng tiến độ chung của tổ phía trên.</p>
             </div>
             <span class="count-badge">{{ investigator_progress|length }} người</span>
         </div>
@@ -470,10 +531,10 @@
             <div class="empty-state">
                 <div class="empty-icon">👥</div>
                 <h3>Chưa có người điều tra được phân công</h3>
-                <p>Hãy phân công phiếu để theo dõi khối lượng và tiến độ cá nhân.</p>
+                <p>Chưa có phân công phiếu riêng để tra cứu.</p>
             </div>
         {% endif %}
-    </section>
+    </details>
 </main>
 </body>
 </html>

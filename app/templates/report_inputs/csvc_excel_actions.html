@@ -1,0 +1,6 @@
+{% if can_edit and selected_school_id and selected_year_id %}
+<section style="background:#fff;border:1px solid #c9ddec;border-radius:12px;padding:16px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+    <div><strong>Nhập cơ sở vật chất từ Excel</strong><p style="margin:6px 0 0;color:#607589">Tải mẫu của trường, nhập số liệu và kiểm tra trước khi lưu.</p></div>
+    <a href="/csvc/nhap-excel/{{ csvc_level }}?school_year_id={{ selected_year_id }}&school_id={{ selected_school_id }}" style="display:inline-block;background:#1673bd;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Nhập Excel CSVC</a>
+</section>
+{% endif %}

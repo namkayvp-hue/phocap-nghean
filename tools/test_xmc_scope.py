@@ -36,7 +36,7 @@ class ScopeTests(unittest.TestCase):
             self.db.add(Household(id=i,code=f"H{i}",commune_id=cid,head_name="Head",address="Address"))
             self.db.add(SurveyBatch(id=i,code=f"B{i}",name=f"Batch {i}",school_year_id=1,commune_id=cid))
             self.db.flush()
-            self.db.add(SurveyForm(id=i,survey_batch_id=i,household_id=i,form_number=f"F{i}",head_name_snapshot="H",address_snapshot="A"))
+            self.db.add(SurveyForm(id=i,survey_batch_id=i,household_id=i,form_number=f"F{i}",head_name_snapshot="H",address_snapshot="A",status="DA_HOAN_THANH"))
             self.db.add(SurveyPerson(id=i,code=f"P{i}",household_id=i,full_name=f"Person {i}",date_of_birth=date(2000,1,1),gender="NU",ethnic_group="Kinh"))
             self.db.flush()
             self.db.add(SurveyFormInvestigator(survey_form_id=i,user_id=i))
@@ -122,7 +122,7 @@ class ScopeTests(unittest.TestCase):
         self.assertTrue(self.db.get(XmcEvidence, 1).data["completed_stage2"])
 
     def test_deduplicate_across_batches(self):
-        self.db.add(SurveyForm(id=4,survey_batch_id=2,household_id=1,form_number="F4",head_name_snapshot="H",address_snapshot="A"))
+        self.db.add(SurveyForm(id=4,survey_batch_id=2,household_id=1,form_number="F4",head_name_snapshot="H",address_snapshot="A",status="DA_HOAN_THANH"))
         self.db.flush()
         self.db.add(SurveyPersonYearRecord(id=4,survey_form_id=4,survey_person_id=1,school_year_id=1,
                                          is_reviewed=True,completed_grade_3=True))

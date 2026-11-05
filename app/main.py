@@ -17,6 +17,7 @@ from app.routers.communes import router as communes_router
 from app.routers.schools import router as schools_router
 # === BAI_13B_10_V3_18A_DATA_TOOLS_IMPORT ===
 from app.routers.data_tools import router as data_tools_router
+from app.routers.person_excel_import import router as person_excel_import_router
 # === SAP_NHAP_TRUONG_DUNG_CHUNG_V9_2_IMPORT ===
 from app.routers.school_merger import router as school_merger_router
 # === SAP_NHAP_TRUONG_V4_5_FUTURE_IMPORT ===
@@ -55,6 +56,7 @@ from app.routers.pcgdmn_template_report import router as pcgdmn_template_report_
 from app.routers.staff_management import router as staff_management_router
 from app.routers.staff_bulk_delete import router as staff_bulk_delete_router
 from app.routers.report_inputs import router as report_inputs_router
+from app.routers.csvc_excel_import import router as csvc_excel_import_router
 from app.routers.users import router as users_router
 from app.routers.survey_school_workflow import router as survey_school_workflow_router
 
@@ -125,6 +127,8 @@ app.include_router(communes_router)
 app.include_router(schools_router)
 # === BAI_13B_10_V3_18A_DATA_TOOLS_INCLUDE ===
 app.include_router(data_tools_router)
+app.include_router(person_excel_import_router)
+app.include_router(csvc_excel_import_router)
 # === SAP_NHAP_TRUONG_DUNG_CHUNG_V9_2_INCLUDE ===
 app.include_router(school_merger_router)
 # === SAP_NHAP_TRUONG_V4_5_FUTURE_INCLUDE ===

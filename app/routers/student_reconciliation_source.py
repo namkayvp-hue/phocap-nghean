@@ -13,7 +13,7 @@ from typing import Annotated, Any
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from openpyxl import load_workbook
 from openpyxl.utils.datetime import from_excel
@@ -76,6 +76,24 @@ REQUIRED_FIELDS = {
     "full_name",
     "date_of_birth",
 }
+STANDARD_SOURCE_COLUMNS = (
+    'STT', 'Xã/phường', 'Trường', 'Nhóm/Lớp', 'Lớp', 'Họ tên',
+    'Ngày sinh', 'Giới tính', 'Nơi sinh', 'Dân tộc', 'Số định danh cá nhân',
+    'Trạng thái', 'Chỗ ở hiện nay', 'Tên cha', 'Năm sinh cha', 'Tên mẹ', 'Năm sinh mẹ',
+)
+
+
+def _standard_source_header(values):
+    return (len(values) >= len(STANDARD_SOURCE_COLUMNS) and
+            all((_header_key(values[i]) == _header_key(label) or
+                 (i == 1 and _header_key(values[i]) == _header_key('Phòng GD')))
+                for i, label in enumerate(STANDARD_SOURCE_COLUMNS)))
+
+
+def _source_identity_code(name, birth, gender, personal_id):
+    identity = ('personal:' + personal_id if personal_id else
+                '|'.join((_normalize(name), birth.isoformat(), _normalize(gender))))
+    return 'SRC_' + hashlib.sha256(identity.encode('utf-8')).hexdigest()[:32]
 
 STATUS_MAP = {
     "dang hoc": ("DANG_HOC", True),
@@ -330,7 +348,7 @@ def _find_header_row(ws) -> int | None:
         start=1,
     ):
         keys = {_header_key(v) for v in row if v is not None}
-        if required.issubset(keys):
+        if required.issubset(keys) or _standard_source_header(row):
             return row_no
     return None
 
@@ -423,6 +441,9 @@ def _parse_workbook(
             headers = next(ws.iter_rows(min_row=header_row, max_row=header_row, values_only=True))
             mapping = _column_map(headers)
             missing = REQUIRED_FIELDS - set(mapping)
+            standard_source = _standard_source_header(headers)
+            if standard_source:
+                missing.discard('student_code')
             if missing:
                 result["errors"].append(
                     _issue("LỖI", ws.title, header_row, "", "", "Thiếu cột bắt buộc: " + ", ".join(sorted(missing)))
@@ -444,6 +465,12 @@ def _parse_workbook(
                 dob = _normalize_date(_val(row, mapping, "date_of_birth"), wb.epoch)
                 gender = _normalize_gender(_val(row, mapping, "gender"))
                 status_info = _normalize_status(_val(row, mapping, "status"))
+                if standard_source and not code and full_name and dob:
+                    personal = _normalize_code(_val(row, mapping, 'personal_id'))
+                    code = _source_identity_code(full_name, dob, gender, personal)
+                    if not personal:
+                        result['warnings'].append(_issue('CẢNH BÁO', ws.title, row_no, code, full_name,
+                            'Thiếu số định danh cá nhân; dùng mã nguồn nội bộ, đối chiếu theo họ tên/ngày sinh/giới tính.'))
 
                 row_error = False
                 for condition, message in (
@@ -691,6 +718,7 @@ def _page_context(
         "forbidden": ("warning", "Tài khoản không có quyền thực hiện thao tác này."),
         "invalid": ("warning", "Thông tin lựa chọn không hợp lệ."),
         "database_error": ("warning", "Không thể hoàn tất giao dịch; hệ thống đã rollback."),
+        "comparison_pending": ("warning", "Chưa khóa nguồn: cần có kết quả đối chiếu và xử lý hết các dòng còn chờ trong các đợt điều tra của năm học này trước khi khóa."),
     }
     status_message = status_messages.get(status)
 
@@ -734,6 +762,18 @@ def source_page(
         name="surveys/student_reconciliation_source.html",
         context=context,
     )
+
+
+@router.get("/file-mau")
+def download_source_template(request: Request):
+    if not _can_manage(request):
+        return RedirectResponse(url="/?status=forbidden", status_code=303)
+    # Preserve the original workbook layout, rather than recreating its headers.
+    path = APP_DIR / 'reference' / 'student_reconciliation' / 'source_template.xlsx'
+    stream = BytesIO(path.read_bytes())
+    return StreamingResponse(stream,
+        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={'Content-Disposition': 'attachment; filename="Mau_nguon_hoc_sinh_doi_chieu_cac_cap.xlsx"'})
 
 
 @router.post("/xem-truoc", response_class=HTMLResponse)
@@ -1187,6 +1227,23 @@ def lock_source(
     state_row = _state(db, target_school_year_id, scoped_commune)
     if state_row is None or str(state_row["status"]).upper() != "LOADED":
         return RedirectResponse(url="/dieu-tra/nguon-hoc-sinh-doi-chieu?status=invalid", status_code=303)
+    from app.survey_models import SurveyBatch
+    from app.routers.student_survey_comparison import _build_comparison_rows, _attach_latest_resolutions, _build_stats
+    batches = db.scalars(select(SurveyBatch).where(
+        SurveyBatch.school_year_id == target_school_year_id,
+        SurveyBatch.commune_id == scoped_commune,
+    )).all()
+    ready = bool(batches)
+    for batch in batches:
+        rows, _ = _build_comparison_rows(db, request, batch)
+        _attach_latest_resolutions(db, batch.id, rows)
+        stats = _build_stats(rows)
+        if stats['TOTAL'] == 0 or stats['CON_CHO_XU_LY'] > 0:
+            ready = False
+            break
+    if not ready:
+        return RedirectResponse(url=(f"/dieu-tra/nguon-hoc-sinh-doi-chieu?target_school_year_id={target_school_year_id}"
+                                     f"&commune_id={scoped_commune}&status=comparison_pending"), status_code=303)
     user = _current_user(request)
     now = datetime.now()
     db.execute(

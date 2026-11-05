@@ -186,6 +186,7 @@ def _load_context(
         school_id=selected_school_id,
         data_state=data_state,
         q="",
+        completed_only=True,
     )
 
     selected_school = next(

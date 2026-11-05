@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.database import DATABASE_PATH
 from app.permissions import is_admin_role, normalize_role_code
+from app.services.school_rename_lineage import school_rename_lineage
 from app.services.school_merger_service import (
     list_communes,
     list_school_years,
@@ -23,6 +24,12 @@ APP_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = APP_DIR.parent
 # Dùng vùng dữ liệu có quyền ghi và được lưu bền vững trên máy chủ Docker.
 BACKUP_DIR = DATABASE_PATH.parent / "backups"
+LEVEL_CHOICES = (("MN", "Mầm non"), ("TH", "Tiểu học"), ("THCS", "THCS"), ("THPT", "THPT"))
+
+
+def _level_filter(value: Any) -> str:
+    code = str(value or "").strip().upper()
+    return code if code in {item[0] for item in LEVEL_CHOICES} else ""
 
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
@@ -233,6 +240,7 @@ def _page_context(
     school_year_id: int | None = None,
     commune_id: int | None = None,
     school_id: int | None = None,
+    level_code: str = "",
     new_name: str = "",
     preview: dict[str, Any] | None = None,
     error_message: str = "",
@@ -241,6 +249,7 @@ def _page_context(
 ) -> dict[str, Any]:
     school_account = normalize_role_code(_auth_user(request).get("role_code")) == "TRUONG"
     own_school = _own_school(request) if school_account else None
+    level_code = "" if school_account else _level_filter(level_code)
     if school_account:
         if own_school is None:
             raise ValueError("Tài khoản chưa gắn với trường đang hoạt động.")
@@ -264,12 +273,17 @@ def _page_context(
         schools = list_schools(
             year_id=int(school_year_id),
             commune_id=int(commune_id),
+            level_code=level_code or None,
             include_inactive=False,
         )
     selected_school = next(
         (x for x in schools if school_id is not None and int(x["id"]) == int(school_id)),
         None,
     )
+    lineage = []
+    if schools and school_year_id is not None:
+        with _connect(read_only=True) as con:
+            lineage = school_rename_lineage(con, schools=schools, school_year_id=school_year_id)
     return {
         "nguoi_dung": _auth_user(request),
         "school_account": school_account,
@@ -280,9 +294,13 @@ def _page_context(
         "selected_commune_id": commune_id,
         "selected_commune_name": str((selected_commune or {}).get("name") or ""),
         "schools": schools,
-        "selected_school_id": school_id,
+        "selected_level_code": level_code,
+        "level_choices": LEVEL_CHOICES,
+        "selected_school_id": school_id if selected_school else None,
         "selected_school_name": str((selected_school or {}).get("name") or ""),
         "selected_school": selected_school,
+        "school_lineage": lineage,
+        "selected_lineage": next((row for row in lineage if row["school_id"] == school_id), None),
         "new_name": _clean(new_name),
         "preview": preview,
         "error_message": error_message,
@@ -305,6 +323,7 @@ def school_rename_page(
     school_year_id: str | None = Query(default=None),
     commune_id: str | None = Query(default=None),
     school_id: str | None = Query(default=None),
+    level_code: str = Query(default=""),
     status: str = Query(default=""),
     backup_name: str = Query(default=""),
 ):
@@ -321,6 +340,7 @@ def school_rename_page(
         school_year_id=_safe_int(school_year_id),
         commune_id=_safe_int(commune_id),
         school_id=_safe_int(school_id),
+        level_code=level_code,
         status_message=message,
         backup_name=backup_name,
     )
@@ -332,6 +352,7 @@ def preview_school_rename(
     commune_id: int = Form(...),
     school_id: int = Form(...),
     new_name: str = Form(...),
+    level_code: str = Form(default=""),
 ):
     if not _can_rename(request, school_id):
         return RedirectResponse(url="/?status=forbidden", status_code=303)
@@ -371,6 +392,7 @@ def preview_school_rename(
             commune_id=int(commune_id),
             school_id=int(school_id),
             new_name=clean_new_name,
+            level_code=level_code,
             preview=preview,
         )
     except Exception as exc:
@@ -380,6 +402,7 @@ def preview_school_rename(
             commune_id=int(commune_id),
             school_id=int(school_id),
             new_name=new_name,
+            level_code=level_code,
             error_message=str(exc),
             status_code=400,
         )
@@ -391,6 +414,7 @@ def execute_school_rename(
     commune_id: int = Form(...),
     school_id: int = Form(...),
     new_name: str = Form(...),
+    level_code: str = Form(default=""),
 ):
     if not _can_rename(request, school_id):
         return RedirectResponse(url="/?status=forbidden", status_code=303)
@@ -482,6 +506,7 @@ def execute_school_rename(
             f"?school_year_id={int(school_year_id)}"
             f"&commune_id={int(commune_id)}"
             f"&school_id={int(school_id)}"
+            f"&level_code={_level_filter(level_code)}"
             "&status=success"
             f"&backup_name={backup.name if backup else ''}"
         )
@@ -498,6 +523,7 @@ def execute_school_rename(
                     commune_id=int(commune_id),
                     school_id=int(school_id),
                     new_name=new_name,
+                    level_code=level_code,
                     error_message=f"{exc}. CẢNH BÁO: khôi phục backup lỗi: {restore_exc}",
                     status_code=500,
                 )
@@ -507,6 +533,7 @@ def execute_school_rename(
             commune_id=int(commune_id),
             school_id=int(school_id),
             new_name=new_name,
+            level_code=level_code,
             error_message=str(exc),
             status_code=400,
         )

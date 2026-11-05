@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nhập Excel {{ title }}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef4f8;color:#17324d;font:15px Arial,sans-serif}main{max-width:1200px;margin:auto;padding:24px}h1{font-size:26px}h2{font-size:20px}.panel{background:#fff;border:1px solid #d1e0eb;border-radius:14px;padding:22px;margin:18px 0}.muted{color:#607589;line-height:1.6}.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.btn{display:inline-block;border:0;border-radius:8px;background:#1473bf;color:#fff;padding:12px 18px;font:inherit;font-weight:bold;text-decoration:none;cursor:pointer}.secondary{background:#e7eff7;color:#195681}.notice{padding:14px;background:#edf7ff;border-radius:8px;line-height:1.6;margin:14px 0}.error{background:#fff0ed;color:#a02d22}.warn{background:#fff6de;color:#805a00}input[type=file]{display:block;max-width:100%;padding:12px;border:1px solid #bed0df;border-radius:8px;margin:12px 0}.scroll{overflow:auto;max-height:600px}table{border-collapse:collapse;width:100%;min-width:650px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e0eaf1}th{background:#edf5fb;position:sticky;top:0}.changed{background:#f0f8ff}label{line-height:1.7}
+</style></head><body>
+{% include 'partials/dropdown_menu_v1.html' %}
+<main>
+<h1>Nhập Excel cơ sở vật chất</h1>
+<p><strong>{{ title }}</strong></p><p>{{ school.name }} · Mã trường {{ school.code }} · Năm học {{ year.code }}</p>
+<a class="btn secondary" href="{{ back_url }}">Quay lại biểu nhập</a>
+{% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+<section class="panel">
+<h2>1. Tải mẫu và điền số liệu</h2>
+<p class="muted">Mẫu chứa các chỉ tiêu đã lưu của trường trong năm học đã chọn. Nhập ở cột <strong>Giá trị</strong>; ô trống giữ nguyên dữ liệu cũ, số <strong>0</strong> cập nhật chỉ tiêu về 0. Các tỉ lệ vẫn do phần mềm tính.</p>
+<a class="btn" href="{{ prefix }}/mau?{{ params }}">Tải mẫu Excel CSVC</a>
+</section>
+<section class="panel">
+<h2>2. Tải file lên để kiểm tra</h2>
+<form action="{{ prefix }}/xem-truoc" method="post" enctype="multipart/form-data">
+<input type="hidden" name="school_id" value="{{ school.id }}"><input type="hidden" name="school_year_id" value="{{ year.id }}"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="excel_file">File .xlsx đúng trường, cấp học và năm học (tối đa 3 MB)</label>
+<input id="excel_file" name="excel_file" type="file" accept=".xlsx" required>
+<button class="btn" type="submit">Kiểm tra và xem trước</button>
+</form>
+</section>
+{% if preview %}
+<section class="panel">
+<h2>3. Xem trước kết quả nhập</h2><p>{{ filename }}</p>
+{% if issues %}<div class="notice error" role="alert">File có lỗi. Chưa có dữ liệu nào được lưu.</div><div class="scroll"><table><thead><tr><th>Dòng Excel</th><th>Nội dung cần sửa</th></tr></thead><tbody>{% for issue in issues %}<tr><td>{{ issue.row or '—' }}</td><td>{{ issue.message }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}
+<div class="notice">{{ rows|length }} chỉ tiêu có giá trị trong file; {{ rows|selectattr('changed')|list|length }} chỉ tiêu sẽ thay đổi. Chưa lưu dữ liệu.</div>
+{% if warnings %}<div class="notice warn"><strong>Cần rà soát:</strong>{% for warning in warnings %}<p>{{ warning }}</p>{% endfor %}</div>{% endif %}
+<div class="scroll"><table><thead><tr><th>Chỉ tiêu</th><th>Đơn vị</th><th>Đã lưu</th><th>Trong file</th></tr></thead><tbody>{% for row in rows %}<tr class="{% if row.changed %}changed{% endif %}"><td>{{ row.label }}</td><td>{{ row.unit }}</td><td>{{ row.old }}</td><td><strong>{{ row.new }}</strong></td></tr>{% endfor %}</tbody></table></div>
+<form action="{{ prefix }}/xac-nhan" method="post" onsubmit="this.querySelector('button').disabled=true" style="margin-top:18px">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="token" value="{{ token }}">
+<label><input type="checkbox" name="acknowledge" value="yes" required> Tôi đã kiểm tra số liệu, các cảnh báo và đúng trường/năm học.</label>
+<div class="actions" style="margin-top:16px"><button class="btn" type="submit">Xác nhận nhập dữ liệu CSVC</button></div>
+</form>
+{% endif %}
+</section>
+{% endif %}
+</main></body></html>

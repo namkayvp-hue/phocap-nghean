@@ -34,7 +34,7 @@ def completion_reference_age(birth, school_year):
     return int(match.group()) - birth.year if birth and match else None
 
 
-def validate_completion_details(grade, primary, secondary, primary_year, secondary_year, birth, school_year):
+def validate_completion_details(grade, primary, secondary, primary_year, secondary_year, birth, school_year, repeating=None):
     values, errors = {}, []
     age = completion_reference_age(birth, school_year)
     for expected, flag, raw, key, label in [
@@ -44,15 +44,18 @@ def validate_completion_details(grade, primary, secondary, primary_year, seconda
         if flag is None and raw is None:
             continue  # Hidden/omitted controls must preserve historical facts.
         age_eligible = age is not None and (11 <= age <= 14 if expected == 5 else 15 <= age <= 18)
-        if grade != expected and not age_eligible:
+        if not age_eligible:
             if flag not in (None,'','CHUA_XAC_DINH') or raw:
                 ages = '11–14' if expected == 5 else '15–18'
-                errors.append(f'Chỉ nhập {label} khi đang chọn lớp {expected} hoặc đối tượng {ages} tuổi.')
+                errors.append(f'Chỉ nhập {label} cho đối tượng {ages} tuổi theo năm học đang chọn.')
             continue
         if str(flag or '').upper() not in {'CO','1','TRUE'}:
             values[key] = None
             continue
         try:
+            normal_progress = repeating == 'KHONG' or (repeating != 'CO' and age is not None and grade == age - 5)
+            if not raw and normal_progress and birth:
+                raw = birth.year + (11 if expected == 5 else 15)
             year = int(raw or '')
             limit = min(date.today().year, int(str(getattr(school_year, 'code', '')).split('-')[-1]))
             if not max(1900, birth.year if birth else 1900) <= year <= limit:

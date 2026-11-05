@@ -15,7 +15,7 @@ class SchoolDetailsTests(unittest.TestCase):
             self.assertEqual(grade_number(value),expected)
         year=SimpleNamespace(code='2025-2026')
         args=(date(2010,1,1),year)
-        self.assertEqual(validate_completion_details(5,'CO',None,'2026',None,*args),({'primary_completion_year':2026},[]))
+        self.assertEqual(validate_completion_details(5,'CO',None,'2026',None,date(2014,1,1),year),({'primary_completion_year':2026},[]))
         self.assertTrue(validate_completion_details(4,'CO',None,'2026',None,*args)[1])
         self.assertTrue(validate_completion_details(9,None,'CO',None,'2099',*args)[1])
         self.assertTrue(validate_completion_details(9,None,'CO',None,'',*args)[1])
@@ -35,6 +35,16 @@ class SchoolDetailsTests(unittest.TestCase):
         self.assertTrue(validate_completion_details(None,None,'CO',None,'2025',date(2007,1,1),year)[1])
         self.assertTrue(validate_completion_details(None,'CO',None,'',None,date(2013,1,1),year)[1])
 
+    def test_automatic_completion_year(self):
+        year=SimpleNamespace(code='2026-2027')
+        self.assertEqual(validate_completion_details(12,None,'CO',None,'',date(2009,12,24),year,None),({'lower_secondary_graduation_year':2024},[]))
+        self.assertTrue(validate_completion_details(12,None,'CO',None,'',date(2009,12,24),year,'CO')[1])
+        self.assertEqual(validate_completion_details(7,'CO',None,'',None,date(2013,1,1),year,'KHONG'),({'primary_completion_year':2024},[]))
+        self.assertEqual(validate_completion_details(10,None,'CO',None,'',date(2010,1,1),year,'KHONG'),({'lower_secondary_graduation_year':2025},[]))
+        self.assertEqual(validate_completion_details(10,None,'CO',None,'2024',date(2010,1,1),year,'KHONG'),({'lower_secondary_graduation_year':2024},[]))
+        self.assertTrue(validate_completion_details(10,None,'CO',None,'',date(2010,1,1),year,'CO')[1])
+        self.assertTrue(validate_completion_details(5,'CO',None,'2026',None,date(2016,1,1),year,'KHONG')[1])
+
     def test_migration_preserves_rows_and_is_repeatable(self):
         engine=create_engine('sqlite://')
         with engine.begin() as conn:
@@ -51,6 +61,8 @@ class SchoolDetailsTests(unittest.TestCase):
             fixture=ScopeTests(); fixture.setUp()
             try:
                 fixture.user['role_code']='ADMIN'
+                fixture.db.get(SurveyPerson,1).date_of_birth=date(2015,1,1)
+                fixture.db.commit()
                 fixture.client.app.include_router(surveys.router)
                 url='/dieu-tra/1/ho-dan/1/doi-tuong/1/nam-hoc/'
                 with patch.object(surveys,'co_quyen_truy_cap_phieu',return_value=True), patch.object(surveys,'b131143_save_person_event'):
@@ -75,6 +87,8 @@ class SchoolDetailsTests(unittest.TestCase):
                     fixture.db.expire_all()
                     self.assertEqual(fixture.db.get(SurveyPersonYearRecord,1).primary_completion_year,2026)
                     self.assertTrue(fixture.db.get(SurveyPersonYearRecord,1).completed_primary_program)
+                    fixture.db.get(SurveyPerson,1).date_of_birth=date(2011,1,1)
+                    fixture.db.commit()
                     response=fixture.client.post(url+'luu',data=dict(school_year_id=1,learning_status='DANG_HOC',residency_status='THUONG_TRU',
                         school_name_reported='THCS Test',class_name_reported='9A',completed_lower_secondary_program='CO',
                         lower_secondary_graduation_year='2026'),follow_redirects=False)

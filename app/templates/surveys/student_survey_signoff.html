@@ -309,6 +309,7 @@
                             <div class="notice notice-warning" style="margin: 14px 0 0;">Chỉ tài khoản quản trị cấp Sở mới được chốt kết quả.</div>
                         {% endif %}
                     {% else %}
+                        {% if not baseline_locked %}<p>Cần kiểm tra, xử lý đầy đủ kết quả đối chiếu rồi khóa nguồn tại mục 2.5.0 trước khi chốt.</p>{% endif %}
                         <p>Còn <strong>{{ stats.CON_CHO_XU_LY }}</strong> dòng chưa được ghi nhận xử lý. Hãy quay lại danh sách đối chiếu, chọn bộ lọc “Còn chờ xử lý” và hoàn tất từng dòng.</p>
                         <div class="form-actions">
                             <a class="button button-primary" href="/dieu-tra/{{ batch.id }}/doi-chieu-hoc-sinh?resolution_state=PENDING">Mở danh sách còn chờ xử lý</a>

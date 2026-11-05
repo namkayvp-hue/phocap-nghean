@@ -12,6 +12,9 @@
         .rename-hero p{margin:6px 0;color:#52606d;line-height:1.55}
         .rename-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px}
         .rename-grid.two{grid-template-columns:1fr 1fr}
+        #select-form .rename-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+        @media(max-width:1100px){ #select-form .rename-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:650px){ #select-form .rename-grid{grid-template-columns:1fr}}
         .field label{display:block;font-weight:700;margin-bottom:6px}
         .field input,.field select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #c9d4df;border-radius:8px;background:#fff}
         .field input[readonly]{background:#f4f7fa;color:#52606d}
@@ -36,7 +39,7 @@
     <section class="rename-hero">
         <h1>Đổi tên trường</h1>
         <p>Chức năng chỉ thay <strong>tên hiện hành</strong> của trường. <strong>school_id, mã trường và toàn bộ dữ liệu liên kết được giữ nguyên.</strong></p>
-        <p>Phần đổi tên chỉ gồm <strong>Tên cũ → Tên mới</strong>. Không yêu cầu số văn bản, ngày văn bản hoặc ghi chú.</p>
+        <p>Đối chiếu <strong>Những trường trước sáp nhập → Trường đích sau sáp nhập → Tên mới</strong> trước khi đổi tên.</p>
         {% if school_account %}
         <p>Bạn có thể cập nhật tên mới của trường mình sau sáp nhập. Chọn năm học hiệu lực, nhập tên mới và xem trước để kiểm tra trước khi lưu.</p>
         {% else %}
@@ -68,10 +71,19 @@
                 <div class="field">
                     <label>Xã/phường</label>
                     <div class="combo">
-                        <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ từ đầu tên xã/phường..." autocomplete="off" {% if school_account %}readonly{% endif %}>
+                        <input id="commune-search" type="text" value="{{ selected_commune_name }}" placeholder="Gõ tên, ví dụ: Thành hoặc thanh..." autocomplete="off" {% if school_account %}readonly{% endif %}>
                         <input id="commune-id" name="commune_id" type="hidden" value="{{ selected_commune_id or '' }}">
                         <div id="commune-list" class="combo-list"></div>
                     </div>
+                    <div class="muted">Gõ từ đầu tên, không cần gõ “Xã”, “Phường” hoặc dấu tiếng Việt.</div>
+                </div>
+
+                <div class="field">
+                    <label for="level-code">Cấp học</label>
+                    <select id="level-code" name="level_code" {% if school_account %}disabled{% endif %}>
+                        <option value="">Tất cả cấp học</option>
+                        {% for code,label in level_choices %}<option value="{{ code }}" {% if selected_level_code == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
                 </div>
 
                 <div class="field">
@@ -86,17 +98,56 @@
             </div>
             <div class="actions"><button class="btn primary" type="submit">Hiển thị trường</button></div>
         </form>
+        {% if selected_commune_id and schools %}
+        <div class="note info">Chọn trường đích ở bảng dưới để đổi tên. Tên trước và sau sáp nhập được đối chiếu từ các lần sáp nhập đã thực hiện đến năm học đã chọn.</div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Những trường trước sáp nhập</th><th>Trường đích sau sáp nhập</th><th>Đổi tên mới</th></tr></thead>
+                <tbody>
+                {% for item in school_lineage %}
+                    <tr>
+                        <td>
+                            {% if item.has_merger %}
+                                {% for source in item.before_schools %}
+                                <div style="margin-bottom:8px">{{ source.name }}<div class="muted">{{ source.code or '' }}{% if source.commune_name %} · {{ source.commune_name }}{% endif %}</div></div>
+                                {% endfor %}
+                            {% else %}
+                                {{ item.current_name }}<div class="muted">Chưa ghi nhận sáp nhập.</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ item.merged_name }}</strong><div class="muted">Mã {{ item.school_code or '—' }}{% if item.has_merger %} · Sáp nhập năm {{ item.merger_year }}{% endif %}</div>
+                            {% if item.current_name != item.merged_name %}<div>Tên hiện hành: {{ item.current_name }}</div>{% endif %}
+                        </td>
+                        <td><a class="btn primary" href="/cong-cu-du-lieu/doi-ten-truong?school_year_id={{ selected_school_year_id }}&commune_id={{ selected_commune_id }}&level_code={{ selected_level_code }}&school_id={{ item.school_id }}#rename-form">Chọn đổi tên</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif selected_commune_id %}
+        <div class="note info">Chưa có trường đang hoạt động thuộc xã/phường và cấp học đã chọn.</div>
+        {% endif %}
     </section>
 
     {% if selected_school %}
-    <section class="rename-panel">
-        <h2>2. Tên cũ → Tên mới</h2>
+    <section class="rename-panel" id="rename-form">
+        <h2>2. Đổi tên trường đích</h2>
         <form method="post" action="/cong-cu-du-lieu/doi-ten-truong/xem-truoc">
             <input type="hidden" name="school_year_id" value="{{ selected_school_year_id }}">
             <input type="hidden" name="commune_id" value="{{ selected_commune_id }}">
             <input type="hidden" name="school_id" value="{{ selected_school_id }}">
-            <div class="rename-grid two">
-                <div class="field"><label>Tên cũ</label><input type="text" value="{{ selected_school.name }}" readonly></div>
+            <input type="hidden" name="level_code" value="{{ selected_level_code }}">
+            <div class="rename-grid">
+                <div class="field"><label>Những trường trước sáp nhập</label>
+                    {% if selected_lineage and selected_lineage.has_merger %}
+                        {% for source in selected_lineage.before_schools %}<div style="margin-bottom:8px">{{ source.name }}<div class="muted">{{ source.code or '' }} · {{ source.commune_name or '' }}</div></div>{% endfor %}
+                    {% else %}<div>{{ selected_school.name }}</div><div class="muted">Chưa ghi nhận sáp nhập.</div>{% endif %}
+                </div>
+                <div class="field"><label>Trường đích sau sáp nhập</label><input type="text" value="{{ selected_lineage.merged_name if selected_lineage else selected_school.name }}" readonly>
+                    <div class="muted">Mã {{ selected_school.code or '—' }}</div>
+                    {% if selected_lineage and selected_lineage.merged_name != selected_school.name %}<div class="muted">Tên hiện hành: {{ selected_school.name }}</div>{% endif %}
+                </div>
                 <div class="field"><label>Tên mới</label><input type="text" name="new_name" value="{{ new_name }}" placeholder="Nhập tên mới của trường" required></div>
             </div>
             <div class="actions"><button class="btn primary" type="submit">Xem trước</button></div>
@@ -114,8 +165,10 @@
                 <div><strong>Mã trường</strong><div>{{ preview.school_code or "—" }}</div></div>
             </div>
             <div class="rename-grid" style="margin-top:18px">
-                <div class="field"><label>Tên cũ</label><input type="text" value="{{ preview.old_name }}" readonly></div>
-                <div class="arrow">→</div>
+                <div class="field"><label>Những trường trước sáp nhập</label>
+                    {% if selected_lineage and selected_lineage.has_merger %}{% for source in selected_lineage.before_schools %}<div>{{ source.name }}</div>{% endfor %}{% else %}<div>{{ preview.old_name }}</div>{% endif %}
+                </div>
+                <div class="field"><label>Trường đích – tên hiện hành</label><input type="text" value="{{ preview.old_name }}" readonly></div>
                 <div class="field"><label>Tên mới</label><input type="text" value="{{ preview.new_name }}" readonly></div>
             </div>
             <div class="note info">Không đổi school_id. Không đổi mã trường. Không chuyển lại tài khoản, đội ngũ, lớp, học sinh hoặc dữ liệu điều tra.</div>
@@ -123,6 +176,7 @@
                 <input type="hidden" name="school_year_id" value="{{ preview.school_year_id }}">
                 <input type="hidden" name="commune_id" value="{{ selected_commune_id }}">
                 <input type="hidden" name="school_id" value="{{ preview.school_id }}">
+                <input type="hidden" name="level_code" value="{{ selected_level_code }}">
                 <input type="hidden" name="new_name" value="{{ preview.new_name }}">
                 <div class="actions"><button class="btn success" type="submit">Thực hiện đổi tên</button></div>
             </form>
@@ -161,6 +215,8 @@
     if ({{ school_account | default(false) | tojson }}) return;
     const communes = {{ communes | tojson }};
     const schools = {{ schools | tojson }};
+    const lineage = {{ school_lineage | tojson }};
+    const selectForm = document.getElementById("select-form");
     const communeInput = document.getElementById("commune-search");
     const communeId = document.getElementById("commune-id");
     const communeList = document.getElementById("commune-list");
@@ -179,11 +235,10 @@
             .replace(/\s+/g, " ");
     }
 
-    function render(input, hidden, box, rows, labelFn, valueFn) {
+    function render(input, hidden, box, rows, labelFn, valueFn, onPick, searchFn, matchesFn) {
         const q = norm(input.value);
         box.innerHTML = "";
-        if (!q) { box.classList.remove("open"); return; }
-        const matches = rows.filter(row => norm(labelFn(row)).startsWith(q)).slice(0, 40);
+        const matches = rows.filter(row => !q || (matchesFn ? matchesFn(row, q) : norm(searchFn ? searchFn(row) : labelFn(row)).includes(q))).slice(0, 40);
         if (!matches.length) {
             const div = document.createElement("div");
             div.className = "combo-empty";
@@ -201,6 +256,7 @@
                 input.value = labelFn(row);
                 hidden.value = valueFn(row);
                 box.classList.remove("open");
+                if (onPick) onPick();
             });
             box.appendChild(div);
         });
@@ -208,18 +264,47 @@
     }
 
     if (communeInput) {
+        const showCommunes = () => render(communeInput, communeId, communeList, communes, row => row.name, row => row.id, () => {
+            schoolInput.value = ""; schoolId.value = "";
+            selectForm.requestSubmit();
+        }, null, (row, q) => {
+            const name = norm(row.name);
+            const shortName = name.replace(/^(xa|phuong|thi tran)\s+/, '');
+            return name.startsWith(q) || shortName.startsWith(q);
+        });
         communeInput.addEventListener("input", function () {
             communeId.value = "";
             if (schoolInput) { schoolInput.value = ""; schoolId.value = ""; }
-            render(communeInput, communeId, communeList, communes, row => row.name, row => row.id);
+            showCommunes();
+        });
+        communeInput.addEventListener("focus", showCommunes);
+        communeInput.addEventListener("keydown", function(event) {
+            if (event.key === 'Enter' && communeList.classList.contains('open')) {
+                event.preventDefault();
+                const first = communeList.querySelector('.combo-item');
+                if (first) first.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, cancelable:true}));
+            }
         });
     }
 
+    function reloadSchoolScope() {
+        schoolInput.value = ''; schoolId.value = '';
+        if (communeId.value) selectForm.requestSubmit();
+    }
+    document.getElementById('level-code').addEventListener('change', reloadSchoolScope);
+    selectForm.querySelector('[name="school_year_id"]').addEventListener('change', reloadSchoolScope);
+
     if (schoolInput) {
+        const showSchools = () => render(schoolInput, schoolId, schoolList, schools, row => row.name, row => row.id,
+            () => selectForm.requestSubmit(), row => {
+                const item = lineage.find(item => item.school_id === row.id);
+                return [row.name, row.code, item ? item.merged_name : '', ...(item ? item.before_schools.map(s => s.name) : [])].join(' ');
+            });
         schoolInput.addEventListener("input", function () {
             schoolId.value = "";
-            render(schoolInput, schoolId, schoolList, schools, row => row.name, row => row.id);
+            showSchools();
         });
+        schoolInput.addEventListener("focus", showSchools);
     }
 
     document.addEventListener("click", function (event) {

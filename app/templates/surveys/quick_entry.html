@@ -1354,7 +1354,7 @@
                                 class="field-input"
                                 id="household_representative_name"
                                 name="household_representative_name"
-                                value="{{ household_form_data.household_representative_name }}"
+                                value="{{ household_form_data.household_representative_name or household_form_data.head_name }}"
                                 maxlength="200"
                             >
                         </div>

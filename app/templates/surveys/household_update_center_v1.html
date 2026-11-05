@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cập nhật dữ liệu hộ dân</title>
+    <title>Nhập dữ liệu điều tra</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         :root{--blue:#0f5fa8;--blue2:#1976d2;--bg:#eef4f9;--line:#d8e4ef;--text:#17324d}
@@ -46,12 +46,19 @@
 
 <header class="hero">
     <div class="hero-inner">
-        <h1>Cập nhật dữ liệu hộ dân từ Excel</h1>
+        <h1>Nhập dữ liệu điều tra</h1>
         <p>{{ scope_label }}</p>
     </div>
 </header>
 
 <main class="wrap">
+
+    {% if nguoi_dung.role_code in ['ADMIN', 'SO'] %}
+    <nav class="actions" aria-label="Loại nhập dữ liệu hộ dân">
+        <a class="btn primary" href="/dieu-tra/cap-nhat-ho-dan" aria-current="page">Nhập dữ liệu điều tra</a>
+        <a class="btn secondary" href="/cong-cu-du-lieu/nhap-chi-tiet-doi-tuong">Nhập dữ liệu đã điều tra</a>
+    </nav>
+    {% endif %}
 
     <!-- === BAI_13B_9_V1B_1_DELETE_CENTER_START === -->
     {% if request.query_params.get('deleted') == '1' %}

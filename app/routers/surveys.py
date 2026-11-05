@@ -73,6 +73,7 @@ from app.survey_models import (
     SurveyFileExchangeLog,
 )
 from app.survey_workflow_models import SurveySchoolAssignment
+from app.services.survey_team_progress import build_team_progress
 
 
 APP_DIR = Path(__file__).resolve().parent.parent
@@ -399,6 +400,8 @@ def b131133_truong_da_tra_loi(record, field_name):
 
 
 def b131133_tien_do_nam_hoc(*, person, record, school_year):
+    from app.services.survey_school_details import completion_reference_age
+    completion_reference_age_for_progress = completion_reference_age(person.date_of_birth, school_year)
     level = b131133_xac_dinh_cap_hoc(person, record, school_year)
 
     required_fields = [
@@ -455,7 +458,7 @@ def b131133_tien_do_nam_hoc(*, person, record, school_year):
     elif level == "TH":
         from app.services.survey_school_details import grade_number
         current_grade = grade_number(getattr(getattr(record,'classroom',None),'name',None) or getattr(record,'class_name_reported',None))
-        if current_grade == 5:
+        if completion_reference_age_for_progress is not None and 11 <= completion_reference_age_for_progress <= 14:
             required_fields.append("completed_primary_program")
             if getattr(record,'completed_primary_program',None) is True:
                 required_fields.append("primary_completion_year")
@@ -463,7 +466,7 @@ def b131133_tien_do_nam_hoc(*, person, record, school_year):
         from app.services.survey_school_details import grade_number
         current_grade = grade_number(getattr(getattr(record,'classroom',None),'name',None) or getattr(record,'class_name_reported',None))
         required_fields.append("post_lower_secondary_path")
-        if current_grade == 9:
+        if completion_reference_age_for_progress is not None and 15 <= completion_reference_age_for_progress <= 18:
             required_fields.append("completed_lower_secondary_program")
             if getattr(record,'completed_lower_secondary_program',None) is True:
                 required_fields.append("lower_secondary_graduation_year")
@@ -8590,7 +8593,7 @@ def tao_du_lieu_tien_do_dieu_tra(
     db: Session,
     batch: SurveyBatch,
 ) -> dict[str, Any]:
-    """Tổng hợp tiến độ theo địa bàn, trường và người điều tra."""
+    """Tổng hợp tiến độ theo địa bàn, trường, tổ và phân công cá nhân."""
 
     report_filters = [
         SurveyForm.survey_batch_id == batch.id,
@@ -8844,6 +8847,10 @@ def tao_du_lieu_tien_do_dieu_tra(
         "hamlet_progress": hamlet_progress,
         "school_progress": school_progress,
         "investigator_progress": investigator_progress,
+        "team_progress": build_team_progress(
+            db=db, batch_id=batch.id, commune_id=batch.commune_id,
+            user=auth_user, status_codes=FORM_STATUS_LABELS,
+        ),
         "progress_scope_label": progress_scope_label,
     }
 
@@ -9131,10 +9138,42 @@ def xuat_excel_tien_do_dieu_tra(
         last_column=9,
     )
 
+    team_sheet = workbook.create_sheet("Theo to dieu tra")
+    dien_tieu_de_bao_cao_tien_do(
+        team_sheet, title="TIẾN ĐỘ THEO TỔ ĐƯỢC PHÂN CÔNG", batch=batch,
+        scope_label=progress_data["progress_scope_label"], last_column=10,
+    )
+    team_sheet.append([])
+    team_sheet.append([
+        "STT", "Tổ điều tra", "Thôn/xóm/khối/bản", "Thành viên – Trường",
+        "Tổng phiếu được giao", "Chưa điều tra", "Đang điều tra",
+        "Đã hoàn thành", "Cần bổ sung", "Tiến độ",
+    ])
+    for index, item in enumerate(progress_data["team_progress"], start=1):
+        counts = item["counts"]
+        team_sheet.append([
+            index, f"Tổ {item['team_number']}", "; ".join(item["hamlets"]),
+            "\n".join(f"{m['full_name']} ({m['level_code']}) – {m['school_name'] or 'Chưa gắn trường'}" for m in item["members"]),
+            item["total"], counts.get("CHUA_DIEU_TRA", 0), counts.get("DANG_DIEU_TRA", 0),
+            counts.get("DA_HOAN_THANH", 0), counts.get("CAN_BO_SUNG", 0),
+            f"{item['progress_percent']}%",
+        ])
+    dinh_dang_bang_bao_cao_tien_do(
+        team_sheet, header_row=4, last_row=team_sheet.max_row, last_column=10,
+    )
+    team_sheet.column_dimensions["D"].width = 60
+    for row_number, item in enumerate(progress_data["team_progress"], start=5):
+        team_sheet.row_dimensions[row_number].height = max(30, 30 * len(item["members"]))
+    team_note_row = team_sheet.max_row + 2
+    team_sheet.merge_cells(start_row=team_note_row, start_column=1, end_row=team_note_row, end_column=10)
+    team_sheet.cell(team_note_row, 1, "Tiến độ chung = phiếu hoàn thành / tổng phiếu được giao cho tổ. Mỗi phiếu tính một lần, bất kể thành viên nào nhập liệu.")
+    team_sheet.cell(team_note_row, 1).alignment = Alignment(wrap_text=True, vertical="top")
+    team_sheet.row_dimensions[team_note_row].height = 32
+
     investigator_sheet = workbook.create_sheet("Theo nguoi dieu tra")
     dien_tieu_de_bao_cao_tien_do(
         investigator_sheet,
-        title="TIẾN ĐỘ THEO NGƯỜI ĐIỀU TRA",
+        title="PHÂN CÔNG CÁ NHÂN – THAM KHẢO",
         batch=batch,
         scope_label=progress_data["progress_scope_label"],
         last_column=12,
@@ -9168,7 +9207,7 @@ def xuat_excel_tien_do_dieu_tra(
             counts.get("DA_HOAN_THANH", 0),
             counts.get("CAN_BO_SUNG", 0),
             f"{item['progress_percent']}%",
-            "Một phiếu có thể được giao cho nhiều người.",
+            "Tham khảo phân công, không đánh giá số lần nhập liệu. Kết quả chung xem bảng Theo to dieu tra.",
         ])
     dinh_dang_bang_bao_cao_tien_do(
         investigator_sheet,
@@ -15433,7 +15472,7 @@ def luu_theo_doi_nam_hoc(
     _details_grade = None if _b13236_is_preschool else grade_number(selected_class.name if selected_class else class_name_reported)
     _completion_details, _details_errors = validate_completion_details(
         _details_grade, completed_primary_program, completed_lower_secondary_program,
-        primary_completion_year, lower_secondary_graduation_year, person.date_of_birth, school_year,
+        primary_completion_year, lower_secondary_graduation_year, person.date_of_birth, school_year, is_repeating_grade,
     )
     errors.extend(_details_errors)
     if literacy_learning_support not in (None, '', 'CHUA_XAC_DINH', 'CO', 'KHONG'):
@@ -15703,9 +15742,9 @@ def luu_theo_doi_nam_hoc(
                     if value is not None:
                         setattr(record, key, value.strip() or None)
 
-        if completed_primary_program is not None and (_details_grade == 5 or (_completion_age is not None and 11 <= _completion_age <= 14)):
+        if completed_primary_program is not None and (_completion_age is not None and 11 <= _completion_age <= 14):
             record.completed_primary_program = _b131132_optional_bool(completed_primary_program)
-        if completed_lower_secondary_program is not None and (_details_grade == 9 or (_completion_age is not None and 15 <= _completion_age <= 18)):
+        if completed_lower_secondary_program is not None and (_completion_age is not None and 15 <= _completion_age <= 18):
             record.completed_lower_secondary_program = _b131132_optional_bool(completed_lower_secondary_program)
         for key, value in _completion_details.items():
             setattr(record, key, value)

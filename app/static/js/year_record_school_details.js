@@ -39,14 +39,21 @@
             field('school_selected')?.textContent].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         const upperSecondary = current !== null ? current >= 10 : /\bthpt\b|trung hoc pho thong/.test(school);
         show(field('post_lower_secondary_path_wrap'), !upperSecondary);
-        document.querySelectorAll('[data-completion-grade]').forEach(box => show(box, current === Number(box.dataset.completionGrade) || ageGrade === Number(box.dataset.completionGrade)));
+        document.querySelectorAll('[data-completion-grade]').forEach(box => show(box, ageGrade === Number(box.dataset.completionGrade)));
         document.querySelectorAll('[data-completion-year]').forEach(box => {
             const expected = box.dataset.completionYear === 'completed_primary_program' ? 5 : 9;
-            const visible = (current === expected || ageGrade === expected) && field(box.dataset.completionYear)?.value === 'CO';
+            const visible = ageGrade === expected && field(box.dataset.completionYear)?.value === 'CO';
             show(box, visible);
             const input = box.querySelector('input');
             input.required = visible;
             input.max = new Date().getFullYear();
+            const repeating = field('is_repeating_grade')?.value;
+            const normalProgress = repeating === 'KHONG' ||
+                (repeating !== 'CO' && age !== null && current === age - 5);
+            if (visible && !input.value && normalProgress) {
+                const suggested = Number(ageSection.dataset.birthYear) + (expected === 5 ? 11 : 15);
+                if (suggested <= Number(input.max)) input.value = String(suggested);
+            }
         });
         const location = field('study_location_scope')?.value;
         show(field('study_destination_wrap'), ['DI_HOC_NOI_KHAC','DI_HOC_TRONG_TINH','DI_HOC_NGOAI_TINH'].includes(location));

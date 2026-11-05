@@ -272,7 +272,7 @@ def build_compulsory(code, db, ctx):
         ['Phạm vi',ctx['label']],['Năm học',ctx['year'].code],
         ['Nguồn','Phiếu điều tra trong phạm vi; dữ liệu mạng lưới, đội ngũ, CSVC đúng năm học. Không sửa dữ liệu gốc.'],
         ['Quy tắc','Ô trống: thiếu xác nhận hoặc mẫu số bằng 0. Số 0 chỉ dùng khi tính được. Tổng tỷ lệ tính lại từ tử/mẫu số.'],
-        ['Phạm vi số liệu','Trường/giáo viên: dân số từ phiếu được phân công; đội ngũ và CSVC giới hạn trường của tài khoản.'],
+        ['Phạm vi số liệu','Dân số và chỉ tiêu điều tra chỉ lấy phiếu đã hoàn thành hoặc đã duyệt của năm học đang chọn. Phiếu mới nhập/đang điều tra chưa được tính. Trường/giáo viên chỉ lấy phiếu trong phạm vi được phân công; đội ngũ và CSVC giới hạn trường của tài khoản.'],
         ['Số phải phổ cập','Kế thừa quy ước thường trú và không thuộc diện ngừng theo dõi. Nơi học dùng trường thông tin đã xác nhận trên phiếu.'],
         ['Lớp/chương trình','Không suy lớp từ tuổi. Chương trình PT/TX/GDNN lấy trường dữ liệu hoặc trường THCS/GDTX được khai báo; chưa rõ để trống.'],
         ['Mẫu hoàn thành','Chỉ lấy xác nhận hoàn thành chương trình và năm hoàn thành/tốt nghiệp đã nhập. Nơi hoàn thành chưa được xác nhận thì để trống, không lấy trường đang học. Mẫu 08 sửa nhãn cột G từ tiểu học thành THCS theo tiêu đề biểu.'],

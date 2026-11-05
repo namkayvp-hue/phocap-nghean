@@ -552,7 +552,7 @@
                Giáo viên: không có danh mục quản trị.
                ========================================================== #}
             {% if menu_role in ['ADMIN', 'SO'] %}
-            <div class="pc-menu-group {% if menu_path.startswith('/tai-khoan') or menu_path.startswith('/xa') or menu_path.startswith('/truong') or menu_path.startswith('/lop-hoc') or menu_path.startswith('/cong-cu-du-lieu') %}is-active{% endif %}">
+            <div class="pc-menu-group {% if menu_path.startswith('/tai-khoan') or menu_path.startswith('/xa') or menu_path.startswith('/truong') or menu_path.startswith('/lop-hoc') or (menu_path.startswith('/cong-cu-du-lieu') and not menu_path.startswith('/cong-cu-du-lieu/nhap-chi-tiet-doi-tuong')) %}is-active{% endif %}">
                 <button type="button" class="pc-menu-trigger" aria-expanded="false">1. Danh mục <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown" role="menu">
                     <div class="pc-submenu">
@@ -689,19 +689,24 @@
                2. ĐIỀU TRA HỘ DÂN - dùng cho cả 4 cấp.
                Mỗi mục chỉ hiện khi cấp đó có quyền/luồng nghiệp vụ tương ứng.
                ========================================================== #}
-            <div class="pc-menu-group {% if menu_path.startswith('/dieu-tra') %}is-active{% endif %}">
+            <div class="pc-menu-group {% if menu_path.startswith('/dieu-tra') or menu_path.startswith('/cong-cu-du-lieu/nhap-chi-tiet-doi-tuong') %}is-active{% endif %}">
                 <button type="button" class="pc-menu-trigger" aria-expanded="false">2. Điều tra hộ dân <span class="pc-menu-caret">▾</span></button>
                 <div class="pc-dropdown" role="menu">
                     {# === BAI_13B_9_V1A_MENU === #}
                     {# === BAI_13B_12_V2_2_HIDE_UPDATE_XA_START === #}
 {# === BAI_13B_12_V2_3_UPDATE_MENU_ONLY_SO === #}
 {% if menu_role in ['ADMIN', 'SO', 'XA'] %}
-                    <a
-                        href="/dieu-tra/cap-nhat-ho-dan"
-                        role="menuitem"
-                    >
-                        Cập nhật dữ liệu hộ dân
-                    </a>
+                    <div class="pc-submenu">
+                        <button type="button" class="pc-submenu-trigger" aria-expanded="false">
+                            <span class="pc-submenu-trigger__text">Cập nhật dữ liệu hộ dân</span><span class="pc-submenu-arrow">▶</span>
+                        </button>
+                        <div class="pc-submenu-panel" role="menu">
+                            <a href="/dieu-tra/cap-nhat-ho-dan" role="menuitem">Nhập dữ liệu điều tra</a>
+                            {% if menu_role in ['ADMIN', 'SO'] %}
+                            <a href="/cong-cu-du-lieu/nhap-chi-tiet-doi-tuong" role="menuitem">Nhập dữ liệu đã điều tra</a>
+                            {% endif %}
+                        </div>
+                    </div>
                     {# === BAI_13B_12_V2_2_HIDE_UPDATE_XA_END === #}
 {% endif %}
 

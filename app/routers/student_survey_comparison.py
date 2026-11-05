@@ -283,7 +283,7 @@ def _baseline_state_for_batch(
                 "JOIN school_years sy ON sy.id=s.source_school_year_id "
                 "WHERE s.target_school_year_id=:target_year_id "
                 "AND s.commune_id=:commune_id "
-                "AND s.status='LOCKED' LIMIT 1"
+                "AND s.status IN ('LOADED','LOCKED') LIMIT 1"
             ),
             {
                 "target_year_id": int(batch.school_year_id),
@@ -1550,6 +1550,7 @@ def comparison_page(
             "batch": batch,
             "scope_label": _scope_label(request),
             "baseline_ready": baseline_state is not None,
+            "baseline_locked": bool(baseline_state and baseline_state['status'] == 'LOCKED'),
             "baseline_source_year_id": (int(baseline_state["source_school_year_id"]) if baseline_state else None),
             "baseline_source_year_code": (str(baseline_state.get("source_year_code") or "") if baseline_state else ""),
             "error_message": None,
@@ -1879,7 +1880,9 @@ def comparison_signoff_page(
     history = _load_signoff_history(db, batch.id)
     latest = history[0] if history else None
     is_signed = bool(latest is not None and latest.action_code == "CHOT")
-    ready_to_sign = stats["TOTAL"] > 0 and stats["CON_CHO_XU_LY"] == 0
+    baseline = _baseline_state_for_batch(db, batch)
+    baseline_locked = bool(baseline and baseline['status'] == 'LOCKED')
+    ready_to_sign = baseline_locked and stats["TOTAL"] > 0 and stats["CON_CHO_XU_LY"] == 0
 
     return templates.TemplateResponse(
         request=request,
@@ -1893,6 +1896,7 @@ def comparison_signoff_page(
             "latest_signoff": latest,
             "comparison_signed": is_signed,
             "ready_to_sign": ready_to_sign,
+            "baseline_locked": baseline_locked,
             "can_manage_signoff": _can_manage_signoff(request),
             "status_message": _signoff_status_message(status),
             "signoff_action_labels": SIGNOFF_ACTION_LABELS,
@@ -1938,7 +1942,8 @@ def sign_comparison_result(
     rows, _ = _build_comparison_rows(db, request, batch)
     _attach_latest_resolutions(db, batch.id, rows)
     stats = _build_stats(rows)
-    if stats["TOTAL"] <= 0 or stats["CON_CHO_XU_LY"] > 0:
+    baseline = _baseline_state_for_batch(db, batch)
+    if not baseline or baseline['status'] != 'LOCKED' or stats["TOTAL"] <= 0 or stats["CON_CHO_XU_LY"] > 0:
         return RedirectResponse(
             url=_signoff_redirect_url(batch.id, "pending"),
             status_code=303,

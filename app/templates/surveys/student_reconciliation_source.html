@@ -24,7 +24,7 @@
             <div class="grid">
                 <div class="field">
                     <label>Năm học đối chiếu</label>
-                    <select name="target_school_year_id" required>
+                    <select name="target_school_year_id" id="reconciliation_target_year" required>
                         {% for y in years %}<option value="{{ y.id }}" {% if y.id == target_year_id %}selected{% endif %}>{{ y.code }} – {{ y.name }}</option>{% endfor %}
                     </select>
                 </div>
@@ -72,6 +72,7 @@
     {% if not state or state.status != 'LOCKED' %}
     <section class="panel">
         <h2 style="margin-top:0">1. Chọn file và xem trước</h2>
+        <p><a class="button secondary" href="/dieu-tra/nguon-hoc-sinh-doi-chieu/file-mau">Tải file mẫu nguồn học sinh (.xlsx)</a></p>
         <form method="post" enctype="multipart/form-data" action="/dieu-tra/nguon-hoc-sinh-doi-chieu/xem-truoc">
             <input type="hidden" name="target_school_year_id" value="{{ target_year.id }}">
             <input type="hidden" name="commune_id" value="{{ selected_commune.id }}">
@@ -79,7 +80,7 @@
                 <div class="field"><label>File Excel nguồn (.xlsx)</label><input type="file" name="source_file" accept=".xlsx" required></div>
                 <div><button class="button primary" type="submit">Kiểm tra trước</button></div>
             </div>
-            <p class="muted small">Có thể nạp file MN, TH, THCS, THPT riêng hoặc file tổng hợp, miễn có các cột Trường – Lớp – Mã định danh Bộ GD&ĐT – Họ tên – Ngày sinh. Các file được cộng dồn theo trường; nạp lại một file chỉ thay dữ liệu của các trường có trong file đó, không xóa dữ liệu các cấp/trường đã nạp trước.</p>
+            <p class="muted small">Dùng file mẫu 17 cột cho MN, TH, THCS, THPT hoặc file tổng hợp; giữ nguyên thứ tự cột, nhập từ dòng 7. Chưa có số định danh cá nhân thì để trống. Các file được cộng dồn theo trường; nạp lại một file chỉ thay dữ liệu của các trường có trong file đó, không xóa dữ liệu các cấp/trường đã nạp trước.</p>
         </form>
     </section>
     {% endif %}
@@ -114,5 +115,6 @@
 </div>
 
 <script src="/static/js/quick_select_v1.js"></script>
+<script src="/static/js/student_reconciliation_year.js?v=1"></script>
 </body>
 </html>

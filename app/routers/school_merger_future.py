@@ -231,6 +231,7 @@ def future_merge_page(
     request: Request,
     school_year_id: str | None = Query(default=None),
     commune_id: str | None = Query(default=None),
+    target_commune_id: str | None = Query(default=None),
     level_code: str = Query(default="TH"),
     status: str = Query(default=""),
 ):
@@ -241,6 +242,11 @@ def future_merge_page(
     commune_id_int = _safe_int(commune_id)
     communes = list_communes()
     selected_commune = next((x for x in communes if int(x["id"]) == int(commune_id_int or -1)), None)
+    commune_id_int = int(selected_commune["id"]) if selected_commune else None
+    target_filter_id = _safe_int(target_commune_id)
+    target_commune_id_int = target_filter_id if str(target_commune_id or "").strip() else commune_id_int
+    selected_target_commune = next((x for x in communes if int(x["id"]) == target_commune_id_int), None)
+    target_commune_id_int = int(selected_target_commune["id"]) if selected_target_commune else None
     level = str(level_code or "TH").upper().strip()
     if level not in {x[0] for x in LEVEL_CHOICES}:
         level = "TH"
@@ -255,6 +261,14 @@ def future_merge_page(
         else []
     )
     message = ""
+    target_schools = (
+        schools if target_commune_id_int == commune_id_int else list_schools(
+            year_id=year_id,
+            commune_id=target_commune_id_int,
+            level_code=level,
+            include_inactive=False,
+        )
+    ) if year_id is not None and commune_id_int is not None and target_commune_id_int is not None else []
     if status == "stale":
         message = "Dữ liệu đã thay đổi; hãy XEM TRƯỚC lại."
     return templates.TemplateResponse(
@@ -268,10 +282,14 @@ def future_merge_page(
             "communes": communes,
             "selected_commune_id": commune_id_int,
             "selected_commune_name": str((selected_commune or {}).get("name") or ""),
+            "selected_target_commune_id": target_commune_id_int,
+            "selected_target_commune_name": str((selected_target_commune or {}).get("name") or ""),
+            "target_commune_filter_id": target_filter_id if selected_target_commune else None,
             "selected_level_code": level,
             "selected_level_label": next((label for code, label in LEVEL_CHOICES if code == level), level),
             "level_choices": LEVEL_CHOICES,
             "schools": schools,
+            "target_schools": target_schools,
             "status_message": message,
             "future_executions": list_future_executions(30),
         },
@@ -283,6 +301,7 @@ def future_merge_preview(
     request: Request,
     school_year_id: str = Form(default=""),
     commune_id: str = Form(default=""),
+    target_commune_id: str = Form(default=""),
     level_code: str = Form(default=""),
     target_school_id: str = Form(default=""),
     source_school_ids: list[str] = Form(default=[]),
@@ -293,7 +312,7 @@ def future_merge_preview(
     target_id = _safe_int(target_school_id)
     source_ids = [int(x) for x in source_school_ids if _safe_int(x) is not None]
     if year_id is None or target_id is None or not source_ids:
-        q = urlencode({"school_year_id": school_year_id, "commune_id": commune_id, "level_code": level_code})
+        q = urlencode({"school_year_id": school_year_id, "commune_id": commune_id, "target_commune_id": target_commune_id, "level_code": level_code})
         return RedirectResponse(url=f"/cong-cu-du-lieu/sap-nhap-truong/phat-sinh?{q}", status_code=303)
     try:
         preview = build_future_preview(
@@ -317,6 +336,9 @@ def future_merge_preview(
             "error_message": error_message,
             "confirm_phrase": FUTURE_CONFIRM_PHRASE,
             "selected_commune_id": _safe_int(commune_id),
+            "selected_target_commune_id": _safe_int(target_commune_id) or _safe_int(commune_id),
+            "selected_school_year_id": year_id,
+            "selected_level_code": level_code,
         },
         status_code=status_code,
     )

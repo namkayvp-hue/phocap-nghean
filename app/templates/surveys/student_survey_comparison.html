@@ -281,8 +281,10 @@
             <strong>Đối chiếu có kiểm soát.</strong> Hệ thống không tự động ghi đè dữ liệu.
             {% if baseline_ready %}
                 <br><strong>Nguồn học sinh:</strong> năm {{ baseline_source_year_code }} (năm trước), đối chiếu với điều tra {{ batch.school_year.code }}.
+                {% if not baseline_locked %}<br>Nguồn đang mở để kiểm tra và xử lý đối chiếu. Hoàn tất rà soát rồi mới khóa nguồn tại mục 2.5.0.{% endif %}
             {% else %}
-                <br><strong>Chưa có nguồn học sinh đối chiếu đã khóa cho xã/phường này.</strong> Hãy nạp tại mục 2.5.0 trước khi chốt kết quả.
+                <br><strong>Chưa có nguồn học sinh đối chiếu cho xã/phường này.</strong>
+                <a href="/dieu-tra/nguon-hoc-sinh-doi-chieu?target_school_year_id={{ batch.school_year_id }}&amp;commune_id={{ batch.commune_id }}">Mở mục 2.5.0 để nạp nguồn</a>.
             {% endif %}
             {% if comparison_signed %}
                 Kết quả hiện đã được <strong>chốt</strong>; các thao tác liên kết và ghi nhận xử lý đang ở chế độ chỉ đọc cho đến khi được mở lại.
@@ -362,6 +364,12 @@
                     <h2>
                         {% if comparison_signed %}
                             Kết quả đối chiếu đã được xác nhận
+                        {% elif not baseline_ready %}
+                            Chưa nạp nguồn học sinh đối chiếu
+                        {% elif stats.TOTAL == 0 %}
+                            Chưa có dữ liệu đối chiếu để trình chốt
+                        {% elif stats.CON_CHO_XU_LY == 0 and not baseline_locked %}
+                            Đã rà soát xong, cần khóa nguồn trước khi trình chốt
                         {% elif stats.CON_CHO_XU_LY == 0 %}
                             Đã đủ điều kiện trình chốt
                         {% else %}
