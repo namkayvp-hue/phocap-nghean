@@ -689,6 +689,7 @@ window.addEventListener('load', function () {
                 <form
                     method="get"
                     action="/dieu-tra"
+                    id="survey-batch-filter-form"
                     style="margin-bottom: 22px;"
                 >
                     <div class="survey-filter-grid">
@@ -720,30 +721,29 @@ window.addEventListener('load', function () {
                         </div>
 
                         <div class="form-group">
-                            <label for="filter_commune_id">
+                            <label for="filter_commune_search">
                                 Xã/phường
                             </label>
 
-                            <select
+                            <input
+                                id="filter_commune_search"
+                                type="search"
+                                class="survey-form-control"
+                                list="filter-commune-options"
+                                placeholder="Gõ tên xã/phường..."
+                                autocomplete="off"
+                            >
+                            <datalist id="filter-commune-options">
+                                {% for xa in communes %}
+                                    <option value="{{ xa.name }} – {{ xa.code }}" data-id="{{ xa.id }}"></option>
+                                {% endfor %}
+                            </datalist>
+                            <input
+                                type="hidden"
                                 id="filter_commune_id"
                                 name="commune_id"
-                                class="survey-form-control"
+                                value="{{ selected_commune_id or '' }}"
                             >
-                                <option value="">
-                                    -- Tất cả xã/phường --
-                                </option>
-
-                                {% for xa in communes %}
-                                    <option
-                                        value="{{ xa.id }}"
-                                        {% if xa.id == selected_commune_id %}
-                                            selected
-                                        {% endif %}
-                                    >
-                                        {{ xa.code }} – {{ xa.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
                         </div>
 
                         <div class="form-group">
@@ -797,6 +797,77 @@ window.addEventListener('load', function () {
                         </a>
                     </div>
                 </form>
+
+                <script>
+                (function () {
+                    const form = document.getElementById("survey-batch-filter-form");
+                    const search = document.getElementById("filter_commune_search");
+                    const options = document.getElementById("filter-commune-options");
+                    const communeId = document.getElementById("filter_commune_id");
+                    if (!form || !search || !options || !communeId) return;
+
+                    function normalize(value) {
+                        return String(value || "")
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "")
+                            .replace(/đ/g, "d")
+                            .replace(/Đ/g, "D")
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, " ")
+                            .trim()
+                            .replace(/\s+/g, " ");
+                    }
+
+                    function resolve(allowUniquePrefix) {
+                        const query = search.value.trim();
+                        if (!query) {
+                            communeId.value = "";
+                            search.setCustomValidity("");
+                            return true;
+                        }
+                        const key = normalize(query);
+                        const available = Array.from(options.options);
+                        let matches = available.filter(function (option) {
+                            return normalize(option.value) === key;
+                        });
+                        if (!matches.length && allowUniquePrefix) {
+                            matches = available.filter(function (option) {
+                                const label = normalize(option.value);
+                                return label.startsWith(key) || label.includes(" " + key);
+                            });
+                        }
+                        if (matches.length === 1 && matches[0].dataset.id) {
+                            communeId.value = matches[0].dataset.id;
+                            search.value = matches[0].value;
+                            search.setCustomValidity("");
+                            return true;
+                        }
+                        communeId.value = "";
+                        if (allowUniquePrefix) {
+                            search.setCustomValidity("Hãy chọn một xã/phường trong danh sách gợi ý.");
+                        }
+                        return false;
+                    }
+
+                    const selected = Array.from(options.options).find(function (option) {
+                        return option.dataset.id === communeId.value;
+                    });
+                    if (selected) search.value = selected.value;
+
+                    search.addEventListener("input", function () {
+                        resolve(false);
+                    });
+                    search.addEventListener("change", function () {
+                        resolve(true);
+                    });
+                    form.addEventListener("submit", function (event) {
+                        if (!resolve(true)) {
+                            event.preventDefault();
+                            search.reportValidity();
+                        }
+                    });
+                })();
+                </script>
 
                 {% if survey_batches %}
                     <div class="table-wrapper">

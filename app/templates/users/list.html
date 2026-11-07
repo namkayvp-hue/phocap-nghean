@@ -790,33 +790,39 @@
 
                     {% if la_quan_tri and muc_hien_tai in ['xa', 'truong', 'tra_cuu'] %}
                         <div class="account-form-group" style="margin-bottom:0;">
-                            <label for="filter_commune_id">Xã/phường</label>
-                            <select id="filter_commune_id" name="xa_id">
-                                <option value="">-- Tất cả xã/phường --</option>
+                            <label for="filter_commune_search">Xã/phường</label>
+                            <input
+                                id="filter_commune_search"
+                                type="search"
+                                list="filter-commune-options"
+                                placeholder="Gõ tên xã/phường..."
+                                autocomplete="off"
+                            >
+                            <datalist id="filter-commune-options">
                                 {% for xa in danh_sach_xa %}
-                                    <option value="{{ xa.id }}" {% if xa_da_chon == xa.id %}selected{% endif %}>
-                                        {{ xa.code }} – {{ xa.name }}
-                                    </option>
+                                    <option value="{{ xa.name }} – {{ xa.code }}" data-id="{{ xa.id }}"></option>
                                 {% endfor %}
-                            </select>
+                            </datalist>
+                            <input type="hidden" id="filter_commune_id" name="xa_id" value="{{ xa_da_chon or '' }}">
                         </div>
                     {% endif %}
 
                     {% if la_quan_tri and muc_hien_tai in ['truong', 'tra_cuu'] %}
                         <div class="account-form-group" style="margin-bottom:0;">
-                            <label for="filter_school_id">Trường</label>
-                            <select id="filter_school_id" name="truong_id">
-                                <option value="">-- Tất cả trường --</option>
+                            <label for="filter_school_search">Trường</label>
+                            <input
+                                id="filter_school_search"
+                                type="search"
+                                list="filter-school-options"
+                                placeholder="Gõ tên trường..."
+                                autocomplete="off"
+                            >
+                            <datalist id="filter-school-options">
                                 {% for truong in danh_sach_truong %}
-                                    <option
-                                        value="{{ truong.id }}"
-                                        data-commune-id="{{ truong.commune_id }}"
-                                        {% if truong_da_chon == truong.id %}selected{% endif %}
-                                    >
-                                        {{ truong.code }} – {{ truong.name }}
-                                    </option>
+                                    <option value="{{ truong.name }} – {{ truong.code }}" data-id="{{ truong.id }}" data-commune-id="{{ truong.commune_id }}"></option>
                                 {% endfor %}
-                            </select>
+                            </datalist>
+                            <input type="hidden" id="filter_school_id" name="truong_id" value="{{ truong_da_chon or '' }}">
                         </div>
                     {% endif %}
 
@@ -1358,31 +1364,80 @@
     const filterForm = document.getElementById("filter-form");
     const filterCommune = document.getElementById("filter_commune_id");
     const filterSchool = document.getElementById("filter_school_id");
+    const communeSearch = document.getElementById("filter_commune_search");
+    const communeOptions = document.getElementById("filter-commune-options");
+    const schoolSearch = document.getElementById("filter_school_search");
+    const schoolOptions = document.getElementById("filter-school-options");
 
     if (!filterForm) {
         return;
     }
 
-    let schoolItems = [];
-    let selectedSchoolId = "";
-    if (filterSchool) {
-        selectedSchoolId = filterSchool.value;
-        schoolItems = Array.from(filterSchool.querySelectorAll("option[data-commune-id]")).map(function (option) {
-            return {
-                value: option.value,
-                communeId: option.dataset.communeId || "",
-                label: option.textContent.trim()
-            };
-        });
+    function normalize(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim()
+            .replace(/\s+/g, " ");
     }
 
+    function resolveSearch(input, datalist, hiddenValue, allowUniquePrefix) {
+        if (!input || !datalist || !hiddenValue) {
+            return true;
+        }
+        const raw = input.value.trim();
+        if (!raw) {
+            hiddenValue.value = "";
+            input.setCustomValidity("");
+            return true;
+        }
+        const key = normalize(raw);
+        const options = Array.from(datalist.options);
+        let matches = options.filter(function (option) {
+            return normalize(option.value) === key;
+        });
+        if (!matches.length && allowUniquePrefix) {
+            matches = options.filter(function (option) {
+                const label = normalize(option.value);
+                return label.startsWith(key) || label.includes(" " + key);
+            });
+        }
+        if (matches.length === 1 && matches[0].dataset.id) {
+            hiddenValue.value = matches[0].dataset.id;
+            input.value = matches[0].value;
+            input.setCustomValidity("");
+            return true;
+        }
+        hiddenValue.value = "";
+        if (allowUniquePrefix) {
+            input.setCustomValidity("Hãy chọn một đơn vị trong danh sách gợi ý.");
+        }
+        return false;
+    }
+
+    let selectedSchoolId = filterSchool ? filterSchool.value : "";
+    let schoolItems = schoolOptions
+        ? Array.from(schoolOptions.options).map(function (option) {
+            return {
+                id: option.dataset.id || "",
+                communeId: option.dataset.communeId || "",
+                label: option.value
+            };
+        })
+        : [];
+
     function refreshFilterSchools(keepCurrent) {
-        if (!filterSchool || !filterCommune) {
+        if (!filterSchool || !schoolSearch || !schoolOptions || !filterCommune) {
             return;
         }
         const communeId = filterCommune.value;
         const currentValue = keepCurrent ? selectedSchoolId : "";
-        filterSchool.innerHTML = '<option value="">-- Tất cả trường --</option>';
+        schoolOptions.replaceChildren();
+        let selectedLabel = "";
 
         schoolItems
             .filter(function (school) {
@@ -1390,40 +1445,83 @@
             })
             .forEach(function (school) {
                 const option = document.createElement("option");
-                option.value = school.value;
-                option.textContent = school.label;
+                option.value = school.label;
+                option.dataset.id = school.id;
                 option.dataset.communeId = school.communeId;
-                if (school.value === currentValue) {
-                    option.selected = true;
+                if (school.id === currentValue) {
+                    selectedLabel = school.label;
                 }
-                filterSchool.appendChild(option);
+                schoolOptions.appendChild(option);
             });
+        filterSchool.value = selectedLabel ? currentValue : "";
+        schoolSearch.value = selectedLabel;
+        selectedSchoolId = filterSchool.value;
     }
+
+    function submitFilters() {
+        if (typeof filterForm.requestSubmit === "function") {
+            filterForm.requestSubmit();
+        } else {
+            filterForm.submit();
+        }
+    }
+
+    if (communeSearch) {
+        communeSearch.addEventListener("input", function () {
+            resolveSearch(communeSearch, communeOptions, filterCommune, false);
+        });
+        communeSearch.addEventListener("change", function () {
+            if (!resolveSearch(communeSearch, communeOptions, filterCommune, true)) {
+                return;
+            }
+            const chosenCommune = filterCommune.value;
+            if (chosenCommune !== filterCommune.dataset.lastValue) {
+                filterCommune.dataset.lastValue = chosenCommune;
+                if (filterSchool) {
+                    filterSchool.value = "";
+                }
+                selectedSchoolId = "";
+                refreshFilterSchools(false);
+                submitFilters();
+            }
+        });
+    }
+
+    if (schoolSearch) {
+        schoolSearch.addEventListener("input", function () {
+            resolveSearch(schoolSearch, schoolOptions, filterSchool, false);
+        });
+        schoolSearch.addEventListener("change", function () {
+            if (resolveSearch(schoolSearch, schoolOptions, filterSchool, true)) {
+                selectedSchoolId = filterSchool.value;
+                submitFilters();
+            }
+        });
+    }
+
+    filterForm.addEventListener("submit", function (event) {
+        const communeValid = resolveSearch(communeSearch, communeOptions, filterCommune, true);
+        const schoolValid = resolveSearch(schoolSearch, schoolOptions, filterSchool, true);
+        if (!communeValid || !schoolValid) {
+            event.preventDefault();
+            const invalid = !communeValid ? communeSearch : schoolSearch;
+            if (invalid) {
+                invalid.reportValidity();
+            }
+        }
+    });
 
     if (filterCommune) {
-        filterCommune.addEventListener("change", function () {
-            refreshFilterSchools(false);
-            if (filterSchool) {
-                filterSchool.value = "";
-            }
-            if (typeof filterForm.requestSubmit === "function") {
-                filterForm.requestSubmit();
-            } else {
-                filterForm.submit();
-            }
-        });
+        filterCommune.dataset.lastValue = filterCommune.value;
     }
-
-    if (filterSchool) {
-        filterSchool.addEventListener("change", function () {
-            if (typeof filterForm.requestSubmit === "function") {
-                filterForm.requestSubmit();
-            } else {
-                filterForm.submit();
-            }
+    if (communeSearch && communeOptions && filterCommune && filterCommune.value) {
+        const selectedCommune = Array.from(communeOptions.options).find(function (option) {
+            return option.dataset.id === filterCommune.value;
         });
+        if (selectedCommune) {
+            communeSearch.value = selectedCommune.value;
+        }
     }
-
     refreshFilterSchools(true);
 })();
 </script>

@@ -1108,8 +1108,7 @@
                 <p class="panel-kicker">TÌM VÀ LỌC DỮ LIỆU</p>
                 <h2>Tìm đúng hộ cần xử lý</h2>
                 <p class="panel-subtext">
-                    Có thể tìm theo số phiếu, mã hộ, chủ hộ, địa chỉ,
-                    điện thoại, tên thành viên hoặc số định danh cá nhân.
+                    Gõ tên thôn/xóm/khối/bản để chọn nhanh, sau đó lọc theo trạng thái phiếu và tình trạng phân công.
                 </p>
             </div>
             <span class="result-count">
@@ -1124,36 +1123,23 @@
         >
             <div class="filter-grid">
                 <div class="form-group">
-                    <label for="q">Tìm nhanh</label>
-                    <input
-                        id="q"
-                        name="q"
-                        type="search"
-                        maxlength="100"
-                        class="form-control"
-                        value="{{ q | default('') }}"
-                        placeholder="Số phiếu, mã hộ, chủ hộ, thành viên..."
-                        autocomplete="off"
-                    >
-                </div>
-
-                <div class="form-group">
                     <label for="hamlet">Thôn/xóm/khối/bản</label>
-                    <select
+                    <input
                         id="hamlet"
                         name="hamlet"
+                        type="search"
                         class="form-control"
+                        value="{{ selected_hamlet | default('') }}"
+                        placeholder="Gõ tên thôn/xóm để tìm nhanh..."
+                        list="hamlet-options"
+                        autocomplete="off"
                     >
+                    <datalist id="hamlet-options">
                         <option value="">-- Tất cả địa bàn --</option>
                         {% for item in hamlet_names | default([]) %}
-                            <option
-                                value="{{ item }}"
-                                {% if selected_hamlet == item %}selected{% endif %}
-                            >
-                                {{ item }}
-                            </option>
+                            <option value="{{ item }}"></option>
                         {% endfor %}
-                    </select>
+                    </datalist>
                 </div>
 
                 <div class="form-group">
@@ -1288,9 +1274,7 @@
                     Xóa bộ lọc
                 </a>
 
-                <span class="keyboard-hint">
-                    Mẹo: nhập từ khóa rồi nhấn Enter.
-                </span>
+                <span class="keyboard-hint">Gõ tên thôn/xóm, chọn gợi ý rồi nhấn Enter hoặc Tìm kiếm / Lọc.</span>
             </div>
         </form>
     </section>
